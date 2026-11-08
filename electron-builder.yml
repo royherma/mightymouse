@@ -1,0 +1,178 @@
+appId: com.mightymouse.app
+productName: MightyMouse
+directories:
+  buildResources: build
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  # SECRETS — never package these. The `.env` entry above matches by LITERAL name
+  # only, so it does NOT catch `.scratch-local/openrouter.env` or any nested env
+  # file. Verified 2026-07-21: v0.8.0's app.asar shipped populated prod Supabase
+  # tokens + DB passwords, an OpenRouter key, a live Stripe rk_, a Cloudflare token
+  # and an Apple app-specific password — extractable with a single `asar
+  # extract-file`. `.gitignore` protects git; it does nothing for electron-builder.
+  # Recursive globs below, directory excludes AND suffix excludes, deliberately
+  # belt-and-braces. Re-verify after any change here with:
+  #   npx @electron/asar list <app.asar> | grep -E 'scratch-local|\.claude/|\.env|\.pem'
+  - '!**/.scratch-local/**'
+  - '!**/.claude/**'
+  - '!**/*.env'
+  - '!**/*.env.*'
+  - '!**/*.pem'
+  - '!**/*.p12'
+  - '!**/*.key'
+  # BULK — `files` is a DENY-list, so every repo-root dir ships unless named here.
+  # v0.25.0's first build packaged 46,360 entries / 2.0 GB of app.asar: ios/build,
+  # agent-charter/runs, six .worktrees checkouts (unreleased branch source in a
+  # public download), and work/. The app needs only out/, node_modules/, resources/.
+  # Re-verify after any change here — entry count should be ~19k, not ~46k:
+  #   npx @electron/asar list <app.asar> | awk -F/ 'NF>1{print $2}' | sort | uniq -c | sort -rn
+  - '!.worktrees/**'
+  - '!agent-charter/**'
+  - '!work/**'
+  - '!ios/**'
+  - '!prds/**'
+  - '!web/**'
+  - '!portal/**'
+  - '!supabase/**'
+  - '!workers/**'
+  - '!installer/**'
+  - '!coverage/**'
+  - '!docs/**'
+  - '!tools/**'
+  - '!scripts/**'
+  - '!bin/**'
+  - '!outputs/**'
+  - '!.wrangler/**'
+  - '!.native-cache/**'
+  - '!.githooks/**'
+  - '!{.claire,.codex}/**'
+asarUnpack:
+  - resources/**
+  - '**/node_modules/uiohook-napi/**'
+  - '**/node_modules/koffi/**'
+  - '**/node_modules/@koromix/**'
+extraResources:
+  - from: bin/mm-coord
+    to: mm-coord
+  # Phone Remote's standalone React build (npm run build:phone-remote, run as
+  # part of the root "build" script) — server.ts's resolvePublicDir() reads this
+  # via app.getPath('exe')/../Resources/phone-remote-public in packaged builds,
+  # since electron-vite bundles src/main/** into one file and drops the source tree.
+  - from: src/main/phone-remote/react/dist
+    to: phone-remote-public
+    filter:
+      - '**/*'
+  # Kokoro read-aloud with word timestamps — tts.ts spawns this with the Kokoro
+  # venv's python, so like the Swift helpers it must be a real file outside the asar.
+  - from: resources/kokoro-speak.py
+    to: kokoro-speak.py
+# Custom URL scheme — Stripe checkout redirects back to mightymouse://billing/...
+# so the browser hands control to the desktop app after a purchase. The OS only
+# routes this to an installed, packaged build (dev caveat lives in deeplink.ts).
+protocols:
+  - name: MightyMouse
+    schemes:
+      - mightymouse
+win:
+  executableName: MightyMouse
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+  # UNSIGNED for the beta (PRD §7: no OV/EV cert; SmartScreen "More info → Run
+  # anyway" is the accepted cost). This flag is what makes that safe for
+  # auto-update: left true, electron-builder writes a publisherName into
+  # app-update.yml and electron-updater then REFUSES every downloaded installer
+  # whose signature doesn't match one — which, unsigned, is all of them.
+  # Flip back to the default (and add certificateFile) the day a cert lands.
+  verifyUpdateCodeSignature: false
+  # node-mac-permissions is optionalDependencies (darwin-only native module) —
+  # never ships in the Windows installer even if a lockfile mismatch installs it.
+  files:
+    - '!node_modules/node-mac-permissions/**'
+  # native/** is deliberately absent (it lives under `mac:`): the 19 Swift
+  # helpers are Mach-O and cannot run here. `native-win/` is the reserved name
+  # for their eventual Windows counterparts — add it here, not at the top level.
+nsis:
+  # Unversioned so /releases/latest/download/MightyMouse-Setup.exe is durable
+  # across every cut (same pattern as mightymouse.dmg). electron-updater still
+  # gets the version from latest.yml; the filename does not need ${version}.
+  artifactName: ${productName}-Setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+mac:
+  category: public.app-category.productivity
+  # Pre-built Swift helpers (Pattern B). Each is spawned as a real process, so it
+  # must live OUTSIDE the asar on disk. The runtime resolvers (ocr.ts, notch-info.ts,
+  # native-mic.ts, click.ts) look in `<app>/../Resources/native/<tool>/<bin>` in prod;
+  # this copies the whole tree there. Source .swift + build.sh ride along harmlessly.
+  # Mac-only, and platform extraResources CONCATENATE onto the shared list above —
+  # so this is the whole tree on mac and nothing at all on win/linux.
+  extraResources:
+    - from: native
+      to: native
+      filter:
+        - '**/*'
+    # macOS 26 draws a bare .icns on a grey plate; rebuild with actool after editing build/AppIcon.icon.
+    - from: build/Assets.car
+      to: Assets.car
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  # Hardened runtime is REQUIRED for notarization. Signing identity is read from
+  # the CSC_LINK / CSC_KEY_PASSWORD env vars (or the login keychain) at build time.
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  extendInfo:
+    CFBundleIconName: AppIcon
+    NSCameraUsageDescription: MightyMouse records your screen and camera when you start a capture.
+    NSMicrophoneUsageDescription: MightyMouse records your microphone when you start a capture or listen session.
+    NSDocumentsFolderUsageDescription: MightyMouse reads and writes files you act on from your Documents folder.
+    NSDownloadsFolderUsageDescription: MightyMouse reads and writes files you act on from your Downloads folder.
+    NSLocationUsageDescription: MightyMouse shares your location only with sites you allow in its browser.
+    NSLocationWhenInUseUsageDescription: MightyMouse shares your location only with sites you allow in its browser.
+  # Notarization: reads APPLE_ID / APPLE_APP_SPECIFIC_PASSWORD / APPLE_TEAM_ID from the
+  # env. `scripts/mac-signing-env.sh` (wired into build:mac / release:mac) sources those
+  # from .scratch-local/apple-signing.env. If that file is absent (fresh clone, CI without
+  # creds) electron-builder skips notarization automatically and still produces an unsigned
+  # dev build — so this stays safe to leave `true`. Org: Techguyver Labs LLC.
+  notarize: true
+dmg:
+  # Stable (unversioned) filename so the landing page can link straight to
+  # .../releases/latest/download/mightymouse.dmg without hardcoding a version —
+  # that GitHub URL only redirects to an asset whose name matches exactly.
+  # electron-updater's auto-update path doesn't use this file (it reads the
+  # mac/zip target + latest-mac.yml instead), so dropping ${version} here is safe.
+  artifactName: ${name}.${ext}
+linux:
+  target:
+    - AppImage
+    - snap
+    - deb
+  maintainer: Roy Hermann
+  category: Utility
+appImage:
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false
+# `notarize: true` above staples the .app but NOT the .dmg container around it, so an offline
+# first-open can only verify by calling Apple. This hook staples each DMG the moment it lands.
+# It must be artifactBuildCompleted, not afterAllArtifactBuild — the latter runs after
+# latest-mac.yml is hashed and after uploads are scheduled. See scripts/staple-dmg.mjs.
+artifactBuildCompleted: scripts/staple-dmg.mjs
+# Auto-update feed. Release artifacts (.dmg/.zip + latest-mac.yml + .blockmap) are
+# published to a SEPARATE PUBLIC repo so the (private) app repo never needs a token
+# shipped in the client — electron-updater reads the public releases repo anonymously.
+# Push a release with `npm run release:mac` (needs GH_TOKEN in the env at publish time).
+# Self-install (delta patches) is live now that notarize: true above is signed +
+# working — see src/main/updater.ts. The app auto-downloads + installs on quit.
+publish:
+  provider: github
+  owner: royherma
+  repo: mightymouse-releases
+  releaseType: release

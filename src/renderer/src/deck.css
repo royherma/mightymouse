@@ -1,0 +1,814 @@
+/* The Mac swipe deck.
+ *
+ * The hyphenated half of the pair `@shared/swipe-deck` renders -- the phone's
+ * camelCase copy is `phone-remote/react/theme.css`. Ported rather than shared
+ * because the two bundles have no stylesheet in common: the phone build is
+ * deliberately Tailwind-free, and `--hairline`/`--danger`/`--z-sheet` exist only
+ * there (substituted below with `--surface3`/`--magenta`/a literal).
+ *
+ * Dropped from the phone copy, all iOS-only: `env(safe-area-inset-*)` padding,
+ * `-webkit-` touch callouts, and the `body:has(.swipeDeck.open)` toast
+ * suppression (the Mac deck owns its whole window, so there is nothing to
+ * suppress). Hover and cursor states are added, since this one has a mouse.
+ *
+ * Its own file rather than appended to `index.css`: that file is 7.2k lines and
+ * edited constantly, so a separate import keeps the deck's diff readable.
+ */
+
+/* Fills its window -- this IS the window, not a sheet over something. */
+.deck-root {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  /* Opaque, layered rather than a token swap: every surface token carries alpha
+     (`--surface1` is 88%) because they are built for sheets over content you
+     should still half-see. This replaces the screen. */
+  background:
+    linear-gradient(var(--surface1), var(--surface1)),
+    linear-gradient(var(--surface-solid), var(--surface-solid));
+  padding: var(--space3) var(--space4) var(--space3);
+  z-index: 100;
+}
+.deck-root.deck-open {
+  display: flex;
+}
+
+.deck-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(var(--shadow-rgb), 0.35);
+  pointer-events: none;
+}
+
+.deck-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  color: var(--text-muted-medium);
+  margin-bottom: var(--space2);
+  flex: 0 0 auto;
+  /* The window is `hiddenInset`, so the traffic lights sit over the content --
+     clear them, and let the header double as the drag strip. */
+  padding-left: 72px;
+  min-height: 28px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
+.deck-header-btn,
+.deck-count {
+  -webkit-app-region: no-drag;
+}
+.deck-header-back {
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: var(--space-xxs) var(--space-xxs) var(--space-xxs) 0;
+  margin: 0;
+  color: var(--text-muted-medium);
+  flex: 0 0 auto;
+  cursor: pointer;
+  /* The header is the window's drag strip -- a button in it must not be. */
+  -webkit-app-region: no-drag;
+}
+.deck-title {
+  font-size: var(--font-lg);
+  font-weight: 600;
+}
+/* The auto margin lives HERE, not on the button: with it per-button each one
+   claimed the free space and the icons drifted apart across the bar. */
+/* Who can reach you. Plate and dot colours match `.code-status` in index.css,
+   the panel's version of the same sentence -- the deck replaces that whole
+   window, so the two must not read as different states. */
+.deck-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin-bottom: var(--space2);
+  padding: var(--space-xs) var(--space3);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  font-size: var(--font-sm);
+  color: var(--on-surface);
+  flex: 0 0 auto;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.deck-status-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.deck-status[data-health='off'] .deck-status-dot,
+.deck-status[data-health='no-agent'] .deck-status-dot {
+  background: var(--red);
+}
+.deck-status[data-health='starting'] .deck-status-dot,
+.deck-status[data-health='mac-only'] .deck-status-dot {
+  background: var(--amber);
+}
+
+.deck-header-btns {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+.deck-header-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space1);
+  flex: 0 0 auto;
+  padding: var(--space-xxs) var(--space1);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--accent-text);
+  font: inherit;
+  font-size: var(--font-mlg);
+  font-weight: 600;
+  cursor: pointer;
+}
+.deck-header-btn:hover {
+  background: var(--surface2);
+}
+
+.deck-count {
+  min-width: 22px;
+  padding: 1px var(--space-xs);
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--surface3);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* GRID, not flex-centring: every card shares one cell, so a ghost sizes to the
+   TOP card's content instead of stretching to the stage. */
+.deck-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template: auto / minmax(0, 1fr);
+  place-content: center;
+  place-items: center;
+}
+/* The stacked cards all share one cell. NOT the stamps: they are absolutely
+   positioned against the stage, and a grid-area places them in the centred cell
+   (which is exactly the card's box), so `top` measured from the stage's own top
+   edge silently resolved to the card's instead and no value could lift them off
+   the card. */
+.deck-stage > *:not(.deck-stamp) {
+  grid-area: 1 / 1;
+}
+
+.deck-card {
+  position: relative;
+  /* Above the stage's stamps, which sit at 0 and stay behind the stack. */
+  z-index: 1;
+  /* Inset so the ghosts behind it at 0.955 scale have something to peek out of. */
+  width: calc(100% - 20px);
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space2);
+  padding: var(--space4);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  background: var(--surface2);
+  box-shadow: var(--shadow-panel);
+  /* The drag sets transform inline and kills this mid-gesture; it runs only for
+     the snap back and the fly out. Overshoot on the way home so an abandoned
+     drag springs rather than glides. */
+  transition: transform 220ms cubic-bezier(0.22, 1.4, 0.36, 1), opacity 180ms ease-out;
+  user-select: none;
+  cursor: grab;
+}
+.deck-card:active {
+  cursor: grabbing;
+}
+/* The fly out is a THROW: no overshoot (nothing to overshoot toward) and faster
+   out than in. */
+.deck-card-leaving {
+  transition: transform 200ms cubic-bezier(0.32, 0, 0.67, 0), opacity 160ms ease-in;
+  opacity: 0;
+}
+/* The promoted card rises from where its ghost sat. Runs on mount, so it never
+   fights the drag transform -- a fresh top card is never mid-drag. */
+.deck-card-rising {
+  animation: deck-rise 200ms cubic-bezier(0.22, 1.2, 0.36, 1);
+  /* Only while it grows: the rows arriving below the pinned height must be
+     clipped by the plate rather than spilling past its rounded corner. */
+  overflow: hidden;
+}
+@keyframes deck-rise {
+  from {
+    /* The depth-1 ghost's exact transform, and the height it was pinned at --
+       growing to its own content over the rise is what turns the pop into the
+       animation. */
+    transform: translateY(14px) scale(0.90);
+    max-height: var(--deck-rise-from-h);
+    opacity: 0.8;
+  }
+  to {
+    transform: none;
+    /* An explicit end value, because `max-height` cannot interpolate toward
+       `none`. Any value past the tallest a card can be reads as uncapped. */
+    max-height: 200vh;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck-card-rising {
+    animation: none;
+  }
+}
+.deck-card[data-intent='affirm'] {
+  border-color: var(--accent);
+}
+.deck-card[data-intent='skip'] {
+  border-color: var(--surface3);
+  opacity: 0.75;
+}
+
+/* The cards under the top one. Two, because one reads as a pair rather than a
+   stack. They render the REAL next cards and size to their OWN content.
+
+   `position: absolute` takes them OUT of the shared grid cell, which is the
+   whole rule: every card sits in `grid-area: 1/1` on an `auto` row, so the cell
+   takes the height of the TALLEST card in it, and a next card with more chips
+   grew the cell past the top card and painted its rows outside the plate. Out of
+   flow, the top card alone sizes the cell. */
+.deck-card-behind {
+  /* Grid-placed into the top card's cell, NOT absolutely positioned against the
+     stage. `position: absolute` opted these out of the grid, so `top/left: 50%`
+     anchored them to the STAGE while the top card centred in its cell -- the
+     stage is the taller box, so every behind card inherited one constant 36px
+     drop (harness: Δy=50/64 against want 14/28, identical excess at both depths
+     despite very different card heights, which is what rules out a sizing
+     cause). Sharing the cell removes the second reference box instead of
+     compensating for it, and it is what makes `grid-area: 1 / 1` above apply.
+     `justify-self`/`align-self: center` keep them centred on the cell without
+     stretching to it. */
+  grid-area: 1 / 1;
+  justify-self: center;
+  align-self: center;
+  /* CLAMPED to the top card's measured height, never grown to it. `height` here
+     forced a short card to the full pin and left a tall band of empty plate
+     protruding below the card covering it. As a max, a shorter card keeps its
+     own size (and stays hidden behind the top card) while a longer one is
+     clipped instead of painting past the plate. */
+  max-height: var(--deck-card-h, none);
+  overflow: hidden;
+  min-height: 0;
+  /* Translate before scale: `scale() translateY()` applies the offset in scaled
+     space, so equal-looking offsets come out uneven. The leading
+     `translate(-50%, -50%)` is GONE with the absolute anchor it undid -- kept
+     alongside grid centring it would shift every card half its own size. */
+  transform: translateY(var(--deck-second-card-y))
+    scale(calc(var(--deck-second-card-scale) + var(--deck-second-card-grow, 0)));
+  opacity: calc(var(--deck-second-card-opacity) + var(--deck-second-card-grow, 0));
+  /* The compositor keeps these on their own layer for the whole drag rather
+     than promoting on the first move and demoting between swipes. */
+  will-change: transform, opacity;
+  /* Out of focus, not just faint: opacity alone left the next card's text sharp
+     enough to read through the top card, which reads as a rendering fault. */
+  /* Driven by the STEPPED drag, never the raw one. A changing blur radius
+     cannot be GPU-composited, so at pointer rate it repainted both cards ~60
+     times a drag and that was the lag on a real phone. In 5 steps the card
+     still sharpens as it is uncovered, at a twelfth of the repaints. */
+  filter: blur(calc(var(--deck-second-card-blur) * var(--deck-second-card-reveal, 1)));
+  pointer-events: none;
+  transition: transform 200ms ease-out, opacity 200ms ease-out;
+}
+/* Under the thumb the reveal IS the drag, so it must not also be easing toward
+   it: a transition here lags the finger and keeps running after an abandoned
+   swipe has already snapped back. Off during the drag, on for the release. */
+.deck-root[data-dragging] .deck-card-behind {
+  transition: none;
+}
+/* Both steps the SAME size, so the stack reads as evenly spaced cards rather
+   than a perspective trick. Deliberately larger than strictly needed -- a 4px
+   lip reads as a rendering seam. */
+.deck-card-behind[data-depth='1'] {
+  --deck-second-card-scale: 0.90;
+  --deck-second-card-y: 14px;
+  --deck-second-card-opacity: 0.8;
+  --deck-second-card-blur: 11px;
+  /* Depth 2 gets no reveal: it is still two cards away, and sharpening it too
+     made the whole stack shimmer on every drag instead of one card emerging. */
+  /* FLOORED at 0.35, not driven to 0: with no blur left at full commit, depth 1
+     read as a second full-size card with full-size buttons poking out past the
+     tilted top one (phone shots 20260819-121425 / -121454). Keyed to the
+     stepped drag, which is what keeps the radius cheap. */
+  --deck-second-card-reveal: calc(1 - 0.65 * var(--deck-commit-stepped, 0));
+  /* The smooth half of the reveal, on the raw drag: scale and opacity composite,
+     so these can track the thumb at full resolution for free. */
+  --deck-second-card-grow: calc(0.05 * var(--deck-commit, 0));
+}
+.deck-card-behind[data-depth='2'] {
+  --deck-second-card-scale: 0.82;
+  --deck-second-card-y: 28px;
+  --deck-second-card-opacity: 0.55;
+  --deck-second-card-blur: 5px;
+}
+
+/* The word for the direction this drag is heading, growing as the release gets
+   closer. Everything keys off `--deck-commit` (0 at rest, 1 at the threshold)
+   rather than a crossed/not-crossed flag -- the point is to SEE the edge coming
+   while there is still time to change your mind. */
+.deck-stamp {
+  /* Out of the grid flow: the stage's one cell is sized by the top card, and a
+     stamp in it would stretch the row to fit the word. */
+  position: absolute;
+  /* Up in the card's shoulder, ABOVE the stack. Centred and behind, the word was
+     covered by the opaque card until it had slid halfway off -- which is after
+     the decision, not during it. */
+  top: 32px;
+  z-index: 2;
+  font-size: clamp(32px, 7vw, 60px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(calc(0.72 + 0.28 * var(--deck-commit, 0)))
+    rotate(var(--deck-stamp-tilt));
+}
+/* Anchored to the edge the card is heading toward, so the word is already there
+   waiting rather than arriving from behind the card. */
+.deck-stamp[data-side='affirm'] {
+  right: 4px;
+  color: var(--accent-text);
+  --deck-stamp-tilt: -8deg;
+}
+.deck-stamp[data-side='skip'] {
+  left: 4px;
+  color: var(--text-muted-medium);
+  --deck-stamp-tilt: 8deg;
+}
+/* Only the side the drag is heading toward, and only once it HAS a direction.
+   Capped below 1: this sits behind a card it must never compete with. */
+.deck-stage[data-intent='affirm'] .deck-stamp[data-side='affirm'],
+.deck-stage[data-intent='skip'] .deck-stamp[data-side='skip'] {
+  /* x3 so the word is legible from ~9% of the drag rather than ~28%. Kept in
+     step with the phone's copy of this rule in phone-remote/react/theme.css. */
+  opacity: calc(0.85 * min(1, var(--deck-commit, 0) * 3));
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck-stamp {
+    transform: none;
+  }
+}
+
+.deck-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space2);
+}
+.deck-who {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.deck-name {
+  font-size: var(--font-lg);
+  font-weight: 600;
+  color: var(--on-surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.deck-place,
+.deck-age {
+  font-size: var(--font-sm);
+  color: var(--text-muted-medium);
+}
+.deck-place {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.deck-age {
+  flex: none;
+}
+/* Icon-only: the head already has a name, a path and an age on one line, and
+   the same glyph carries the meaning in the session sheet. */
+.deck-goto {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs);
+  margin: calc(-1 * var(--space-xs)) calc(-1 * var(--space1)) calc(-1 * var(--space-xs)) 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-muted-medium);
+  cursor: pointer;
+}
+.deck-goto:not(:disabled):hover {
+  background: var(--surface1);
+  color: var(--on-surface);
+}
+.deck-goto:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.deck-subject {
+  margin: 0;
+  font-size: var(--font-mlg);
+  line-height: 1.35;
+  color: var(--on-surface);
+}
+.deck-subject-muted {
+  color: var(--text-muted-medium);
+}
+/* Marks the line as the agent's declared subject rather than text derived from
+   its cards -- the two render identically otherwise and share this slot. */
+.deck-subject-tag {
+  display: inline-block;
+  margin-right: var(--space1);
+  padding: 0 var(--space1);
+  border-radius: var(--radius-xs);
+  background: var(--surface3);
+  font-size: var(--font-micro);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  vertical-align: 1px;
+  color: var(--text-muted-medium);
+}
+.deck-facts {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--text-muted-medium);
+}
+.deck-last {
+  margin: 0;
+  font-size: var(--font-sm);
+  line-height: 1.35;
+  color: var(--text-muted-light);
+}
+
+.deck-ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space1);
+  padding: var(--space3);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface1));
+}
+.deck-ask-label {
+  font-size: var(--font-xs);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+.deck-ask-text {
+  margin: 0;
+  font-size: var(--font-mlg);
+  line-height: 1.35;
+  color: var(--on-surface);
+}
+
+/* A stack, not a wrap row: chips side by side are unreadable at a glance. One
+   per line, full width, scanned top to bottom. */
+.deck-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+/* Fires when an affirm lands with nothing armed -- the swipe IS the confirm, so
+   the row has to say what is missing without moving the card. */
+.deck-actions-nudge {
+  animation: deck-pulse 400ms ease-in-out;
+}
+@keyframes deck-pulse {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.deck-chip {
+  /* Explicit, because there is no global reset and a `<button>` gets
+     border-box from the UA sheet while a `<span>` does not. The behind cards
+     render their chips as spans (a disabled button paints greyed on iOS), so
+     without this `width: 100%` plus the padding measured wider than the card
+     and the options spilled past its edge. */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: var(--space2);
+  min-height: 38px;
+  width: 100%;
+  padding: var(--space2) var(--space4);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-md);
+  background: var(--surface1);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: var(--font-mlg);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.deck-chip:hover {
+  border-color: var(--accent-border-subtle);
+}
+/* Sized in its own em so it reads at a glance without shouting over the words,
+   and fixed-width so a two-chip row lines its text up even when only one came
+   back with a glyph. */
+.deck-chip-emoji {
+  flex: none;
+  width: 1.25em;
+  font-size: var(--font-xlg);
+  line-height: 1;
+  text-align: center;
+}
+/* One row is always armed, so this is not a "selected" state -- it is what an
+   affirm will SEND. Outlined rather than filled: a solid accent plate is the
+   language of a button you press to commit, and this is a choice. */
+.deck-chip[data-chosen] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface1));
+  color: var(--accent-text);
+}
+
+/* Same box as a chip so the card doesn't jump when the real ones arrive. */
+.deck-chip-skeleton {
+  box-sizing: border-box;
+  min-height: 38px;
+  width: 100%;
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-md);
+  background: linear-gradient(
+    100deg,
+    var(--surface1) 40%,
+    color-mix(in srgb, var(--on-surface) 8%, var(--surface1)) 50%,
+    var(--surface1) 60%
+  );
+  background-size: 200% 100%;
+  animation: deck-chip-shimmer 1.2s ease-in-out infinite;
+}
+@keyframes deck-chip-shimmer {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -80% 0;
+  }
+}
+
+.deck-composer {
+  display: flex;
+}
+.deck-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  resize: none;
+  overflow-y: auto;
+  max-height: 120px;
+  padding: var(--space2) var(--space3);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-md);
+  background: var(--surface1);
+  color: inherit;
+  font: inherit;
+  font-size: var(--font-mlg);
+}
+.deck-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.28);
+}
+
+.deck-more {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space2);
+  min-height: 36px;
+  padding: var(--space2) var(--space3);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-md);
+  background: var(--surface1);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: var(--font-md);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.deck-more:hover {
+  border-color: var(--accent-border-subtle);
+}
+
+.deck-note {
+  margin: 0;
+  font-size: var(--font-sm);
+  color: var(--text-muted-medium);
+}
+.deck-failed {
+  margin: 0;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--magenta);
+}
+
+/* The rail mirrors the drag: the button you are heading toward swells, the
+   other recedes. Transitioned, unlike the stamps -- the rail is peripheral
+   vision during a swipe, and untransitioned jitter reads as a glitch. */
+.deck-rail {
+  display: flex;
+  gap: var(--space2);
+  flex: none;
+  padding-top: var(--space3);
+}
+.deck-rail-btn {
+  flex: 1 1 0;
+  /* The icon is a sibling of the label, so without this the two stack. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  min-height: 40px;
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  background: var(--surface2);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: var(--font-lg);
+  font-weight: 600;
+  cursor: pointer;
+}
+.deck-rail[data-intent] .deck-rail-btn {
+  transition: transform 120ms ease-out, opacity 120ms ease-out;
+}
+.deck-rail[data-intent='affirm'] .deck-rail-btn[data-side='affirm'],
+.deck-rail[data-intent='skip'] .deck-rail-btn[data-side='skip'] {
+  transform: scale(calc(1 + 0.07 * var(--deck-commit, 0)));
+}
+.deck-rail[data-intent='affirm'] .deck-rail-btn[data-side='skip'],
+.deck-rail[data-intent='skip'] .deck-rail-btn[data-side='affirm'] {
+  transform: scale(calc(1 - 0.05 * var(--deck-commit, 0)));
+  opacity: calc(1 - 0.55 * var(--deck-commit, 0));
+}
+/* Only the affirm side lights, and only once something is armed: that is the
+   one piece of state the gesture cannot show on its own. */
+.deck-rail-btn[data-armed] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.deck-empty {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  text-align: center;
+}
+.deck-empty-title {
+  margin: 0;
+  font-size: var(--font-xlg);
+  font-weight: 600;
+  color: var(--on-surface);
+}
+.deck-empty-body {
+  margin: 0;
+  font-size: var(--font-mlg);
+  color: var(--text-muted-medium);
+}
+
+/* The passed-over agents at the end of a run. `.deck-empty` centres its
+   children, which is right for two lines of copy and wrong once the list can
+   outgrow the window -- so this scrolls on its own. */
+.deck-passed {
+  align-self: center;
+  width: 100%;
+  max-width: 460px;
+  margin-top: var(--space2);
+  max-height: 46vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  text-align: left;
+}
+.deck-again {
+  align-self: center;
+  min-height: 36px;
+  margin-top: var(--space1);
+  padding: 0 var(--space4);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--accent-text);
+  font: inherit;
+  font-size: var(--font-mlg);
+  font-weight: 600;
+  cursor: pointer;
+}
+.deck-again:hover {
+  background: var(--accent-wash);
+}
+
+/* Jump straight to an agent instead of swiping down to it. Anchored under the
+   header, which is 12px of padding plus a ~22px row. */
+/* Zero-height in flow: gives .deck-jump a containing block right under the
+   header, so the overlay tracks a header that grows instead of a constant. */
+.deck-jump-anchor {
+  position: relative;
+  height: 0;
+  z-index: 2;
+}
+.deck-jump {
+  /* An overlay -- opening it must not reflow the deck under it. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 58vh;
+  overflow-y: auto;
+  padding: var(--space-xs);
+  background: var(--surface1);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-panel);
+  /* Above the cards (z 1): the stage renders later in the DOM, so an equal
+     z-index painted the top card over the open list. */
+  z-index: 2;
+}
+.deck-jump-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space2);
+  width: 100%;
+  padding: var(--space-xs) var(--space2);
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--on-surface);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.deck-jump-row:hover {
+  background: var(--surface2);
+}
+.deck-jump-row[data-current] {
+  background: var(--surface2);
+}
+.deck-jump-who {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.deck-jump-name {
+  font-size: var(--font-mlg);
+  font-weight: 600;
+}
+/* One line only: this is a menu of agents, not a second reading surface. */
+.deck-jump-what {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--text-muted-medium);
+  font-size: var(--font-sm);
+}
+.deck-jump-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}

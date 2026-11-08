@@ -1,0 +1,64 @@
+.affects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: var(--space1) 0;
+  list-style: none;
+}
+.affects-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space2);
+  min-width: 0;
+  padding: var(--space1) var(--space-xs);
+  color: var(--on-surface);
+  font-size: var(--font-xs);
+}
+.affects-row:not([data-env]) + .affects-row[data-env] {
+  margin-top: var(--space1);
+  padding-top: var(--space2);
+  border-top: 1px solid var(--surface3);
+}
+.affects-row[data-faint] {
+  opacity: 0.6;
+}
+.affects-icon {
+  --tone: var(--muted);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--tone) 14%, var(--surface1));
+  color: var(--tone);
+}
+.affects-icon[data-tone='desktop'] {
+  --tone: var(--accent);
+}
+.affects-icon[data-tone='mobile'] {
+  --tone: var(--blue);
+}
+.affects-icon[data-tone='web'] {
+  --tone: var(--green);
+}
+.affects-icon[data-tone='prod'] {
+  --tone: var(--red);
+}
+.affects-icon[data-tone='staging'] {
+  --tone: var(--amber);
+}
+.affects-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.affects-meta {
+  flex: none;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

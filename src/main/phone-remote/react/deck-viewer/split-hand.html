@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Split-hand deck — landscape variants</title>
+<style>
+  :root { --bg:#14171c; --fg:#e6e9ef; --dim:#8b94a3; --line:#2a3140;
+          --ok:#7ee2a8; --bad:#ff9aa8; --warn:#ffd07a; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:20px 24px 60px; background:var(--bg); color:var(--fg);
+         font:13px/1.5 -apple-system, system-ui, sans-serif; }
+  h1 { font-size:15px; font-weight:650; margin:0 0 3px; }
+  .sub { color:var(--dim); margin:0 0 18px; font-size:12px; max-width:74ch; }
+  .sub code { color:#cfd6e2; }
+  .bar { display:flex; flex-wrap:wrap; gap:18px; align-items:center;
+         padding:12px 14px; border:1px solid var(--line); border-radius:9px; margin-bottom:22px; }
+  .grp { display:flex; gap:7px; align-items:center; }
+  .grp > label { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+  button.t { background:#232833; color:#cfd6e2; border:1px solid #333b4a; border-radius:7px;
+             padding:5px 11px; font:inherit; cursor:pointer; }
+  button.t[aria-pressed='true'] { background:#3a68b8; border-color:#4d7fd4; color:#fff; }
+  button.t.sm { padding:2px 8px; font-size:11px; border-radius:6px; }
+
+  .grid { display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start; }
+  .cell { display:flex; flex-direction:column; gap:7px; }
+  .head { display:flex; align-items:baseline; gap:9px; width:100%; }
+  .name { font-weight:650; font-size:12.5px; }
+  .dims { color:var(--dim); font-family:ui-monospace,Menlo,monospace; font-size:11px; }
+  .verdict { margin-left:auto; font-size:11px; padding:1px 8px; border-radius:20px; white-space:nowrap; }
+  .v-ok { background:#1e3d2a; color:var(--ok); }
+  .v-bad { background:#4a2029; color:var(--bad); }
+  .v-warn { background:#463619; color:var(--warn); }
+  .notes { color:var(--dim); font-size:11px; font-family:ui-monospace,Menlo,monospace;
+           white-space:pre-wrap; max-width:100%; }
+
+  /* The phone. Hard-sized, never scaled -- scaling the box would change the CSS
+     pixel count the deck sees and therefore every reach measurement. */
+  .phone { position:relative; border-radius:34px; overflow:hidden; background:#0b0d10;
+           box-shadow:0 6px 26px #0009; flex:none; }
+
+  /* ---------------------------------------------------------------------
+     The deck mockups. These are NOT the shipped bundle -- the split variants
+     do not exist in it yet, which is the whole point of this harness. What IS
+     real: the viewport sizes, the safe-area insets, the control dimensions
+     (scraped from theme.css: 2x2 pills at 62x34, icons at 44, mic at 56), and
+     the landscape anchoring rules the PRD must respect. So the reach numbers
+     this page prints are measured against real boxes at real positions.
+     --------------------------------------------------------------------- */
+  .deck { position:absolute; inset:0; overflow:hidden;
+          background:radial-gradient(120% 90% at 50% 0%, #1c2430 0%, #12161c 70%); }
+
+  /* Header band -- the fixed strip both orientations already carry. */
+  .hdr { position:absolute; left:0; right:0; display:flex; align-items:center;
+         gap:8px; padding:0 12px; height:34px; font-size:10px; color:#7d8798; }
+  .hdr .dot { width:7px; height:7px; border-radius:50%; background:#5fd08a; }
+  .hdr .sp { margin-left:auto; }
+  .hdr b { font-weight:600; color:#9aa4b4; }
+
+  /* The touchpad. Its box is computed in JS per variant, so the pad here is
+     whatever the deck leaves over -- same rule as the app. */
+  .pad { position:absolute; border-radius:22px; background:#1b222c;
+         border:1px solid #2b3444; }
+  .pad .padHint { position:absolute; inset:0; display:flex; align-items:center;
+                  justify-content:center; color:#3d4757; font-size:9.5px;
+                  letter-spacing:.14em; font-weight:650; }
+
+  /* Every control shares one class so the measurer can find them all. */
+  .ctl { position:absolute; display:flex; align-items:center; justify-content:center;
+         border-radius:11px; background:#252d3a; border:1px solid #333d4d;
+         color:#c3ccda; font-size:10.5px; font-weight:600; letter-spacing:.02em; }
+  .ctl.mic { border-radius:50%; background:#2f3a4a; border-color:#3d4a5d; color:#e8edf5; }
+  .ctl.icon { border-radius:13px; }
+  /* Primary-thumb controls tint so the frequency split is legible at a glance. */
+  .ctl[data-freq='high'] { background:#2b3950; border-color:#3d5175; color:#dce6f7; }
+  .ctl[data-freq='low'] { background:#20262f; border-color:#2c3543; color:#8e99a9; }
+
+  /* Thumb-arc overlay: the reachable region from each bottom corner pivot.
+     Drawn from the SAME radius the measurer scores against, so the picture and
+     the verdict can never disagree. */
+  .arc { position:absolute; border-radius:50%; pointer-events:none;
+         border:1px dashed #4d7fd455; background:#3a68b810; }
+  .arc.right { border-color:#d4864d55; background:#b8683a10; }
+
+  /* Safe-area shading. In landscape the notch is a SIDE inset -- the trap the
+     PRD calls out, so it is drawn on the sides, not the top. */
+  .safe { position:absolute; top:0; bottom:0; width:0; background:#ff9aa81f;
+          border-right:1px solid #ff9aa833; border-left:1px solid #ff9aa833;
+          pointer-events:none; }
+
+  /* Measured failures, drawn over the deck from the parent's numbers. */
+  .ovl { position:absolute; inset:0; pointer-events:none; }
+  .ovl i { position:absolute; display:block; outline:2px dashed var(--bad);
+           background:#ff9aa81a; }
+  .ovl i.far { outline-color:var(--warn); background:#ffd07a1a; }
+</style>
+</head>
+<body>
+
+<h1>Split-hand deck — landscape variants</h1>
+<p class="sub">
+  Four ways to split the landscape control deck across two thumbs, measured at real device
+  viewports with real control dimensions. <b>These are mockups, not the shipped bundle</b> —
+  the split variants don't exist in <code>dist/</code> yet. What's real here: viewport sizes,
+  safe-area insets, control box sizes scraped from <code>theme.css</code>, and the landscape
+  anchoring rules. The verdict per cell is <b>measured</b> (every control's full box against
+  the thumb arc + against the pad), never eyeballed. Compare with the shipped stacked deck via
+  <code>deck-viewer/viewer.html</code>.
+</p>
+
+<div class="bar">
+  <div class="grp"><label>Variant</label><span id="tVariant" class="grp"></span></div>
+  <div class="grp"><label>Hand</label><span id="tHand" class="grp"></span></div>
+  <div class="grp"><label>Mirror</label><span id="tMirror" class="grp"></span></div>
+  <div class="grp"><label>Show</label><span id="tShow" class="grp"></span></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script src="split-hand.js"></script>
+</body>
+</html>

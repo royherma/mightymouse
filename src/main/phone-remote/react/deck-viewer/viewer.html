@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Deck viewer — every device × orientation × skin</title>
+<style>
+  :root { --bg:#14171c; --fg:#e6e9ef; --dim:#8b94a3; --line:#2a3140; --ok:#7ee2a8; --bad:#ff9aa8; --warn:#ffd07a; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:20px 24px 60px; background:var(--bg); color:var(--fg);
+         font:13px/1.5 -apple-system, system-ui, sans-serif; }
+  h1 { font-size:15px; font-weight:650; margin:0 0 3px; }
+  .sub { color:var(--dim); margin:0 0 18px; font-size:12px; }
+  .bar { display:flex; flex-wrap:wrap; gap:18px; align-items:center;
+         padding:12px 14px; border:1px solid var(--line); border-radius:9px; margin-bottom:22px; }
+  .grp { display:flex; gap:7px; align-items:center; }
+  .grp > label { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+  button.t { background:#232833; color:#cfd6e2; border:1px solid #333b4a; border-radius:7px;
+             padding:5px 11px; font:inherit; cursor:pointer; }
+  button.t[aria-pressed='true'] { background:#3a68b8; border-color:#4d7fd4; color:#fff; }
+  select { background:#232833; color:#cfd6e2; border:1px solid #333b4a; border-radius:7px;
+           padding:5px 9px; font:inherit; }
+  .grid { display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start; }
+  /* Corners mode: a device's 4 keys×hand combos read as ONE comparison, so they
+     get a bordered block that won't wrap into the next device's cells. */
+  .group { border:1px solid var(--line); border-radius:11px; padding:12px 14px 14px; }
+  .group h2 { font-size:12px; font-weight:650; margin:0 0 10px; color:#b7c0cf; }
+  .groupGrid { display:flex; flex-wrap:wrap; gap:20px; align-items:flex-start; }
+  .cell { display:flex; flex-direction:column; gap:7px; }
+  .head { display:flex; align-items:baseline; gap:9px; }
+  /* Per-cell keys/hand switches. Every cell owns its own config so two combos
+     can sit side by side and be compared without re-rendering the page. */
+  .cellBar { display:flex; gap:10px; }
+  .seg { display:inline-flex; gap:3px; }
+  button.t.sm { padding:2px 8px; font-size:11px; border-radius:6px; }
+  .name { font-weight:650; font-size:12.5px; }
+  .dims { color:var(--dim); font-family:ui-monospace,Menlo,monospace; font-size:11px; }
+  .verdict { margin-left:auto; font-size:11px; padding:1px 8px; border-radius:20px; white-space:nowrap; }
+  .v-ok   { background:#1e3d2a; color:var(--ok); }
+  .v-bad  { background:#4a2029; color:var(--bad); }
+  .v-wait { background:#2a2f3a; color:var(--dim); }
+  /* The phone. A hard-sized box so the bundle's own media queries fire exactly
+     as they do on device -- no scaling of the iframe itself, which would change
+     the CSS pixel count the app sees and therefore its layout. */
+  .phone { position:relative; border:1px solid #39425400; border-radius:34px; overflow:hidden;
+           background:#000; box-shadow:0 6px 26px #0009; flex:none; }
+  .phone iframe { border:0; display:block; }
+  /* Measured-overlap boxes, drawn OVER the iframe from the parent's numbers. */
+  .ovl { position:absolute; inset:0; pointer-events:none; }
+  .ovl i { position:absolute; display:block; }
+  /* 2px, not 1px: a hairline dashed outline is invisible in a full-page
+     screenshot of ten phones, which is the exact view this overlay exists to
+     serve. Legibility at the size it is actually READ at wins. */
+  .ovl i.pad  { outline:2px dashed #0ff; }
+  .ovl i.btn  { outline:2px dashed #7cff8f; }
+  .ovl i.hit  { outline:3px solid #ff3b5c; background:#ff3b5c4d; }
+  /* The floating context bar, and the cluster union the ring wraps. The ring
+     drew straight through the bar while the measured union stopped below it
+     (Roy, on-device + viewer 2026-07-31) -- so both boxes are drawn, and a
+     `wrap` that excludes the bar is visible instead of inferred. */
+  .ovl i.bar  { outline:2px dashed #ffd23f; }
+  .ovl i.wrap { outline:2px solid #c07cff; }
+  /* No left/right here: a landscape side band sets its own left|right + width,
+     and a hardcoded pair would stretch it across the whole phone. Each band
+     states every edge it occupies. Dashes go on all four sides for the same
+     reason -- border-block only outlines a horizontal band. */
+  .safe { position:absolute; pointer-events:none; background:#ffd07a1f;
+          border:1px dashed #ffd07a66; }
+  .rep { font-family:ui-monospace,Menlo,monospace; font-size:10.5px; color:var(--dim);
+         white-space:pre; max-height:120px; overflow:auto; }
+  .rep b { color:var(--bad); font-weight:600; }
+</style>
+</head>
+<body>
+<h1>Deck viewer</h1>
+<p class="sub">Every device × orientation, running the <b>real built bundle</b> — same components, same theme.css, same notch algorithm. Overlap is <b>measured</b> from live rects, never eyeballed. Nothing connects to the phone-remote server.</p>
+
+<div class="bar">
+  <div class="grp"><label>Skin</label><span id="skins"></span></div>
+  <div class="grp"><label>Orient</label><span id="orients"></span></div>
+  <div class="grp"><label>Layout</label><span id="mode"></span></div>
+  <div class="grp"><label>Keys</label><span id="vpos"></span></div>
+  <div class="grp"><label>Hand</label><span id="hand"></span></div>
+  <div class="grp"><label>Deck</label><span id="deck"></span></div>
+  <div class="grp"><label>Split style</label><span id="concept"></span></div>
+  <div class="grp"><label>Mirror</label><span id="mirror"></span></div>
+  <div class="grp"><label>App ring</label><span id="ring"></span></div>
+  <div class="grp"><label>Open</label><span id="overlay"></span></div>
+  <div class="grp"><label><input type="checkbox" id="showBoxes" checked> boxes</label>
+                  <label><input type="checkbox" id="showSafe"> safe area</label></div>
+  <div class="grp"><button class="t" id="remeasure">re-measure</button></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script type="module" src="./viewer.js"></script>
+</body>
+</html>

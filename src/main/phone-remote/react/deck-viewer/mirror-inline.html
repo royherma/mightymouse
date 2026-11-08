@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mirror layout — four candidates</title>
+<style>
+  :root { --bg:#14171c; --fg:#e6e9ef; --dim:#8b94a3; --line:#2a3140; --ok:#7ee2a8; --bad:#ff9aa8; --warn:#ffd07a; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:20px 24px 60px; background:var(--bg); color:var(--fg);
+         font:13px/1.5 -apple-system, system-ui, sans-serif; }
+  h1 { font-size:15px; font-weight:650; margin:0 0 3px; }
+  .sub { color:var(--dim); margin:0 0 18px; font-size:12px; max-width:form; }
+  .bar { display:flex; flex-wrap:wrap; gap:18px; align-items:center;
+         padding:12px 14px; border:1px solid var(--line); border-radius:9px; margin-bottom:22px; }
+  .grp { display:flex; gap:7px; align-items:center; }
+  .grp > label { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.08em; }
+  button.t { background:#232833; color:#cfd6e2; border:1px solid #333b4a; border-radius:7px;
+             padding:5px 11px; font:inherit; cursor:pointer; }
+  button.t[aria-pressed='true'] { background:#3a68b8; border-color:#4d7fd4; color:#fff; }
+  select { background:#232833; color:#cfd6e2; border:1px solid #333b4a; border-radius:7px;
+           padding:5px 9px; font:inherit; }
+  .grid { display:flex; flex-wrap:wrap; gap:26px; align-items:flex-start; }
+  .cell { display:flex; flex-direction:column; gap:7px; max-width:min-content; }
+  .note { margin:0; color:var(--dim); font-size:11.5px; line-height:1.45; }
+  .head { display:flex; align-items:baseline; gap:9px; }
+  .name { font-weight:650; font-size:12.5px; }
+  .dims { color:var(--dim); font-family:ui-monospace,Menlo,monospace; font-size:11px; }
+  .verdict { margin-left:auto; font-size:11px; padding:1px 8px; border-radius:20px; white-space:nowrap; }
+  .v-ok   { background:#1e3d2a; color:var(--ok); }
+  .v-bad  { background:#4a2029; color:var(--bad); }
+  .v-wait { background:#2a2f3a; color:var(--dim); }
+  /* Hard-sized so the bundle's own media queries fire exactly as on device --
+     scaling the iframe would change the CSS pixel count the app sees. */
+  .phone { position:relative; border-radius:34px; overflow:hidden;
+           background:#000; box-shadow:0 6px 26px #0009; flex:none; }
+  .phone iframe { border:0; display:block; }
+  .ovl { position:absolute; inset:0; pointer-events:none; }
+  .ovl i { position:absolute; display:block; }
+  .ovl i.pad { outline:2px dashed #0ff; }
+  .ovl i.mir { outline:2px dashed #ffd23f; }
+  /* The number that decides this experiment: usable pad area. */
+  .stat { font-family:ui-monospace,Menlo,monospace; font-size:11px; color:var(--dim); }
+  .stat b { color:var(--fg); font-weight:600; }
+  .win { color:var(--ok); }
+</style>
+</head>
+<body>
+<h1>Mirror layout — four candidates for the admin toggle</h1>
+<p class="sub">Every cell boots the <b>real built bundle</b>. <b>Stacked</b> is what ships today: the pane
+is fixed at the top and the pad's <code>top</code> is pushed below it. The other three put the screen
+inside the pad and drop that offset, differing only in how much of the pad the screen claims.
+Both numbers are <b>measured</b> from live rects and quoted against stacked — pad area you gain,
+screen area you give up. Nothing connects to the phone-remote server.</p>
+
+<div class="bar">
+  <div class="grp"><label>Device</label><span id="deviceSeg" class="seg"></span></div>
+  <div class="grp"><label>Skin</label><select id="skin"></select></div>
+  <div class="grp"><label>Orient</label><span id="orientSeg" class="seg"></span></div>
+  <div class="grp"><label>Boxes</label><span id="boxSeg" class="seg"></span></div>
+  <div class="grp"><button class="t" id="reload">Reload bundle</button></div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<script type="module" src="./mirror-inline.js"></script>
+</body>
+</html>

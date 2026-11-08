@@ -1,0 +1,33 @@
+@config "./phone-pulse.tailwind.config.js";
+@tailwind utilities;
+
+.phonePulse {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text);
+  text-align: left;
+}
+.phonePulse .session-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  animation: phone-pulse-beat 2s infinite;
+}
+@keyframes phone-pulse-beat {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 60%, transparent); }
+  70%, 100% { box-shadow: 0 0 0 7px transparent; }
+}
+.phonePulse .session-pulse-tabs { border-radius: 10px; padding: 3px; gap: 2px; }
+.phonePulse .session-pulse-tabs > button { border-radius: 8px; padding: 6px 8px; }
+.phonePulse .session-pulse-close { display: grid; place-items: center; color: var(--muted); }
+.ai .aiPulseBtn > i {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ai-soft);
+}
+.phonePulse .segmented-item[data-on] { background: var(--accent); }

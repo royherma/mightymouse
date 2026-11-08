@@ -1,0 +1,544 @@
+.drawPage {
+  --draw-ink: var(--surface-solid);
+  --draw-dark: rgb(var(--shadow-rgb));
+  --draw-dim: rgba(var(--white-rgb), 0.62);
+  --draw-chip: rgba(var(--white-rgb), 0.1);
+  --draw-chip-on: var(--surface-solid);
+  --draw-line: rgba(var(--white-rgb), 0.12);
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: flex;
+  flex-direction: column;
+  background: var(--draw-dark);
+  color: var(--draw-ink);
+  font-family: inherit;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+:where(.drawPage) button {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.drawTop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 10px;
+}
+.drawTop .drawSeg {
+  flex: 1;
+  justify-content: center;
+}
+
+.drawRound {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 21px;
+  background: var(--draw-chip);
+  color: var(--draw-ink);
+  transition: background-color 120ms ease, opacity 120ms ease, transform 120ms ease;
+}
+.drawRound:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+  transform: scale(0.94);
+}
+.drawRound:disabled {
+  opacity: 0.32;
+}
+
+.drawSeg {
+  display: flex;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 21px;
+  background: var(--draw-chip);
+}
+.drawSeg button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  color: var(--draw-dim);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 140ms ease, color 140ms ease;
+}
+.drawSeg button[aria-checked='true'] {
+  background: var(--draw-chip-on);
+  color: var(--draw-dark);
+}
+
+.drawStage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0 12px;
+  display: grid;
+  place-items: center;
+}
+.drawSheet {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(var(--white-rgb), 0.04);
+  box-shadow: 0 0 0 1px var(--draw-line), 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+.drawSheet.blank {
+  background: var(--draw-ink);
+}
+.drawShot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+}
+.drawShotState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--draw-dim);
+  font-size: 14px;
+  text-align: center;
+  pointer-events: none;
+}
+.drawRetry {
+  pointer-events: auto;
+  position: relative;
+  z-index: 2;
+  min-height: 34px;
+  padding: 0 14px;
+  border-radius: 17px;
+  background: var(--draw-ink);
+  color: var(--draw-dark);
+  font-size: 14px;
+  font-weight: 600;
+}
+.drawCanvas {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+}
+.drawHint {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+.drawSheet.blank .drawHint {
+  color: rgba(var(--shadow-rgb), 0.45);
+  text-shadow: none;
+}
+.drawToast {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  max-width: calc(100% - 24px);
+  padding: 9px 14px;
+  border-radius: 18px;
+  background: var(--draw-ink);
+  color: var(--draw-dark);
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+  animation: drawToastIn 180ms ease-out;
+}
+.drawToast.bad {
+  background: var(--red-light);
+  color: var(--draw-ink);
+}
+@keyframes drawToastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 6px);
+  }
+}
+
+.drawPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 14px calc(env(safe-area-inset-bottom, 0px) + 12px);
+}
+.drawRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.drawTools {
+  flex: 1;
+}
+.drawTools button {
+  flex: 1;
+  padding: 0 8px;
+}
+
+.drawStyle {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  transition: opacity 140ms ease;
+}
+.drawStyle.off {
+  opacity: 0.3;
+  pointer-events: none;
+}
+.drawColors {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+.drawSwatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 15px;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.drawSwatch[aria-checked='true'] {
+  box-shadow: 0 0 0 2px var(--draw-dark), 0 0 0 4px var(--draw-ink);
+  transform: scale(1.06);
+}
+.drawSwatch:active {
+  transform: scale(0.9);
+}
+.drawSizes {
+  align-self: flex-start;
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 20px;
+  background: var(--draw-chip);
+}
+.drawSize {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 17px;
+  transition: background-color 120ms ease;
+}
+.drawSize span {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+.drawSize[aria-checked='true'] {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.drawLive {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: var(--draw-chip);
+  text-align: left;
+}
+.drawLiveText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.drawLiveTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--draw-ink);
+}
+.drawLiveSub {
+  font-size: 12.5px;
+  color: var(--draw-dim);
+}
+.drawLiveTrack {
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 28px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background-color 160ms ease;
+}
+.drawLiveTrack::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: var(--draw-ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 160ms ease;
+}
+.drawLive[aria-checked='true'] .drawLiveTrack {
+  background: var(--green-light);
+}
+.drawLive[aria-checked='true'] .drawLiveTrack::after {
+  transform: translateX(18px);
+}
+
+.drawSend {
+  gap: 10px;
+}
+.drawSendBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 50px;
+  border-radius: 25px;
+  background: var(--draw-chip);
+  color: var(--draw-ink);
+  font-size: 16px;
+  font-weight: 700;
+  transition: background-color 120ms ease, opacity 120ms ease, transform 120ms ease;
+}
+.drawSendBtn.primary {
+  background: var(--draw-ink);
+  color: var(--draw-dark);
+}
+.drawSendBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+.drawSendBtn:disabled {
+  opacity: 0.38;
+}
+
+.drawSpin {
+  animation: drawSpin 0.9s linear infinite;
+}
+@keyframes drawSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.settingsDrawBtn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md, 12px);
+  background: var(--accent);
+  color: var(--surface1);
+  text-align: left;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+.settingsDrawBtn:active {
+  transform: scale(0.98);
+  filter: brightness(0.92);
+}
+.settingsDrawText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.settingsDrawTitle {
+  font-size: 15px;
+  font-weight: 700;
+}
+.settingsDrawSub {
+  font-size: 12.5px;
+  opacity: 0.85;
+}
+
+.drawMain {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.drawPage[data-orient='landscape'] .drawTop {
+  position: relative;
+  z-index: 3;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px calc(env(safe-area-inset-right, 0px) + 10px) 6px
+    calc(env(safe-area-inset-left, 0px) + 10px);
+}
+.drawGroup {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.drawPage[data-orient='landscape'] .drawTop .drawSeg {
+  flex: none;
+}
+.drawPage[data-orient='landscape'] .drawRound {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+}
+.drawPage[data-orient='landscape'] .drawSeg {
+  padding: 2px;
+}
+.drawPage[data-orient='landscape'] .drawSeg button {
+  min-height: 32px;
+  padding: 0 9px;
+}
+.drawPage[data-orient='landscape'] .drawToolLabel {
+  display: none;
+}
+.drawPage[data-orient='landscape'] .drawLive {
+  width: auto;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 6px 0 12px;
+  border-radius: 18px;
+}
+.drawPage[data-orient='landscape'] .drawLiveTitle {
+  font-size: 13px;
+  white-space: nowrap;
+}
+.drawPage[data-orient='landscape'] .drawLiveTrack {
+  width: 40px;
+  height: 24px;
+  border-radius: 12px;
+}
+.drawPage[data-orient='landscape'] .drawLiveTrack::after {
+  width: 18px;
+  height: 18px;
+  border-radius: 9px;
+}
+.drawPage[data-orient='landscape'] .drawLive[aria-checked='true'] .drawLiveTrack::after {
+  transform: translateX(16px);
+}
+.drawPage[data-orient='landscape'] .drawSendBtn {
+  flex: none;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 18px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.drawPage[data-orient='landscape'] .drawCopy {
+  width: 36px;
+  padding: 0;
+}
+.drawPage[data-orient='landscape'] .drawStage {
+  margin: 0 calc(env(safe-area-inset-right, 0px) + 10px)
+    calc(env(safe-area-inset-bottom, 0px) + 6px) calc(env(safe-area-inset-left, 0px) + 10px);
+}
+
+.drawStyleWrap {
+  position: relative;
+}
+.drawStyleDot {
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--swatch);
+  box-shadow: 0 0 0 2px var(--draw-dark), 0 0 0 3.5px var(--draw-ink);
+}
+.drawStyleBtn[aria-expanded='true'] {
+  background: rgba(255, 255, 255, 0.22);
+}
+.drawStylePop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgb(var(--shadow-rgb));
+  box-shadow: 0 0 0 1px var(--draw-line), 0 14px 36px rgba(0, 0, 0, 0.55);
+  animation: drawPopIn 140ms ease-out;
+}
+.drawStylePop .drawColors {
+  gap: 8px;
+}
+.drawStylePop .drawSizes {
+  align-self: center;
+}
+@keyframes drawPopIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -4px);
+  }
+}
+.drawScrim {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+}
+
+.drawLiveBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 7px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--draw-ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  pointer-events: none;
+}
+.drawLiveBadge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 4px;
+  background: var(--red-light);
+  animation: drawLivePulse 1.6s ease-in-out infinite;
+}
+.drawLiveBadge.paused::before {
+  background: var(--draw-dim);
+  animation: none;
+}
+@keyframes drawLivePulse {
+  50% {
+    opacity: 0.35;
+  }
+}

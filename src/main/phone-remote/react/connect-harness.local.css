@@ -1,0 +1,236 @@
+/* Harness chrome only. Nothing here may style a `.strandedGuard*`, `.bootGate*`,
+   `.terminal*`, `.pair*` or `.approval*` class -- those belong to theme.css, and
+   a harness that restyles the component it is previewing stops being evidence
+   about the real thing. */
+
+/* theme.css pins the root for a trackpad surface that must swallow every
+   gesture. On a desktop harness page that blocks the wheel/trackpad scroll
+   ITSELF, leaving the page reachable only with the spacebar. Restoring these is
+   harness chrome, not a change to how any previewed component behaves.
+   (The relay harness hit exactly this.) */
+html,
+body {
+  overflow: auto;
+  height: auto;
+  touch-action: auto;
+  overscroll-behavior: auto;
+  margin: 0;
+}
+
+.hPage {
+  min-height: 100vh;
+  padding: 32px 24px 96px;
+  background: #0e1119;
+  color: #e7ecf5;
+  font:
+    14px/1.5 -apple-system,
+    BlinkMacSystemFont,
+    'SF Pro Text',
+    system-ui,
+    sans-serif;
+}
+
+.hPageHead {
+  max-width: 900px;
+  margin: 0 auto 36px;
+}
+.hPageHead h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 650;
+}
+.hPageHead h2 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 650;
+}
+.hPageHead p {
+  margin: 0 0 16px;
+  color: #93a0b8;
+}
+code {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12.5px;
+  color: #c8d3e8;
+}
+
+.hControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.hViewTab {
+  padding: 6px 12px;
+  border: 1px solid #232a3a;
+  border-radius: 8px;
+  background: #141924;
+  color: #93a0b8;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.hViewTab[data-active] {
+  background: #2c3548;
+  border-color: #3a465e;
+  color: #fff;
+}
+
+.hGroup {
+  max-width: 1360px;
+  margin: 0 auto 44px;
+}
+.hGroupHead {
+  margin: 0 0 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #1e2534;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7d8aa3;
+}
+
+/* Four per row at full width, per the composite house rule. */
+.hGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+.hCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hCardHead {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.hCardHead h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.hCardHead code {
+  font-size: 11px;
+  color: #6f7d97;
+}
+
+/* The phone frame. `transform` is load-bearing, NOT decoration: `.strandedGuard`
+   and `.bootGate` are both `position: fixed; inset: 0`, so with no containing
+   block every frame would pin to the viewport and stack, leaving one visible
+   screen for eleven scenarios. A transform makes this element the fixed root for
+   its own gate. Don't remove it to "clean up". */
+.hPhone {
+  position: relative;
+  transform: translateZ(0);
+  width: 100%;
+  aspect-ratio: 393 / 852; /* iPhone 16 Pro logical px */
+  border: 1px solid #232a3a;
+  border-radius: 26px;
+  overflow: hidden;
+  background: var(--bg, #000);
+}
+.hPhoneScreen {
+  position: absolute;
+  inset: 0;
+  /* The real page sets these on the root; the gates read them for the notch
+     inset, and without them `.terminalBack` sits under the status bar exactly
+     as it did on device before that was fixed. */
+  --pro-safe-top: 59px;
+  --pro-safe-bottom: 34px;
+}
+
+.hTrigger {
+  margin: 0;
+  font-size: 13px;
+  color: #b8c4d8;
+}
+.hNote {
+  margin: 0;
+  padding-left: 10px;
+  border-left: 2px solid #2c3548;
+  font-size: 12.5px;
+  color: #8592ab;
+}
+
+/* Stand-in for the live deck, so the reconnect banner can be read against
+   something rather than floating on the page background. */
+.hDeckStub {
+  position: absolute;
+  inset: 0;
+  background: var(--bg, #0b0d12);
+}
+.hDeckStubBody {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32px;
+  text-align: center;
+  font-size: 13px;
+  color: #5d6a82;
+}
+
+.hFoot {
+  max-width: 900px;
+  padding-top: 28px;
+  border-top: 1px solid #1e2534;
+}
+.hTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.hTable th,
+.hTable td {
+  padding: 7px 10px;
+  border-bottom: 1px solid #1e2534;
+  text-align: left;
+  vertical-align: top;
+}
+.hTable th {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7d8aa3;
+}
+.hTable td {
+  color: #b8c4d8;
+}
+
+/* ── Native iOS lobby ─────────────────────────────────────────────────────
+   The SwiftUI lobby has no React to render, so it arrives one of two ways: a
+   real simulator screenshot, or transcribed copy on a blank phone. The badge
+   is what keeps the two apart on sight -- a transcription read as a screenshot
+   is worse than no frame at all. */
+.hShell {
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+.hShell[data-shell='native'] {
+  background: #2a1c08;
+  color: #f0b366;
+  border: 1px solid #5c3d10;
+}
+.hShell[data-shell='web'] {
+  background: #131a2a;
+  color: #7d90b3;
+  border: 1px solid #232a3a;
+}
+
+/* A device shot fills the frame -- it was taken at the frame's own aspect. */
+.hShot {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+

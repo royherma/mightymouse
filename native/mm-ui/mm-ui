@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# mm-ui — the act agent's channel to APP-side capabilities.
+#
+# Companion to mm-input, and deliberately NOT part of it. mm-input synthesizes
+# real HID events via CGEvent and needs no app state, so it can be a standalone
+# Swift binary. The verbs here drive Electron windows the app already owns (the
+# highlight overlay), which only the main process can move/show/route across
+# displays. So this is a thin client: it writes one JSON line to the unix socket
+# main is listening on (src/main/act-control.ts) and exits.
+#
+# Why a shell script and not a binary: there is nothing to compile. No CGEvent,
+# no framework, no notarization step — just a socket write. `nc` ships with
+# macOS; python3 is the fallback so a stripped PATH still works.
+#
+# Coordinate space: LOGICAL SCREEN POINTS, top-left origin — the same space as
+# mm-input, screen.getCursorScreenPoint(), and the cursor overlay.
+#
+# Usage:
+#   mm-ui highlight <x> <y> [size_px] [duration_ms]
+#
+# Output: "ok highlight x,y" on success; usage error → exit 2; no socket → exit 1.
+
+set -uo pipefail
+
+die() { printf '%s\n' "$1" >&2; exit "${2:-2}"; }
+
+VERB="${1:-}"
+[ -n "$VERB" ] || die "usage: mm-ui highlight <x> <y> [size_px] [duration_ms]"
+
+# Socket path resolution, most explicit first. MM_ACT_SOCKET is exported into
+# the agent's environment by the app, so the app name / tmp layout is never
+# duplicated here (CONFIG.APP_NAME owns it). MM_ACT_POINTER is the sidecar file
+# main writes at listen() time — used when only the pointer path is known.
+#
+# Resolved lazily, INSIDE send_line, so argument validation always runs first: a
+# typo'd verb or a non-numeric coordinate must report itself as a usage error
+# (exit 2) rather than being masked by "socket not available" (exit 1) whenever
+# the app happens to be closed.
+resolve_sock() {
+  if [ -n "${MM_ACT_SOCKET:-}" ]; then
+    SOCK="$MM_ACT_SOCKET"
+  elif [ -n "${MM_ACT_POINTER:-}" ] && [ -r "$MM_ACT_POINTER" ]; then
+    SOCK="$(cat "$MM_ACT_POINTER")"
+  else
+    die "mm-ui: MM_ACT_SOCKET is not set (is MightyMouse running this command?)" 1
+  fi
+  [ -S "$SOCK" ] || die "mm-ui: MightyMouse control socket not available at $SOCK" 1
+}
+
+# Write one newline-delimited JSON line to the socket. Prefers nc (present on
+# stock macOS); python3 covers a stripped PATH. Fire-and-forget — the app never
+# replies, so we don't wait on a read.
+send_line() {
+  resolve_sock
+  if command -v nc >/dev/null 2>&1; then
+    printf '%s\n' "$1" | nc -U "$SOCK" >/dev/null 2>&1
+  elif command -v python3 >/dev/null 2>&1; then
+    SOCK="$SOCK" PAYLOAD="$1" python3 -c '
+import os, socket
+s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+s.connect(os.environ["SOCK"])
+s.sendall((os.environ["PAYLOAD"] + "\n").encode())
+s.close()
+' >/dev/null 2>&1
+  else
+    die "mm-ui: neither nc nor python3 available to reach the socket" 1
+  fi
+}
+
+is_num() { printf '%s' "$1" | grep -Eq '^-?[0-9]+$'; }
+
+case "$VERB" in
+  highlight)
+    X="${2:-}"; Y="${3:-}"
+    { is_num "$X" && is_num "$Y"; } || die "highlight needs <x> <y>"
+    SIZE="${4:-}"; DUR="${5:-}"
+    JSON="{\"verb\":\"highlight\",\"x\":$X,\"y\":$Y"
+    if [ -n "$SIZE" ]; then
+      is_num "$SIZE" || die "size must be an integer"
+      JSON="$JSON,\"size\":$SIZE"
+    fi
+    if [ -n "$DUR" ]; then
+      is_num "$DUR" || die "duration must be an integer"
+      JSON="$JSON,\"duration\":$DUR"
+    fi
+    JSON="$JSON}"
+    send_line "$JSON"
+    printf 'ok highlight %s,%s\n' "$X" "$Y"
+    ;;
+  *)
+    die "unknown verb: $VERB"
+    ;;
+esac

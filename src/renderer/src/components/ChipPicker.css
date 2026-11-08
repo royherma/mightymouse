@@ -1,0 +1,101 @@
+.chippick {
+  position: relative;
+  display: inline-flex;
+  min-width: 0;
+}
+
+.chippick-btn {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.chippick-btn:hover:not(:disabled) {
+  background: var(--surface2);
+  color: var(--on-surface);
+}
+
+.chippick-btn:disabled {
+  cursor: default;
+}
+
+/* The model said it wasn't sure — the chip reads as a question, not a settled pick. */
+.chippick-btn.is-unsure {
+  background: var(--accent-bg-subtle);
+  border: 1px solid var(--accent-border-subtle);
+  color: var(--accent-text);
+  padding: 0 var(--space1);
+}
+
+.chippick-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 20;
+  width: 200px;
+  padding: var(--space1);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-sm);
+  background: var(--surface-solid);
+  box-shadow: var(--shadow-popover);
+}
+
+.chippick-filter {
+  width: 100%;
+  padding: var(--space1) var(--space-xs);
+  border: 1px solid var(--border-dark);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  color: var(--on-surface);
+  font-family: inherit;
+  font-size: var(--font-xs);
+  outline: none;
+}
+
+.chippick-filter:focus {
+  border-color: var(--accent);
+}
+
+.chippick-list {
+  max-height: 180px;
+  margin-top: var(--space1);
+  overflow-y: auto;
+}
+
+.chippick-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  padding: var(--space1) var(--space-xs);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--on-surface);
+  font-family: inherit;
+  font-size: var(--font-xs);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chippick-item.is-active {
+  background: var(--surface3);
+}
+
+.chippick-item.is-current {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.chippick-item-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chippick-empty {
+  padding: var(--space2) var(--space-xs);
+  color: var(--muted);
+  font-size: var(--font-xs);
+  text-align: center;
+}

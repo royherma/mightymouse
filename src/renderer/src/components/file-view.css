@@ -1,0 +1,268 @@
+.file-view {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space2);
+  min-width: 0;
+  min-height: 0;
+}
+.file-view-bar {
+  gap: var(--space-xs);
+  min-width: 0;
+  padding-left: var(--space1);
+}
+.file-view-icon {
+  flex: none;
+  color: var(--muted);
+}
+.file-view-name {
+  flex: none;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--on-surface);
+}
+.file-view-folder {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+  font-size: var(--font-xs);
+  color: var(--muted);
+}
+.file-view-modes {
+  display: flex;
+  flex: none;
+  gap: var(--space-xxs);
+  padding: var(--space-xxs);
+  border-radius: var(--radius-sm);
+  background: var(--surface1);
+  border: 1px solid var(--surface3);
+}
+.file-view-mode {
+  padding: var(--space1) var(--space3);
+  border-radius: calc(var(--radius-sm) - 2px);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--muted);
+  transition: background-color 120ms, color 120ms;
+}
+.file-view-mode:hover {
+  color: var(--on-surface);
+}
+.file-view-mode[data-on] {
+  background: var(--bg);
+  color: var(--on-surface);
+  box-shadow: var(--shadow-card);
+}
+
+.file-view-editor,
+.file-view-doc,
+.file-view-raw {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+.file-view-editor .cm-editor {
+  height: 100%;
+}
+.file-view-doc {
+  padding: var(--space3) var(--space4);
+  font-size: var(--font-sm);
+}
+.file-view-raw {
+  margin: 0;
+  padding: var(--space2) var(--space3);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--font-sm);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: var(--on-surface);
+}
+.file-view-doc .file-view-raw {
+  padding: 0;
+}
+.file-view-warn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  margin: 0 0 var(--space2);
+  color: var(--amber);
+}
+.file-view-note {
+  margin: var(--space2) 0 0;
+  font-size: var(--font-xs);
+  color: var(--muted);
+}
+
+.file-json {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--font-sm);
+  line-height: 1.6;
+}
+.file-json-branch > :not(summary),
+.file-json-branch > .file-json-leaf {
+  margin-left: var(--space4);
+}
+.file-json-branch > summary {
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+}
+.file-json-branch > summary:hover {
+  background: var(--surface2);
+}
+.file-json-key {
+  color: var(--on-surface);
+  font-weight: 600;
+}
+.file-json-count {
+  color: var(--muted);
+}
+.file-json-string {
+  color: var(--green);
+  overflow-wrap: anywhere;
+}
+.file-json-number,
+.file-json-boolean {
+  color: var(--accent-text);
+}
+.file-json-null {
+  color: var(--muted);
+}
+
+.file-view-table {
+  border-collapse: collapse;
+  font-size: var(--font-xs);
+}
+.file-view-table th,
+.file-view-table td {
+  padding: var(--space1) var(--space2);
+  border: 1px solid var(--surface3);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+.file-view-table th {
+  position: sticky;
+  top: -14px;
+  background: var(--surface1);
+  font-weight: 600;
+}
+.file-view-table tbody tr:nth-child(even) {
+  background: var(--surface2);
+}
+
+.side-browser-tab[data-dirty] .side-browser-tab-title::after {
+  content: ' •';
+  color: var(--accent-text);
+}
+
+.file-tree {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space2);
+  min-width: 0;
+  min-height: 0;
+}
+.file-tree-head {
+  gap: var(--space-xs);
+  padding-left: var(--space2);
+}
+.file-tree-input {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space1) 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: var(--font-sm);
+  color: var(--on-surface);
+}
+.file-tree-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space1);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+.file-tree-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  width: 100%;
+  padding-top: var(--space1);
+  padding-bottom: var(--space1);
+  padding-right: var(--space2);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  font-size: var(--font-sm);
+  color: var(--on-surface);
+}
+.file-tree-row:hover {
+  background: var(--surface2);
+}
+.file-tree-row[data-on] {
+  background: var(--surface3);
+}
+.file-tree-row[data-current] .file-tree-name {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.file-tree-chevron {
+  flex: none;
+  color: var(--muted);
+  transition: transform 120ms;
+}
+.file-tree-chevron[data-open] {
+  transform: rotate(90deg);
+}
+.file-tree-icon {
+  flex: none;
+  color: var(--muted);
+}
+.file-tree-name {
+  flex: none;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-tree-folder {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+  font-size: var(--font-xs);
+  color: var(--muted);
+}
+.file-tree-note {
+  margin: 0;
+  padding: var(--space3);
+  font-size: var(--font-sm);
+  color: var(--muted);
+}
+.side-browser-top-icon {
+  color: var(--muted);
+}
+.side-browser-top-key {
+  font-family: inherit;
+  font-size: var(--font-xs);
+  color: var(--muted);
+}
+.side-browser-tab-new[data-on] {
+  background: var(--surface3);
+  color: var(--on-surface);
+}

@@ -1,0 +1,40 @@
+/* Screenshot-harness chrome only -- never shipped.
+
+   .ai, .aiSheet and .aiViewer are all `position: fixed`, so nine of them on one
+   page would stack on top of each other. .aiPhone re-establishes a containing
+   block (`transform` does it) and scopes each instance to a phone-sized box --
+   see chatfull.local.css for the same trick. */
+body {
+  margin: 0;
+  background: #b8ada0;
+  font: 15px/1.5 -apple-system, system-ui, sans-serif;
+}
+.aiGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+  padding: 28px;
+}
+.aiPanelLabel {
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: #43403c;
+}
+.aiPhone {
+  position: relative;
+  width: 393px;
+  height: 852px;
+  overflow: hidden;
+  border-radius: 26px;
+  box-shadow: 0 8px 28px rgb(0 0 0 / 28%);
+  transform: translateZ(0);
+}
+.aiPhone > .ai > .aiScroll:first-child {
+  padding-top: calc(var(--safe-top) + 8px);
+}
+.aiPhone .aiSheet {
+  max-height: 88%;
+}

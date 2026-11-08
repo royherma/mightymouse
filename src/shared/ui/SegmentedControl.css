@@ -1,0 +1,32 @@
+.segmented {
+  display: flex;
+  gap: var(--space-xxs);
+  padding: var(--space1);
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+}
+.segmented-item {
+  display: inline-flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space1) var(--space3);
+  border-radius: var(--radius-xs);
+  color: var(--muted);
+  white-space: nowrap;
+  transition: background-color 160ms, color 160ms, box-shadow 160ms;
+}
+.segmented-item:hover {
+  color: var(--on-surface);
+}
+.segmented-item[data-on],
+.segmented-item[data-on]:hover {
+  background: var(--surface-solid);
+  color: var(--on-surface);
+  box-shadow: var(--shadow-card);
+}
+.segmented-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.6;
+}

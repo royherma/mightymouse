@@ -1,0 +1,25 @@
+.hover-scroll {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.hover-scroll-inner {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.hover-scroll[data-overflow] {
+  mask-image: linear-gradient(90deg, rgb(var(--shadow-rgb)) calc(100% - 22px), transparent);
+}
+:is(button, .hover-scroll-host):hover .hover-scroll[data-overflow] {
+  mask-image: linear-gradient(90deg, transparent, rgb(var(--shadow-rgb)) 14px, rgb(var(--shadow-rgb)) calc(100% - 14px), transparent);
+}
+:is(button, .hover-scroll-host):hover .hover-scroll[data-overflow] > .hover-scroll-inner {
+  transform: translateX(var(--hover-scroll-by));
+  transition: transform var(--hover-scroll-ms) linear 0.35s;
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(button, .hover-scroll-host):hover .hover-scroll[data-overflow] > .hover-scroll-inner {
+    transform: none;
+  }
+}

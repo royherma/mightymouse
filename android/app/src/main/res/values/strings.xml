@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">MightyMouse</string>
+    <string name="title">Use your phone as your Mac\'s remote</string>
+    <string name="step1">Install the free MightyMouse app on your Mac</string>
+    <string name="step2">Open it. Your Mac shows a QR code.</string>
+    <string name="step3">Scan it with this phone</string>
+    <string name="scan">Scan the code</string>
+    <string name="reconnect">Reconnect to your Mac</string>
+    <string name="foreign_qr">That code isn\'t from MightyMouse. Scan the one MightyMouse shows on your Mac.</string>
+    <string name="load_failed">Can\'t reach your Mac. Check it is awake and on the same Wi-Fi, then try again.</string>
+    <string name="scan_prompt">Point your camera at the code on your Mac</string>
+</resources>

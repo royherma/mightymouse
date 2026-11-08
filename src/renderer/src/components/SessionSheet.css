@@ -1,0 +1,738 @@
+.session-detail .agent-rail .session-detail-action[data-primary] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent, #fff);
+}
+
+.session-detail .agent-rail .session-detail-action[data-primary]:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent, #fff);
+  filter: brightness(1.08);
+}
+
+.session-detail .agent-rail .session-detail-action[data-primary]:disabled {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent, #fff);
+  opacity: 0.7;
+}
+
+.session-detail .agent-rail .agent-rail-tldr-value {
+  white-space: pre-wrap;
+}
+
+.session-detail .turn-row > .session-detail-did {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space1);
+  align-self: stretch;
+  min-width: 0;
+  max-width: 100%;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.session-detail .turn-row > .session-detail-did svg {
+  flex: none;
+  margin-top: 1px;
+  transition: transform 0.12s;
+}
+
+.session-detail .turn-row > .session-detail-did svg[data-open] {
+  transform: rotate(90deg);
+}
+
+.session-detail .turn-row > .session-detail-did span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-detail .turn-row > .session-detail-did[data-open] span {
+  white-space: pre-wrap;
+  overflow: visible;
+  text-overflow: unset;
+}
+
+.session-detail .turn-row > .session-detail-did span b {
+  font-weight: 600;
+}
+
+.session-detail .turn-row > .session-detail-did span span {
+  opacity: 0.72;
+}
+
+.session-detail .turn-row > .session-detail-did[data-open] span span {
+  display: block;
+  margin-top: var(--space-xxs);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  font-size: 0.92em;
+  line-height: 1.45;
+}
+
+.session-detail .turn-row > .session-detail-did[data-bare] {
+  cursor: default;
+}
+
+.session-detail .turn-row > .session-detail-did[data-bare] svg {
+  opacity: 0.35;
+}
+
+.session-detail .turn-row > .session-detail-did[data-nested] {
+  padding-left: var(--space4);
+}
+
+.session-detail .turn-row > .session-detail-did:hover {
+  color: var(--on-surface);
+}
+
+.session-detail .agent-rail {
+  gap: var(--space4);
+  padding: var(--space4);
+}
+
+.session-detail .agent-rail-fact {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: var(--space3);
+  padding: var(--space-xs) var(--space3);
+  background: var(--surface1);
+}
+
+.session-detail .agent-rail-fact-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.session-detail .agent-rail-fact-label > svg {
+  flex: none;
+  opacity: 0.7;
+}
+
+.session-detail .agent-rail-fact-value > svg {
+  margin: 0;
+}
+
+.session-detail .agent-rail-section-toggle {
+  gap: var(--space-xs);
+  padding-bottom: var(--space1);
+}
+
+.session-detail .agent-rail-section-icon {
+  flex: none;
+  opacity: 0.75;
+}
+
+.session-detail .agent-rail-section-toggle svg.agent-rail-section-icon[data-open] {
+  transform: none;
+}
+
+.session-detail .agent-rail-shared-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space2);
+  margin-top: var(--space-xs);
+  padding: var(--space2) var(--space3);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-sm);
+  background: var(--surface1);
+}
+
+.session-detail .agent-rail-shared-row > svg {
+  flex: none;
+  margin-top: var(--space-xxs);
+  color: var(--text-muted-medium);
+}
+
+.session-detail .agent-rail-shared-row .coord-line {
+  min-width: 0;
+  margin: 0;
+  gap: var(--space-xxs);
+}
+
+.session-detail .agent-rail-shared-row .coord-line-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xxs);
+}
+
+.session-detail .agent-rail-shared-row .coord-line-title {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--on-surface);
+  overflow-wrap: anywhere;
+}
+
+.session-detail .agent-rail-shared-row .coord-line-meta,
+.session-detail .agent-rail-shared-row .coord-line-sub {
+  font-size: var(--font-xs);
+}
+
+.session-detail .agent-rail-fact-value {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-xs);
+  text-align: right;
+}
+
+.session-detail .agent-rail-fact-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-detail .agent-rail-fact-app-icon {
+  flex: none;
+  margin: 0;
+}
+
+.session-detail .agent-rail-section-body,
+.session-detail .agent-rail-activity {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-md);
+  background: var(--surface3);
+  overflow: hidden;
+  flex: none;
+}
+
+.session-detail .agent-rail-section-body > *,
+.session-detail .agent-rail-activity > * {
+  background: var(--surface1);
+}
+
+/* Facts flow into columns once the rail is wide enough for two. */
+.session-detail .agent-rail-section-body:has(> .agent-rail-fact),
+.session-detail .agent-rail-activity {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(15rem, calc(50% - 1px)), 1fr));
+}
+
+.session-detail .agent-rail-section-body > .agent-rail-goal-empty-text {
+  padding: var(--space2) var(--space3);
+}
+
+.session-detail .agent-rail-section-toggle {
+  font-size: var(--font-xs);
+  font-weight: 700;
+}
+
+.session-detail .agent-rail-tldr-label {
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.session-detail .agent-rail .session-detail-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: var(--space2);
+  padding: 0;
+}
+
+.session-detail .agent-rail .session-detail-action {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 0;
+  height: 32px;
+  justify-content: center;
+  gap: var(--space2);
+  padding: 0 var(--space3);
+  border-color: var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--on-surface);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    transform 120ms ease;
+}
+
+.session-detail .agent-rail .session-detail-action:hover:not(:disabled) {
+  border-color: var(--surface3);
+}
+
+.session-detail .agent-rail .session-detail-action:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.session-detail .agent-rail .session-detail-action > svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  color: var(--text-muted-medium);
+}
+
+.session-detail .agent-rail .session-detail-action:hover:not(:disabled) > svg {
+  color: inherit;
+}
+
+.session-detail .agent-rail .session-detail-action[data-primary] {
+  height: 36px;
+  font-weight: 600;
+}
+
+.session-detail .agent-rail .session-detail-action[data-primary] > svg {
+  color: inherit;
+}
+
+.session-detail .agent-rail .session-detail-action[data-primary],
+.session-detail .agent-rail .session-detail-action[data-primary],
+.session-detail .agent-rail .session-detail-actions > p {
+  flex-basis: 100%;
+}
+
+.session-detail .agent-rail-fact[data-setting] {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  cursor: pointer;
+}
+
+.session-detail .agent-rail-fact[data-setting] > button {
+  justify-self: end;
+}
+
+.session-detail .agent-rail-section-toggle[data-pinned] {
+  padding-left: 0;
+}
+
+.session-detail .agent-rail-goal-empty {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  gap: var(--space2);
+  border: 0;
+  border-radius: 0;
+  padding: var(--space2) var(--space3);
+  background: var(--surface1);
+}
+
+.session-detail .agent-rail-goal-empty-text {
+  flex: 1;
+  margin: 0;
+}
+
+.session-detail .agent-rail-goal-empty-button {
+  margin: 0;
+  flex-shrink: 0;
+  height: 26px;
+  padding: 0 var(--space3);
+  border-color: var(--border-subtle);
+  border-radius: var(--radius-full);
+  font-weight: 500;
+}
+
+.session-detail .session-detail-head {
+  gap: 10px;
+  height: 52px;
+  padding: 0 16px 0 24px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.session-detail .session-detail-title {
+  flex: 0 1 auto;
+  font-size: 15px;
+  font-weight: 620;
+  letter-spacing: -0.01em;
+}
+.session-detail-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 14rem;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--text-muted-dark);
+  font-size: 12px;
+  font-weight: 520;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.session-detail .session-detail-head .code-detail-pos {
+  margin-left: auto;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.session-detail .session-detail-head .code-detail-pos[data-health='waiting'] {
+  color: var(--amber);
+}
+.session-detail-back {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xxs);
+  height: 26px;
+  padding: 0 8px 0 4px;
+  margin-left: -8px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 540;
+  white-space: nowrap;
+}
+.session-detail-back:hover {
+  background: var(--surface2);
+  color: var(--on-surface);
+}
+.session-detail .session-detail-tldr .session-tldr-tag {
+  padding: 0;
+  background: none;
+  font-size: 12px;
+  letter-spacing: normal;
+  color: var(--muted);
+}
+.session-detail-project {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-xs);
+  color: var(--text-muted-medium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.agent-rail-chat {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+  height: 50vh;
+  min-height: 240px;
+}
+.agent-rail-chat .session-detail-suggest {
+  align-items: flex-start;
+}
+.agent-rail-chat .session-detail-suggest-row {
+  flex-direction: column;
+  align-items: stretch;
+  overflow: visible;
+}
+.agent-rail-chat .session-detail-suggest .session-detail-suggest-chip:not(.session-detail-suggest-again) {
+  height: auto;
+  min-height: 30px;
+  max-width: none;
+  padding: 6px 12px;
+  white-space: normal;
+}
+.agent-rail-chat .session-detail-suggest-chip .hover-scroll {
+  white-space: normal;
+}
+.agent-rail-chat .session-detail-suggest .session-detail-suggest-chip:is(:hover, *) .hover-scroll[data-overflow] {
+  mask-image: none;
+}
+.agent-rail-chat .session-detail-suggest-chip .hover-scroll-inner {
+  display: inline;
+}
+.session-detail-terminal {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  margin-top: var(--space2);
+}
+
+.session-step-in {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space2);
+  padding: var(--space2) var(--space3) var(--space3);
+  background: var(--bg);
+}
+.session-step-in-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space2);
+  min-width: 0;
+}
+.session-step-in-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.session-step-in-spacer {
+  flex: 1;
+}
+.session-step-in-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space1) var(--space3);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-xs);
+  white-space: nowrap;
+}
+
+.session-detail .agent-rail .git-run-line {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+  padding: var(--space-xs) var(--space2);
+  border-radius: var(--radius-sm);
+  background: var(--surface1);
+  color: var(--text-muted-dark);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  animation: git-run-line-in 160ms ease-out;
+}
+.session-detail .agent-rail .git-run-line[data-kind='committed'],
+.session-detail .agent-rail .git-run-line[data-kind='pushed'],
+.session-detail .agent-rail .git-run-line[data-kind='opened'],
+.session-detail .agent-rail .git-run-line[data-kind='merged'] {
+  color: var(--green);
+}
+.session-detail .agent-rail .git-run-line[data-kind='failed'] {
+  color: var(--red);
+}
+.git-run-line-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.git-run-line-dismiss {
+  flex: none;
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+@keyframes git-run-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+}
+
+.session-detail .agent-rail .git-action[data-tone='commit']:not(:disabled) > svg {
+  color: var(--green);
+}
+.session-detail .agent-rail .git-action[data-tone='push']:not(:disabled) > svg {
+  color: var(--blue);
+}
+.session-detail .agent-rail .git-action[data-tone='pull']:not(:disabled) > svg,
+.session-detail .agent-rail .git-action[data-tone='merge']:not(:disabled) > svg {
+  color: var(--accent);
+}
+.session-detail .agent-rail .git-changes {
+  grid-column: 1 / -1;
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+.session-detail .agent-rail .git-action {
+  flex-basis: 100%;
+  justify-content: flex-start;
+}
+.session-detail .agent-rail .git-action .git-action-caption {
+  margin-left: auto;
+  color: var(--text-muted-medium);
+  font-size: var(--font-xs);
+  font-weight: 400;
+  opacity: 1;
+}
+.session-detail .agent-rail .git-action[data-armed] {
+  border-color: var(--blue);
+}
+.git-action-caption {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: var(--font-micro);
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+.session-detail .agent-rail .git-push-confirm {
+  grid-column: 1 / -1;
+  flex-basis: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space3);
+  border: 1px solid color-mix(in srgb, var(--blue) 45%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--blue) 7%, var(--surface1));
+  font-size: var(--font-xs);
+  animation: git-run-line-in 160ms ease-out;
+}
+.git-push-confirm-title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--on-surface);
+}
+.git-push-confirm-sub {
+  margin: 0;
+  color: var(--text-muted-dark);
+  line-height: 1.4;
+}
+.git-push-confirm-list {
+  margin: 0;
+  padding-left: var(--space4);
+  color: var(--on-surface);
+}
+.git-push-confirm-list li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.git-push-confirm-more {
+  color: var(--text-muted-dark);
+  list-style: none;
+  margin-left: calc(-1 * var(--space4));
+}
+.git-push-confirm-buttons {
+  display: flex;
+  gap: var(--space-xs);
+}
+.git-push-confirm-go,
+.git-push-confirm-cancel {
+  flex: 1;
+  padding: var(--space-xs) var(--space2);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: var(--font-xs);
+}
+.git-push-confirm-go {
+  background: var(--blue);
+  color: var(--on-accent);
+}
+.git-push-confirm-go:hover {
+  filter: brightness(1.1);
+}
+.git-push-confirm-cancel {
+  border: 1px solid var(--surface3);
+  color: var(--text-muted-dark);
+}
+.git-push-confirm-cancel:hover {
+  background: var(--surface2);
+}
+
+.session-detail .agent-rail-section-body > :last-child:nth-child(odd),
+.session-detail .agent-rail-activity > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
+.session-detail .agent-rail-file-group {
+  display: flex;
+  flex-direction: column;
+  padding: var(--space1) var(--space2) var(--space2);
+}
+
+.session-detail .agent-rail-file-folder {
+  display: flex;
+  align-items: center;
+  gap: var(--space1);
+  min-width: 0;
+  padding: var(--space1) var(--space-xs);
+  overflow: hidden;
+  color: var(--text-muted-medium);
+  font-size: var(--font-micro);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.session-detail .agent-rail-file-group .local-path-row-name {
+  max-width: none;
+}
+
+.session-detail .agent-rail-tldr-value {
+  padding: var(--space2) var(--space3);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) var(--radius-xs);
+  background: var(--surface1);
+  box-shadow: var(--shadow-card);
+  font-size: var(--font-sm);
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.session-detail .agent-rail-section-body .tools-used-list {
+  padding: var(--space1) var(--space1) 0;
+  mask-image: none;
+}
+
+.session-detail .agent-rail-section-body .mcp-footer {
+  padding: var(--space2) var(--space2);
+}
+
+.session-detail .agent-rail-islands {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space4);
+  flex: none;
+}
+
+.session-detail .agent-rail-islands[data-grid] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+  grid-auto-rows: 17rem;
+  gap: var(--space3);
+}
+
+.session-detail .agent-rail-islands[data-grid] > .agent-rail-section {
+  min-height: 0;
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-lg);
+  background: var(--surface1);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.session-detail .agent-rail-islands[data-grid] .agent-rail-section-toggle {
+  flex: none;
+  padding: var(--space2) var(--space3);
+}
+
+.session-detail .agent-rail-islands[data-grid] .agent-rail-section-body {
+  flex: 1;
+  min-height: 0;
+  align-content: start;
+  gap: 0;
+  border: 0;
+  border-top: 1px solid var(--surface3);
+  border-radius: 0;
+  background: var(--surface1);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.session-detail .agent-rail-islands[data-grid] .agent-rail-section-body > * {
+  flex: none;
+}
+
+.session-detail .agent-rail-islands[data-grid] .agent-rail-section-body > :not(:last-child) {
+  border-bottom: 1px solid var(--surface3);
+}
+
+.session-detail .agent-rail-islands[data-grid] .agent-rail-section-body:has(> .agent-rail-fact) {
+  grid-template-columns: minmax(0, 1fr);
+}

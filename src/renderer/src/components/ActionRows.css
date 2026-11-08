@@ -1,0 +1,373 @@
+/* The proposed-action rows. Rendered inside .hud-container by both the HUD and
+ * the voice-route card, so this file styles the ROWS only -- the frame, the
+ * padding and the glass all come from the container it is dropped into.
+ *
+ * Its own file rather than appended to index.css: that file is 8k lines and
+ * edited by every agent at once, so a separate import keeps the diff readable
+ * (same reasoning as deck.css).
+ */
+
+.actrow-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space1);
+  min-width: 0;
+}
+
+/* The row is a flex rail so the confirm button takes real width after the label
+ * rather than floating over it -- the collision DESIGN.md rule 3 is about, and
+ * the one the voice-route rows had to be rebuilt to fix. */
+.actrow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space1);
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  transition:
+    background 0.1s,
+    border-color 0.1s,
+    opacity 0.1s;
+}
+
+.actrow:hover {
+  background: var(--surface2);
+}
+
+/* The pre-selected row. Tinted AND bordered, because on the warm glass a tint
+ * alone is one contrast step and reads as a hover, not as a decision already
+ * made on the user's behalf. */
+.actrow.is-selected {
+  border-color: var(--accent-border-subtle);
+  background: var(--accent-bg-subtle);
+}
+
+.actrow.is-busy {
+  opacity: 0.6;
+}
+
+.actrow-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space2);
+  flex: 1;
+  min-width: 0;
+  padding: var(--space1) var(--space-xxs) var(--space1) var(--space-xs);
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--on-surface);
+  font-size: var(--font-sm);
+  font-family: inherit;
+  text-align: left;
+}
+
+.actrow-main:disabled {
+  cursor: default;
+}
+
+.actrow-glyph {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+}
+
+.actrow.is-selected .actrow-glyph {
+  color: var(--accent-text);
+}
+
+.actrow-appicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: var(--radius-xs);
+}
+
+/* The title clips before the chips do: a truncated verb is unreadable, while a
+ * dropped chip still leaves the action itself legible. */
+.actrow-title {
+  flex-shrink: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.actrow.is-selected .actrow-title {
+  font-weight: 600;
+}
+
+.actrow-chips {
+  display: flex;
+  align-items: center;
+  gap: var(--space1);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.actrow-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space1);
+  flex-shrink: 0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 1px var(--space-xs);
+  border-radius: var(--radius-full);
+  background: var(--surface3);
+  color: var(--text-muted-dark);
+  font-size: var(--font-micro);
+  font-weight: 600;
+}
+
+.actrow-chip-icon {
+  flex-shrink: 0;
+  border-radius: 2px;
+}
+
+/* Tabular figures so a re-rank doesn't shift the rows sideways. */
+.actrow-pct {
+  flex-shrink: 0;
+  padding-right: var(--space-xs);
+  font-size: var(--font-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.actrow.is-selected .actrow-pct {
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+/* The one dominant element: the confirm on the pre-selected row. Filled rather
+ * than outlined, because every other control on this card is a text button and
+ * the eye has to land here first. */
+.actrow-confirm {
+  flex-shrink: 0;
+  margin-right: var(--space1);
+  padding: var(--space1) var(--space3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  color: var(--surface-solid);
+  font-family: inherit;
+  font-size: var(--font-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    filter 0.1s,
+    transform 0.06s;
+}
+
+.actrow-confirm:hover {
+  filter: brightness(1.06);
+}
+
+.actrow-confirm:active {
+  transform: scale(0.97);
+}
+
+.actrow-confirm:disabled {
+  cursor: default;
+  filter: none;
+  opacity: 0.7;
+}
+
+.actrow-more {
+  align-self: flex-start;
+  font-size: var(--font-xs);
+  color: var(--muted);
+  padding: var(--space1) var(--space-xs);
+  margin-top: 1px;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.actrow-more:hover {
+  color: var(--accent-text);
+  background: var(--accent-bg-subtle);
+}
+
+/* Fixed at 4 lines from the first step - a growing block moves the Stop button under the pointer. */
+.actions-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xxs);
+  box-sizing: content-box;
+  height: calc(4 * (var(--font-micro) * 1.4) + 6px);
+  padding: var(--space-xxs) var(--space-xs);
+  overflow-y: auto;
+}
+
+.actions-steps-total {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space1) var(--space-xs) 0;
+  font-size: var(--font-micro);
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.actions-steps-line {
+  display: flex;
+  flex-shrink: 0;
+  gap: var(--space2);
+  font-size: var(--font-micro);
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.actions-steps-line.is-pending {
+  color: var(--text);
+}
+
+.actions-steps-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions-steps-time {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .actions-steps-line {
+    animation: actions-step-in 180ms ease-out;
+  }
+
+  .actions-steps-line.is-pending {
+    animation:
+      actions-step-in 180ms ease-out,
+      actions-step-pulse 1.1s ease-in-out 180ms infinite;
+  }
+}
+
+@keyframes actions-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes actions-step-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* The one-line outcome that replaces the rows once something ran. */
+.actions-result {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space1) var(--space-xs);
+  font-size: var(--font-sm);
+  color: var(--on-surface);
+}
+
+.actions-result-glyph {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: var(--green);
+}
+
+.actions-result.is-fail .actions-result-glyph {
+  color: var(--magenta);
+}
+
+.actions-result-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actions-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+
+.actions-label {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--on-surface);
+  letter-spacing: 0.2px;
+}
+
+.actions-hint {
+  font-size: var(--font-xs);
+  color: var(--muted);
+}
+
+.actions-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* The action block on the voice card, set apart from the destination bands
+ * below it. The wrapper holds the component even when it renders nothing, so
+ * the rule hangs off :has() — a bare :empty never matches here. */
+.vroute-do:has(.actions-section, .actions-result, .vroute-do-skel) {
+  padding-bottom: var(--space2);
+  margin-bottom: var(--space-xxs);
+  border-bottom: 1px solid var(--border-dark);
+}
+
+.vroute-do-skel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+/* The HUD mount is always in the DOM but renders nothing until a ranking lands.
+ * .hud-container is a flex column with an 8px gap, so without this every HUD
+ * card pays that gap for an empty box. */
+.hud-actioncard:empty {
+  display: none;
+}
+
+.hud-actioncard {
+  position: relative;
+  z-index: 1;
+}
+
+/* Cmd-held row number. Same 16px box as the glyph so the row does not shift
+ * width when the badges appear and disappear under the pointer. */
+.actrow-num {
+  min-width: 16px;
+  height: 16px;
+  padding: 0 var(--space1);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: var(--font-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.actrow.is-selected .actrow-num {
+  background: var(--accent);
+  color: var(--bg);
+}

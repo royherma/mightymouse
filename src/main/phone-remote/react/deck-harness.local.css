@@ -1,0 +1,195 @@
+/* Harness chrome only. Nothing here may style a `.swipeDeck*` class: both
+   columns must render the SHIPPED rules, or the harness stops being evidence. */
+
+/* theme.css + renderer index.css pin overflow/touch-action on html/body so the
+   phone never scrolls. Fatal here: the page is two tall stages and a wheel
+   would do nothing. Same restore as relay-harness.local.css. */
+html,
+body {
+  overflow: auto;
+  height: auto;
+  touch-action: auto;
+  overscroll-behavior: auto;
+  user-select: auto;
+}
+
+/* Neutral chrome, deliberately NOT dark: the phone ships light by default, and a
+   dark page around a light surface reads as if the surface were the odd one. */
+body {
+  margin: 0;
+  background: #f6f7f9;
+  color: #1b2130;
+  font: 13px/1.5 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.hPage {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 20px 48px;
+}
+
+.hPageHead h1 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.hPageHead p {
+  margin: 0 0 14px;
+  color: #5a6478;
+  max-width: 70ch;
+}
+
+.hPageHead code {
+  background: #e8ebf0;
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+
+.hTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.hTab {
+  border: 1px solid #d3d8e0;
+  background: #fff;
+  color: #5a6478;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.hTab[data-active] {
+  background: #1b2130;
+  border-color: #1b2130;
+  color: #fff;
+}
+
+.hNote {
+  margin: 0;
+  color: #6b7488;
+  font-size: 12px;
+}
+
+.hSurfaceTabs {
+  margin-top: 12px;
+  border-top: 1px solid #dfe3ea;
+  padding-top: 12px;
+}
+
+/* Stacked, not side by side: the deck is a TALL surface, so two columns squeezed
+   each card to ~420px wide and cropped the stage. Full width per skin, one above
+   the other, is how the real thing is shaped. */
+.hColumns {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  margin-top: 18px;
+}
+
+.hColumnLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #6b7488;
+  margin-bottom: 6px;
+}
+
+.hMeasure {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: #1b2130;
+  color: #e8ebf0;
+  font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap;
+}
+
+.hMeasure[data-ok='1'] {
+  background: #14532d;
+}
+
+.hMeasure[data-ok='0'] {
+  background: #7f1d1d;
+}
+
+.hTune {
+  display: grid;
+  grid-template-columns: minmax(180px, 280px) minmax(180px, 280px);
+  gap: 6px 16px;
+  align-items: center;
+  margin: 0 0 10px;
+  max-width: 640px;
+}
+
+.hSlide {
+  display: grid;
+  grid-template-columns: 78px 1fr 48px;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+  color: #5a6478;
+}
+
+.hSlide input[type='range'] {
+  width: 100%;
+  margin: 0;
+}
+
+.hSlideVal {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: #1b2130;
+  text-align: right;
+}
+
+/* The deck is `position: fixed`; `transform` makes each stage its own
+   containing block, so a stage clips its own deck instead of the page. */
+/* Width is the point, not decoration: the phone column is a real iPhone width so
+   wrapping and truncation are judgeable, and the Mac column is the window it is
+   headed for. A full-page-wide stage centres a 420px card in dead space and
+   proves nothing about either. */
+.hDeckStage {
+  position: relative;
+  height: 620px;
+  transform: translateZ(0);
+  border: 1px solid #d3d8e0;
+  border-radius: 20px;
+  overflow: hidden;
+  /* theme.css sets touch-action:none on the card so iOS does not steal the
+     swipe. On this page that also eats the wheel, so the Mac column below
+     is unreachable. pan-y restores page scroll; pointer-drag still swipes. */
+  touch-action: pan-y;
+}
+
+.hDeckStage * {
+  touch-action: pan-y;
+}
+
+.hColumn[data-skin='phone'] .hDeckStage {
+  width: 393px;
+}
+
+.hColumn[data-skin='mac'] .hDeckStage {
+  width: 560px;
+}
+
+/* The deck renders its own full-VIEWPORT scrim when open. Two open decks meant
+   two page-sized scrims stacked over the document, swallowing every click. */
+.hDeckStage .swipeDeck {
+  position: absolute;
+}
+
+.hLog {
+  margin-top: 22px;
+}
+
+.hLog ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #5a6478;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+}

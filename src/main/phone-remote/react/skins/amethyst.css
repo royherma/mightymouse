@@ -1,0 +1,71 @@
+/* Skin: amethyst
+   ---------------------------------------------------------------------------
+   Split out of theme.css, 2026-07-24. Every rule here is scoped to
+   `.proRoot[data-skin='amethyst']`, so this file cannot affect any other skin --
+   that independence is what made it safe to lift out whole.
+
+   IMPORTED BY theme.css at the END of the file, so it still lands after the
+   base cascade and after the generic `.proRoot[data-skin]` rules it overrides.
+   Order is load-bearing: an @import moved above those generic rules silently
+   hands the win back to them.
+
+   NOT here: this skin's `html:has(.proRoot[data-skin='amethyst'])` canvas rule,
+   if it has one. Those paint the strip BELOW the visible viewport, which
+   requires a selector outside .proRoot, so they stay in theme.css beside the
+   other --pro-strip rules. */
+
+/* ── Amethyst -- the first image skin ────────────────────────────────────────
+   Ten generated pictures, one per surface, from a single 4:3 reference sheet
+   cut up by the mm-phone-skin pipeline. Nothing here sculpts: the tokens below
+   are the sculpt's FALLBACK colours, showing through only while an asset is
+   still loading over the LAN, and the ten --pro-*-img tokens are the skin.
+
+   Why the colour tokens exist at all if every surface is a picture: the pad and
+   deck assets are ~120KB each over a phone's LAN connection, and a deck with no
+   background-color flashes white before they land. These keep that flash in the
+   skin's own palette. Same reasoning as the cork pad's --pro-pad-bg above. */
+.proRoot[data-skin='amethyst'] {
+  --pro-bg: #2e2833;
+  --pro-blob: #241f28;
+  --pro-card: #3b3340;
+  --pro-card-border: #574a5e;
+  --pro-pad-bg: #6b5a78;
+  --pro-pad-border: #4a3d54;
+  --pro-pad-label: #e8dcf0;
+  --pro-key-bg: #8a6a52;
+  --pro-key-wall: #5f4738;
+  --pro-key-wall-deep: #3a2b22;
+  --pro-key-ink: #f0e2cc;
+  --pro-ink: #d8cce0;
+  --pro-ink-strong: #f4ecf8;
+  --pro-pill-bg: #4a4050;
+  --pro-accent: #a04a32;
+  --pro-accent-ink: #fff4ea;
+  --pro-mic: #4a7c4a;
+  --pro-r: 18px;
+  --pro-r-key: 7px;
+  --pro-key-travel: 4px;
+
+  --pro-deck-img: url('/amethyst/background-v2.webp');
+  --pro-pad-img: url('/amethyst/trackpad-v2.webp');
+  --pro-mic-img: url('/amethyst/mic-v2.webp');
+  --pro-key-esc-img: url('/amethyst/esc-v2.webp');
+  --pro-key-tab-img: url('/amethyst/tab-v2.webp');
+  --pro-key-enter-img: url('/amethyst/enter-v2.webp');
+  --pro-key-keyboard-img: url('/amethyst/keyboard-v2.webp');
+  --pro-icon-prev-img: url('/amethyst/prev-v2.webp');
+  --pro-icon-switcher-img: url('/amethyst/switcher-v2.webp');
+  --pro-icon-settings-img: url('/amethyst/settings-v2.webp');
+  --pro-mark-img: url('/amethyst/mark-v2.webp');
+  /* Set NEXT TO the mark asset, never derived from it: an <image> token has no
+     "is it set" test, so this flag is what tells the 🐭 to get out of the way.
+     A skin with no mark asset simply omits both and keeps the emoji. */
+  --pro-mark-emoji: hidden;
+
+  /* No --pro-pad-label-display override: this pad asset is bare linen with no
+     lettering baked in, so the CSS label is the only copy of the words and has
+     to stay. The token exists for the opposite case -- the previous asset had
+     "DRAG · TAP · SCROLL" painted in by the generator, and showing the label
+     over it printed the words twice. Which case a skin is in depends on its
+     picture, so this is a per-skin call, not a default. */
+}

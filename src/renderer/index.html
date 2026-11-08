@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>MightyMouse</title>
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+         connect-src allows the Nango frontend SDK to reach its API + open the
+         WebSocket (wss) it uses to deliver the OAuth result. Without these the
+         Connect popup is blocked and closes blank. Only content lands on-device;
+         the OAuth grant itself is custodied by Nango.
+         script-src adds 'wasm-unsafe-eval' so the experimental gaze feature can
+         compile MediaPipe's WebAssembly. This keyword permits WASM compilation
+         ONLY — it does NOT enable JS eval()/new Function() (that's the broader,
+         unsafe 'unsafe-eval'). WASM binaries are still served from 'self'.
+         media-src adds blob: and data: because ALL speech playback is
+         locally-generated audio handed to an <audio> element: the companion
+         wraps TTS bytes in a blob: URL, and the panel's read-aloud button uses a
+         data: URL. Both originate in our own main process (audio/tts.ts), never
+         off the network — without these two schemes the CSP silently blocks
+         every spoken reply, which is exactly what it did until 2026-07-26. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: media:; media-src 'self' media: blob: data:; connect-src 'self' media: https://api.nango.dev wss://api.nango.dev"
+    />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

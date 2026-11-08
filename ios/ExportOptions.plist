@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>method</key><string>app-store-connect</string>
+	<key>teamID</key><string>BZJ35GS989</string>
+	<!-- Manual, not automatic: automatic signing makes Xcode mint its own "iOS
+	     Team Store Provisioning Profile", which is generated without the
+	     Communication Notifications entitlement and fails the export. The four
+	     profiles below are the ones the Release configs already name. -->
+	<key>signingStyle</key><string>manual</string>
+	<key>signingCertificate</key><string>Apple Distribution</string>
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>com.mightymouse.ios</key><string>MM App App Store</string>
+		<key>com.mightymouse.ios.nse</key><string>MM NSE App Store</string>
+		<key>com.mightymouse.ios.share</key><string>MM Share App Store</string>
+		<key>com.mightymouse.ios.widgets</key><string>MM Widgets App Store</string>
+	</dict>
+	<!-- Symbols go up so TestFlight/Xcode Organizer can symbolicate crash reports. -->
+	<key>uploadSymbols</key><true/>
+	<!-- We upload with altool ourselves, so the export must not also submit. -->
+	<key>destination</key><string>export</string>
+</dict>
+</plist>

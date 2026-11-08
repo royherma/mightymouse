@@ -1,0 +1,851 @@
+[
+  {
+    "id": "store-cut-checkout-steps-and-fields",
+    "kind": "store",
+    "title": "Cut checkout steps and fields",
+    "benefit": "More shoppers finish paying instead of leaving at checkout.",
+    "moves": "Carts left behind",
+    "use": "win",
+    "area": "product",
+    "tags": [
+      "checkout",
+      "conversion",
+      "forms"
+    ],
+    "goal": "Find the checkout code (Shopify checkout/cart templates, Stripe Checkout session creation, or a custom checkout form). Count steps and form fields, and look for forced account creation, a hidden guest option, and shipping cost shown only at the last step. Propose one bounded change: make guest checkout the default, drop non-essential fields, and show shipping and tax estimates in the cart.",
+    "steps": [
+      "Guest checkout is the default",
+      "Checkout asks only for fields the order needs",
+      "Shipping and tax estimates show in the cart"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Baymard Institute",
+      "url": "https://baymard.com/lists/cart-abandonment-rate"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "store-speed-up-the-largest-product-image",
+    "kind": "store",
+    "title": "Speed up the largest product image",
+    "benefit": "Product pages load faster, so more visitors stay and buy.",
+    "moves": "Main image load time",
+    "use": "fast",
+    "area": "engineering",
+    "tags": [
+      "speed",
+      "images",
+      "core web vitals"
+    ],
+    "goal": "Find the product and collection page templates and the hero image tags. Check for missing width/height, no lazy loading below the fold, an eager first image without fetchpriority, and oversized uncompressed files. Propose responsive srcset, modern formats, fetchpriority=high on the first image, and lazy loading everywhere else.",
+    "steps": [
+      "The first product image loads with high priority",
+      "Images below the fold load lazily",
+      "Images have a set size and come in modern, right-sized files"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "web.dev (Google)",
+      "url": "https://web.dev/articles/vitals"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "store-add-product-structured-data",
+    "kind": "store",
+    "title": "Add product structured data",
+    "benefit": "Products show price and stock in search results, bringing more qualified visits.",
+    "moves": "Visitors who buy",
+    "use": "found",
+    "area": "marketing",
+    "tags": [
+      "seo",
+      "structured data",
+      "search"
+    ],
+    "goal": "Search product page templates for JSON-LD or microdata. If Product schema (name, image, price, currency, availability, reviews) is missing or hardcoded, add it generated from the same data that renders the page, and make sure price and availability match what is displayed. Do not add fields the store has no data for.",
+    "steps": [
+      "Product pages carry Product data for search engines",
+      "That data comes from the same source as the page",
+      "Price and stock in it match what the page shows"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Shopify",
+      "url": "https://www.shopify.com/blog/ecommerce-conversion-rate",
+      "sells": "an online store platform"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "saas-recover-failed-payments-automatically",
+    "kind": "saas",
+    "title": "Recover failed payments automatically",
+    "benefit": "Customers with an expired or declined card stay subscribed instead of silently churning.",
+    "moves": "Cancels from failed payments",
+    "use": "keep",
+    "area": "engineering",
+    "tags": [
+      "billing",
+      "churn",
+      "email"
+    ],
+    "goal": "Find the billing webhook handler (Stripe invoice.payment_failed, customer.subscription.updated). Check that failures are handled: the user is emailed with a link to update their card, access is kept for a grace period, and status is updated when payment later succeeds. Propose the missing handler branches and a billing-portal link in the failure email.",
+    "steps": [
+      "A failed payment emails the customer a link to update their card",
+      "Access stays on for a grace period",
+      "The account recovers by itself when the payment later succeeds"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Recurly",
+      "url": "https://recurly.com/research/churn-rate-benchmarks/",
+      "sells": "subscription billing software"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "saas-track-the-first-value-moment",
+    "kind": "saas",
+    "title": "Track the first-value moment",
+    "benefit": "You can see where new signups get stuck before they ever pay.",
+    "moves": "Signups who reach value",
+    "use": "numbers",
+    "area": "data",
+    "tags": [
+      "analytics",
+      "onboarding",
+      "activation"
+    ],
+    "goal": "Find the signup, onboarding and first-use code paths. List which of signup_completed, first_key_action and upgrade_clicked events are missing from the analytics layer (or add a minimal one if none exists). Propose the smallest set of named events with user id and timestamp, wired at those code points, without changing UI.",
+    "steps": [
+      "Finishing signup is recorded",
+      "The first key action is recorded",
+      "Clicking upgrade is recorded"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "PostHog",
+      "url": "https://posthog.com/product-engineers/activation-metrics",
+      "sells": "a product analytics tool"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "saas-add-a-one-step-cancel-save-offer",
+    "kind": "saas",
+    "title": "Add a one-step cancel save offer",
+    "benefit": "Some cancelling customers pause or downgrade instead of leaving.",
+    "moves": "Customers who cancel",
+    "use": "keep",
+    "area": "customers",
+    "tags": [
+      "churn",
+      "retention",
+      "billing"
+    ],
+    "goal": "Find the cancel flow in the settings/billing code. If cancel is immediate with no reason captured, propose a bounded change: ask for one reason, offer pause or a cheaper plan using existing billing API calls, and store the reason. Keep cancel reachable in two clicks.",
+    "steps": [
+      "Cancelling asks for one reason and saves it",
+      "A pause or a cheaper plan is offered before leaving",
+      "Cancel stays reachable in two clicks"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Recurly",
+      "url": "https://recurly.com/research/churn-rate-benchmarks/",
+      "sells": "subscription billing software"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "app-add-a-paywall-test",
+    "kind": "app",
+    "title": "Add a paywall test",
+    "benefit": "Find the paywall that turns more installs into paying users.",
+    "moves": "Downloads that pay",
+    "use": "win",
+    "area": "product",
+    "tags": [
+      "paywall",
+      "pricing",
+      "experiments"
+    ],
+    "goal": "Find the paywall screen and purchase code (react-native-purchases, StoreKit, RevenueCat offerings, Play Billing). Check whether paywall copy, price display and trial length are hardcoded. Propose moving them to remote offerings or a config flag so two variants can be shown, plus a paywall_viewed and purchase_started event.",
+    "steps": [
+      "Paywall text, price and trial length come from a setting, not from code",
+      "Two paywall versions can be shown",
+      "Seeing the paywall and starting a purchase are recorded"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "RevenueCat",
+      "url": "https://www.revenuecat.com/state-of-subscription-apps/",
+      "sells": "in-app subscription software"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "app-add-onboarding-step-tracking",
+    "kind": "app",
+    "title": "Add onboarding step tracking",
+    "benefit": "See exactly which screen new users quit on.",
+    "moves": "Users back next day",
+    "use": "numbers",
+    "area": "data",
+    "tags": [
+      "analytics",
+      "onboarding",
+      "retention"
+    ],
+    "goal": "Find the first-launch and onboarding flow. Check whether each step logs an event. Propose one event per step (viewed, completed, skipped) through the existing analytics SDK, and an app_first_open event. Do not change the screens.",
+    "steps": [
+      "The first open is recorded",
+      "Every onboarding step records viewed, completed or skipped",
+      "The screens themselves are unchanged"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Braze",
+      "url": "https://www.braze.com/resources/articles/mobile-app-retention-10-tip",
+      "sells": "a customer messaging tool"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "app-fix-crashes-in-startup-path",
+    "kind": "app",
+    "title": "Fix crashes in startup path",
+    "benefit": "Fewer users hit a crash on first open and uninstall.",
+    "moves": "Crash-free sessions",
+    "use": "fast",
+    "area": "engineering",
+    "tags": [
+      "crashes",
+      "stability",
+      "launch"
+    ],
+    "goal": "Search launch code and the first screens for force unwraps, unchecked optionals, unguarded null access, and unhandled promise rejections or permission-denied paths. Propose guarded versions and a crash reporter hook (Crashlytics/Sentry) if none is installed.",
+    "steps": [
+      "Launch code has no unguarded empty values",
+      "A denied permission or failed request at launch is handled",
+      "A crash reporter is installed"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Android Developers",
+      "url": "https://developer.android.com/topic/performance/issues/crash"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "marketplace-fix-empty-search-results",
+    "kind": "marketplace",
+    "title": "Fix empty search results",
+    "benefit": "Buyers who find nothing get suggestions instead of leaving.",
+    "moves": "Browsers who buy",
+    "use": "win",
+    "area": "product",
+    "tags": [
+      "search",
+      "conversion",
+      "discovery"
+    ],
+    "goal": "Find the search and listing-index code. Check what renders on zero results and whether filters can combine into an empty set. Propose a zero-results state with related categories, a broaden-filters button, and logging of zero-result queries.",
+    "steps": [
+      "An empty search shows related categories",
+      "One button widens the filters",
+      "Searches that find nothing are recorded"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Sharetribe",
+      "url": "https://www.sharetribe.com/academy/measure-your-success-key-marketplace-metrics/",
+      "sells": "marketplace software"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "marketplace-shorten-the-listing-creation-flow",
+    "kind": "marketplace",
+    "title": "Shorten the listing creation flow",
+    "benefit": "Sellers publish their first listing faster, so supply grows.",
+    "moves": "Sellers who list again",
+    "use": "keep",
+    "area": "product",
+    "tags": [
+      "forms",
+      "onboarding",
+      "supply"
+    ],
+    "goal": "Find the create-listing form. Count required fields, check image upload feedback and draft saving. Propose making optional fields optional, saving drafts automatically, and showing upload progress and errors.",
+    "steps": [
+      "Only the fields a listing needs are required",
+      "Drafts save by themselves",
+      "Picture uploads show progress and errors"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/4-principles-reduce-cognitive-load/"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "marketplace-add-message-reply-tracking",
+    "kind": "marketplace",
+    "title": "Add message-reply tracking",
+    "benefit": "You can see whether buyers get answers, the main cause of lost sales.",
+    "moves": "Browsers who buy",
+    "use": "numbers",
+    "area": "data",
+    "tags": [
+      "analytics",
+      "messaging",
+      "conversion"
+    ],
+    "goal": "Find the buyer-seller messaging and inquiry code. Check whether first-reply time is stored. Propose recording a timestamp per first reply, a reminder email to the seller after a set wait, and an event for inquiry_sent and inquiry_replied.",
+    "steps": [
+      "The time of each first reply is stored",
+      "The seller gets a reminder after a set wait",
+      "Sending a question and getting a reply are recorded"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Sharetribe",
+      "url": "https://www.sharetribe.com/academy/measure-your-success-key-marketplace-metrics/",
+      "sells": "marketplace software"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "extension-add-a-first-run-welcome-page",
+    "kind": "extension",
+    "title": "Add a first-run welcome page",
+    "benefit": "New installs learn what to do, so fewer uninstall on day one.",
+    "moves": "Installs that stay",
+    "use": "keep",
+    "area": "product",
+    "tags": [
+      "onboarding",
+      "retention",
+      "first run"
+    ],
+    "goal": "Find the background service worker and manifest. Check whether chrome.runtime.onInstalled opens an onboarding page or shows the toolbar pin hint. Propose a short welcome page with one task and a pinned-icon hint, plus an uninstall feedback URL via chrome.runtime.setUninstallURL.",
+    "steps": [
+      "Installing opens a short welcome page with one task",
+      "The page shows how to pin the icon",
+      "Uninstalling opens a feedback page"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Chrome for Developers",
+      "url": "https://developer.chrome.com/docs/extensions/reference/api/runtime"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "extension-cut-permissions-to-the-minimum",
+    "kind": "extension",
+    "title": "Cut permissions to the minimum",
+    "benefit": "Fewer scary install warnings and faster store review.",
+    "moves": "Installs that stay",
+    "use": "win",
+    "area": "engineering",
+    "tags": [
+      "permissions",
+      "trust",
+      "store review"
+    ],
+    "goal": "Read manifest.json permissions and host_permissions. Compare against the APIs and sites the code actually uses. Propose removing unused permissions, switching broad host access to activeTab or optional_permissions where possible.",
+    "steps": [
+      "Every permission asked for is used by the code",
+      "Broad site access is replaced by current-tab or optional access where possible"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Chrome for Developers",
+      "url": "https://developer.chrome.com/docs/extensions/develop/concepts/permission-warnings"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "extension-complete-the-store-listing-assets",
+    "kind": "extension",
+    "title": "Complete the store listing assets",
+    "benefit": "More people who see the listing click Install.",
+    "moves": "Store rating",
+    "use": "found",
+    "area": "marketing",
+    "tags": [
+      "store listing",
+      "screenshots",
+      "conversion"
+    ],
+    "goal": "Check store assets in the repo (screenshots, promo tiles, description). Chrome recommends five screenshots at 1280x800 and a summary of 132 characters or less. Propose generating missing sizes and rewriting the summary to state the benefit.",
+    "steps": [
+      "Five screenshots at 1280x800 exist",
+      "The summary is 132 characters or less",
+      "The summary says what the user gets"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Chrome for Developers",
+      "url": "https://developer.chrome.com/docs/webstore/best-listing"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "devtool-add-a-copy-paste-quickstart",
+    "kind": "devtool",
+    "title": "Add a copy-paste quickstart",
+    "benefit": "New developers get a working result in minutes.",
+    "moves": "Minutes to first success",
+    "use": "win",
+    "area": "product",
+    "tags": [
+      "docs",
+      "onboarding",
+      "quickstart"
+    ],
+    "goal": "Read the README and docs entry page. Check whether a developer can run a first call with one install command and a short snippet that works unmodified. Propose a quickstart section and a runnable examples/ file tested against the current API or CLI.",
+    "steps": [
+      "One install command and one short snippet give a first working call",
+      "The snippet works without changes",
+      "A runnable example file is tested against the current version"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Diátaxis",
+      "url": "https://diataxis.fr/tutorials/"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "devtool-publish-an-openapi-spec-and-collection",
+    "kind": "devtool",
+    "title": "Publish an OpenAPI spec and collection",
+    "benefit": "Developers can try every endpoint without writing code first.",
+    "moves": "Minutes to first success",
+    "use": "win",
+    "area": "engineering",
+    "tags": [
+      "api",
+      "docs",
+      "openapi"
+    ],
+    "goal": "Search for openapi.yaml/json, swagger, or route definitions. If no spec exists, propose generating one from the routes or types and a ready-to-import collection. If one exists, check it matches the live routes and has examples for each response.",
+    "steps": [
+      "An OpenAPI spec exists",
+      "It matches the live routes",
+      "Every response has an example and a ready-to-import collection exists"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "OpenAPI Initiative",
+      "url": "https://learn.openapis.org/"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "devtool-make-error-messages-actionable",
+    "kind": "devtool",
+    "title": "Make error messages actionable",
+    "benefit": "Developers fix their own mistakes instead of filing issues.",
+    "moves": "Docs blockers",
+    "use": "fast",
+    "area": "engineering",
+    "tags": [
+      "errors",
+      "developer experience",
+      "support"
+    ],
+    "goal": "Grep for thrown errors and HTTP error responses. Find generic messages like 'invalid request' or 'something went wrong'. Propose messages that name the bad field, the expected value and a docs link, with stable error codes.",
+    "steps": [
+      "Errors name the bad field and the expected value",
+      "Errors link to the docs",
+      "Every error has a stable code"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Google API Improvement Proposals",
+      "url": "https://google.aip.dev/193"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "content-add-article-structured-data-and-meta-tags",
+    "kind": "content",
+    "title": "Add article structured data and meta tags",
+    "benefit": "Pages look right in search and social, earning more clicks.",
+    "moves": "Pages that get search visits",
+    "use": "found",
+    "area": "marketing",
+    "tags": [
+      "seo",
+      "structured data",
+      "social sharing"
+    ],
+    "goal": "Scan page templates and the content pipeline for unique title, meta description, canonical URL, Open Graph tags, and Article JSON-LD with datePublished and author. Find posts missing a description or sharing a title. Propose template-level defaults and a build-time check that fails on duplicates.",
+    "steps": [
+      "Every page has its own title, description and canonical address",
+      "Share tags and Article data with date and author are set",
+      "The build fails on a duplicate title or missing description"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Ahrefs",
+      "url": "https://ahrefs.com/blog/search-traffic-study/",
+      "sells": "SEO software"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "content-add-sitemap-rss-and-internal-links",
+    "kind": "content",
+    "title": "Add sitemap, RSS and internal links",
+    "benefit": "Search engines find every post, and readers find the next one.",
+    "moves": "Pages that get search visits",
+    "use": "found",
+    "area": "marketing",
+    "tags": [
+      "seo",
+      "sitemap",
+      "internal links"
+    ],
+    "goal": "Check for a generated sitemap.xml, robots.txt and RSS feed (for example @astrojs/rss, next-sitemap). Find posts with zero inbound links from other posts. Propose generating the missing files and a related-posts block at the end of each article from shared tags.",
+    "steps": [
+      "A sitemap, robots file and RSS feed are generated",
+      "Every post is linked from at least one other post",
+      "Each article ends with related posts"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Ahrefs",
+      "url": "https://ahrefs.com/blog/search-traffic-study/",
+      "sells": "SEO software"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "content-reserve-space-for-images-and-ads",
+    "kind": "content",
+    "title": "Reserve space for images and ads",
+    "benefit": "Pages stop jumping, so readers do not leave mid-read.",
+    "moves": "Pages that shift while loading",
+    "use": "fast",
+    "area": "engineering",
+    "tags": [
+      "speed",
+      "layout shift",
+      "core web vitals"
+    ],
+    "goal": "Find img, iframe, embed and ad slot markup and web font loading. List elements without width/height or aspect-ratio and fonts without font-display. Propose adding explicit dimensions, reserved slot heights and font-display: swap with a preload for the main font.",
+    "steps": [
+      "Images, embeds and ad slots have a set size",
+      "Fonts show text right away while loading",
+      "The main font is preloaded"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "web.dev (Google)",
+      "url": "https://web.dev/articles/vitals"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "landing-shorten-the-signup-form",
+    "kind": "landing",
+    "title": "Shorten the signup form",
+    "benefit": "More visitors finish signing up.",
+    "moves": "Visitors who sign up",
+    "use": "win",
+    "area": "product",
+    "tags": [
+      "forms",
+      "conversion",
+      "signup"
+    ],
+    "goal": "Find the signup or waitlist form. Count required fields and check validation, autocomplete attributes, input types, and the submit-button label. Propose cutting to the fields actually used downstream (usually email only), adding autocomplete and correct input types, and a clear error message per field.",
+    "steps": [
+      "The form asks only for fields that get used",
+      "Inputs have the right type and autofill",
+      "Each field shows a clear error"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Unbounce",
+      "url": "https://unbounce.com/average-conversion-rates-landing-pages/",
+      "sells": "a landing page builder"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "landing-speed-up-the-hero-section",
+    "kind": "landing",
+    "title": "Speed up the hero section",
+    "benefit": "The page shows its main message sooner, so fewer visitors bounce.",
+    "moves": "Page load time",
+    "use": "fast",
+    "area": "engineering",
+    "tags": [
+      "speed",
+      "images",
+      "core web vitals"
+    ],
+    "goal": "Find the hero image or video, fonts and render-blocking scripts. Check for oversized files, autoplay video loaded eagerly, and third-party scripts in the head. Propose a compressed responsive hero image, preloading the LCP element, and deferring non-critical scripts.",
+    "steps": [
+      "The hero image is compressed and sized per screen",
+      "The main headline or image is preloaded",
+      "Scripts the first view does not need load later"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "web.dev (Google)",
+      "url": "https://web.dev/articles/vitals"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "landing-add-signup-conversion-tracking",
+    "kind": "landing",
+    "title": "Add signup conversion tracking",
+    "benefit": "You can see which page version actually brings signups.",
+    "moves": "Visitors who sign up",
+    "use": "numbers",
+    "area": "data",
+    "tags": [
+      "analytics",
+      "conversion",
+      "ads"
+    ],
+    "goal": "Find where the form submits and the thank-you state. Check for a signup event and UTM parameter capture. Propose one signup_submitted event, storing utm_source/utm_campaign with the lead, and a visible success message.",
+    "steps": [
+      "Submitting the form is recorded",
+      "The ad source and campaign are stored with the lead",
+      "A success message shows after signup"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Unbounce",
+      "url": "https://unbounce.com/average-conversion-rates-landing-pages/",
+      "sells": "a landing page builder"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "internal-add-loading-empty-and-error-states",
+    "kind": "internal",
+    "title": "Add loading, empty and error states",
+    "benefit": "Teammates stop wondering if the tool is broken.",
+    "moves": "Errors people hit",
+    "use": "fast",
+    "area": "product",
+    "tags": [
+      "loading states",
+      "errors",
+      "ux"
+    ],
+    "goal": "Find every data-fetching view. List ones that show a blank area or raw error while loading, empty, or failing. Propose a small shared component for the three states and apply it with retry on failure.",
+    "steps": [
+      "Every screen that loads data shows a loading state",
+      "Empty screens say they are empty",
+      "Failures show a message with a retry"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Nielsen Norman Group",
+      "url": "https://www.nngroup.com/articles/visibility-system-status/"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "internal-add-usage-logging",
+    "kind": "internal",
+    "title": "Add usage logging",
+    "benefit": "You learn which screens teammates actually use.",
+    "moves": "Weekly active teammates",
+    "use": "numbers",
+    "area": "data",
+    "tags": [
+      "analytics",
+      "privacy",
+      "usage"
+    ],
+    "goal": "Find the router or page entry points and auth layer. Check whether page views and key actions are recorded with the user id. Propose a minimal event log (page_view, action) to the existing database or analytics tool, with no personal data beyond user id.",
+    "steps": [
+      "Page views are recorded with the user id",
+      "Key actions are recorded",
+      "Nothing personal beyond the user id is stored"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Google Research",
+      "url": "https://research.google/pubs/measuring-the-user-experience-on-a-large-scale-user-centered-metrics-for-web-applications/"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  },
+  {
+    "id": "internal-cut-slow-queries-and-bulk-loads",
+    "kind": "internal",
+    "title": "Cut slow queries and bulk loads",
+    "benefit": "Screens open in seconds, saving every teammate time daily.",
+    "moves": "Time to finish the job",
+    "use": "fast",
+    "area": "engineering",
+    "tags": [
+      "speed",
+      "database",
+      "queries"
+    ],
+    "goal": "Find list and dashboard queries. Look for selects of all rows without limit, N+1 queries inside loops, and missing indexes on filtered columns. Propose pagination and one batched query for the worst offender, with before and after timing.",
+    "steps": [
+      "Lists load a page at a time",
+      "No query runs inside a loop",
+      "Filtered columns have an index"
+    ],
+    "publisher": {
+      "name": "MightyMouse",
+      "url": "https://getmightymouse.com"
+    },
+    "source": {
+      "name": "Use The Index, Luke",
+      "url": "https://use-the-index-luke.com/no-offset",
+      "sells": "a book and training on fast SQL"
+    },
+    "status": "live",
+    "added": "2026-10-01",
+    "checked": "2026-11-02"
+  }
+]

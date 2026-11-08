@@ -1,0 +1,285 @@
+/* Skin: cap
+   ---------------------------------------------------------------------------
+   Split out of theme.css, 2026-07-24. Every rule here is scoped to
+   `.proRoot[data-skin='cap']`, so this file cannot affect any other skin --
+   that independence is what made it safe to lift out whole.
+
+   IMPORTED BY theme.css at the END of the file, so it still lands after the
+   base cascade and after the generic `.proRoot[data-skin]` rules it overrides.
+   Order is load-bearing: an @import moved above those generic rules silently
+   hands the win back to them.
+
+   NOT here: this skin's `html:has(.proRoot[data-skin='cap'])` canvas rule,
+   if it has one. Those paint the strip BELOW the visible viewport, which
+   requires a selector outside .proRoot, so they stay in theme.css beside the
+   other --pro-strip rules. */
+
+/* ══ SKIN: CAP ═════════════════════════════════════════════════════════════
+   The first skin authored AFTER Pro II, and deliberately built the cheap way
+   (a third value on the layout union) to measure what a skin actually costs
+   before paying for the axis split in the skin-system PRD. Read the block
+   header there before generalising from this one.
+
+   Material story, one step from Pro II's milled steel + cork:
+     deck -- deep navy ENAMEL over steel. Glossy, not brushed: the grain runs
+             the other way (a broad specular sweep, not fine anisotropic
+             noise), because enamel pools light instead of scattering it.
+     pad  -- lighter steel-blue rubberised inlay, RECESSED (Pro I's story),
+             not the proud cork lip. Gives the deck's gloss something matte
+             to sit against, which is what stops navy-on-navy going flat.
+     key  -- off-white ABS, same sculpt as Pro II, warm-neutral rather than
+             Pro II's aged ivory: a cool deck needs caps that don't read
+             yellow next to it.
+   Accent is shield RED. The mic is a DEEPER oxblood, not the accent -- same
+   trap Pro II solved with clay-vs-orange: two red-family elements an inch
+   apart merge into one blob unless their values separate.
+
+   Everything below the token block is material the tokens genuinely cannot
+   reach -- the enamel sweep, the concentric star, the recessed pad edge.
+   That split is the finding this experiment exists to produce. */
+.proRoot[data-skin='cap'] {
+  /* Navy deep enough that white caps and red accents both separate from it.
+     Pulled off pure blue toward slate so the enamel reads as painted metal
+     rather than plastic. */
+  --pro-bg: #1b2a4a;
+  --pro-blob: #121d35;
+  --pro-card: #22355c;
+  --pro-card-border: #101a30;
+  /* Pad goes LIGHTER and cooler than the deck -- a recessed well catches less
+     light than the surface around it, so it has to start lighter to end up
+     reading as the same material in shadow. Desaturated hard: at full chroma
+     it competed with the accent for attention. */
+  --pro-pad-bg: #4a6183;
+  --pro-pad-border: #16233d;
+  /* Stamped label: lighter than the pad, unlike Pro II's darker-than-cork
+     stamp. On rubber over steel a pressed mark exposes lighter material;
+     on cork it exposes shadow. Opposite materials, opposite treatment. */
+  --pro-pad-label: #a9bcd6;
+  /* Caps: warm-neutral ABS. Walls carry the deck's blue in shadow rather than
+     Pro II's brown, since the bounce light on a cap's front wall comes from
+     the deck it's sitting on. */
+  --pro-key-wall: #9aa3b4;
+  --pro-key-wall-deep: #4d5567;
+  --pro-key-top: rgba(255, 255, 255, 0.42);
+  --pro-key-face-lip: 7px;
+  --pro-key-travel: 4px;
+  /* Recessed pad, so the sheen inverts Pro II's raised lip: shadow along the
+     top-left where the wall occludes, light along the bottom-right where the
+     floor turns back up. */
+  --pro-pad-sheen-a: rgba(8, 14, 28, 0.3);
+  --pro-pad-sheen-mid: rgba(8, 14, 28, 0);
+  --pro-pad-sheen-b: rgba(198, 216, 240, 0.16);
+  --pro-pad-inset: rgba(6, 11, 22, 0.42);
+  /* Shared pad-face sheen, retinted for enamel-over-steel: a cool white catch
+     top-left, deep navy shade bottom-right. Replaces Cap's old bespoke
+     ::before gradient -- same look, now the one shared rule. */
+  --pro-pad-face-hi: rgba(226, 238, 255, 0.1);
+  --pro-pad-face-lo: rgba(6, 12, 26, 0.18);
+  --pro-ink: #c3d0e4;
+  --pro-ink-strong: #eef3fa;
+  --pro-pill-bg: #33456c;
+  --pro-key-bg: #eceef2;
+  --pro-key-ink: #24314c;
+  /* Shield red. Kept a touch dark and slightly blue-shifted so it belongs to
+     the same light as the navy -- a pure primary red floats off a cool deck. */
+  --pro-accent: #b3282f;
+  --pro-accent-ink: #fff2f0;
+  /* Oxblood, distinctly deeper than the accent (see the header). The glow has
+     to move with it -- the default is keyed to Pro's amber and would ring a
+     red mic in orange. */
+  --pro-mic: #7c1c22;
+  --pro-mic-ink: #f6e3e2;
+  --pro-mic-glow: rgba(10, 16, 32, 0.5);
+  /* Lit chat/history in the shield's blue, not its red: three reds in one
+     header (Enter, mic, lit icon) collapsed into a single field. */
+  --pro-icon-lit: #2f5fa8;
+  --pro-icon-lit-ink: #eaf1fb;
+  /* Enamel takes a softer, wider shadow than milled steel, and its highlight
+     is a true specular white rather than steel's slightly warm sheen. */
+  --pro-neu-shadow: rgba(4, 9, 20, 0.5);
+  --pro-neu-highlight: rgba(255, 255, 255, 0.9);
+  --pro-r: 18px;
+  --pro-r-key: 7px;
+  /* Cool seams. The shared sculpt defaults these warm for Pro I/II; on navy a
+     warm gutter reads as an orange glow between every cap. */
+  --pro-key-seam: rgba(4, 9, 20, 0.55);
+  --pro-key-seam-soft: rgba(4, 9, 20, 0.42);
+}
+
+/* Enamel, not brushed metal. Pro II's fine anisotropic grain is replaced by a
+   broad diagonal specular sweep plus a much subtler isotropic noise: gloss
+   scatters light in a wide lobe, so the highlight is a soft band across the
+   deck rather than thousands of directional grooves. baseFrequency is a
+   single value (isotropic) and the octaves are low -- the noise here is
+   surface imperfection under the clearcoat, not a machining direction.
+   Same inline data-URI approach as Pro II's steelGrain, for the same reason:
+   a fetched asset that 404s over LAN leaves the deck flat. */
+.proRoot[data-skin='cap'] .proCard {
+  border: 1px solid var(--pro-card-border);
+  border-bottom: none;
+}
+.proRoot[data-skin='cap'] .proCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-color: var(--pro-card);
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cfilter%20id%3D%22enamelGrain%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.65%22%20numOctaves%3D%221%22%20seed%3D%229%22%20result%3D%22n%22/%3E%3CfeColorMatrix%20in%3D%22n%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200.32%200.32%200.32%200%20-0.28%22%20result%3D%22grain%22/%3E%3C/filter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23enamelGrain%29%22/%3E%3C/svg%3E"),
+    /* The specular sweep: a wide soft band running down-right, which is what
+       a gloss coat does with a single overhead source. */
+    linear-gradient(
+      148deg,
+      rgba(255, 255, 255, 0) 18%,
+      rgba(214, 232, 255, 0.16) 38%,
+      rgba(255, 255, 255, 0) 60%
+    ),
+    radial-gradient(ellipse 130% 110% at 32% 18%, rgba(0, 0, 0, 0) 40%, rgba(2, 6, 16, 0.42) 100%),
+    linear-gradient(168deg, rgba(255, 255, 255, 0.1) 0%, rgba(0, 0, 0, 0.16) 100%);
+  background-blend-mode: soft-light, screen, normal, normal;
+  z-index: 0;
+}
+
+/* The star. This is the finding the experiment was for: the mark is the skin's
+   identity and it is NOT reachable by any token -- it's geometry.
+
+   Drawn as a CSS polygon() rather than an image, deliberately. A five-pointed
+   star is exactly the case where a vector beats an asset: 10 points of pure
+   maths, no file to serve over LAN, no tiling seam, and it rescales with the
+   pad instead of resampling. Cork needed a photo because cork's identity is
+   irregular granule SHAPE; a star's identity is regular geometry. Opposite
+   materials, opposite technique -- that contrast is the general rule.
+
+   Sits at low opacity ON the pad texture: a full-strength star would fight the
+   cursor for attention every time the user looks down. It reads as stamped
+   into the rubber, not printed on it. */
+/* Cap's pad-face gradient now comes from the shared .proTouchpad::before via
+   --pro-pad-face-hi/lo above. Only the decorative star stays skin-specific. */
+.proRoot[data-skin='cap'] .proTouchpad::after {
+  content: '';
+  position: absolute;
+  /* Centred, sized off the SHORTER axis so it never crops in landscape. */
+  left: 50%;
+  top: 50%;
+  width: min(38%, 190px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background: rgba(233, 241, 252, 0.13);
+  /* Regular 5-pointed star, points up. Outer radius 50%, inner 19.1% (the
+     golden-ratio inradius that makes the arms read as straight lines). */
+  clip-path: polygon(
+    50% 0%,
+    61.8% 34.5%,
+    98.2% 34.5%,
+    68.8% 55.9%,
+    80.1% 90.5%,
+    50% 69.1%,
+    19.9% 90.5%,
+    31.2% 55.9%,
+    1.8% 34.5%,
+    38.2% 34.5%
+  );
+  /* Stamped, not printed: the drop-shadow gives the cut a lit lower edge, the
+     same trick .proHintTitle uses for its pressed label. */
+  filter: drop-shadow(0 1px 0 rgba(6, 12, 26, 0.4));
+  z-index: 0;
+}
+
+/* Recessed pad. Inverse of Pro II's raised lip: shadow on the inner top edge
+   where the wall occludes, light on the inner bottom where the floor turns up,
+   and NO outer drop shadow (a well casts nothing onto the deck). */
+.proRoot[data-skin='cap'] .proTouchpad {
+  box-shadow:
+    inset 0 2px 5px 0 rgba(4, 9, 20, 0.5),
+    inset 0 -1px 0 0 rgba(198, 216, 240, 0.22);
+}
+
+/* Pressed label in rubber exposes LIGHTER material, so the engraving
+   highlight flips to a dark bottom edge (Pro II's is a light one). */
+.proRoot[data-skin='cap'] .proHintTitle {
+  color: var(--pro-pad-label);
+  text-shadow: 0 1px 0 rgba(6, 12, 26, 0.45);
+}
+
+/* Geometry + seams inherited from the shared cap rules, which already read
+   --pro-key-* tokens. Only the two things Pro II hardcoded need restating:
+   the seam colour (Pro II's is warm brown; on navy it has to be cool or every
+   gutter glows orange) and the radius. */
+.proRoot[data-skin='cap'] .proKeyPill,
+.proRoot[data-skin='cap'] .settingsPanel .qualityBtn,
+.proRoot[data-skin='cap'] .settingsPanel .settingChoice {
+  border-radius: var(--pro-r-key);
+}
+.proRoot[data-skin='cap'] .proKeyPill {
+  min-width: 60px;
+  height: 48px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+.proRoot[data-skin='cap'] .proKeyPill.proKeyPillIcon {
+  width: 48px;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+.proRoot[data-skin='cap'] .proIconBtn {
+  border-radius: var(--pro-r-key);
+}
+.proRoot[data-skin='cap'] .proKeyGrid,
+.proRoot[data-skin='cap'] .proKeyRow,
+.proRoot[data-skin='cap'] .proIconRow {
+  gap: 1px;
+}
+.proRoot[data-skin='cap'] .proBlobs {
+  opacity: 0.4;
+}
+/* Cool seams (see above). Structure is a straight copy of the Pro II rule --
+   which is precisely the duplication the token promotion in phase 2 of the
+   PRD is meant to remove; noted here rather than fixed, so the experiment
+   reports the real cost. */
+.proRoot[data-skin='cap'] .proKeyPill,
+.proRoot[data-skin='cap'] .proIconBtn {
+  box-shadow:
+    3px 0 5px -1px rgba(4, 9, 20, 0.6),
+    0 4px 6px -1px rgba(4, 9, 20, 0.55),
+    0 calc(var(--pro-key-travel) + 2px) 4px -2px rgba(4, 9, 20, 0.65),
+    0 5px 10px -2px var(--pro-neu-shadow),
+    0 var(--pro-key-travel) 0 0 var(--pro-key-wall-deep),
+    inset 0 -1px 0 0 var(--pro-key-wall),
+    inset 0 1px 0 0 var(--pro-key-top);
+}
+
+/* Enter -- the shield-red accent cap. Token-driven exactly like Pro II's, so
+   the whole sculpt reshades; only the seam layers must be restated (this
+   selector re-declares box-shadow and would otherwise drop them). */
+.proRoot[data-skin='cap'] .proKeyPill[data-img='enter'] {
+  --pro-key-bg: var(--pro-accent);
+  --pro-key-wall: color-mix(in srgb, var(--pro-accent) 72%, #000);
+  --pro-key-wall-deep: color-mix(in srgb, var(--pro-accent) 55%, #000);
+  --pro-key-top: rgba(255, 255, 255, 0.3);
+  color: var(--pro-accent-ink);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
+  box-shadow:
+    3px 0 5px -1px rgba(4, 9, 20, 0.6),
+    0 4px 6px -1px rgba(4, 9, 20, 0.55),
+    0 calc(var(--pro-key-travel) + 2px) 4px -2px rgba(4, 9, 20, 0.65),
+    0 5px 10px -2px var(--pro-neu-shadow),
+    0 var(--pro-key-travel) 0 0 var(--pro-key-wall-deep),
+    inset 0 -1px 0 0 var(--pro-key-wall),
+    inset 0 1px 0 0 var(--pro-key-top);
+}
+
+/* Oxblood mic ball. Same sphere logic as Pro II (off-centre glint, terminator
+   bottom-right, contact shadow) with the plateau tints hand-paired to
+   --pro-mic, and a cool rim light picked up from the enamel deck around it. */
+.proRoot[data-skin='cap'] .proMicBtn {
+  color: #f4dcdc;
+  background: var(--pro-mic);
+  background-image:
+    radial-gradient(circle at 30% 20%, rgba(255, 226, 226, 0.45) 0%, rgba(255, 226, 226, 0) 14%),
+    radial-gradient(circle at 32% 25%, #a83039 0%, #8d2028 28%, rgba(141, 32, 40, 0) 58%),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 50%, rgba(34, 4, 8, 0.45) 100%),
+    radial-gradient(circle at 70% 85%, rgba(28, 3, 6, 0.62) 0%, rgba(28, 3, 6, 0) 55%);
+  background-blend-mode: normal, normal, normal, normal;
+}

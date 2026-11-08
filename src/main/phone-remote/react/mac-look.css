@@ -1,0 +1,459 @@
+.ai .macLook {
+  --ml-metal-hi: #4b4c50;
+  --ml-metal: #2f3033;
+  --ml-metal-lo: #1d1e20;
+  --ml-deck-top: #36373a;
+  --ml-deck-bottom: #2a2b2e;
+  --ml-well: #0c0c0d;
+  --ml-key: #1b1b1d;
+  --ml-key-text: #d9d9dc;
+  --ml-pad-top: #3a3b3e;
+  --ml-pad-bottom: #313235;
+  --ml-pad-edge: rgba(255, 255, 255, 0.07);
+  --ml-chin-text: #74747a;
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  padding: calc(env(safe-area-inset-top, 0px) + 8px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px);
+  background: radial-gradient(120% 70% at 50% 28%, #2b2b30 0%, #141416 58%, #08080a 100%);
+  color: #fff;
+  touch-action: none;
+  overflow: hidden;
+}
+.ai .macLook[data-frame='macbook-air'] {
+  --ml-metal-hi: #f1f2f4;
+  --ml-metal: #d2d4d7;
+  --ml-metal-lo: #a8aaae;
+  --ml-deck-top: #dfe1e4;
+  --ml-deck-bottom: #caccd0;
+  --ml-well: #b5b7bb;
+  --ml-pad-top: #dadcdf;
+  --ml-pad-bottom: #cfd1d4;
+  --ml-pad-edge: rgba(0, 0, 0, 0.08);
+  --ml-chin-text: #8e9095;
+}
+.ai .macLook[data-frame='desktop'] {
+  --ml-metal-hi: #eef0f2;
+  --ml-metal: #cfd1d5;
+  --ml-metal-lo: #9fa1a6;
+  --ml-well: #e6e7ea;
+  --ml-key: #fbfbfd;
+  --ml-key-text: #3a3a3d;
+  --ml-pad-top: #f4f4f6;
+  --ml-pad-bottom: #e2e3e6;
+  --ml-pad-edge: rgba(0, 0, 0, 0.08);
+}
+
+.ai .macLook .mlTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 40px;
+  margin-bottom: 14px;
+}
+.ai .macLook .mlTopRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.ai .macLook .mlSettings {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(28, 26, 24, 0.78);
+  color: #fff;
+}
+.ai .macLook .mlName {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 11px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai .macLook .mlDevice {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.ai .macLook .mlLid {
+  position: relative;
+  z-index: 1;
+  padding: 3px;
+  border-radius: 17px 17px 6px 6px;
+  background: linear-gradient(180deg, var(--ml-metal-hi), var(--ml-metal) 45%, var(--ml-metal-lo));
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
+}
+.ai .macLook .mlBezel {
+  position: relative;
+  padding: 7px 7px 0;
+  border-radius: 14px 14px 4px 4px;
+  background: #050506;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+.ai .macLook:not([data-notch]) .mlBezel {
+  padding: 15px 11px 0;
+}
+.ai .macLook .mlScreen {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+  aspect-ratio: 16 / 10;
+  border-radius: 7px 7px 0 0;
+  overflow: hidden;
+  background: #000;
+}
+.ai .macLook:not([data-notch]) .mlScreen {
+  border-radius: 2px;
+}
+.proRoot .ai .macLook .mlScreen > .proMirrorPane {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: auto !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden;
+}
+.proRoot .ai .macLook .mlScreen .mirrorVideo {
+  object-fit: contain;
+}
+.ai .macLook .mlScreen .mirrorShareControls {
+  display: none;
+}
+.ai .macLook .mlNotch {
+  position: absolute;
+  z-index: 1;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 17%;
+  height: 13px;
+  display: grid;
+  place-items: center;
+  border-radius: 0 0 7px 7px;
+  background: #050506;
+}
+.ai .macLook .mlCam {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a4366, #0e1018 70%);
+  box-shadow: 0 0 0 1px #15161a;
+}
+.ai .macLook .mlCamTop {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.ai .macLook .mlChin {
+  height: 17px;
+  display: grid;
+  place-items: center;
+  color: var(--ml-chin-text);
+  font-size: 8.5px;
+  letter-spacing: 0.03em;
+}
+
+.ai .macLook .mlHinge {
+  height: 8px;
+  margin: 0 3px;
+  border-radius: 0 0 3px 3px;
+  background: linear-gradient(180deg, #050506 0, var(--ml-metal-lo) 40%, var(--ml-metal) 100%);
+}
+
+.ai .macLook .mlBase {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 12px 14px;
+  border-radius: 4px 4px 24px 24px;
+  background: linear-gradient(180deg, var(--ml-deck-top), var(--ml-deck-bottom));
+  box-shadow:
+    0 24px 44px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+}
+.ai .macLook .mlBase::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20%;
+  height: 5px;
+  border-radius: 0 0 7px 7px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.08));
+}
+
+.ai .macLook .mlKeys {
+  padding: 6px;
+  border-radius: 10px;
+  background: var(--ml-well);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+.ai .macLook .mlKeys .vkRows {
+  gap: 4px;
+  margin: 0;
+}
+.ai .macLook .mlKeys .vkRow {
+  gap: 4px;
+}
+.ai .macLook .mlKeys .vkKey {
+  height: 32px;
+  border: 0;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 400;
+}
+.ai .macLook .mlKeys .vkKey:not(.flash, .active, .latched) {
+  background: var(--ml-key);
+  color: var(--ml-key-text);
+  box-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.ai .macLook .mlKeys .vkKeySpecial {
+  font-size: 9px;
+}
+.ai .macLook .mlKeys .vkRow:first-child .vkKey {
+  height: 21px;
+  font-size: 8px;
+}
+
+.ai .macLook .mlPadRow {
+  position: relative;
+  flex: 1;
+  min-height: 96px;
+  display: flex;
+  justify-content: center;
+}
+.ai .macLook .mlPad {
+  position: relative;
+  width: 64%;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--ml-pad-top), var(--ml-pad-bottom));
+  box-shadow:
+    inset 0 0 0 1px var(--ml-pad-edge),
+    inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+.ai .macLook .mlPad .aiScreenPadHint {
+  display: none;
+}
+.ai .macLook .mlPadRow .mlMic.proMicBtn {
+  all: unset;
+  position: absolute;
+  top: 50%;
+  right: calc(9% - 24px);
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.ai .macLook[data-frame='macbook-air'] .mlPadRow .mlMic.proMicBtn {
+  background: rgba(0, 0, 0, 0.1);
+  color: #2b2b2e;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+.ai .macLook .mlPadRow .mlMic.proMicBtn:is(.recording, .handsFreeHot) {
+  background: #ff3b30;
+  color: #fff;
+  box-shadow: none;
+  animation: mlMicPulse 1.1s ease-in-out infinite;
+}
+.ai .macLook .mlPadRow .mlMic.proMicBtn.handsFree:not(.handsFreeHot) {
+  background: #ff3b30;
+  color: #fff;
+  box-shadow: none;
+  animation: mlMicBreathe 2.6s ease-in-out infinite;
+}
+.ai .macLook .mlPadRow .mlMic.proMicBtn.handsFreeStarting {
+  opacity: 0.6;
+}
+@keyframes mlMicPulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(255, 59, 48, 0.55));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 59, 48, 0.95));
+  }
+}
+@keyframes mlMicBreathe {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(255, 59, 48, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 59, 48, 0.7));
+  }
+}
+
+.ai .macLook .mlRecHud {
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 30px;
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.ai .macLook .mlRecHud :is(.micSideBtn, .micWaveform) {
+  position: static;
+  left: auto;
+  bottom: auto;
+  transform: none;
+}
+.ai .macLook .mlRecHud .micSideBtn {
+  width: 50px;
+  height: 44px;
+  border-radius: 22px;
+  border: 0;
+  font-size: 12px;
+  font-weight: 600;
+}
+.ai .macLook .mlRecHud .micCancel {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.ai .macLook .mlRecHud .micStop {
+  background: #ff3b30;
+  color: #fff;
+}
+.ai .macLook .mlRecHud .micWaveform {
+  width: 72px;
+  height: 44px;
+}
+body:has(.macLook) :is(.toast, .micTranscribing) {
+  z-index: calc(var(--z-sheet-popover) + 10);
+}
+
+.ai .macLook[data-frame='desktop'] .mlLid {
+  padding: 4px;
+  border-radius: 13px;
+}
+.ai .macLook[data-frame='desktop'] .mlBezel {
+  padding: 10px;
+  border-radius: 10px;
+}
+.ai .macLook[data-frame='desktop'] .mlScreen {
+  border-radius: 2px;
+}
+.ai .macLook[data-frame='desktop'] .mlStand {
+  width: 24%;
+  height: 22px;
+  margin: 0 auto;
+  background: linear-gradient(90deg, var(--ml-metal-lo), var(--ml-metal-hi) 50%, var(--ml-metal-lo));
+  clip-path: polygon(14% 0, 86% 0, 100% 100%, 0 100%);
+}
+.ai .macLook[data-frame='desktop'] .mlBase {
+  padding: 16px 0 0;
+  gap: 14px;
+  background: none;
+  box-shadow: none;
+}
+.ai .macLook[data-frame='desktop'] .mlBase::before {
+  display: none;
+}
+.ai .macLook[data-frame='desktop'] .mlKeys {
+  padding: 7px;
+  border-radius: 12px;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.ai .macLook[data-frame='desktop'] .mlKeys .vkKey:not(.flash, .active, .latched) {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+}
+.ai .macLook[data-frame='desktop'] .mlPad {
+  width: 70%;
+  border-radius: 14px;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 1px var(--ml-pad-edge);
+}
+
+.ai .macLook[data-orient='landscape'] .mlTop {
+  margin-bottom: 8px;
+}
+.ai .macLook[data-orient='landscape'] .mlDevice {
+  max-width: none;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 14px;
+}
+.ai .macLook[data-orient='landscape'] .mlLid {
+  align-self: center;
+  height: 100%;
+  aspect-ratio: 16 / 11;
+  display: flex;
+}
+.ai .macLook[data-orient='landscape'] .mlBezel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.ai .macLook[data-orient='landscape'] .mlScreen {
+  flex: 1;
+  aspect-ratio: auto;
+}
+.ai .macLook[data-orient='landscape'] :is(.mlHinge, .mlStand) {
+  display: none;
+}
+.ai .macLook[data-orient='landscape'] .mlBase {
+  flex: 1;
+  min-width: 0;
+  border-radius: 18px;
+  padding: 10px;
+  gap: 8px;
+}
+.ai .macLook[data-orient='landscape'] .mlKeys .vkKey {
+  height: 22px;
+}
+.ai .macLook[data-orient='landscape'] .mlKeys .vkRow:first-child .vkKey {
+  height: 15px;
+}
+.ai .macLook[data-orient='landscape'] .mlPadRow {
+  min-height: 60px;
+}

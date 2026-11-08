@@ -1,0 +1,4 @@
+@config "./phone-kit.tailwind.config.js";
+@tailwind utilities;
+:where(body) [data-button-variant] { -webkit-tap-highlight-color: transparent; }
+:where(.ai) [data-button-variant='bare'] { font-weight: inherit; }

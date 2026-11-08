@@ -1,0 +1,570 @@
+/* Skin: proII
+   ---------------------------------------------------------------------------
+   Split out of theme.css, 2026-07-24. Every rule here is scoped to
+   `.proRoot[data-skin='proII']`, so this file cannot affect any other skin --
+   that independence is what made it safe to lift out whole.
+
+   IMPORTED BY theme.css at the END of the file, so it still lands after the
+   base cascade and after the generic `.proRoot[data-skin]` rules it overrides.
+   Order is load-bearing: an @import moved above those generic rules silently
+   hands the win back to them.
+
+   NOT here: this skin's `html:has(.proRoot[data-skin='proII'])` canvas rule,
+   if it has one. Those paint the strip BELOW the visible viewport, which
+   requires a selector outside .proRoot, so they stay in theme.css beside the
+   other --pro-strip rules. */
+
+/* ── Pro II ────────────────────────────────────────────────────────────────
+   Selected via data-skin (set from the 'proII' LAYOUT value) -- data-theme
+   stays strictly light/dark. Pro II shares the pro DOM: App.tsx renders
+   TouchpadLayout for both 'pro' and 'proII', so a pro<->proII switch never
+   unmounts the tree; the layout-keyed gesture/mic effects just re-bind to the
+   same nodes (the path classic<->pro already exercises). These tokens are
+   built over the LIGHT base, so TouchpadLayout pins data-theme='light' while
+   the skin is on -- until a Pro II dark variant exists.
+
+   Material story, one step further than Pro I's anodized-aluminum deck:
+     deck -- MILLED steel bezel, cool and slightly blue, with a brushed grain
+     pad  -- tan LEATHER inlay, the warmest thing on the device
+     key  -- thicker ABS caps with a deeper throw (travel 2px -> 4px)
+   The accent orange is unchanged from Pro I on purpose: it already matches
+   the reference, and holding one token still across themes is what keeps the
+   three from reading as three different products. */
+.proRoot[data-skin='proII'] {
+  /* Steel, not cream. Cooler than the deck it replaces so the warm leather
+     pad and the warm caps both separate from it instead of blending. */
+  --pro-bg: #8e9195;
+  --pro-blob: #6f7377;
+  --pro-card: #b9bcc0;
+  --pro-card-border: #7e8286;
+  /* Cork is PROUD of the deck, not recessed like Pro I's glass pad -- so it
+     goes warmer and lighter than the metal around it, and its edge treatment
+     (below) reads as a raised lip rather than an inset well. Lighter and less
+     saturated than the leather this replaced: cork's flecks supply the darker
+     tones, so the BASE has to sit light or the speckle has nothing to read
+     against and the whole pad muddies to flat orange (the shipped bug). */
+  --pro-pad-bg: #b37a4c;
+  --pro-pad-border: #8d6034;
+  /* Stamped label: darker than the cork, since a burned/stamped mark on cork
+     shows as a shadowed depression rather than an ink mark. */
+  --pro-pad-label: #5e3d1e;
+  /* Caps stay warm cream against the cool deck -- that temperature split is
+     most of what makes the reference load as two materials.
+
+     Walls pushed markedly DARKER and WARMER (2026-07-22). On the reference
+     the front wall of each cap is a big brown slab in shadow, nothing like a
+     slightly-grey version of the top face -- and a low-contrast wall is what
+     kept reading as "rounded rectangle with a border" rather than a solid
+     object with a lit top and a shaded front. Contrast between top face and
+     wall IS the thickness cue; there's no separate control for it. */
+  --pro-key-wall: #9e8b6c;
+  --pro-key-wall-deep: #5f4d36;
+  /* 0.92 -> 0.4: this hairline sits on the cap's OUTER top edge and was the
+     third white layer in the top-left glow (with the wall's white-mixed top
+     stop and the 0.95 chamfer rim). A faint catch-light is right; a white
+     line is not. */
+  --pro-key-top: rgba(255, 244, 222, 0.38);
+  /* Front-wall height. Separate from --pro-key-travel (how far a press
+     sinks): the reference caps show far more wall than they have travel, so
+     tying the two together caps how tall the key can look at the cost of an
+     absurd press. This is the ::before's bottom inset. */
+  --pro-key-face-lip: 7px;
+  /* The single biggest feel change: a 4px throw on the caps. */
+  --pro-key-travel: 4px;
+  /* Raised-lip edge: highlight along the top-left, shadow under the bottom-
+     right, which is the inverse of the recessed pad's sheen in Pro I. */
+  --pro-pad-sheen-a: rgba(255, 236, 208, 0.3);
+  --pro-pad-sheen-mid: rgba(255, 236, 208, 0);
+  --pro-pad-sheen-b: rgba(88, 54, 22, 0.16);
+  --pro-pad-inset: rgba(70, 42, 16, 0.3);
+  --pro-ink: #4c4f53;
+  --pro-ink-strong: #2c2e31;
+  --pro-pill-bg: #cdd0d3;
+  /* Warmer/creamier than the near-white it was: on the reference the caps are
+     clearly aged ivory ABS, and a cool white top face fights the warm brown
+     wall under it -- the two stop reading as one molded piece. */
+  --pro-key-bg: #e5d6bd;
+  --pro-key-ink: #6f4e34;
+  /* Muted rust, not bright orange (2026-07-22, matched against the reference
+     crop): the reference Enter is a fired-clay terracotta -- lower chroma,
+     darker -- and the previous #d4703a read as a saturated web-orange next to
+     it. Pro I keeps its own accent; this only regrades Pro II. */
+  --pro-accent: #b4603a;
+  --pro-accent-ink: #fff8f0;
+  /* The mic ball is NOT accent-colored on the reference: it's a distinctly
+     deeper clay-brown than Enter, which is what lets two orange-family
+     elements sit an inch apart without reading as one material. Own token so
+     the ball's whole shading stack (body, terminator, :active) regrades from
+     one place. */
+  --pro-mic: #ab5530;
+  /* Metal takes a harder, tighter shadow than the softer Pro I deck. */
+  --pro-neu-shadow: rgba(38, 42, 46, 0.34);
+  --pro-neu-highlight: rgba(255, 255, 255, 0.95);
+  /* Geometry: squarer bezel, thicker border, chunkier caps. */
+  --pro-r: 18px;
+  /* Molded-ABS corners (2026-07-22, third read of the reference): 3px was too
+     sharp -- at phone scale the reference caps show a clearly ROUNDED top
+     edge, and the near-square corners were part of why the top-left rim
+     highlights read as a painted white L rather than light wrapping a curved
+     corner. 7px keeps them far from soft-UI pill territory. */
+  --pro-r-key: 7px;
+}
+
+/* Brushed grain. The repeating-linear-gradient this replaced sold flat gray
+   on a real screen -- a periodic repeat at 3px reads as a print pattern, not
+   metal, because every stripe is IDENTICAL. Real brushed steel is directional
+   but irregular: the grooves run one way but never repeat.
+   feTurbulence with an anisotropic baseFrequency ("x y" pair, X >> Y) is the
+   standard trick for that -- squash the noise almost flat in Y and it reads
+   as fine grain running along X, but unlike a repeating-gradient it's true
+   noise, so no two grooves are identical and nothing tiles.
+   Inline SVG data-URI, not a fetched asset: this page is served over the LAN
+   to a phone that may already be reconnecting, and a 404/slow asset would
+   leave the deck flat -- the exact bug already fixed once on the cork pad.
+   Painted on ::before (not .proCard directly): .proCard has real children
+   (mirror pane, touchpad, controls) and a CSS `filter` on the parent would
+   filter them too -- see the cork pad comment below for the same trap. A
+   background-image on an empty inset:0 pseudo-element avoids it entirely. */
+.proRoot[data-skin='proII'] .proCard {
+  /* No BOTTOM border. The other three edges are true device edges, where the
+     hairline reads as the milled lip of the deck. The bottom one isn't an
+     edge at all -- it's where the fixed root stops short of the screen, with
+     this card's own ::before overlay continuing the deck below it. A 1px
+     #7e8286 line drawn across that point is a seam sitting exactly where the
+     overflow exists to ensure there isn't one. */
+  border: 1px solid var(--pro-card-border);
+  border-bottom: none;
+  isolation: isolate;
+}
+.proRoot[data-skin='proII'] .proCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* Do NOT try to bleed the bottom strip from here -- it cannot work, and it
+     looks like it should. Overflowing this past the card escapes the card,
+     but `html, body { height: 100% }` caps the BODY at the visible viewport
+     too (793), so the overflow just gets clipped one box further out. It
+     measured as card794/win793 with the strip still unpainted. The strip is
+     painted by `html:has(...)` near the debug block instead. */
+  pointer-events: none;
+  background-color: var(--pro-card);
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cfilter%20id%3D%22steelGrain%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%200.02%22%20numOctaves%3D%222%22%20seed%3D%222%22%20result%3D%22n%22/%3E%3CfeColorMatrix%20in%3D%22n%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200.6%200.6%200.6%200%20-0.55%22%20result%3D%22grain%22/%3E%3C/filter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23steelGrain%29%22/%3E%3C/svg%3E"),
+    /* Vignette: one warm key light up-left, ambient falling off toward the
+       corners. This is the scene-level cue the reference has and a flat,
+       evenly-lit deck doesn't -- without it every individually-correct cap
+       still reads as UI, because nothing ties them to a single light. */
+    radial-gradient(ellipse 130% 110% at 32% 18%, rgba(0, 0, 0, 0) 42%, rgba(24, 20, 14, 0.2) 100%),
+    linear-gradient(168deg, rgba(255, 255, 255, 0.16) 0%, rgba(0, 0, 0, 0.1) 100%);
+  /* Grain layer is greyscale alpha-only noise -- soft-light lets it darken
+     and lighten the steel tone per-pixel (real brushing) instead of sitting
+     as a flat gray wash on top of it. */
+  background-blend-mode: soft-light, normal, normal;
+  z-index: 0;
+}
+
+/* CORK, and it's a PHOTO now -- worth recording why, because three
+   procedural attempts failed here in a row and the next person will be
+   tempted to try a fourth.
+
+   What each attempt taught:
+     1. Tiled radial-gradients -- read as a regular dot grid. Every fleck was
+        the same size, and a grid stays a grid however long its period.
+     2. One feTurbulence layer -- failed the SAME way at a different
+        frequency. A single turbulence field has one characteristic fleck
+        size, so it still resolved to even pepper on a real phone.
+     3. Four feTurbulence layers at different scales -- this finally got the
+        SCALE distribution right (sparse voids + granules + fine pepper +
+        tonal mottle) and looked like cork in a screenshot. It still wasn't
+        cork, because cork's granules have distinctive SHAPES: angular,
+        fractured, dark-rimmed, with flat cleaved faces. Turbulence produces
+        rounded blobs at every scale. No amount of retuning fixes shape.
+
+   Hence a real photograph. The lesson generalizes: procedural noise can
+   match a material's frequency content, but not its structure -- when a
+   material's identity lives in the shape of its features rather than their
+   distribution, use a photo.
+
+   The generator for attempt 3 is kept at cork-texture.gen.py, since the
+   layered-threshold technique is genuinely useful for materials whose
+   identity IS distribution (sandstone, concrete, static). It is not dead
+   code to delete on sight; it's a reference implementation. */
+/* NO `position: relative` here, deliberately. The base .proTouchpad rule is
+   `position: absolute` with top/left/right/bottom offsets that SIZE it against
+   the card; overriding to relative turns those offsets into a shift of a
+   static-flow box, so the pad lands at the wrong size and position -- and
+   useNotchPath plus App.tsx's gesture math both measure this rect, so cursor
+   tracking and the notch cutout break with it. The ::before below only needs
+   a positioning context, and `absolute` already is one. */
+.proRoot[data-skin='proII'] .proTouchpad {
+  background-color: var(--pro-pad-bg);
+  isolation: isolate;
+}
+.proRoot[data-skin='proII'] .proTouchpad::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Real cork photograph, tiled. Replaces four generated feTurbulence layers:
+     procedural noise can reproduce cork's SCALE distribution but not its
+     actual granule SHAPES (angular, fractured, with dark rims), which is the
+     last thing that kept it reading as "textured surface" rather than cork.
+
+     The tile is pre-processed to wrap seamlessly -- offset-and-heal with a
+     narrow feather, verified by measuring the wrap-edge pixel delta against
+     the image's own neighbour delta (16.7 vs 14.7, i.e. the seam is quieter
+     than the grain that hides it). Do NOT swap in a raw photo without
+     redoing that step; an unhealed tile shows hard cross seams on the pad.
+
+     102KB webp, served from the same LAN origin as the page -- unlike the
+     steel grain's data-URI this is big enough that inlining it would bloat
+     the CSS, and it degrades gracefully: --pro-pad-bg shows through as flat
+     tan if the asset is slow, rather than leaving the pad empty. */
+  background-image:
+    radial-gradient(ellipse 70% 55% at 32% 24%, rgba(255, 226, 186, 0.16) 0%, transparent 72%),
+    linear-gradient(158deg, rgba(255, 240, 214, 0.1) 0%, rgba(92, 54, 20, 0.14) 100%),
+    url('/cork.webp');
+  background-size:
+    100% 100%,
+    100% 100%,
+    280px 280px;
+  background-repeat: no-repeat, no-repeat, repeat;
+  z-index: 0;
+}
+/* Raised lip: light along the top edge, shadow under the bottom. Sits on the
+   pad element itself (not the texture pseudo) since it's a shape-level cue,
+   independent of what's painted inside. */
+.proRoot[data-skin='proII'] .proTouchpad {
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 240, 214, 0.4),
+    inset 0 -2px 4px 0 rgba(86, 52, 20, 0.24),
+    0 2px 5px -1px rgba(38, 42, 46, 0.3);
+}
+
+/* Stamped, not printed: a light bottom edge under dark text is what sells a
+   depression in leather. */
+.proRoot[data-skin='proII'] .proHintTitle {
+  color: var(--pro-pad-label);
+  text-shadow: 0 1px 0 rgba(255, 233, 200, 0.42);
+}
+
+/* Squarer caps than Pro I's 13px, matching the reference's flatter keycaps.
+   The shadow stack itself is inherited -- it already reads --pro-key-travel
+   and --pro-key-wall, both retuned above, so the deeper throw comes for free
+   and only the radius needs saying. */
+.proRoot[data-skin='proII'] .proKeyPill,
+.proRoot[data-skin='proII'] .settingsPanel .qualityBtn,
+.proRoot[data-skin='proII'] .settingsPanel .settingChoice {
+  border-radius: var(--pro-r-key);
+}
+
+/* Real-keycap proportions (2026-07-22, Roy): the pills were reading as squat
+   app buttons. Wider text caps + a touch taller, and the icon pill keeps
+   square at the same height. Widths stay inside --pro-col: worst row is the
+   icon row at mic 76 + 12 margin + 3x44 caps + 2px gaps = 222 < 260. */
+.proRoot[data-skin='proII'] .proKeyPill {
+  /* content-box: totals are min-width + 48px padding = ~108px per text cap,
+     two caps + 1px gap = 217px, inside the ~223px the cell's padding leaves. */
+  min-width: 60px;
+  height: 48px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+.proRoot[data-skin='proII'] .proKeyPill.proKeyPillIcon {
+  width: 48px;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* The deck is a light metal, so Pro I's dark blob wash muddies it. Cut the
+   opacity and let it read as a soft sheen across the bezel instead. */
+.proRoot[data-skin='proII'] .proBlobs {
+  opacity: 0.22;
+}
+
+/* ── Zero-gap keyboard block ───────────────────────────────────────────────
+   The reference reads as ONE milled keyboard, not scattered buttons, and the
+   10px/10px/8px gutters were the single biggest tell that it wasn't. Caps
+   butt directly together and the only thing separating them is each cap's
+   own side wall -- which is exactly how a real keyboard looks.
+
+   Gaps go to 1px rather than a true 0: at 0 two adjacent walls collapse into
+   one 2px-thick dark line that reads as a drawn border, while 1px keeps a
+   hairline of deck visible between caps, which is what the reference shows.
+
+   The MIC is deliberately exempt (see the margin below): Roy's call -- it
+   stays round, bigger, and visibly detached from the block, the way the
+   reference's rubber button sits apart from the keycaps. */
+.proRoot[data-skin='proII'] .proKeyGrid,
+.proRoot[data-skin='proII'] .proKeyRow {
+  gap: 1px;
+}
+.proRoot[data-skin='proII'] .proIconRow {
+  gap: 1px;
+}
+/* Caps cast onto their NEIGHBOURS, not just onto the deck. With a 1px gutter
+   there's no room for a normal drop shadow, so each cap paints a hard, tight
+   shadow to its right and below -- which is what the reference's dark seams
+   between adjacent caps actually are. Without this the block reads as one
+   flat sheet with hairlines drawn on it rather than separate keys sitting
+   side by side. Pushed noticeably darker/wider than the first pass (0.34
+   alpha, 3px spread) -- at the old 1px gutter a thin shadow reads as a hairline
+   OUTLINE, not a well the cap sits in; only a genuinely dark, wider-spread
+   seam reads as depth between two separate objects.
+
+   Layer order matters: the two seam layers come FIRST so they sit under the
+   cap's own wall/sheen layers, otherwise the wall paints over the seam and
+   the effect vanishes. */
+.proRoot[data-skin='proII'] .proKeyPill,
+.proRoot[data-skin='proII'] .proIconBtn {
+  box-shadow:
+    3px 0 5px -1px rgba(30, 20, 10, 0.68),
+    0 4px 6px -1px rgba(30, 20, 10, 0.62),
+    /* Contact shadow ON THE DECK. Tight, dark, directly beneath the cap --
+       this is what makes it read as an object RESTING on the surface rather
+       than a shape drawn into it. Distinct from the diffuse --pro-neu-shadow
+       below it, which does the soft ambient occlusion; a soft shadow alone
+       always reads as "floating", it needs a hard contact edge under it. */
+    0 calc(var(--pro-key-travel) + 2px) 4px -2px rgba(30, 20, 10, 0.72),
+    0 5px 10px -2px var(--pro-neu-shadow),
+    0 var(--pro-key-travel) 0 0 var(--pro-key-wall-deep),
+    inset 0 -1px 0 0 var(--pro-key-wall),
+    inset 0 1px 0 0 var(--pro-key-top);
+}
+
+/* ── The key block sits in a milled WELL ───────────────────────────────────
+   On the reference the whole cluster is recessed into the deck: there's a
+   dark cut line along the top and left of the block where the deck drops
+   away, and a matching light lip on the far side where the cut edge catches
+   the light. Without it the caps read as glued ONTO a flat sheet -- which
+   was the last structural difference left after the caps themselves got
+   sculpted.
+
+   Painted on a ::before rather than the container's own box-shadow: .proKeyGrid
+   is a flex container whose rows the caps live in, and a shadow on it would
+   sit UNDER the caps (same stacking trap the cap faces hit). An inset:0
+   pseudo-element bled slightly outward with a negative inset puts the cut
+   line just outside the block, which is where the deck actually is.
+
+   pointer-events:none throughout -- this is decoration sitting over the
+   region App.tsx measures for gestures, and a hit-testable overlay there
+   would eat presses meant for the caps. */
+.proRoot[data-skin='proII'] .proKeyGrid,
+.proRoot[data-skin='proII'] .proIconRow {
+  position: relative;
+}
+/* (Removed 2026-07-22.) A tighter well used to sit around the key grid alone;
+   the whole-cluster depression above replaced it -- both at once drew a
+   double indent (verified in the harness). */
+
+/* The one gap that stays: the round mic detaches from the square block.
+   A BALL, not a disc. Three things separate a sphere from a flat circle:
+     1. the highlight is a small off-centre ellipse up and to the LEFT, and
+        it falls off fast -- a big soft centred one reads as a dome at best
+     2. a dark terminator on the far side (bottom-right), where the surface
+        curves away from the light
+     3. a tight contact shadow ON THE DECK directly beneath it, which is what
+        makes it look like it's RESTING on the surface rather than drawn into
+        it. That's the layer the previous pass was missing entirely. */
+
+.proRoot[data-skin='proII'] .proMicBtn {
+  width: 76px;
+  height: 76px;
+  /* The one gap that stays -- see the comment above. SIZE only: which side it
+     sits on is handled once by the shared .proIconRow .proMicBtn rule in
+     theme.css, which flips it wherever the row is reversed. */
+  --pro-mic-seam: 12px;
+  /* Contains the -1 socket ring, same reason as the caps: without a stacking
+     context here the ring drops behind the card and disappears. */
+  position: relative;
+  isolation: isolate;
+  /* Glyph is ENGRAVED dark brown, not printed white. On the reference ball the
+     mark reads as cut into the rubber -- a white glyph floats on top of the
+     sphere and flattens it, because pure white competes with the highlight
+     that's doing the round-ness work. The lucide icon inherits currentColor,
+     so this one line re-inks it. */
+  color: #451f09;
+  /* --pro-mic, NOT --pro-accent: on the reference the ball is a deeper
+     clay-brown than the Enter cap -- see the token's comment. */
+  background: var(--pro-mic);
+  /* R6 (2026-07-22, picked from the harness variant gallery): matte grainy
+     clay. Fine noise grain blended soft-light, a small hot glint atop a broad
+     soft-lit plateau upper-left, the body rolling into deep rust at the
+     edges/bottom-right. No bezel ring -- the seat is all shadow, in the
+     box-shadow below. Plateau tints are hand-paired with --pro-mic. */
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cfilter%20id%3D%22micGrain%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.8%22%20numOctaves%3D%222%22%20seed%3D%225%22/%3E%3CfeColorMatrix%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200.5%200.5%200.5%200%20-0.42%22/%3E%3C/filter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23micGrain%29%22/%3E%3C/svg%3E"),
+    radial-gradient(circle at 30% 20%, rgba(255, 225, 200, 0.5) 0%, rgba(255, 225, 200, 0) 14%),
+    radial-gradient(circle at 32% 25%, #d77e46 0%, #c06336 28%, rgba(192, 99, 54, 0) 58%),
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 50%, rgba(52, 18, 4, 0.45) 100%),
+    radial-gradient(circle at 70% 85%, rgba(44, 13, 2, 0.6) 0%, rgba(44, 13, 2, 0) 55%);
+  background-blend-mode: soft-light, normal, normal, normal, normal;
+  box-shadow:
+    0 0 0 1px rgba(28, 14, 6, 0.45),
+    0 6px 8px -4px rgba(22, 10, 3, 0.6),
+    0 2px 3px -1px rgba(22, 10, 3, 0.42),
+    inset 0 -2px 4px 0 rgba(36, 12, 2, 0.32);
+}
+/* Recording flips the ball to red, and the engraved brown glyph turns muddy
+   on it -- brown on red has almost no separation. Back to a light ink for
+   this state only, and drop the sphere shading so the pulse animation reads
+   as the dominant signal. */
+.proRoot[data-skin='proII'] .proMicBtn.recording {
+  color: #fff2ec;
+  background-image: radial-gradient(
+    circle at 32% 26%,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0) 46%
+  );
+}
+.proRoot[data-skin='proII'] .proMicBtn:active {
+  /* Ball presses INTO the deck: it sinks, the contact shadow tightens right
+     up under it, and the rim light dims as it goes below the surface. */
+  transform: translateY(4px);
+  box-shadow:
+    0 3px 5px -3px rgba(38, 28, 16, 0.6),
+    inset 0 3px 8px 0 color-mix(in srgb, var(--pro-mic) 44%, #000),
+    inset -2px -3px 8px -2px rgba(70, 30, 6, 0.4);
+}
+/* Engraved glyph: a warm light edge below the dark strokes, same trick as the
+   caps' text-shadow but via filter since this is an SVG. */
+.proRoot[data-skin='proII'] .proMicBtn svg {
+  filter: drop-shadow(0 1px 0 rgba(255, 190, 150, 0.28));
+}
+/* The base paint now carries 5 blend-mode entries; recording swaps in a
+   single-layer image, which would otherwise inherit soft-light for its one
+   layer and mute the red. */
+.proRoot[data-skin='proII'] .proMicBtn.recording {
+  background-blend-mode: normal;
+}
+/* (Removed 2026-07-26.) A [data-hand='left'] copy of the seam flip used to sit
+   here, restating margin-right/left by hand. The shared rule in theme.css now
+   flips the seam from --pro-seam-flip at every reversal -- left-hand mode AND
+   the mirror split's secondary cluster, which this copy never covered. */
+
+/* ── Per-key colors ────────────────────────────────────────────────────────
+   The reference does NOT use one uniform cap color -- Enter is orange, the
+   app-grid cap is tan, settings is espresso, and the rest are cream. That
+   variation is most of what makes it read as a real keyboard rather than a
+   UI. Addressed by the `data-img` identity every control already carries in
+   TouchpadControls.tsx, so a cap keeps its colour wherever it sits.
+
+   This was :nth-child until 2026-07-26. Landscape split deals the icons into
+   two clusters, so the gear moved from slot 4 to slot 3, lost its espresso,
+   and a cluster's 4th button inherited it -- the deck read as a different
+   skin in landscape. Position is not identity; do not go back. */
+
+/* Enter -- the accent cap. */
+.proRoot[data-skin='proII'] .proKeyPill[data-img='enter'] {
+  /* Colour goes through the TOKENS, not a direct background. Since the sculpt
+     rewrite the base element paints the side WALL and ::before paints the top
+     face -- so a `background: orange` here would have coloured Enter's wall
+     and left its top face cream, i.e. an orange-rimmed white key. Setting the
+     tokens instead reshades the whole sculpt (face, dish, chamfer, wall,
+     travel) from one place, exactly as the app-grid cap already did. */
+  --pro-key-bg: var(--pro-accent);
+  --pro-key-wall: color-mix(in srgb, var(--pro-accent) 72%, #000);
+  --pro-key-wall-deep: color-mix(in srgb, var(--pro-accent) 55%, #000);
+  --pro-key-top: rgba(255, 255, 255, 0.3);
+  color: var(--pro-accent-ink);
+  /* Dark ink on an orange cap needs the engraving highlight dropped -- a white
+     shadow under light text reads as a halo, not a cut edge. */
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.18);
+  /* Repeats the two seam layers from the shared cap rule above: this selector
+     is more specific AND re-declares box-shadow, so omitting them here would
+     silently drop Enter's seams while every other cap kept theirs. Values
+     must stay in lockstep with the shared rule's seam layers (darker/wider,
+     0.5-0.55 alpha, 3-4px spread) -- this cap fell out of sync with the old
+     thin 0.34-alpha/3px pass and was the one cap still reading as a flat
+     hairline outline instead of a well. */
+  box-shadow:
+    3px 0 5px -1px rgba(30, 20, 10, 0.68),
+    0 4px 6px -1px rgba(30, 20, 10, 0.62),
+    0 calc(var(--pro-key-travel) + 2px) 4px -2px rgba(30, 20, 10, 0.72),
+    0 5px 10px -2px var(--pro-neu-shadow),
+    0 var(--pro-key-travel) 0 0 var(--pro-key-wall-deep),
+    inset 0 -1px 0 0 var(--pro-key-wall),
+    inset 0 1px 0 0 var(--pro-key-top);
+}
+
+/* App-grid icon -- the COOL GRAY cap. Re-read off the close-up reference:
+   this one is a cold silver-gray, not the warm tan of a first pass. It's the
+   only cool-toned cap on the deck and that contrast is deliberate. */
+.proRoot[data-skin='proII'] .proIconBtn[data-img='switcher'] {
+  --pro-key-bg: #d3d5d6;
+  --pro-key-wall: #9a9ea1;
+  --pro-key-wall-deep: #75797c;
+  color: #3a3d40;
+}
+/* Metal top face, not gray plastic. What separates the two is gradient
+   HARDNESS: plastic shades smoothly (the shared dish), metal shows distinct
+   bands where the milled face catches the light. So this cap swaps the soft
+   dish for a stepped diagonal ramp with a hot band near the top-left. The
+   geometry (inset, radius, z-index) is inherited from the shared rule. */
+.proRoot[data-skin='proII'] .proIconBtn[data-img='switcher']::before {
+  background-image: linear-gradient(
+    150deg,
+    #e9ebed 0%,
+    #dfe2e4 18%,
+    #c2c5c7 34%,
+    #d2d5d7 52%,
+    #aeb2b5 78%,
+    #bcbfc2 100%
+  );
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 0 rgba(90, 95, 99, 0.8),
+    0 1px 1px 0 rgba(60, 60, 65, 0.3);
+}
+
+/* Settings -- the ESPRESSO cap. Was a smoked translucent tint; re-read of the
+   reference crop (2026-07-22, Roy's call) says opaque: a dark roasted-brown
+   cap with a coarse, sparkly grain across the top face, like bead-blasted
+   dark resin. Tokens go opaque so the shared sculpt (dish, keylight, chamfer,
+   wall) reshades it exactly like its neighbours. */
+.proRoot[data-skin='proII'] .proIconBtn[data-img='settings'] {
+  --pro-key-bg: #46301c;
+  --pro-key-wall: #241608;
+  --pro-key-wall-deep: #140b04;
+  --pro-key-top: rgba(255, 236, 208, 0.16);
+  color: #ecdcc2;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+/* Grain on the top face. Same feTurbulence-as-data-URI trick as the deck's
+   brushed steel, but isotropic and coarser -- flecks, not grooves. soft-light
+   lets the noise lighten AND darken the espresso per-pixel, which is what
+   reads as surface texture rather than a gray film. The dish + keylight
+   layers are re-declared verbatim from the shared ::before rule (this
+   override replaces background-image wholesale -- keep them in lockstep).
+   The chamfer box-shadow needs a light-on-dark retune: the shared rule's
+   0.95-white top rim reads as a glare line on a near-black cap. */
+.proRoot[data-skin='proII'] .proIconBtn[data-img='settings']::before {
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cfilter%20id%3D%22capGrain%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.55%22%20numOctaves%3D%223%22%20seed%3D%227%22%20result%3D%22n%22/%3E%3CfeColorMatrix%20in%3D%22n%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200.7%200.7%200.7%200%20-0.6%22/%3E%3C/filter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23capGrain%29%22/%3E%3C/svg%3E"),
+    radial-gradient(
+      ellipse 120% 150% at 50% 42%,
+      color-mix(in srgb, var(--pro-key-bg) 88%, var(--pro-key-wall-deep)) 0%,
+      color-mix(in srgb, var(--pro-key-bg) 96%, var(--pro-key-wall-deep)) 46%,
+      transparent 78%
+    ),
+    linear-gradient(
+      150deg,
+      color-mix(in srgb, var(--pro-key-bg) 88%, #fff) 0%,
+      var(--pro-key-bg) 45%,
+      color-mix(in srgb, var(--pro-key-bg) 88%, var(--pro-key-wall)) 100%
+    );
+  background-blend-mode: soft-light, normal, normal;
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 236, 208, 0.3),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.4),
+    0 1px 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+/* ── Square caps ───────────────────────────────────────────────────────────
+   Roy's call: the icon buttons become square keycaps like the reference, and
+   only the mic stays a circle. 50% -> the same radius as the key pills, so
+   round and square controls read as one machined set. */
+.proRoot[data-skin='proII'] .proIconBtn {
+  border-radius: var(--pro-r-key);
+}

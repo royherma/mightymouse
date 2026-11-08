@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <!-- Required by V8/Electron under hardened runtime. Apple accepts these for notarization. -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
+    <!-- Capture features: screen recording spawns ffmpeg, listen/transcribe uses the mic + camera. -->
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+    <key>com.apple.security.device.camera</key>
+    <true/>
+    <!-- Apple-granted, team BZJ35GS989 — needs the matching provisioningProfile to sign. -->
+    <key>com.apple.developer.web-browser.public-key-credential</key>
+    <true/>
+  </dict>
+</plist>

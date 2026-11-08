@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Notch rotation probe</title>
+<style>
+  body { font: 13px ui-monospace, Menlo, monospace; background: #14161a; color: #d8dee9; padding: 20px; }
+  h1 { font-size: 15px; margin: 0 0 4px; }
+  p.sub { color: #8b95a5; margin: 0 0 16px; max-width: 70ch; line-height: 1.5; }
+  #frame { width: 393px; height: 852px; border: 0; background: #000; }
+  .wrap { display: flex; gap: 24px; align-items: flex-start; }
+  pre { background: #0d0f12; padding: 12px; border-radius: 6px; margin: 0; line-height: 1.6;
+        max-height: 780px; overflow: auto; flex: 1; }
+  .ok { color: #7ee081; } .bad { color: #ff6b6b; } .dim { color: #8b95a5; }
+</style>
+<h1>Notch rotation probe</h1>
+<p class="sub">
+  Boots the REAL bundle in one frame and ROTATES it, which is the only way to hit
+  this bug: the deck viewer mounts each orientation as its own fresh frame, so it
+  can never see a stale-across-rotation clip-path. Measures the pad's right edge
+  against the card's after each step - the bare-steel gap from Roy's screenshot.
+</p>
+<div class="wrap">
+  <iframe id="frame" src="../dist/index.html"></iframe>
+  <pre id="out">booting…</pre>
+</div>
+<script type="module" src="./rotate-probe.js"></script>

@@ -1,0 +1,39 @@
+.agent-cursor-pulse {
+  opacity: 0.35;
+  animation: agent-cursor-pulse ease-out infinite;
+}
+.agent-cursor-pulse[data-paused] {
+  animation: none;
+  opacity: 0.25;
+}
+@keyframes agent-cursor-pulse {
+  from { transform: scale(0.5); opacity: 0.5; }
+  to { transform: scale(1.8); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-cursor-pulse { animation: none; }
+}
+.agent-cursor-hint {
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+.agent-cursor-menu {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.agent-cursor-menu > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.agent-cursor-menu > button:hover {
+  background: var(--surface3);
+}

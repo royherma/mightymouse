@@ -1,0 +1,110 @@
+.slash-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 30;
+  padding: var(--space1);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-md);
+  background: var(--surface1);
+  box-shadow: var(--shadow-panel);
+}
+.slash-list {
+  max-height: 260px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.slash-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space2);
+  width: 100%;
+  padding: var(--space-xs) var(--space2);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  color: var(--on-surface);
+  transition: background 0.1s;
+}
+.slash-item:hover,
+.slash-item[data-active] {
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.slash-name {
+  flex: none;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--accent-text);
+}
+.slash-desc {
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--font-micro);
+  color: var(--text-muted-light);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.slash-empty {
+  margin: 0;
+  padding: var(--space-xs) var(--space2);
+  font-size: var(--font-micro);
+  color: var(--text-muted-light);
+}
+.slash-dialog {
+  gap: 0;
+  max-width: 460px;
+  max-height: min(600px, calc(100vh - 48px));
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--surface-solid);
+  box-shadow: var(--shadow-panel);
+}
+.slash-dialog-head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space4) var(--space4) var(--space3) var(--space6);
+  border-bottom: 1px solid var(--surface3);
+}
+.slash-dialog-head .keys-sheet-title {
+  font-size: var(--font-lg);
+}
+.slash-dialog-close {
+  border: 0;
+  border-radius: var(--radius-full);
+}
+.slash-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space2);
+  min-height: 0;
+  padding: var(--space2) var(--space3) 0;
+  overflow-y: auto;
+}
+.slash-dialog-body > :last-child {
+  margin-bottom: var(--space3);
+}
+.slash-dialog-body .mcp-footer {
+  position: sticky;
+  bottom: 0;
+  margin: 0 calc(-1 * var(--space3));
+  padding: var(--space3) var(--space4) var(--space3) var(--space6);
+  border-top: 1px solid var(--surface3);
+  background: var(--surface-solid);
+}
+.slash-search {
+  padding: var(--space2) var(--space3);
+  border: 1px solid var(--surface3);
+  border-radius: var(--radius-full);
+  background: var(--surface2);
+  color: var(--on-surface);
+  font-size: var(--font-sm);
+  outline: none;
+}
+.slash-search:focus {
+  border-color: var(--accent);
+}

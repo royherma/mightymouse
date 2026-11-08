@@ -1,0 +1,445 @@
+/* Harness chrome only. Nothing here may style a `.code*` or `.chat*` class --
+   those belong to theme.css, and a harness that restyles the component it is
+   previewing stops being evidence about the real thing. */
+
+/* renderer/src/index.css pins `html, body { overflow: hidden }` -- right for an
+   Electron window that must never scroll, fatal here: importing it for the real
+   HUD styling silently clipped the page at the fold, so nine of ten scenarios
+   existed in the DOM and could not be reached. This file loads last on purpose. */
+html,
+body {
+  overflow: auto;
+  height: auto;
+  /* theme.css sets `touch-action: none` + `overscroll-behavior: none` on the
+     root, because a trackpad surface must swallow every gesture the browser
+     would otherwise interpret. On a desktop harness page that blocks the
+     trackpad/wheel scroll ITSELF: the page could only be moved with the
+     spacebar, since a key press is not a touch gesture. Restoring these is
+     harness chrome, not a change to how any previewed component behaves. */
+  touch-action: auto;
+  overscroll-behavior: auto;
+}
+
+.hPage {
+  min-height: 100vh;
+  padding: 32px 24px 96px;
+  background: #0e1119;
+  color: #e7ecf5;
+  font:
+    14px/1.5 -apple-system,
+    BlinkMacSystemFont,
+    'SF Pro Text',
+    system-ui,
+    sans-serif;
+}
+
+.hPageHead {
+  max-width: 820px;
+  margin: 0 auto 40px;
+}
+.hPageHead h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 650;
+}
+.hPageHead p {
+  margin: 0 0 16px;
+  color: #93a0b8;
+}
+.hPageHead code {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12.5px;
+  color: #c8d3e8;
+}
+
+.hControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.hViewTabs {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid #232a3a;
+  border-radius: 10px;
+  background: #141924;
+}
+.hViewTab {
+  padding: 7px 13px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #93a0b8;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.hViewTab[data-active] {
+  background: #2c3548;
+  color: #eef3fb;
+}
+
+.hToggle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 12px;
+  border: 1px solid #232a3a;
+  border-radius: 8px;
+  color: #b6c1d6;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Grid mode: every scenario in one surface. auto-fill rather than a fixed
+   column count so a wide display shows five across and a laptop shows two,
+   without a breakpoint per size. */
+.hGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  max-width: 1800px;
+  margin: 0 auto 48px;
+  align-items: start;
+}
+.hGridCell {
+  min-width: 0;
+}
+.hGridLabel {
+  margin-bottom: 8px;
+  color: #8592ab;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Fixed so a response logged from a cell three screens down is still visible
+   without scrolling back up to find it. */
+.hLogFixed {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 50;
+  max-width: 380px;
+}
+
+.hReal,
+.hMock {
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+.hReal {
+  background: #14331f;
+  color: #6ee7a0;
+}
+.hMock {
+  background: #33291470;
+  color: #e8bd72;
+}
+
+.hLog {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #12161f;
+  border: 1px solid #222a3a;
+  color: #8fe3a8;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 11.5px;
+  word-break: break-word;
+}
+
+.hRow {
+  max-width: 1400px;
+  margin: 0 auto 48px;
+  padding-top: 24px;
+  border-top: 1px solid #1c2230;
+}
+.hRowHead h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.hRowHead p {
+  margin: 0 0 20px;
+  max-width: 760px;
+  color: #7d8aa3;
+  font-size: 13px;
+}
+
+.hSurfaces {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: start;
+}
+.hSurfaceLabel {
+  margin-bottom: 10px;
+  color: #6f7c94;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ---- iPhone lock screen ---- */
+
+.hIosPhone {
+  padding: 14px;
+  border-radius: 20px;
+  background: #171b26;
+}
+/* Locked = a dimmed wallpaper behind the banner, which is the contrast the
+   real thing is read against. Unlocked drops it so the banner can be judged
+   against an ordinary app background too. */
+.hIosPhone[data-locked] {
+  background: linear-gradient(150deg, #2a3350, #131722 70%);
+}
+
+.hIosBanner {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(56, 62, 78, 0.72);
+  backdrop-filter: blur(20px);
+  color: #fff;
+}
+.hIosBannerHead {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: rgba(255, 255, 255, 0.72);
+}
+.hIosAppIcon {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: linear-gradient(140deg, #ffd76e, #ff8a5c);
+}
+/* The badge sits half off the blob's bottom-right, which is where iOS puts the
+   app mark on a communication notification. */
+.hIosFaceWrap {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+}
+.hIosFaceBadge {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  border: 1.5px solid #383e4e;
+  background: linear-gradient(140deg, #ffd76e, #ff8a5c);
+}
+.hIosTime {
+  margin-left: auto;
+}
+.hIosTitle {
+  font-size: 14px;
+  font-weight: 650;
+}
+/* Title AND subtitle are both bold on a real card -- they read as two lines of
+   one headline, with the body the only regular-weight line under them. The
+   harness had all three at body weight, which previewed a flatter card than
+   iOS draws. */
+.hIosSubtitle,
+.hIosBody {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+.hIosSubtitle {
+  font-weight: 650;
+}
+.hIosBody {
+  font-weight: 400;
+}
+/* iOS gives the `sender · app` header exactly one line and ellipsizes it, so
+   an un-clamped harness previews a two-line header no device ever draws. */
+.hIosAppName {
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The clamp is the whole point of this column: a glance shows 2 lines, a long
+   press shows 4, and a question that reads fine in the Code sheet can arrive on
+   the lock screen with its actual question cut off. `data-lines` carries the
+   state's value rather than two classes so the two numbers sit side by side. */
+.hIosBody {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.hIosBody[data-lines='2'] {
+  -webkit-line-clamp: 2;
+}
+.hIosBody[data-lines='4'] {
+  -webkit-line-clamp: 4;
+}
+
+.hIosThumb {
+  width: 38px;
+  height: 38px;
+  margin-top: 8px;
+  border-radius: 6px;
+  background: linear-gradient(140deg, #4a5a7d, #2b3448);
+}
+/* Expanded, iOS shows the attachment full-width instead of as a corner thumb. */
+.hIosImage {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+/* Collapsed banners show no buttons at all — the actions only exist past a long
+   press, which is why the state bar above is not decoration. */
+.hIosActions {
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.hIosAction {
+  flex: 1;
+  /* Equal columns whatever the label length -- flex: 1 alone still lets a long
+     word set a wider basis, which is why the chips came out uneven. */
+  min-width: 0;
+  padding: 11px 8px;
+  border: 0;
+  background: rgba(70, 76, 94, 0.78);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+}
+.hIosAction[data-destructive] {
+  color: #ff6b6b;
+}
+.hIosFaceId {
+  display: block;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.6);
+}
+.hIosAuthed {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(40, 90, 60, 0.5);
+  color: #9df0bd;
+  font-size: 11.5px;
+  text-align: center;
+}
+
+/* A real UNTextInputNotificationAction field: focusable and typeable, because a
+   dead placeholder cannot answer the question this harness exists to check —
+   whether the answer box is reachable without unlocking. */
+.hIosReplyRow {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 8px;
+}
+.hIosReplyField {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 18px;
+  background: rgba(70, 76, 94, 0.75);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+}
+.hIosReplyField::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+.hIosSend {
+  padding: 9px 14px;
+  border: 0;
+  border-radius: 18px;
+  background: #2f7bf0;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.hIosSend:disabled {
+  background: rgba(70, 76, 94, 0.7);
+  color: rgba(255, 255, 255, 0.4);
+  cursor: default;
+}
+.hIosSent {
+  margin-top: 8px;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(40, 90, 60, 0.5);
+  color: #9df0bd;
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.hIosHint {
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 11px;
+  text-align: center;
+}
+
+/* Past the second action, iOS collapses a button behind a long-press rather
+   than showing it inline. Dimmed to mark that, NOT struck through: it is fully
+   reachable, just one gesture further away. (This replaced the old .hIosDropped
+   block, which painted the agent's options as permanently lost -- true until
+   the NSE started registering them as real buttons, 2026-08-14.) */
+.hIosAction[data-collapsed] {
+  opacity: 0.62;
+}
+.hIosAction[data-collapsed]::after {
+  content: 'long-press';
+  /* Its own line, like .hIosFaceId: inline, it wrapped INSIDE the label and a
+     two-word option read as four lines of nothing. */
+  display: block;
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 9.5px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* ---- Mac HUD stage ---- */
+
+/* The HUD column renders the REAL `.hud-*` markup against the REAL
+   renderer/src/index.css, so nothing here may style a `.hud-*` class -- and
+   this MUST stay a wrapper element, never a second class on .hud-container.
+   Sharing the element let this rule's `background` win over
+   `rgba(var(--bg-rgb), .96)`, which painted the card transparent and left its
+   near-black title on the dark page, unreadable.
+
+   The HUD is a transparent always-on-top window, so a plate behind it is what
+   makes the card's own edges legible. Dark because that is what it floats over
+   most of the time. */
+.hHudStage {
+  padding: 18px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #2a3348, #10141d 75%);
+}
+
+@media (max-width: 1100px) {
+  .hSurfaces {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+

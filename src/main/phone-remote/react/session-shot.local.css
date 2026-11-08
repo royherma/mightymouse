@@ -1,0 +1,70 @@
+/* Screenshot-harness chrome only -- never shipped. The sheet box mirrors
+   .chatSheet's real width, padding, radius and border so the detail inside is
+   measured against the same box it gets on device; it is static rather than
+   fixed so the page grows to the content and the shot captures all of it. */
+.sessionShotFrame {
+  min-height: 100vh;
+  padding: 12px;
+  /* The trackpad ground the sheet floats over on device -- a white page would
+     make the panel's own surface look darker than it really is. */
+  background: #b8ada0;
+  /* Side by side at device width rather than stacked full-bleed: the point of
+     this page is comparing readings, and a 1280px-wide panel is not the box any
+     of them ship in. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+/* iPhone 16 Pro, the real device this is judged against: 402x874 CSS px.
+   Sized here rather than by resizing the browser so several panels sit in one
+   shot at true width.
+
+   The insets are SIMULATED. env(safe-area-inset-*) is 0 in headless Chromium --
+   there is no notch and no home indicator -- so a capture of the real env()
+   would always show the composer flush, whether or not the code is right. The
+   composer rule resolves --classic-safe-bottom, a plain custom property, so
+   overriding it here puts the true 34px indicator back in the picture.
+   This proves the LAYOUT reserves the strip; it does not prove what iOS
+   reports. Values: 59px top (Dynamic Island), 34px bottom. */
+.sessionShotSheet {
+  --classic-safe-bottom: 34px;
+  --safe-top: 59px;
+  width: 402px;
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--surface3);
+  border-radius: 14px;
+  background: var(--surface1);
+  box-shadow: var(--shadow-panel);
+  /* The device clips at the screen edge, so the rounded corner has to cut the
+     header and composer rather than let them square off past it. */
+  overflow: hidden;
+}
+/* The sheet panel (SessionDetail) still wants its old inner padding -- only the
+   full-screen ones are edge-to-edge, because on device they ARE the screen. */
+.sessionShotSheet:has(.codeSessionDetailBody) {
+  padding: 14px 14px 10px;
+}
+/* The body is its own scroller on device, which would cut the shot off at the
+   fold. Let it run full height here so one image holds the whole screen; this
+   changes nothing about the spacing or color being judged. */
+.sessionShotSheet .codeSessionDetailBody {
+  overflow: visible;
+}
+/* .chatFull is position:fixed;inset:0 on device -- it IS the screen there. In
+   the harness that escapes its box and paints over every other panel, so it is
+   pinned back into the frame at phone height. Same rule as the body above:
+   only the containing box changes, nothing being judged. */
+.sessionShotSheet .chatFull {
+  position: static;
+  /* The 16 Pro's full screen height. It has to be the real number: the composer
+     is the column's LAST child, so where the bottom edge falls is exactly what
+     is being judged here. */
+  height: 874px;
+}
+.sessionShotSheet .chatFullScroll {
+  overflow-y: auto;
+}

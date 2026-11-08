@@ -1,0 +1,12 @@
+<resources>
+    <color name="bg">#0F1115</color>
+    <color name="fg">#F4F5F7</color>
+    <color name="muted">#A3A8B3</color>
+    <color name="accent">#C2501A</color>
+    <style name="Theme.MightyMouse" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:colorAccent">@color/accent</item>
+    </style>
+</resources>

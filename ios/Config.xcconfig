@@ -1,0 +1,24 @@
+// Optional local build settings for the iOS app, passed explicitly:
+//
+//     xcodebuild -project ios/MightyMouse.xcodeproj -xcconfig ios/Local.xcconfig ...
+//
+// This is NOT wired in as a baseConfigurationReference. The .pbxproj here is
+// hand-rolled, and adding the file to a PBXGroup makes xcodebuild fail to read
+// the project at all ("PBXFrameworksBuildPhase group: unrecognized selector"),
+// so the reference is kept out of the project entirely and passed on the
+// command line instead.
+//
+// The staging test-admin password is deliberately absent: it is a credential,
+// and a committed default is exactly how one ends up in git -- with a fallback
+// the build works whether or not the setting is wired, so nobody notices the
+// literal is load-bearing. See Config.swift `stagingTestAdmin`.
+//
+// To enable the Debug-only test-admin bypass, create ios/Local.xcconfig
+// (gitignored) containing:
+//
+//     MM_STAGING_TEST_PASSWORD = <the staging test-admin password>
+//
+// Building in Xcode.app rather than via xcodebuild will not pick this up, so
+// the bypass is absent there. An unconfigured build simply has no bypass,
+// which is the safe failure Config.swift already chose.
+#include? "Local.xcconfig"

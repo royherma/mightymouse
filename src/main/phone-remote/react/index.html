@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<!-- Lets iOS Safari launch this page chrome-free (no URL bar, no bottom
+     toolbar) when opened from a Home Screen icon added via Share -> Add to
+     Home Screen. There is no in-page JS fullscreen API that hides Safari's
+     own bars -- standalone-mode-via-home-screen-icon is the only way. -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<!-- "default" reserves status-bar space visually but reports
+     env(safe-area-inset-top)=0 to CSS in standalone mode -- the mismatch
+     between painted position and hit-test position that caused touch-offset
+     bugs on real buttons. black-translucent draws under the status bar AND
+     reports the real inset, so CSS positioning and touch targets agree. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="MM Remote" />
+<!-- The band below the web view in standalone mode is painted by the OS, not
+     by the page: on this device the document is capped at the visible
+     viewport (793px against an 852px screen), so no CSS -- not on .proCard,
+     not on body, not even on html's canvas -- can reach the last ~59px. iOS
+     fills it from theme-color, falling back to the manifest's
+     background_color. Both are set to the Pro II card steel so the strip
+     matches the deck instead of showing a light seam.
+
+     Kept in sync with --pro-card in theme.css and background_color in
+     manifest.webmanifest. A meta tag can't read a CSS var, so this is the one
+     place the value is duplicated -- change all three together. -->
+<meta name="theme-color" content="#b9bcc0" />
+<!-- iOS ignores the manifest for its OWN install metadata (name/icon come
+     from the meta tags + apple-touch-icon above) but Android/desktop PWA
+     installs read it, and iOS 26+ betas are moving toward respecting it too --
+     cheap to include, no downside. Relative start_url is required so an
+     install from a stale/rotated LAN IP still boots from wherever it's
+     opened, not a baked-in address (see useHostDiscovery.ts). -->
+<link rel="manifest" href="./manifest.webmanifest" />
+<!-- iOS Safari won't fetch the icon over the SELF-SIGNED HTTPS origin the LAN
+     server uses (see server.ts's startIconServer comment) -- so on LAN we
+     point at a plain-HTTP side-channel on the same host. Over the Cloudflare
+     Tunnel the origin has a real publicly-trusted cert, so a relative path
+     works and is strictly better: the tunnel doesn't forward port 17871, so
+     the side-channel URL would 404 there and leave the Home Screen icon blank.
+     LAN is detected by the hostname being a bare IPv4 literal -- the tunnel
+     always hands out a DNS name.
+     document.write, not DOM insertion after load, because the icon fetch
+     happens the moment the <link> is parsed -- inserting it later is too
+     late for Safari to pick up the Home Screen / share-sheet icon.
+     17871 must match CONFIG.PHONE_REMOTE.ICON_PORT in src/shared/config.ts --
+     this plain HTML file sits outside Vite's module graph so it can't import
+     the constant directly; keep the two in sync by hand. -->
+<script>
+  var isLanIp = /^\d+\.\d+\.\d+\.\d+$/.test(location.hostname)
+  var iconHref = isLanIp
+    ? 'http://' + location.hostname + ':17871/apple-touch-icon.png'
+    : './apple-touch-icon.png'
+  document.write(
+    '<link rel="apple-touch-icon" href="' + iconHref + '">' +
+    '<link rel="icon" href="' + iconHref + '">'
+  )
+</script>
+<title>MightyMouse Remote</title>
+</head>
+<body>
+  <!-- Painted before the module bundle is even requested, and removed by
+       main.tsx once React has committed its first frame. Without it the phone
+       shows a white screen for the whole bundle download + eval -- the worst
+       of it on a cold LAN load, and again on every pairing-success reload.
+
+       Inline styles, not theme.css: the stylesheet arrives with the bundle, so
+       anything class-based here would itself be unstyled while it mattered.
+       #b9bcc0 is the same steel as the theme-color meta above (see its comment
+       -- the value is duplicated by necessity, change all of them together), so
+       the splash, the OS-painted bottom band, and the deck are one surface and
+       the handoff to React is invisible rather than a flash of another color. -->
+  <div id="boot" aria-hidden="true">
+    <div id="boot-mark">MightyMouse</div>
+    <div id="boot-dots"><i></i><i></i><i></i></div>
+  </div>
+  <style>
+    #boot {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: #b9bcc0;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+      /* Above nothing in particular -- React mounts into #root, which is a
+         sibling, so this simply has to win the paint until it's removed. */
+      z-index: 9999;
+      /* Fades out rather than vanishing, so a fast connect doesn't read as a
+         flicker. The class is added one frame before removal. */
+      transition: opacity 220ms ease;
+    }
+    /* Opacity alone keeps the full box tappable, so anything that stops the
+       removal from running leaves an INVISIBLE inset:0 shield at z-index 9999
+       over the trackpad -- every touch swallowed, nothing to see. The splash
+       is decorative and never needs a touch, so it stops taking them the
+       instant it starts fading, independent of whether removal ever runs. */
+    #boot.boot-done { opacity: 0; pointer-events: none; }
+    #boot-mark {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      color: #2b2d30;
+      opacity: 0.9;
+    }
+    #boot-dots { display: flex; gap: 7px; }
+    #boot-dots i {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #2b2d30;
+      opacity: 0.28;
+      animation: boot-pulse 1.15s ease-in-out infinite;
+    }
+    #boot-dots i:nth-child(2) { animation-delay: 0.16s; }
+    #boot-dots i:nth-child(3) { animation-delay: 0.32s; }
+    @keyframes boot-pulse {
+      0%, 80%, 100% { opacity: 0.28; transform: scale(1); }
+      40% { opacity: 0.85; transform: scale(1.18); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #boot-dots i { animation: none; opacity: 0.55; }
+    }
+  </style>
+  <div id="root"></div>
+  <script type="module" src="/main.tsx"></script>
+</body>
+</html>

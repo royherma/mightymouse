@@ -1,0 +1,214 @@
+.code-sessions[data-density='list'] {
+  --session-cols: minmax(0, 2.2fr) minmax(0, 1.3fr) minmax(0, 1fr) 120px 180px 110px;
+  --session-row-pad: 12px;
+  --session-row-gutter: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.code-session-cols {
+  display: grid;
+  grid-template-columns: var(--session-cols);
+  column-gap: 12px;
+  padding: 8px var(--session-row-gutter) 8px var(--session-row-pad);
+  border-bottom: 1px solid var(--border-dark);
+  font-size: 12px;
+  font-weight: 560;
+  color: var(--muted);
+}
+
+.code-session-cols span {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.code-session-cols span:last-child {
+  text-align: right;
+}
+
+.code-session-segments {
+  order: 0;
+  margin: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 2px;
+  border-radius: 8px;
+}
+
+.code-session-segments .segmented-item {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  font-weight: 540;
+  gap: 6px;
+}
+
+.code-session-segments .segmented-item[data-on] {
+  box-shadow: 0 1px 2px rgba(var(--shadow-rgb), 0.12);
+}
+
+.code-session-segments .segmented-count {
+  font-size: 11.5px;
+  opacity: 1;
+  color: var(--muted);
+}
+
+.code-session-head .code-session-search {
+  height: 30px;
+  padding: 0 10px;
+  border-color: transparent;
+  border-radius: 8px;
+  background: var(--surface2);
+}
+
+.code-session-head .code-session-search-input {
+  font-size: 13px;
+}
+
+.code-session-tools {
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.code-session-tools .code-session-select {
+  order: 1;
+  font-size: 12.5px;
+}
+
+.code-session-tools .code-session-select select {
+  font-size: 12.5px;
+}
+
+.code-session-tools .code-session-select:nth-of-type(3) {
+  order: 2;
+  margin-left: auto;
+}
+
+.code-session-tools .code-session-density {
+  order: 3;
+  margin-left: 0;
+}
+
+.code-session-tools .code-session-density-btn {
+  font-size: 12.5px;
+}
+
+.code-session-card[data-density='list'] {
+  display: grid;
+  grid-template-columns: var(--session-cols);
+  align-items: center;
+  column-gap: 12px;
+  padding: 13px var(--session-row-gutter) 13px var(--session-row-pad);
+  border: none;
+  border-bottom: 1px solid var(--surface3);
+  border-radius: 0;
+  background: none;
+  font-size: 13px;
+}
+
+.code-session-card[data-density='list'][data-clickable]:hover,
+.code-session-card[data-density='list'][data-clickable]:focus-visible {
+  background: var(--surface2);
+  transform: none;
+}
+
+.code-session-card[data-density='list'] > * {
+  grid-row: 1;
+  min-width: 0;
+}
+
+.code-session-card[data-density='list'] .code-session-last,
+.code-session-card[data-density='list'] .code-session-stats,
+.code-session-card[data-density='list'] .code-session-go,
+.code-session-card[data-density='list'] .code-session-branch,
+.code-session-card[data-density='list'] .code-session-foot .code-progress-meter,
+.code-session-card[data-density='list'] .code-session-chip:not([data-model]) {
+  display: none;
+}
+
+.code-session-card[data-density='list'] .code-session-top {
+  grid-column: 1;
+  display: flex;
+  font-size: 14px;
+}
+
+.code-session-card[data-density='list'] .code-session-face {
+  display: none;
+}
+
+.code-session-card[data-density='list'] .code-session-name {
+  font-weight: 580;
+}
+
+.code-session-card[data-density='list'] .code-session-place {
+  grid-column: 2;
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--text-muted-dark);
+}
+
+.code-session-card[data-density='list'] .code-session-meta {
+  grid-column: 3;
+  flex-wrap: nowrap;
+  margin-top: 0;
+}
+
+.code-session-card[data-density='list'] .code-session-chip[data-model] {
+  padding: 0;
+  background: none;
+  font-size: 13px;
+  color: var(--text-muted-dark);
+}
+
+.code-session-card[data-density='list'] .code-session-foot {
+  grid-column: 4;
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+  font-size: 13px;
+}
+
+.code-session-card[data-density='list'] .code-session-state {
+  font-weight: 540;
+}
+
+.code-session-card[data-density='list'][data-health='your-turn'] .code-session-state,
+.code-session-card[data-density='list'][data-health='working'] .code-session-state {
+  color: var(--on-surface);
+  animation: none;
+}
+
+.code-session-card[data-density='list'] .code-session-pulse {
+  grid-column: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--on-surface);
+  white-space: nowrap;
+}
+
+.code-session-pulse[data-empty] {
+  color: var(--muted);
+}
+
+.code-session-pulse-dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.code-session-pulse-word {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.code-session-card[data-density='list'] .code-session-time {
+  grid-column: 6;
+  text-align: right;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

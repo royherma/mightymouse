@@ -1,0 +1,207 @@
+/* Skin: military
+   ---------------------------------------------------------------------------
+   Split out of theme.css, 2026-07-24. Every rule here is scoped to
+   `.proRoot[data-skin='military']`, so this file cannot affect any other skin --
+   that independence is what made it safe to lift out whole.
+
+   IMPORTED BY theme.css at the END of the file, so it still lands after the
+   base cascade and after the generic `.proRoot[data-skin]` rules it overrides.
+   Order is load-bearing: an @import moved above those generic rules silently
+   hands the win back to them.
+
+   NOT here: this skin's `html:has(.proRoot[data-skin='military'])` canvas rule,
+   if it has one. Those paint the strip BELOW the visible viewport, which
+   requires a selector outside .proRoot, so they stay in theme.css beside the
+   other --pro-strip rules. */
+
+/* ===========================================================================
+   MILITARY -- olive drab field equipment.
+   ---------------------------------------------------------------------------
+   The FIRST skin authored through the post-axis-split path, so it doubles as
+   the test of the SKINS.md recipe: one registry entry + one CSS block, no
+   TypeScript beyond the union member. Anything it needed beyond that is a gap
+   in the split, not a quirk of this skin.
+
+   Material story, and why each choice is what it is:
+     deck -- olive drab MOULDED POLYMER, not painted metal. So it takes a
+             MATTE finish: no specular sweep (Cap's enamel) and no anisotropic
+             grain (Pro II's brushed steel). A wide, very low-contrast mottle
+             is what a pigmented polymer shell actually does with light.
+     pad  -- slightly darker olive, recessed, same family as the deck. Field
+             gear is moulded in one colour; a contrasting pad would read as a
+             separate part bolted on, which is exactly what this ISN'T.
+     key  -- SAND/tan ABS. The one genuine contrast on the deck, and the pair
+             (olive + sand) is what makes the whole thing read as military
+             rather than merely green.
+   Accent is a muted brick, not a bright red -- field equipment has no
+   high-chroma anything, and a saturated accent would break the story harder
+   than any other single choice here. The mic is BRONZE, deliberately a
+   different family from the accent: same trap Pro II solved with clay-vs-
+   orange and Cap with oxblood-vs-shield-red. Two warm controls an inch apart
+   merge unless their hue AND value separate. */
+.proRoot[data-skin='military'] {
+  /* Olive drab. Pulled toward yellow-green rather than blue-green so it reads
+     as pigment in polymer, not painted steel; a cooler olive goes straight to
+     "hospital green" at phone brightness. */
+  --pro-bg: #4a5240;
+  --pro-blob: #3a4132;
+  --pro-card: #59614b;
+  --pro-card-border: #2f3529;
+  /* Pad goes DARKER than the deck, opposite of Cap. Cap's pad is rubber over
+     steel (different material, so it starts lighter to survive shadow); this
+     is the SAME moulded polymer, recessed -- and a recess in one material is
+     simply less lit. Same reasoning, opposite direction, because the material
+     premise differs. */
+  --pro-pad-bg: #3e4534;
+  /* Border/inset are what the .proPadEdge SVG strokes + floods along the notch
+     path -- the ONLY thing that makes the carve read on a flat (untextured)
+     skin, since Pro II's cork-on-steel contrast isn't here. Left weak, the pad
+     hugged the buttons in geometry but not to the eye: "Military doesn't wrap
+     the buttons like Pro II" (Roy, on-device 2026-07-24). Pushed the pad a shade
+     deeper than the deck AND darkened the border so the bend has an edge. */
+  --pro-pad-border: #22261b;
+  /* Stamped label: LIGHTER than the pad. A moulded-in mark on matte polymer
+     catches the light on its raised edge -- closer to Cap's rubber than to
+     Pro II's cork, which exposes shadow instead. */
+  --pro-pad-label: #9aa286;
+  /* Sand caps: warm tan wall under a lighter face. The wall carries olive in
+     its shadow, since bounce light on a cap's front wall comes off the deck
+     it stands on -- same rule that gave Cap's walls their blue. */
+  --pro-key-wall: #a89b7e;
+  --pro-key-wall-deep: #5c5545;
+  --pro-key-top: rgba(255, 252, 240, 0.38);
+  --pro-key-face-lip: 7px;
+  --pro-key-travel: 4px;
+  /* Recessed pad, so the sheen runs Cap's direction: shadow top-left where the
+     wall occludes, light bottom-right where the floor turns back up. Both are
+     weaker than Cap's -- matte scatters, it doesn't reflect a clean edge. */
+  --pro-pad-sheen-a: rgba(18, 22, 14, 0.34);
+  --pro-pad-sheen-mid: rgba(18, 22, 14, 0);
+  --pro-pad-sheen-b: rgba(214, 220, 190, 0.14);
+  --pro-pad-inset: rgba(10, 14, 7, 0.55);
+  /* Shared pad-face sheen, retinted for matte polymer: a DIM sage highlight (a
+     bright catch would read as gloss) fading to deep olive shade. Gives
+     Military the same inset well the others get, from the one shared ::before. */
+  --pro-pad-face-hi: rgba(214, 220, 190, 0.12);
+  --pro-pad-face-lo: rgba(10, 14, 7, 0.22);
+  --pro-ink: #cdd3ba;
+  --pro-ink-strong: #f0f2e4;
+  --pro-pill-bg: #656d55;
+  --pro-key-bg: #ded3b8;
+  --pro-key-ink: #3a3626;
+  /* Muted brick. Desaturated hard on purpose (see the header) -- this is the
+     single choice most able to break the material story. */
+  --pro-accent: #9c5434;
+  --pro-accent-ink: #fdf2e8;
+  /* Bronze mic: warmer and more metallic than the brick accent, and lighter,
+     so the two separate by hue AND value rather than sitting adjacent in the
+     same red-brown field. */
+  --pro-mic: #8a6134;
+  --pro-mic-ink: #fbeeda;
+  --pro-mic-glow: rgba(20, 24, 14, 0.5);
+  /* Lit chat/history keys in a desaturated field green, NOT the brick: on a
+     deck this warm, three warm controls in one header collapse into a single
+     smear (the exact failure Cap hit with three reds). */
+  --pro-icon-lit: #7d8a5e;
+  --pro-icon-lit-ink: #f4f7e6;
+  /* Matte polymer: a broad soft shadow and a DIM highlight. A bright specular
+     white here would immediately read as gloss and undo the finish. */
+  --pro-neu-shadow: rgba(14, 18, 10, 0.5);
+  --pro-neu-highlight: rgba(232, 236, 214, 0.36);
+  /* Touchpad + landscape mirror-pane radius. Matched to Pro II and Cap rather
+     than kept at the 14px this skin shipped with: it's the pad's corner, not a
+     keycap detail, and a skin-specific value there reads as the deck being cut
+     to a different size instead of painted a different colour. Key radius
+     still goes squarer (6px vs their 7px) -- that IS a keycap detail, and the
+     blockier caps are the point of this skin. */
+  --pro-r: 18px;
+  --pro-r-key: 6px;
+  /* Warm-dark seams, keyed to the olive rather than the shared default's
+     brown -- a cool seam would read as a blue gap between sand caps. */
+  --pro-key-seam: rgba(20, 24, 14, 0.5);
+  --pro-key-seam-soft: rgba(20, 24, 14, 0.38);
+}
+
+/* Matte moulded polymer. Deliberately the SIMPLEST of the three finishes:
+   Pro II gets directional grain (machining), Cap gets a specular sweep
+   (clearcoat), and this gets neither -- just a fine isotropic mottle at low
+   contrast, which is pigment dispersion in a moulded shell. Getting this
+   right is mostly about what NOT to add: any highlight band turns polymer
+   into plastic-with-a-gloss-coat, which is a different (cheaper) object.
+   Same inline data-URI as the other two, for the same reason -- a fetched
+   asset that 404s over LAN would leave the deck flat. */
+.proRoot[data-skin='military'] .proCard {
+  border: 1px solid var(--pro-card-border);
+  border-bottom: none;
+}
+.proRoot[data-skin='military'] .proCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-color: var(--pro-card);
+  background-image:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cfilter%20id%3D%22polymerGrain%22%20x%3D%22-5%25%22%20y%3D%22-5%25%22%20width%3D%22110%25%22%20height%3D%22110%25%22%20color-interpolation-filters%3D%22sRGB%22%3E%3CfeTurbulence%20type%3D%22fractalNoise%22%20baseFrequency%3D%220.9%22%20numOctaves%3D%222%22%20seed%3D%224%22%20result%3D%22n%22/%3E%3CfeColorMatrix%20in%3D%22n%22%20type%3D%22matrix%22%20values%3D%220%200%200%200%200%20%200%200%200%200%200%20%200%200%200%200%200%20%200.26%200.26%200.26%200%20-0.22%22%20result%3D%22grain%22/%3E%3C/filter%3E%3Crect%20width%3D%22100%25%22%20height%3D%22100%25%22%20filter%3D%22url%28%23polymerGrain%29%22/%3E%3C/svg%3E"),
+    /* A very wide, very weak vertical falloff -- ambient occlusion toward the
+       bottom of a moulded shell, NOT a specular band. Kept under 0.05 alpha
+       so it never resolves into a visible edge. */
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04) 0%, rgba(0, 0, 0, 0.05) 100%);
+  background-size:
+    140px 140px,
+    100% 100%;
+  border-radius: inherit;
+  z-index: 0;
+}
+/* Squarer keys than Cap's, matching the reference's blockier field-gear caps.
+   Straight token work -- no new structure. */
+.proRoot[data-skin='military'] .proKeyPill,
+.proRoot[data-skin='military'] .settingsPanel .qualityBtn,
+.proRoot[data-skin='military'] .settingsPanel .settingChoice {
+  border-radius: var(--pro-r-key);
+}
+/* Same cap footprint as Pro II and Cap. The base 56x44 is the PLAIN skin's
+   button; the sculpt is drawn for 60x48 with 24px side padding (two text caps
+   + a 1px gutter = 217px inside the ~223px the cell's padding leaves). Left at
+   the base size the caps sit on a different grid from the other skins and the
+   icon cap isn't square. */
+.proRoot[data-skin='military'] .proKeyPill {
+  min-width: 60px;
+  height: 48px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+.proRoot[data-skin='military'] .proKeyPill.proKeyPillIcon {
+  width: 48px;
+  min-width: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+/* The bottom icon buttons are SQUARE here, like every other cap on this deck.
+   The base .proIconBtn is `border-radius: 50%`, which is right for the plain
+   skin (no sculpt -- a flat circular button) but wrong for any skin using the
+   shared keycap sculpt: the sculpt paints a square-cornered cap face and front
+   wall, so a circular clip cuts the corners off and the wall bleeds out past
+   the curve. That's the "square in circle" artifact. Pro II and Cap each
+   override it to --pro-r-key for exactly this reason; Military inherited the
+   circle because the override is per-skin rather than attached to the sculpt.
+   Worth noting as a real gap in the split: the sculpt and its radius should
+   travel together, so a skin can't opt into one without the other. */
+.proRoot[data-skin='military'] .proIconBtn {
+  border-radius: var(--pro-r-key);
+}
+/* Tight 1px seams, matching Pro II and Cap. The base gaps (8px between icon
+   buttons, 10px between key rows) are built for the PLAIN skin, where keys are
+   free-floating buttons on bare deck. Under the sculpt they're wrong twice:
+   the caps read as scattered rather than as one keyboard block, and the extra
+   vertical gap pushes the whole cluster taller so it runs closer to the bottom
+   of the screen than the other skins do -- which is the missing bottom gap.
+   1px is what makes the neighbour-cast shadows read as seams between adjacent
+   caps instead of hairline outlines. */
+.proRoot[data-skin='military'] .proKeyGrid,
+.proRoot[data-skin='military'] .proKeyRow,
+.proRoot[data-skin='military'] .proIconRow {
+  gap: 1px;
+}
+.proRoot[data-skin='military'] .proBlobs {
+  opacity: 0.3;
+}
