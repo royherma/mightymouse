@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { MOVE_FAST_PX, MOVE_SLOW_MULTIPLIER, MOVE_SLOW_PX, moveGainForSpeed } from '../pointer-accel'
 
-// The curve exists so a high sensitivity slider (Roy runs the top of the range)
+// The curve exists so a high sensitivity slider
 // stops amplifying hand jitter as hard as it amplifies intent. These lock in the
 // two ends -- a fixed precision speed when slow, full reach when fast -- and the
 // monotonic ramp between them, since a non-monotonic gain would make the cursor

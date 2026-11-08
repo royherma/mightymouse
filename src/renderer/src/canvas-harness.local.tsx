@@ -40,15 +40,15 @@ const projects = [
   ),
   project(
     'gk',
-    state === 'long' ? `${LONG} (GoKuna)` : 'GoKuna',
+    state === 'long' ? `${LONG} (Nimbus)` : 'Nimbus',
     'globe',
     '2026-10-05T03:50:00.000Z'
   ),
-  project('ts', 'techguyver-side-projects', 'folder', '2026-10-05T03:40:00.000Z'),
+  project('ts', 'side-projects', 'folder', '2026-10-05T03:40:00.000Z'),
   project('tg', 'Techguyver Site', 'palette', '2026-10-05T03:30:00.000Z'),
   project('to', 'techno-optimists', 'bot', '2026-10-05T03:20:00.000Z'),
-  project('pf', 'petfomo', 'cart', '2026-10-05T03:00:00.000Z'),
-  project('os', 'OpenString', 'music', '2026-10-04T03:00:00.000Z'),
+  project('pf', 'acme', 'cart', '2026-10-05T03:00:00.000Z'),
+  project('os', 'StringLab', 'music', '2026-10-04T03:00:00.000Z'),
   ...(state === 'many'
     ? 'Atlas Bramble Cinder Dune Ember Fjord Grove Harbor Iris Juniper Kestrel Lumen'
         .split(' ')

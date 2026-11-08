@@ -4,7 +4,7 @@ import { Check, FolderPlus, Folders, LayoutGrid, Loader2, MessageSquare, Pencil,
 import { Button } from '../components/Button'
 import { ProjectGroupHeader } from '../components/ProjectIcon'
 
-// Roy's tree has 1,234 chats in one group - rendering them all is what made the sidebar crawl.
+// The user's tree has 1,234 chats in one group - rendering them all is what made the sidebar crawl.
 const SIDEBAR_CHAT_CAP = 5
 const UNASSIGNED_SIDEBAR_KEY = 'unassigned'
 const FOLD_PINNED = 'section:pinned'
@@ -1254,7 +1254,7 @@ export function ChatTab({
 // A single conversation row in the drawer, used both inside a project's group and
 // in the Unassigned bucket. The "…" menu offers New project / Move to project /
 // Unassigned so a chat can be reassigned without drag-and-drop (fast-follow, see
-// the Projects PRD).
+// the Projects design).
 /**
  * A search snippet with the matched span highlighted. Rendered from indices
  * rather than by string-replacing the query: the match may be a TYPO of what's

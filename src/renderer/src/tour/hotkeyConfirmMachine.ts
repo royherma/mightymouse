@@ -3,7 +3,7 @@ import { TOUR } from '../../../shared/tour/constants'
 import type { HotkeyConfirmState, TourProbeEventPayload } from '../../../shared/tour/types'
 
 // Pure, framework-free state machine for one hotkey step's press-to-confirm flow
-// (PRD §4.3/§5.3). Extracted out of useHotkeyConfirm.ts so it's unit-testable under
+// Extracted out of useHotkeyConfirm.ts so it's unit-testable under
 // this repo's `environment: 'node'` vitest config — no jsdom/testing-library is
 // installed, so anything that needs React rendering or `window`/`document` can't be
 // driven directly in a test. Mirrors the existing convention in gaze/tracker.ts:

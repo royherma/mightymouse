@@ -55,7 +55,7 @@ describe('resolveDpad', () => {
       return a.factor
     }
     // Up/Right = forward, Left/Down = back: memory
-    // `cursorless-arrow-direction-pairing`, set by Roy on the band.
+    // `cursorless-arrow-direction-pairing`, set by the user on the band.
     expect(factor('up')).toBeGreaterThan(1)
     expect(factor('right')).toBeGreaterThan(1)
     expect(factor('down')).toBeLessThan(1)

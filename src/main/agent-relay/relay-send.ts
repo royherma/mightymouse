@@ -1,5 +1,5 @@
 /**
- * Sends one push through the agent-relay Edge Function (PRD §5, §6c). The Mac
+ * Sends one push through the agent-relay Edge Function. The Mac
  * never talks to APNs directly -- the .p8 key lives only in Supabase secrets.
  * This module owns exactly one job: turn a minted RelayRequest into a push,
  * or fail with a stated, actionable reason. Retry/backoff and the health line
@@ -29,7 +29,7 @@ async function currentJwt(): Promise<string> {
   return data.session?.access_token ?? ''
 }
 
-/** §6c: "relay toggle off -> MCP calls fail fast ... the error string IS the
+/** "relay toggle off -> MCP calls fail fast ... the error string IS the
  *  guide." Checked first and unconditionally -- every other failure path
  *  below assumes the toggle already said yes. */
 export function agentRelayOffReason(): string | null {
@@ -60,7 +60,7 @@ function loopbackPush(request: RelayRequest): RelaySendResult | null {
 }
 
 /** A MIRROR, not a transport: the same card appears on the Mac whether or not a
- *  phone is reachable, and first answer wins (§6b) -- so answering here while a
+ *  phone is reachable, and first answer wins -- so answering here while a
  *  push is in flight is a supported outcome rather than a conflict.
  *
  *  Reads the Mac's own switches, which is the whole point: the phone's filter
@@ -101,7 +101,7 @@ export async function sendRelayPush(request: RelayRequest): Promise<RelaySendRes
     return { ok: false, reason: 'relay-off', detail: agentRelayOffReason()! }
   }
 
-  // BEFORE the phone gates, deliberately (PRD 2026-08-22-1787388684). The mirror
+  // BEFORE the phone gates, deliberately. The mirror
   // used to sit below them, which meant a `return` for a phone-muted verb was
   // also a return for the Mac -- turning off updates on the phone silently
   // killed every Mac alert of that kind. They are two surfaces with two answers
@@ -283,7 +283,6 @@ function scheduleFetchWatchdog(requestId: string): void {
  * Mac (or timed out) stayed there looking tappable indefinitely, and tapping it
  * did nothing at all: silently, because the request it names is gone. That
  * silence is the defect -- a dead button is indistinguishable from a broken one
- * (Roy, on device: "I click and it won't work").
  *
  * Deliberately quiet about failure. This runs on EVERY resolution, including
  * the overwhelmingly common one where no phone is paired and nothing was ever
@@ -335,7 +334,7 @@ function titleFor(request: RelayRequest): string | undefined {
   return undefined
 }
 
-/** Every verb's content rides the push (Roy's call, 2026-08-13): the NSE's
+/** Every verb's content rides the push: the NSE's
  *  tunnel fetch failed often enough that ask/approve/show arrived as a bare
  *  title with no message. The NSE still overwrites with the fetched card when
  *  it works; this is the fallback iOS shows when it doesn't. */

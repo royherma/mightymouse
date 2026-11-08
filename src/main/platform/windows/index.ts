@@ -1,7 +1,7 @@
 /**
  * Windows implementation of the platform contract — Tier 1.
  *
- * Tier 1 is the minimal USEFUL Windows app (PRD §4b): hotkey → panel →
+ * Tier 1 is the minimal USEFUL Windows app: hotkey → panel →
  * Claude/Codex on the selection + clipboard, tray, settings, updater. Selection,
  * context, binaries, shell, permissions, chrome, helpers and phone-remote input
  * (SendInput via koffi) are real here. Capture and the native helpers are Tier
@@ -14,7 +14,7 @@
  *    hides what cannot work instead of offering a button that throws.
  *
  * phoneMic and virtualDisplay are false and stay false: both need WHQL-signed
- * kernel drivers, which puts them permanently out of scope on Windows (PRD §3).
+ * kernel drivers, which puts them permanently out of scope on Windows.
  */
 import { hostname } from 'node:os'
 import { screen } from 'electron'
@@ -192,7 +192,7 @@ export const windows: PlatformImpl = {
   },
 
   capabilities: {
-    // Kernel-driver bound, permanently out of scope on Windows (PRD §3).
+    // Kernel-driver bound, permanently out of scope on Windows.
     phoneMic: false,
     virtualDisplay: false,
     // No notch on any Windows machine.

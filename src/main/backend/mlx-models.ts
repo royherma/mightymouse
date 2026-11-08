@@ -4,7 +4,7 @@
 // is the `mlx`-backend sibling of local-models.ts: same "find what's actually
 // available" job, different wire (OpenAI `/v1/models`, not Ollama's `/api/tags`).
 //
-// Wire shape verified live against rapid-mlx 0.10.10 (see prds/active/rapid-mlx-samples/):
+// Wire shape verified live against rapid-mlx 0.10.10:
 //   GET /v1/models → { object:"list", data:[{ id, capabilities:["text","tools"], ... }] }
 // Two quirks handled here:
 //   1. Each model appears TWICE — once as the full HF repo id ("mlx-community/Qwen3-0.6B-4bit")

@@ -55,7 +55,7 @@ function readmeHeadAndSummary(root: string): { heading: string; summary: string 
 
 const identityCache = new Map<string, string>()
 
-/** " (also called GoKuna; Mobile web ...)" for a folder whose product name differs from the folder name. */
+/** " (also called Nimbus; Mobile web ...)" for a folder whose product name differs from the folder name. */
 export function projectIdentityPhrase(project: string, cwd: string): string {
   if (cwd === '') return ''
   const root = repoRootOf(cwd)

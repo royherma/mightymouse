@@ -368,8 +368,8 @@ export function useKeyboard({
     [send]
   )
 
-  // Mirror whatever keyboard the host reports (Roy: "the auto keyboard will be
-  // based on the same keyboard of the device") -- no picker, the mapping IS
+  // Mirror whatever keyboard the host reports
+  // -- no picker, the mapping IS
   // the selection. New host types are one KEYBOARD_LAYOUT_FOR_HOST row.
   const virtualKeyboardLayoutId = KEYBOARD_LAYOUT_FOR_HOST[hostKeyboard]
 

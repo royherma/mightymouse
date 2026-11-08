@@ -160,13 +160,13 @@ export async function readCmux(): Promise<AppContextReading> {
  * Everything tmux knows about the panel the phone is looking at: whether its pane
  * is fullscreened, and what the panes inside it are called.
  *
- * The join the parent PRD declared unknowable, found in the session file rather
+ * The join the parent design declared unknowable, found in the session file rather
  * than in a tty: a panel cmux launched into tmux carries
  * `terminal.resumeBinding.kind === 'tmux'` and a `checkpointId` that IS the tmux
  * session name. Verified live — the one panel whose session read `zoomed=1` was
  * the one tab showing a fullscreened pane, and the other seven read 0.
  *
- * That also settles the OTHER half of what the PRD gave up on: a panel running a
+ * That also settles the OTHER half of what the design gave up on: a panel running a
  * plain shell has no `resumeBinding`, so "is this really tmux" stops being a
  * guess. `null` on that path keeps the zoom button stateless instead of asserting
  * "not zoomed" about a pane that has no such thing, and `panes: undefined` keeps
@@ -325,7 +325,7 @@ export function activateCmuxTerminal(itemId: string): boolean {
  * AppleScript cannot supply these (see the header), but the session file's
  * `panels[].id` is the same uuid AppleScript hands out — verified by joining
  * both sources live: 11/11 matched, in tab-strip order. Measured 35s fresh
- * while cmux was running, unlike the Chrome `Sessions/` path the parent PRD
+ * while cmux was running, unlike the Chrome `Sessions/` path the parent design
  * rejected at 10 minutes stale.
  *
  * Read per call rather than cached: a rename or a new split must show up, and

@@ -629,7 +629,7 @@ export const CONFIG = {
   // is Accelerate + AVX2. Both statically linked — `otool -L` shows only
   // /usr/lib and /System/Library, which is the check that matters: a Homebrew
   // dylib linked on the build machine passes codesign AND notarization, then
-  // dyld-crashes on every clean Mac (managed-ffmpeg PRD §4.1).
+  // dyld-crashes on every clean Mac.
   WHISPER_DOWNLOAD: {
     arm64: {
       url: 'https://github.com/royherma/mightymouse-releases/releases/download/whisper-cpp-1.8.2/whisper-cli-arm64',
@@ -644,7 +644,7 @@ export const CONFIG = {
   } as Record<string, { url: string; sha256: string; bytes: number }>,
 
   // Parakeet: NVIDIA's ASR model, 2.8x faster than whisper turbo on the same
-  // Mac (PRD 2026-09-21). Shipped as NVIDIA's own builds pinned by sha256 —
+  // Mac. Shipped as NVIDIA's own builds pinned by sha256 —
   // nothing of ours to compile.
   //
   // ATTRIBUTION, required by the licenses and owed on any surface that lists
@@ -664,7 +664,7 @@ export const CONFIG = {
   // Resident `nemo-speech serve` holding the model in memory. Spawning the CLI
   // per clip re-pays process start + 11 dylibs + a 680 MB model load every
   // press: measured 2512 ms median vs 1229 ms through the server, 6/6
-  // interleaved pairs on the same 4.36 s clip (2026-09-21).
+  // interleaved pairs on the same 4.36 s clip.
   PARAKEET_SERVER_PORT: instancePort(IS_STAGING_BUILD ? 17873 : 17872),
   PARAKEET_SERVER_HOST: '127.0.0.1',
   PARAKEET_SERVER_READY_TIMEOUT_MS: 60_000,
@@ -697,7 +697,7 @@ export const CONFIG = {
     installed: 'Installed. Try recording again.',
     installFailed: "That didn't work. Open Settings to try again.",
     // The screen half of a recording never started. Named as a capability, not
-    // as "ffmpeg spawn error" — what died underneath is our problem (PRD §4.0).
+    // as "ffmpeg spawn error" — what died underneath is our problem.
     videoFailed: "Couldn't record your screen. Nothing was saved.",
     // Whisper heard speech it can't write down because English is selected.
     // Pasting its guess would put nonsense in the user's document, so we say
@@ -728,7 +728,7 @@ export const CONFIG = {
   // (~500 MB of gcc alone), so it outruns the standard formula ceiling.
   BREW_INSTALL_TIMEOUT_LOCAL_MS: 900000,
   // Rapid-MLX compiles Metal shaders on first serve — measured ~24s cold
-  // (PRD 2026-07-16). 90s leaves room for a slower Mac without hanging forever.
+  // 90s leaves room for a slower Mac without hanging forever.
   LOCAL_SERVICE_START_TIMEOUT_MS: 90000,
   LOCAL_SERVICE_POLL_MS: 1000,
 
@@ -1487,7 +1487,7 @@ export const CONFIG = {
     return { ...base, PORT: instancePort(base.PORT), ICON_PORT: instancePort(base.ICON_PORT) }
   })(),
 
-  // Code agent relay (PRD 2026-08-12-1786501335). The MCP server lives inside
+  // Code agent relay. The MCP server lives inside
   // Electron main and speaks Streamable HTTP on localhost -- both the bundled
   // agent (pointed at this port directly) and `npx mightymouse-code` (a stdio
   // shim that proxies here) are the same server, never a forked copy.
@@ -1502,7 +1502,7 @@ export const CONFIG = {
     // a closed terminal drops the socket, and the count follows immediately.
     PRESENCE_ROUTE: '/presence',
     // Read-only mirror of what the panel's session list shows, so the list can
-    // be checked from a terminal (`bin/mm-relay sessions`) instead of by
+    // be checked from a terminal (the relay CLI) instead of by
     // hovering the UI and reading pixels. Loopback-only, like every route here.
     SESSIONS_ROUTE: '/sessions',
     // Fires the deck's suggestion path for one session and returns what it

@@ -16,7 +16,6 @@ export type QuickSwitchTarget = { name: string; bundleId: string; iconPngBase64:
  * call it, so the tile the user sees lit and the app the Mac is asked to
  * activate are guaranteed to be the same app. Two separate derivations of
  * "which app is next" is the bug this feature keeps regressing into -- see
- * docs/gotchas.md, "phone-remote quick-switch".
  *
  * `anchor` is the bundle id the Mac's last switch landed on. Null (first tap
  * of a session) or not found (that app quit) both start from index 0.
@@ -54,7 +53,7 @@ export function quickSwitchTargetIndex(
  * apps[0] is the current app: listSwitchableApps() orders by CGWindowList
  * z-order, which does not reliably reorder after an activate, so apps[0] stays
  * pinned across taps. That assumption is what froze the highlight on one tile
- * while the Mac correctly walked forward (Roy, 2026-07-21).
+ * while the Mac correctly walked forward.
  *
  * `anchor` is the bundle id the Mac's last switch landed on, or null before the
  * first tap of a session -- in which case index 0 is the right place to start,
@@ -167,7 +166,7 @@ export function QuickSwitchOverlay(props: {
 
 // The Pro layout's secondary control cluster: the 2x2 key pill grid (top)
 // and the bottom icon row (mic + download/grid/settings). Split out of
-// TouchpadLayout.tsx per the PRD's "subcomponents, not one monolithic file"
+// TouchpadLayout.tsx per the design's "subcomponents, not one monolithic file"
 // ask -- this is the one piece with enough repeated button markup to be
 // worth its own file.
 

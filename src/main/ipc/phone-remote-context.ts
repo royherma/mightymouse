@@ -50,7 +50,7 @@ export function watchFrontmostForPhone(): void {
   unsubscribeFrontmost = context.onFrontmostAppChange((_bundleId, spawnEcho) => {
     // A spawn echo is the watcher (re)starting -- which happens on every phone
     // connect -- not the screen changing. Heralding it downscaled the mirror and
-    // stalled the encoder ~2s per connect (PRD 2026-08-18-1787030000). The app
+    // stalled the encoder ~2s per connect. The app
     // bar below still gets it: a respawn may have missed a real switch.
     if (!spawnEcho) {
       // ABOVE the bar-visibility gate on purpose. Switching apps on the MAC sends

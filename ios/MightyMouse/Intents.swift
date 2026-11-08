@@ -231,7 +231,6 @@ struct TellMyMacIntent: AppIntent {
 }
 
 /// "Hey Siri, what's on my Mac?" — the ship gate for the whole intent surface
-/// (mac-as-an-intent-target §9.4).
 ///
 /// The first intent that brings something BACK from the Mac instead of firing a
 /// verb at it, which is why it reads as the headline: the phone in your pocket

@@ -8,8 +8,7 @@ import { describe, expect, it } from 'vitest'
  *  element inside .proRoot can paint. They are also the only selectors in the
  *  file that a store preview can trigger from outside its own card: SkinPreview
  *  mounts a genuine `.proRoot`, so `body:has(.proRoot)` matched a 180px card and
- *  repainted the entire page in whichever skin sorted last (Roy, on-device
- *  2026-07-31 — the store showed grey and cream columns running the full sheet).
+ *  repainted the entire page in whichever skin sorted last.
  *
  *  No reset inside .skinPreview can undo this; :has() escapes the subtree by
  *  design. So the exclusion has to be written into every such selector, and this
@@ -39,8 +38,8 @@ describe('skin preview scoping', () => {
   /* `.proRoot.proRoot` buys (0,2,0) so the PWA/native height rules outrank the
      skin blocks. That also outranks `.proRoot.skinPreview`, so it forced the
      viewport height onto a store card and the preview grew to fill the sheet --
-     the aspect-ratio never stood a chance (Roy, on-device 2026-07-31, native
-     shell). Any future doubled-class root rule has the same reach. */
+     the aspect-ratio never stood a chance.
+     Any future doubled-class root rule has the same reach. */
   it('excludes .skinPreview from the doubled-class viewport-height rules', () => {
     const unscoped = (THEME_CSS.match(/\.proRoot\.proRoot(?::not\([^)]*\))?/g) ?? []).filter(
       (rule) => !rule.includes(':not(.skinPreview)')

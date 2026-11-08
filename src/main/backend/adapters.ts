@@ -803,7 +803,7 @@ const gemini: BackendAdapter = {
 
   // GEMINI_CLI_TRUST_WORKSPACE=true + -y is the verified-working combo — `--skip-trust`
   // alone left tool calls hanging indefinitely in testing. gemini has no file-attach
-  // flag; images/files aren't wired in this first cut (see PRD out-of-scope).
+  // flag; images/files aren't wired in this first cut.
   buildCommand({ promptFile, shellQuote, shellFileText, fast }) {
     const bin = resolveGemini()
     if (!bin) throw new BinaryNotFoundError('gemini')

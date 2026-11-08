@@ -26,14 +26,13 @@ import ortMjsUrl from '../vad-assets/ort-wasm-simd-threaded.mjs?url'
 const STAGE_PROVIDER = 'vad-web'
 
 /**
- * Live Voice Companion — Phase 1 of the PRD
- * (prds/active/2026-07-12-1783824131-live-voice-companion.md §5, §6
- * `VoiceInputSource`). Wraps `@ricky0123/vad-web`'s `MicVAD` (Silero VAD over
+ * Live Voice Companion — Phase 1 of the design
+ * Wraps `@ricky0123/vad-web`'s `MicVAD` (Silero VAD over
  * ONNX-web + AudioWorklet) to turn a raw mic stream into speech SEGMENTS —
  * "here's one utterance's worth of audio" — firing a callback once per
  * silence-terminated segment.
  *
- * Runs entirely in the RENDERER by design (see the PRD's reality-check table):
+ * Runs entirely in the RENDERER by design:
  * `@ricky0123/vad-node` is dead, so a main-process VAD means hand-rolling
  * `onnxruntime-node` — same native-binary ABI risk class as the
  * `better-sqlite3` codesign scar. `vad-web` needs a DOM `getUserMedia` +

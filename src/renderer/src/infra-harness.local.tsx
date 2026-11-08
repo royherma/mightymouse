@@ -11,7 +11,7 @@ const stamp = '2026-09-24T09:41:00.000Z'
 
 const projects: MightyProject[] = [
   { id: 'p1', name: 'MightyMouse', created: stamp, updated: stamp, repoFolder: '/Users/roy/dev/mm' },
-  { id: 'p2', name: 'petfomo', created: stamp, updated: stamp, repoFolder: '/Users/roy/dev/petfomo' },
+  { id: 'p2', name: 'acme', created: stamp, updated: stamp, repoFolder: '/Users/roy/dev/acme' },
   { id: 'p3', name: 'No folder yet', created: stamp, updated: stamp }
 ]
 
@@ -43,7 +43,7 @@ const mm: InfraRecord = {
   }
 }
 
-const petfomo: InfraRecord = {
+const acme: InfraRecord = {
   checkedAt: stamp,
   appKinds: ['mobile', 'worker'],
   skip: ['push'],
@@ -63,7 +63,7 @@ const petfomo: InfraRecord = {
 
 const infra: ProjectInfra[] = [
   { projectId: 'p1', repoFolder: '/Users/roy/dev/mm', record: mm, live: { logging: 'working', health: 'waiting', errors: 'stopped' } },
-  { projectId: 'p2', repoFolder: '/Users/roy/dev/petfomo', record: petfomo },
+  { projectId: 'p2', repoFolder: '/Users/roy/dev/acme', record: acme },
   { projectId: 'p3', record: null, error: 'This project has no folder on this Mac.' }
 ]
 
@@ -114,7 +114,7 @@ Object.assign(window, {
       want: async (id: string) => find(id),
       setBusiness: async (id: string) => find(id),
       setBrief: async (id: string) => find(id),
-      site: async () => ({ site: null, suggested: 'petfomo' }),
+      site: async () => ({ site: null, suggested: 'acme' }),
       onSiteProgress: () => () => {},
       onChanged: () => () => {}
     },

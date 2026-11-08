@@ -148,7 +148,7 @@ export interface UseConnectionResult {
 }
 
 /**
- * Owns every connect concern (PRD 2026-08-02-1785667000 §7 step 3): candidate
+ * Owns every connect concern: candidate
  * racing, connect/reconnect/backoff, credential presentation, and the
  * `connState` bridge emit to Swift on every transition. Drives `ConnState`
  * exclusively through `transition()` -- nothing here assigns a state literal.
@@ -179,7 +179,7 @@ export function useConnection(): UseConnectionResult {
   // depend on (and re-run) the connect effect itself.
   const escalateNowRef = useRef<(() => void) | null>(null)
 
-  // Bridge emit fires on every transition, no exceptions (PRD §2.5) -- done
+  // Bridge emit fires on every transition, no exceptions -- done
   // here, once, rather than at each call site that might forget it.
   const dispatch = useCallback((event: Parameters<typeof transition>[1]) => {
     setConnStateRaw((prev) => {
@@ -303,7 +303,7 @@ export function useConnection(): UseConnectionResult {
       retryTimer = setTimeout(() => { void connect(target) }, delay)
     }
 
-    // Every known candidate raced in parallel, first answer wins (PRD §3) --
+    // Every known candidate raced in parallel, first answer wins --
     // no priority order, no cache-staleness heuristic. `discoverHost` already
     // does this internally for the tunnel/mDNS/last-known/subnet rungs; this
     // wraps it as the single retry-vs-stranded decision point.
@@ -429,7 +429,7 @@ export function useConnection(): UseConnectionResult {
           dispatch({ type: 'socketClosed', reason: null })
           return
         }
-        // The server states the reason directly now (PRD §2.1) -- no client
+        // The server states the reason directly now -- no client
         // inference. A bare 4401 with no BlockedReason string is stale/unknown
         // and treated as unreachable rather than guessed at.
         if (event.code === 4401) {

@@ -1,6 +1,6 @@
 import { CONFIG } from '../../shared/config'
 
-// Native PiP audio pipe (prds/active/2026-08-09-*-pip-audio-native-transport.md).
+// Native PiP audio pipe.
 // The picture's twin: pip-encoder.ts encodes the display, this encodes the Mac's
 // system audio, and both ride one WebSocket so Swift owns playback end to end.
 // Until this existed the sound reached the phone as a WebRTC track a WebKit

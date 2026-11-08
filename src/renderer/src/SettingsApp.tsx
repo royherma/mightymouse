@@ -93,6 +93,7 @@ import { SettingsSidebar, SidebarToggle } from './components/settings/SettingsSi
 import { relayStatusLine, listNames } from '../../shared/relay-status'
 import { TRANSCRIPT_FORMATS, TRANSCRIPT_FORMAT_KEY } from '../../shared/transcript-format'
 import { useUpdateNotifications } from './hooks/useUpdateNotifications'
+import { prettyOllamaModel } from '../../shared/model-label'
 import { ShieldCheck, BarChart3, Search, X, Eye, EyeOff, SquareTerminal } from 'lucide-react'
 
 // Card + section-header classes now live in components/Card.tsx so every
@@ -2032,7 +2033,7 @@ export default function SettingsApp({
                       aria-label="ollama model"
                     >
                       <Select.Value placeholder="Pick a model">
-                        {ollamaModel || 'Pick a model'}
+                        {ollamaModel ? prettyOllamaModel(ollamaModel) : 'Pick a model'}
                       </Select.Value>
                       <Select.Icon className="text-muted">▾</Select.Icon>
                     </Select.Trigger>
@@ -2045,7 +2046,7 @@ export default function SettingsApp({
                         <Select.Viewport className="p-1">
                           {localModels.map((m) => (
                             <SelectItem key={m.name} value={m.name}>
-                              {m.name} ({(m.sizeBytes / 1e9).toFixed(1)} GB
+                              {prettyOllamaModel(m.name)} ({(m.sizeBytes / 1e9).toFixed(1)} GB
                               {m.vision ? ', vision' : ''}
                               {m.tools ? ', tools' : ''})
                             </SelectItem>
@@ -3407,7 +3408,7 @@ export default function SettingsApp({
         </Section>
 
         {/* Code agent relay — its own "Developer" bucket, gated the same way as
-            Advanced. PRD 2026-08-12-1786501335 §8: kept off the main flow so
+            Advanced. kept off the main flow so
             it never adds a noun ("MCP", "agent") to consumer onboarding. */}
         {advancedMenu && (
           <>
@@ -3685,7 +3686,7 @@ export default function SettingsApp({
 }
 
 /** One-line command a dev pastes into their MCP client config, with a copy
- *  button — the whole "second door" (PRD decision 2) is this one string. */
+ *  button — the whole "second door" is this one string. */
 function CopySnippet({ text }: { text: string }): JSX.Element {
   return (
     <div className="flex items-center gap-2">

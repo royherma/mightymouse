@@ -20,7 +20,7 @@ export interface WhisperLanguage {
   code: string
   /** The language's name in that language — what the picker shows. */
   native: string
-  /** English name, shown as a secondary label so Roy can scan the list. */
+  /** English name, shown as a secondary label so the user can scan the list. */
   english: string
   /** Regional-indicator flag, only where the language maps to one country. */
   flag?: string

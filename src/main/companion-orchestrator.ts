@@ -114,7 +114,7 @@ function underVisionRateLimit(now: number): boolean {
 }
 
 /**
- * Phase 4 (screen-aware vision, §5/§6 of the PRD): if `transcript` looks like
+ * Phase 4 (screen-aware vision): if `transcript` looks like
  * it's referencing on-screen content AND the per-minute rate guard has
  * headroom, grab a screenshot via the EXISTING `screenshot.ts` capture util
  * (same `fireScreenshot()` the panel's ⌘⌥⇧O hotkey calls) and return it as a

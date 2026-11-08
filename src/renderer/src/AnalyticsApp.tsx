@@ -424,7 +424,7 @@ function TopModels({
       {models.map((m, i) => {
         const pct = (m.count / maxCount) * 100
         const pctOfTotal = total > 0 ? Math.round((m.count / total) * 100) : 0
-        const name = m.model === 'unknown' ? '(unknown)' : m.model
+        const name = m.model
         const shortName = name.length > 22 ? name.slice(0, 21) + '…' : name
         return (
           <div

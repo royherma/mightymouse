@@ -17,8 +17,8 @@ import type { PhoneRemoteKeysPosition } from '@shared/types'
 // -- 33.333% OF THE CARD -- with `justify-content: flex-end`, deliberately, so
 // the leftover height collects ABOVE the buttons where the pad can use it. That
 // makes the cell's box top ~130px of open cork above the topmost key, and a bar
-// anchored to it floats in the middle of the trackpad (Roy, on-device: the bar
-// sat level with nothing, well clear of Esc). The cell is the right ref to hold
+// anchored to it floats in the middle of the trackpad.
+// The cell is the right ref to hold
 // -- it is the node the five rules move -- but the edge to measure is its FIRST
 // ELEMENT CHILD, the key grid, which is where the cluster visually starts.
 //
@@ -89,7 +89,7 @@ export function useClusterTop(
   // WHY A FLOOR AND NOT A SECOND ANCHOR. The arc can only be cleared by moving
   // the bar, never by growing the circle: enclosing both needs ~259px on a
   // 393pt portrait pad that offers ~227, so `ringBand` caps at the pad edge and
-  // the icons sit behind the tab chips (Roy, on-device). With the ring off this
+  // the icons sit behind the tab chips. With the ring off this
   // is null and the cluster's own edge wins, which is the only rule that
   // existed before.
   ringClearanceTop: number | null,
@@ -125,7 +125,7 @@ export function useClusterTop(
       // carries `padding: 0 10px 8px`, so its border box runs 10px past the
       // keycaps on each side and 8px below the icon row -- and a bar aligned to
       // that ran flush to the screen edge while the buttons beneath it stopped
-      // short (Roy, on-device). The buttons' own edge is the line to match.
+      // short. The buttons' own edge is the line to match.
       const cell = el.getBoundingClientRect()
       const pad = getComputedStyle(el)
       const padLeft = parseFloat(pad.paddingLeft) || 0

@@ -12,8 +12,8 @@ import type { CompanionStageEvent } from '../shared/companion-debug'
 import type { LiveTurnResult } from '../shared/companion-state'
 import { HIDEOUT_FULL, isHideoutFull, type HideoutPlace } from '../shared/hideout'
 
-// Live Voice Companion overlay (?window=companion) — Phase 0 of the PRD
-// (prds/active/2026-07-12-1783824131-live-voice-companion.md §5). A single
+// Live Voice Companion overlay (?window=companion) — Phase 0 of the design
+// A single
 // small, always-on-top window pinned to the bottom-right corner that hosts
 // the mouse character. The renderer drives the idle→listening→thinking→
 // talking→reacting cycle — this module ONLY manages the window's lifecycle
@@ -239,7 +239,7 @@ export function setCompanionWindow(on: boolean): void {
 
 /**
  * Push one debug/verify stage-event to the companion renderer (Phase 0.5 of the
- * PRD — see src/shared/companion-debug.ts). Real Phase 1-4 adapters running in
+ * design — see src/shared/companion-debug.ts). Real Phase 1-4 adapters running in
  * main will call this directly on every stage transition; today it's only used
  * to re-broadcast Phase 0's mock-timer sample events sent up from the renderer
  * (see registerWindowHandlers in ipc/windows.ts). No-ops if the window isn't up.

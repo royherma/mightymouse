@@ -5,7 +5,6 @@
  * Nothing here ships. It portals the REAL `BottomIconRow` + `KeyPillGrid` on
  * top of the REAL `SwipeDeckSheet`, so the shipped deck stays byte-identical
  * while the four layouts are judged. Whichever wins gets built properly after
- * (PRD 2026-08-19-swipe-deck-control-island, steps 1-4).
  *
  * Real components on purpose, not a sketch: they carry the `data-img` hooks
  * every skin paints against, so what you see here is what a skinned island
@@ -24,7 +23,7 @@ import { KeyPillGrid, BottomIconRow } from './TouchpadControls'
 import DeckControlIsland from './DeckControlIsland'
 import type { KeyPillId, IconBtnId } from './TouchpadControls'
 
-/** The four shapes Roy chose between, plus `real`: the SHIPPED component, so
+/** The four shapes the user chose between, plus `real`: the SHIPPED component, so
  *  what the harness shows is the code that runs on the phone rather than a
  *  mock that has drifted from it. */
 export type IslandVariant = 'off' | 'real' | 'stacked' | 'iconsOnly' | 'wide' | 'corner'

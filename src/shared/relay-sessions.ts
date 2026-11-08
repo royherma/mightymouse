@@ -7,7 +7,7 @@ import { PRIORITY_COPY, priorityWeight, type PriorityLevel, type SessionPriority
  * is: the sort a card claims ("2m") and the sort actually applied have to come
  * from one place, or a list can be ordered by something no card is showing.
  *
- * The organising principle, from the Sessions V2 PRD: a field repeated on every
+ * The organising principle, from the Sessions V2 design: a field repeated on every
  * card is not noise to delete, it is the key worth grouping and filtering BY.
  * Repo, agent, and state each stay on the card and each become a control here.
  */
@@ -217,7 +217,7 @@ export function passesFilters(entry: SessionEntry, filters: readonly SessionFilt
 
 /** Has this session ever said anything? False for one that would render as its
  *  own name and nothing else -- the rows the phone list hides by default, which
- *  were 36 of 43 open sessions when this was measured (2026-09-10).
+ *  were 36 of 43 open sessions when this was measured.
  *
  *  Deliberately NOT `activity.total === 0`. The resolved tail is capped at
  *  RELAY_RESOLVED_TAIL and measured full, so a long session's cards age out of

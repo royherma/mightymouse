@@ -926,7 +926,7 @@ export function registerSettingsHandlers(): void {
     const confirmed = PREFS.getIncognito()
     // Same side effects as the tray toggle: update every window's badge + the
     // tray. Lazy import avoids the index↔ipc load-time cycle (index imports ipc).
-    // Deliberately NOT tracked — see the PRD; logging the toggle would leak the
+    // Deliberately NOT tracked — see the design; logging the toggle would leak the
     // moment the user goes private.
     const { broadcastIncognito } = await import('../index')
     broadcastIncognito(confirmed)

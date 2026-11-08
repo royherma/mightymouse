@@ -31,7 +31,7 @@ let downY = 0
 
 // Below this a mouseup is a bare click, not a drag-select. Bare clicks must stay
 // passive (AX-only): the ⌘C fallback types into whatever is open — it was
-// dismissing the tray's NSMenu ~1s after every click (docs/gotchas.md 2026-08-16).
+// dismissing the tray's NSMenu ~1s after every click.
 const DRAG_MIN_PX = 5
 
 function log(msg: string): void {

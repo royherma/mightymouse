@@ -12,7 +12,7 @@
  * `RemoteEntitlementReason` (supabase/functions/_shared/remote-entitlement.ts).
  * The uncapped reasons (`pro`, `within_limits`, `disabled`, `check_failed`) never
  * reach the client as a cap: they all mean "allowed", and the fail-open posture
- * (§4d of the entitlement PRD) is deliberate — a broken limiter must not break
+ * is deliberate — a broken limiter must not break
  * pairing. So an unrecognised reason resolves to NOT capped, never to capped.
  */
 

@@ -16,11 +16,10 @@ import { MODELS } from './SettingsApp'
 import { Check, Sparkles, ShieldCheck, Zap, Lock, ChevronDown } from 'lucide-react'
 
 // One-screen setup — the real first run since 2026-08-05.
-// PRD: prds/active/2026-08-05-1785910227-onboarding-single-screen-permissions.md
 //
 // What this deliberately does NOT have, versus the wizard: no step machine, no
 // auto-advance, no resume marker, no per-row restart button, and no pairing
-// explainer (Roy, 2026-08-05 — there is no leftover vertical space to fill).
+// explainer.
 
 // Row order is the ordering rationale the wizard expressed by gating: the hard
 // requirement first, the two optional asks after. Nothing is locked — a user may
@@ -233,7 +232,7 @@ export default function OnboardingOneScreen(): JSX.Element {
         window.api.onboarding.getChecks()
       ])
       // A DEV REPLAY is a look at FIRST RUN, so it shows the first-run default —
-      // Roy's real `claude` pref otherwise made the replay open on Claude. Read
+      // The user's real `claude` pref otherwise made the replay open on Claude. Read
       // from a live getChecks, not `checks`, which this effect races.
       const replay = live.some((c) => c.test.mocked)
       setBackend(replay ? CONFIG.DEFAULT_BACKEND : prefs.backend)

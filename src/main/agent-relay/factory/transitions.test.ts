@@ -12,7 +12,7 @@ function project(partial: Partial<FactoryProject> = {}): FactoryProject {
   return {
     id: 'p1',
     mightyId: 'm1',
-    name: 'PetFOMO',
+    name: 'Acme',
     repoRoot: '/repo',
     integrationRef: 'dev',
     workflowVersion: 1,

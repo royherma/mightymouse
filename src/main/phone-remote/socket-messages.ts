@@ -35,7 +35,7 @@ export interface PendingFrame {
   // behavior every client had before chat dictation existed.
   audioTo: PhoneAudioDestination
   audioId: string
-  // Diagnostic only -- whisper re-runs this same audio and wins (PRD §3b C2).
+  // Diagnostic only -- whisper re-runs this same audio and wins.
   audioPhoneText: string
   audioQueued: boolean
   // Which handler the NEXT binary frame belongs to. Defaults to 'audio' so a

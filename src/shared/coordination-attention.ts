@@ -1,5 +1,5 @@
 /**
- * Who needs Roy, who can wait, who is ready to wrap up.
+ * Who needs the user, who can wait, who is ready to wrap up.
  *
  * Five levels replace the five roster state words for exactly one screen: the
  * roster still drives "Waiting on you" (blocked/waiting rules, no model
@@ -63,7 +63,7 @@ function reasonFor(candidate: AttentionCandidate): string {
   return relay?.tldr || relay?.preview || ''
 }
 
-/** Where a scored (or rule-placed) row lands. Matches the PRD's five levels:
+/** Where a scored (or rule-placed) row lands. Matches the design's five levels:
  *  0 finished/nothing asked, 1 idle, 2 working fine, 3 wants a reply soon,
  *  4 stuck -- 0-1 can wrap up or wait, 2 waits, 3-4 need a reply now. */
 export function groupForLevel(level: number, canWrapUp: boolean): AttentionGroup {
@@ -126,7 +126,7 @@ export function clampLevel(score: number): number {
  *  `lastSeen` to the minute means a session that is merely still alive
  *  (heartbeats every few seconds) does not force a re-check on every poll --
  *  only a real state change does, matching "a reload with nothing new makes
- *  zero calls" from the PRD. */
+ *  zero calls" from the design. */
 export function attentionCacheKey(candidate: AttentionCandidate): string {
   const { agent, relay } = candidate
   const lastSeenBucket = Math.floor(agent.session.lastSeen / 60_000)

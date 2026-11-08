@@ -179,12 +179,12 @@ export const PATHS = {
   // server listening until asked"), 1 = on. Restored on launch same as the
   // cursor/island/companion toggles (see startAppTail() in main/index.ts).
   PHONE_REMOTE_PREF: join(ROOT_DIR, 'phone-remote-enabled.txt'),
-  // Paired phone credentials (PWA-stranded PRD). Encrypted at rest via
+  // Paired phone credentials. Encrypted at rest via
   // safe-storage: unlike the toggles beside it, this file grants full remote
   // control of the Mac to whoever holds a value in it.
   PHONE_REMOTE_DEVICES: join(ROOT_DIR, 'phone-remote-devices.json'),
   // Append-only audit trail for agent-relay requests (notify/ask/approve/show):
-  // one JSONL row per resolution, including drops. Not a UI in v1 -- PRD §6.
+  // one JSONL row per resolution, including drops. Not a UI in v1 -- design.
   AGENT_RELAY_LOG: join(ROOT_DIR, 'agent-relay-log.jsonl'),
   AGENT_RELAY_LOOPBACK_LOG: join(ROOT_DIR, 'agent-relay-loopback-push.jsonl'),
   // Agent relay MCP server toggle. Absent/0 = off (default, opt-in) -- same
@@ -216,7 +216,7 @@ export const PATHS = {
   // bug report.
   PHONE_REMOTE_JOURNAL: join(ROOT_DIR, 'phone-remote-journal.json'),
   MIRROR_TUNING_LEDGER: join(ROOT_DIR, 'mirror-tuning-ledger.jsonl'),
-  // Off-Wi-Fi access via Cloudflare Tunnel toggle (cloudflare-tunnel PRD).
+  // Off-Wi-Fi access via Cloudflare Tunnel toggle.
   // Absent/0 = off (default, opt-in) -- flipping this is what provisions +
   // runs the tunnel alongside the LAN server; nothing to detect or install.
   PHONE_REMOTE_TUNNEL_PREF: join(ROOT_DIR, 'phone-remote-tunnel-enabled.txt'),

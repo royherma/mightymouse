@@ -642,7 +642,7 @@ export async function runBackend(opts: RunOptions): Promise<void> {
   let spawnEnv = shell.env()
 
   // These children are the app talking to itself (suggestions, act, panel runs) —
-  // never a session Roy is watching. Claude Code hooks are inherited, so without a
+  // never a session the user is watching. Claude Code hooks are inherited, so without a
   // marker the Stop hook pushes each one's raw output to his phone as a card.
   spawnEnv = { ...spawnEnv, MM_INTERNAL_RUN: runId }
 

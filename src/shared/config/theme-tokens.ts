@@ -150,7 +150,7 @@ export const THEME_TOKENS = {
   fontSm: '12px',
   fontMd: '13px',
   // fontMlg is the chat-body size: one notch above fontMd so the conversation
-  // outweighs the chrome around it. Bumped 13→14 (2026-07-17) — 13/400 on the warm
+  // outweighs the chrome around it. Bumped 13→14 — 13/400 on the warm
   // surface read as the thinnest thing on screen despite being the content.
   fontMlg: '14px',
   fontLg: '16px',

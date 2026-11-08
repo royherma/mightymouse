@@ -123,7 +123,7 @@ function downloadManagedBinary(
 
 /**
  * ffmpeg: LGPL v2.1+ built from source and notarized under our Developer ID
- * (prds/active/2026-07-23-1784775485-managed-ffmpeg-download.md). The record
+ * The record
  * path needs no GPL component — recorder.ts encodes with Apple's hardware
  * h264_videotoolbox, and listen-recorder.ts writes plain PCM.
  */
@@ -155,7 +155,7 @@ export function downloadManagedWhisper(
  *      @loader_path/../lib, so a flattened unpack dies in dyld on every run.
  *   2. The archive must be fetched by the app, never by a browser: a file
  *      carrying com.apple.quarantine exits 137 because NVIDIA's build is
- *      ad-hoc signed, not notarized (PRD 2026-09-21).
+ *      ad-hoc signed, not notarized.
  */
 export function downloadManagedParakeet(
   onProgress?: (pct: number) => void

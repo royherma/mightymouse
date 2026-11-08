@@ -18,7 +18,7 @@ import { COMPANION_STATE_LABEL, type CompanionState } from '../../../shared/comp
 import { useIpcSubscriptions } from '../hooks/useIpcSubscriptions'
 import { Button } from './Button'
 
-// Live Voice Companion — Phase 0.5 debug/verify panel (the PRD's §5 "Phase 0.5"
+// Live Voice Companion — Phase 0.5 debug/verify panel (the design's "Phase 0.5"
 // ship gate: "every later phase is verifiable without guesswork"). Plain HTML/CSS
 // list, zero three.js/r3f dependency — usable from Phase 0 day one and unaffected
 // by Phase 3's eventual character-renderer swap.

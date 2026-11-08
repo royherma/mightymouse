@@ -50,7 +50,7 @@ describe('flat ring focus traversal', () => {
   })
 
   // The point of the rewrite: four directions, two moves. Up/Right go forward,
-  // Left/Down go back -- so no swipe is ever dead. The pairing is Roy's, set
+  // Left/Down go back -- so no swipe is ever dead. The pairing is the user's, set
   // from driving the band on-device; it is NOT reading order.
   it('steps forward on both Up and Right', () => {
     const rest = DECK.filter((x) => x.node !== 'switcher')
@@ -65,7 +65,7 @@ describe('flat ring focus traversal', () => {
   })
 
   // Inside a sheet the vertical pair INVERTS: a settings sheet is a list, not a
-  // ring of buttons around a trackpad, so Down must walk down the screen. Roy
+  // ring of buttons around a trackpad, so Down must walk down the screen. The user
   // set both rules on the band -- the deck one above, then this one.
   it('inverts Up/Down inside a sheet so Down walks down the list', () => {
     const rest = DECK.filter((x) => x.node !== 'prev')

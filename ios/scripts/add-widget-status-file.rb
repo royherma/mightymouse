@@ -4,7 +4,6 @@
 # it exists, so a NEW file needs this file-only script instead -- same shape
 # as add-recorder-files.rb for the app target.
 #
-# PRD: prds/active/2026-08-02-1785661910-ios-widgets-hold-to-note.md §5 step 4.
 
 require 'xcodeproj'
 

@@ -30,7 +30,7 @@ const RESPAWN_DELAY_MS = 5000
  *  activation. It fans out (a respawn may have missed real switches, so
  *  consumers still want the fresh value) but must never be treated as motion:
  *  every phone connect respawns the watcher, and the echo heralding a downscale
- *  cost a 2-keyframe encoder stall per connect (PRD 2026-08-18-1787030000). */
+ *  cost a 2-keyframe encoder stall per connect. */
 type Listener = (bundleId: string, spawnEcho: boolean) => void
 type SetListener = () => void
 

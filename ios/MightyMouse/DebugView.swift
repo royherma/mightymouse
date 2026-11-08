@@ -446,7 +446,7 @@ enum DebugReport {
             "searchOutcome: \(model.searchOutcome ?? "nil")",
             "localNetworkAsked: \(model.localNetworkAsked)",
             "cachedHost: \(Prefs.lastRemoteURL?.absoluteString ?? "nil")",
-            // Presence only. A tunnel hostname is a routable address to Roy's
+            // Presence only. A tunnel hostname is a routable address to the user's
             // Mac, so the value never goes in a pasteable blob.
             "tunnelHost: \(hasTunnelHost(model) ? "set" : "nil")",
             "credentials: \(model.credentials.hasAnyStoredValue() ? "present" : "none")",
@@ -464,7 +464,7 @@ enum DebugReport {
 
     /// Presence + OSStatus, never the value. "unreadable (-34018)" is a signing
     /// problem; "unreadable (-25300)" means pairing never wrote it -- the split
-    /// that §13b of the agent-relay PRD burned a session distinguishing.
+    /// that burned a session distinguishing.
     private static func deviceCredentialState(_ model: AppModel) -> String {
         let key = Credentials.webKeyPrefix + AppConfig.deviceCredentialKey
         if model.credentials.value(for: key) != nil { return "readable" }

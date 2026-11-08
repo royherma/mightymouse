@@ -5,7 +5,7 @@ import UIKit
 
 /// Swift's only job here is picking which URL the WebView loads. Everything
 /// past that -- pairing, auth, retry, blocked reasons -- is server-stated and
-/// rendered by the page itself (PRD 2026-08-02-1785667000 §2.4).
+/// rendered by the page itself.
 @MainActor
 final class AppModel: ObservableObject {
     @Published var remoteURL: URL?

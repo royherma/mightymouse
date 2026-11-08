@@ -123,12 +123,12 @@ export const CHANNELS = Object.freeze({
   hudStopRun: 'hud-stop-run',
   hudRelayAnswer: 'hud-relay-answer',
   // Replaces the old "Open the screen" affordance on the Mac card — see
-  // take-me-to-the-session PRD §5.5. Fire-and-forget: the resolver shells out
+  // take-me-to-the-session design. Fire-and-forget: the resolver shells out
   // to cmux/tmux/open on the main side, the renderer never waits on it.
   hudGoToOrigin: 'hud-go-to-origin',
 
   // ── renderer → main (invoke / handle) ──────────────────────────────────────
-  // §5.4: a dead "go to session" button is worse than none, so the card asks
+  // a dead "go to session" button is worse than none, so the card asks
   // FIRST whether the origin resolves before ever rendering the button.
   hudCanGoToOrigin: 'hud-can-go-to-origin',
   getInitialData: 'get-initial-data',
@@ -246,9 +246,9 @@ export const CHANNELS = Object.freeze({
   settingsSetActHighlight: 'settings-set-act-highlight',
   phoneRemoteSetEnabled: 'phone-remote-set-enabled',
   phoneRemoteGetQr: 'phone-remote-get-qr',
-  // Code agent relay (PRD 2026-08-12-1786501335). Toggle starts/stops the
+  // Code agent relay. Toggle starts/stops the
   // loopback MCP server; status is polled by Settings for the health line;
-  // sendTest fires a real `notify` push so setup ends in a felt buzz (§6c).
+  // sendTest fires a real `notify` push so setup ends in a felt buzz.
   agentRelaySetEnabled: 'agent-relay-set-enabled',
   agentRelayGetStatus: 'agent-relay-get-status',
   coordinationGet: 'coordination-get',
@@ -279,14 +279,14 @@ export const CHANNELS = Object.freeze({
   factoryCodeSize: 'factory-code-size',
   agentRelaySendTest: 'agent-relay-send-test',
   // Which kinds of message may buzz the phone. Gates the push only -- the card
-  // reaches every inbox either way (PRD 2026-08-14-1786690000).
+  // reaches every inbox either way.
   agentRelayGetPushFilter: 'agent-relay-get-push-filter',
   agentRelaySetPushFilter: 'agent-relay-set-push-filter',
   // The severity floor under the notify switch, stored alongside it.
   agentRelaySetNotifyLevel: 'agent-relay-set-notify-level',
   agentRelaySetTurnEndPing: 'agent-relay-set-turn-end-ping',
   // The Mac's OWN alert switches, separate from the phone's above
-  // (PRD 2026-08-22-1787388684): which kinds pop up here, and whether they are
+  // which kinds pop up here, and whether they are
   // drawn as macOS notifications or MightyMouse cards.
   agentRelayGetMacAlerts: 'agent-relay-get-mac-alerts',
   agentRelaySetMacAlerts: 'agent-relay-set-mac-alerts',
@@ -441,7 +441,7 @@ export const CHANNELS = Object.freeze({
   webrtcCapturePcm: 'webrtc-capture-pcm',
   webrtcCaptureMicPcm: 'webrtc-capture-mic-pcm',
   // A SECOND encode of the running capture track -- Annex-B H.264 for the
-  // phone's native PiP layer (prds/active/2026-08-09-*-native-pip.md). Distinct
+  // phone's native PiP layer. Distinct
   // from the WebRTC path: that stays the foreground mirror, this exists only so
   // backgrounded Swift has CMSampleBuffers.
   webrtcCapturePipStart: 'webrtc-capture-pip-start',
@@ -530,7 +530,7 @@ export const CHANNELS = Object.freeze({
   tourSkip: 'tour-skip',
   // Press-to-confirm probe (renderer arms/disarms; main pushes hit/wrong/mods
   // events back). ONE channel pair for all three hotkey steps — see
-  // src/main/tour-hotkey-probe.ts + the PRD's mandated simplification.
+  // src/main/tour-hotkey-probe.ts + the design's mandated simplification.
   tourProbeArm: 'tour-probe-arm',
   tourProbeEvent: 'tour-probe-event',
   tourMockConfirm: 'tour-mock-confirm',
@@ -760,7 +760,7 @@ export const CHANNELS = Object.freeze({
   // Drop a session's last turn, for regenerate (resend the same q) and edit-resend
   // (resend an edited q) — both replace the tail of turns[] instead of branching.
   mightyTruncateLastTurn: 'mighty-truncate-last-turn',
-  // Save a session to a file the user picks, as Markdown or the PRD's flat JSON shape.
+  // Save a session to a file the user picks, as Markdown or the design's flat JSON shape.
   mightyExportSession: 'mighty-export-session',
 
   // ── main → renderer (webContents.send) ─────────────────────────────────────

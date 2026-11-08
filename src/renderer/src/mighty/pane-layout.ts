@@ -19,11 +19,11 @@ const PRESET_BY_PANE_COUNT: Record<number, PaneLayoutPreset> = {
   6: '2x3'
 }
 
-/** Max panes a single tab may hold (PRD ship gate: "up to 6 panes"). */
+/** Max panes a single tab may hold. */
 export const MAX_PANES_PER_TAB = 6
 
 /** Below this px width, PaneGrid stacks panes vertically regardless of preset — must
- *  be read off the pane area's own ResizeObserver, not window width (see PRD risk:
+ *  be read off the pane area's own ResizeObserver, not window width (see design risk:
  *  sidebar/rail toggles resize the pane area without resizing the window). */
 export const PANE_STACK_WIDTH_THRESHOLD = 640
 

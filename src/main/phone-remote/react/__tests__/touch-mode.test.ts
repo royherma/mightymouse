@@ -49,7 +49,7 @@ describe('touch-mode', () => {
 describe('touch-mode drives the gesture entry gate', () => {
   // use-mirror-gestures reads `drivesCursor(state)` via touchModeActiveRef to
   // decide whether a one-finger touchdown warps immediately or must wait out
-  // the 1000ms long-press. These lock the PRD's stated toggle semantics.
+  // the 1000ms long-press. These lock the design's stated toggle semantics.
   it('toggle ON makes a one-finger drag drive the cursor with no hold', () => {
     const held = transition('pan', { type: 'setHold', hold: true })
     expect(drivesCursor(held)).toBe(true)

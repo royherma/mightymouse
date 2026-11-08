@@ -5,7 +5,7 @@
  *  them. That combination burned us twice -- a change to two of them at once
  *  read as "worse" with no way to tell which one did it, and a later revert
  *  restored one constant while silently leaving two at their experimental
- *  values, which nobody caught until Roy felt it again.
+ *  values, which nobody caught until the user felt it again.
  *
  *  So: these values are approved-by-feel, not derived. This test fails on any
  *  edit to them. That failure is not a bug to route around -- it is the prompt
@@ -93,7 +93,7 @@ describe('phone-remote cursor feel (approved on-device — change one at a time)
 
   it('holds a slow finger to a fixed precision speed', () => {
     // Absolute, not a fraction of the slider -- see pointer-accel.ts. 2.5 was
-    // shipped and read as "very slow and jumpy" at Roy's 10.6 setting; 5
+    // shipped and read as "very slow and jumpy" at the user's 10.6 setting; 5
     // matches the fraction-era feel there while still capping 20x.
     expect(MOVE_SLOW_MULTIPLIER).toBe(5)
   })
@@ -104,8 +104,8 @@ describe('phone-remote cursor feel (approved on-device — change one at a time)
     //    so two hops fight for the cursor. Reads as jumpy, no visible cause.
     //  - UNDERRUN: steps finishing early, leaving the cursor perfectly still
     //    for the rest of the window. At 50/sec that is a 50Hz move-stop
-    //    stutter -- invisible on a flick, obvious on a slow circle (Roy:
-    //    "it's almost like interval'd", 2026-07-27). Fixed step spacing hit
+    //    stutter -- invisible on a flick, obvious on a slow circle.
+    //    Fixed step spacing hit
     //    this the moment the send interval halved to 20ms.
     // The window must therefore be nearly full, but not full.
     const windowMs = glideWindowMs()

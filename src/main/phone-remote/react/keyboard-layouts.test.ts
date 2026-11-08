@@ -1,7 +1,7 @@
 /**
  * Pins the ANSI/ISO decision. An ISO Mac physically has one MORE key than an
  * ANSI one (§ left of Z). We detect the difference but deliberately draw the
- * ANSI board for both -- Roy has an ISO Mac, tried the drawn § key, and asked
+ * ANSI board for both -- the user has an ISO Mac, tried the drawn § key, and asked
  * for it removed. These tests keep that a DECISION rather than something that
  * silently comes back the next time someone "fixes" the layout to match a real
  * keyboard.

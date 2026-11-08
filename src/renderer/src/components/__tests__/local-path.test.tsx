@@ -13,7 +13,7 @@ describe('local paths in agent text', () => {
     const html = renderToStaticMarkup(
       <Markdown cwd={CWD}>
         {
-          'Saved /Users/roy/Dev/App/.claude/artifacts/shot.png. Fixed in src/main/dock.ts:42, see `docs/gotchas.md`, [index](src/main/index.ts) and https://x.com/a/b.png or 1/2.5'
+          'Saved /Users/roy/Dev/App/.claude/artifacts/shot.png. Fixed in src/main/dock.ts:42, see `docs/notes.md`, [index](src/main/index.ts) and https://x.com/a/b.png or 1/2.5'
         }
       </Markdown>
     )
@@ -23,7 +23,7 @@ describe('local paths in agent text', () => {
     expect(hrefs).toEqual([
       `${CWD}/.claude/artifacts/shot.png`,
       `${CWD}/src/main/dock.ts`,
-      `${CWD}/docs/gotchas.md`,
+      `${CWD}/docs/notes.md`,
       `${CWD}/src/main/index.ts`
     ])
     expect(html).toContain('href="https://x.com/a/b.png"')

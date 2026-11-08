@@ -1,6 +1,5 @@
 /**
  * session-meter.ts — bills an off-Wi-Fi Phone Remote session by wall-clock time
- * (PRD 2026-08-04-1785824719-remote-real-minute-metering).
  *
  * WHY THE CLIENT OWNS THE CLOCK: the tunnel provision is cached on disk and reused
  * forever, so the `phone-remote-tunnel` Edge Function fires roughly once per

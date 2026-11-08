@@ -314,7 +314,7 @@ function pushTokenId(token: string): string {
 }
 
 /** POST /push-token — iOS re-sends its APNs device token here on every launch
- *  (PRD §6c: a rotated token must self-heal invisibly). Authed by the SAME
+ *  Authed by the SAME
  *  device credential /pair minted, carried in the body since this is a plain
  *  POST, not the WS upgrade. */
 export function handlePushToken(req: IncomingMessage, res: ServerResponse): void {
@@ -414,7 +414,7 @@ export const shareAttempts = rateLimitBucket()
 
 /** POST /share — the iOS Share Extension's one call. Takes a base64 image or a
  *  string of text and hands it to the same Mac-side handler the WS path uses;
- *  only the transport differs (share-to-mac PRD §4). No socket is opened, so
+ *  only the transport differs. No socket is opened, so
  *  the single-active-socket rule is never engaged and a share cannot evict the
  *  live deck. */
 export function handleShare(req: IncomingMessage, res: ServerResponse): void {
@@ -524,7 +524,7 @@ export const intentAttempts = rateLimitBucket()
  *  rather than buffer it. */
 const INTENT_BODY_LIMIT_BYTES = 2048
 
-/** POST /intent -- the App Intent's one call (mac-as-an-intent-target PRD §5).
+/** POST /intent -- the App Intent's one call.
  *  Same authed-stateless-POST shape as handleShare: no socket is opened, so the
  *  single-active-socket rule is never engaged and Siri cannot evict the live
  *  deck. Its own rate-limit bucket, so a flood here can't starve /pair -- the
@@ -610,7 +610,7 @@ export function handleIntent(req: IncomingMessage, res: ServerResponse): void {
     void run
       .then((result) => {
         // `meta` rides along on success AND failure: it is how a run that went
-        // wrong on Roy's machine gets diagnosed without reproducing it (which
+        // wrong on the user's machine gets diagnosed without reproducing it (which
         // control was pressed, what confirmed it, how long it took).
         if (result.ok) {
           reply(200, { ok: true, spoken: result.spoken, meta: result.meta })
@@ -618,7 +618,7 @@ export function handleIntent(req: IncomingMessage, res: ServerResponse): void {
         }
         // 200 with ok:false on purpose: the intent SPEAKS the reason, and a
         // non-2xx would surface to Siri as "MightyMouse isn't responding"
-        // instead of the sentence that tells Roy what to fix.
+        // instead of the sentence that tells the user what to fix.
         reply(200, {
           ok: false,
           reason: result.reason,

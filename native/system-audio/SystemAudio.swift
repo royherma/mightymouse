@@ -4,7 +4,7 @@
 // capture on Windows and ChromeOS only. On macOS `audio: true` silently yields
 // no audio track — Apple gates system audio behind ScreenCaptureKit, which
 // Chromium doesn't surface through that API. So the phone-remote screen mirror
-// (prds/active/2026-07-21-1784600649-phone-remote-computer-audio.md) captures
+// captures
 // audio here natively and injects it into the existing RTCPeerConnection.
 //
 // Permission: this rides the SAME Screen Recording (TCC) grant the video mirror

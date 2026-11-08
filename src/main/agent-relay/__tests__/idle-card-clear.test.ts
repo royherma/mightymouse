@@ -4,7 +4,7 @@
  * The bug this locks down: an idle notify settles at mint (it asks nothing), so
  * it never reaches the store's change feed as a retirement and the clear-push
  * wiring on `onRelayStoreChanged` never fires for it. The card sat on the lock
- * screen looking tappable forever, long after the session had moved on -- Roy,
+ * screen looking tappable forever, long after the session had moved on -- the user,
  * on device, with "Tell it what's next" still offered on a turn he had already
  * taken. `UserPromptSubmit` is the signal it is dead: typing answers "your
  * turn" by construction.

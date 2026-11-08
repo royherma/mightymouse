@@ -15,7 +15,7 @@ import { SidebarRow } from '../mighty/MightySidebar'
 import { useSessionArchive } from '../hooks/useSessionArchive'
 import { useIsAdmin } from '../hooks/useIsAdmin'
 /**
- * The Mac's Code surface (agent-relay PRD §6b). Deliberately NOT a port of
+ * The Mac's Code surface. Deliberately NOT a port of
  * CodeSheet.tsx: every decision with a right answer comes from
  * `@shared/relay-cards`, and nothing about how it looks is shared.
  */

@@ -21,30 +21,30 @@ const key = (name: string, provider: string, extra: Partial<KeyRecord> = {}): Ke
 const owners: KeyOwner[] = [
   {
     id: 'dlc',
-    prefixes: ownerPrefixes(['datalabellingco', 'datalabellingco', 'gokuna'], KEY_PROVIDERS)
+    prefixes: ownerPrefixes(['labelco', 'labelco', 'nimbus'], KEY_PROVIDERS)
   },
-  { id: 'petfomo', prefixes: ownerPrefixes(['PetFOMO', 'petfomo'], KEY_PROVIDERS) }
+  { id: 'acme', prefixes: ownerPrefixes(['Acme', 'acme'], KEY_PROVIDERS) }
 ]
 
 const names = (provider: string, projectId: string, keys: KeyRecord[]): string[] =>
   keysFor(provider, undefined, projectId, keys, owners).map((m) => m.key.name)
 
 describe('keysFor', () => {
-  it('counts a GOKUNA_ key for datalabellingco only', () => {
-    const keys = [key('GOKUNA_POSTHOG_PROD_TOKEN', 'posthog')]
-    expect(names('posthog', 'dlc', keys)).toEqual(['GOKUNA_POSTHOG_PROD_TOKEN'])
-    expect(names('posthog', 'petfomo', keys)).toEqual([])
+  it('counts a NIMBUS_ key for labelco only', () => {
+    const keys = [key('NIMBUS_POSTHOG_PROD_TOKEN', 'posthog')]
+    expect(names('posthog', 'dlc', keys)).toEqual(['NIMBUS_POSTHOG_PROD_TOKEN'])
+    expect(names('posthog', 'acme', keys)).toEqual([])
   })
 
   it('counts an unprefixed key for every project', () => {
     const keys = [key('SENTRY_AUTH_TOKEN', 'sentry')]
     expect(names('sentry', 'dlc', keys)).toEqual(['SENTRY_AUTH_TOKEN'])
-    expect(names('sentry', 'petfomo', keys)).toEqual(['SENTRY_AUTH_TOKEN'])
+    expect(names('sentry', 'acme', keys)).toEqual(['SENTRY_AUTH_TOKEN'])
   })
 
   it('lets an explicit Used by list replace the name rule', () => {
-    const keys = [key('SENTRY_AUTH_TOKEN', 'sentry', { projects: ['petfomo'] })]
-    expect(names('sentry', 'petfomo', keys)).toEqual(['SENTRY_AUTH_TOKEN'])
+    const keys = [key('SENTRY_AUTH_TOKEN', 'sentry', { projects: ['acme'] })]
+    expect(names('sentry', 'acme', keys)).toEqual(['SENTRY_AUTH_TOKEN'])
     expect(names('sentry', 'dlc', keys)).toEqual([])
   })
 
@@ -53,10 +53,10 @@ describe('keysFor', () => {
       'posthog',
       undefined,
       'dlc',
-      [key('GOKUNA_POSTHOG_PROD_TOKEN', 'posthog')],
+      [key('NIMBUS_POSTHOG_PROD_TOKEN', 'posthog')],
       owners
     )
-    expect(m.why).toBe('name starts with GOKUNA_')
+    expect(m.why).toBe('name starts with NIMBUS_')
   })
 })
 
@@ -97,8 +97,8 @@ describe('duplicateKeys', () => {
   it('leaves prod and staging keys alone', () => {
     expect(
       pairs([
-        key('GOKUNA_POSTHOG_PROD_TOKEN', 'posthog'),
-        key('GOKUNA_POSTHOG_STAGING_TOKEN', 'posthog')
+        key('NIMBUS_POSTHOG_PROD_TOKEN', 'posthog'),
+        key('NIMBUS_POSTHOG_STAGING_TOKEN', 'posthog')
       ])
     ).toEqual([])
     expect(

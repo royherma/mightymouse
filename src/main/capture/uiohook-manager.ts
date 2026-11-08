@@ -39,7 +39,7 @@ function load(): Hook | null {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     hook = require('uiohook-napi').uIOhook as Hook
     // Log which native module actually loaded. A degraded uiohook tap throttles
-    // system-wide typing (see prds/shipped/…uiohook-typing-swallow-bug.md) and the
+    // system-wide typing and the
     // one confirmed cause was a stray native binary copied in from another worktree.
     // That degraded state loads fine — there's no JS probe for it — so the actionable
     // signal is this line: if typing lag ever recurs, the log shows the resolved

@@ -63,7 +63,7 @@ export interface Session {
 
 /** Arms the step's confirm source and wires up all timers/listeners. Returns a
  *  `cleanup()` that disarms and tears down everything — call it from the owning
- *  effect's return, and ALWAYS call it on unmount/step-change (PRD §5.2: an
+ *  effect's return, and ALWAYS call it on unmount/step-change (an
  *  armed probe must never outlive its step). */
 export function startSession(stepKey: TourStepKey, deps: SessionDeps): Session {
   let machine = initMachine(deps.now())

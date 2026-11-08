@@ -96,7 +96,7 @@ export function showTourWindow(source: TourSource): void {
     if (!completing) track(ANALYTICS_EVENT.tour_handoff, { to: 'none', dismissed: true })
     tourWindow = null
     setTourWindowRef(null)
-    // Belt-and-braces (PRD §5.2): an armed probe that outlives the window would
+    // Belt-and-braces: an armed probe that outlives the window would
     // silently swallow a real hotkey press forever. A crashed/closed renderer
     // must not strand it armed. disarmProbe() also tears down any live demo
     // surface, so closing the tour mid-demo can't strand a panel or HUD card.
@@ -105,7 +105,7 @@ export function showTourWindow(source: TourSource): void {
 }
 
 /** The live tour window, or null. Used by tour-hotkey-probe.ts to push probe
- * events and by capture-hotkey.ts-adjacent checks for focus state (§5.3). */
+ * events and by capture-hotkey.ts-adjacent checks for focus state. */
 export function getTourWindow(): BrowserWindow | null {
   return tourWindow
 }

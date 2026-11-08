@@ -180,7 +180,7 @@ export async function listAgentModels(): Promise<AgentModelOption[]> {
     for (const m of await cursorModels()) options.push({ harness: 'cursor', ...m })
   }
   if (installed.includes('claude') && showsOn('ollama', 'code')) {
-    for (const model of await listCodingModels()) options.push({ harness: 'ollama', model, label: model })
+    for (const model of await listCodingModels()) options.push({ harness: 'ollama', model, label: prettyOllamaModel(model) })
   }
   return options
 }
@@ -189,7 +189,7 @@ export async function listChatSourceModels(): Promise<SourceModel[]> {
   const out: SourceModel[] = []
   if (showsOn('openrouter', 'chat') && (await hasOpenRouterKey())) {
     for (const model of await listOpenRouterModels()) {
-      out.push({ source: 'openrouter', model, label: model, thinks: openRouterThinks(model) })
+      out.push({ source: 'openrouter', model, label: claudeModelLabel(model), thinks: openRouterThinks(model) })
     }
   }
   if (showsOn('opencode', 'chat') && availableHarnesses().includes('opencode')) {

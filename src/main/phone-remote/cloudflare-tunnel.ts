@@ -1,6 +1,6 @@
 /**
  * Cloudflare Tunnel lifecycle for Phone Remote's off-LAN path — replaces
- * tailscale.ts (PRD 2026-07-19-1784445290-phone-remote-cloudflare-tunnel).
+ * tailscale.ts.
  *
  * Nothing to detect, nothing for the user to install or log into: the
  * `phone-remote-tunnel` Edge Function provisions a named tunnel + DNS on
@@ -534,7 +534,7 @@ export function stopTunnelSync(): void {
 }
 
 /** Stop cloudflared. The tunnel + DNS stay provisioned server-side, so the
- *  next enable is just a cached-token spawn (PRD §4: fast re-enable). Queued
+ *  next enable is just a cached-token spawn. Queued
  *  (see `enqueue`) alongside startTunnel() for the same reason. */
 export function stopTunnel(): Promise<void> {
   return enqueue(async () => {

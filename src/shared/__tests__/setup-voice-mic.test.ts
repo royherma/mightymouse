@@ -4,7 +4,7 @@ import { voiceRowState, SETUP_STATUS, SETUP_FIX_KIND } from '../setup-check'
 /**
  * The Voice row must describe the whole capability, not just the binaries.
  *
- * neljlee92 (2026-09-06) saw "Voice transcription — Ready" while his mic was
+ * A beta tester saw "Voice transcription — Ready" while his mic was
  * blocked, pressed the install button four times in four minutes, and never
  * transcribed a word. Every assertion here is that session.
  */

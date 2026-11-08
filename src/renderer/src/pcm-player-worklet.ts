@@ -1,7 +1,7 @@
 // pcm-player-worklet.ts — AudioWorkletProcessor that plays raw float32 PCM
 // pushed in from the main thread.
 //
-// Why a worklet at all: the system-audio path (computer-audio PRD) delivers
+// Why a worklet at all: the system-audio path delivers
 // bytes from a native ScreenCaptureKit subprocess, NOT from a MediaStream.
 // WebRTC has no addTrack(rawBytes) — a track can only come from a real audio
 // graph node. So we push PCM here, this processor drains it into the graph,

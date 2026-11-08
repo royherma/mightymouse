@@ -8,7 +8,7 @@
 //
 // An adapter is CODE, not config: each app has its own AppleScript dialect
 // ("active tab index" vs "select tab") and many expose nothing at all. That is
-// why there is no user-editable mapping here — see the PRD's section 8.
+// why there is no user-editable mapping here — see the design's section 8.
 
 import { devLog } from '../../../../shared/env'
 import {

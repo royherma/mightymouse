@@ -81,7 +81,7 @@ function Phone({
             <MacLookView
               pane={<FakeMacScreen />}
               device={device}
-              macName={`Roy's ${device.name}`}
+              macName={`Pat's ${device.name}`}
               isLandscape={sideways}
               mic={micFor(micState)}
               layoutId={KEYBOARD_LAYOUT_ID.macUs}

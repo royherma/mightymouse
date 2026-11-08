@@ -1,8 +1,8 @@
 /**
  * Idle-lock suppressor — owns TWO of the five different things this feature
  * calls a "lock". Naming them apart is not cosmetic: sharing the word "lock"
- * is how a reversible one got tuned like a one-way one and locked Roy out of
- * his own Mac (2026-09-09). The five, and who owns each:
+ * is how a reversible one got tuned like a one-way one and locked the user out of
+ * his own Mac. The five, and who owns each:
  *
  *   1. THE MACOS IDLE LOCK — the password screen macOS arms after the screen
  *      saver. THIS MODULE suppresses it. Nothing is written to the system:

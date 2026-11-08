@@ -570,7 +570,7 @@ export function startCaptureHotkey(h: Handlers): boolean {
       }
 
       // Capture key: arm tap/hold timing or stop an in-progress recording.
-      // Probe check comes BEFORE the hold timer arms (PRD mandated-simplification
+      // Probe check comes BEFORE the hold timer arms (design mandated-simplification
       // bullet) — a real tour press must never start an actual recording.
       if (e.keycode === VC_O) {
         if (probeIntercept('capture')) return

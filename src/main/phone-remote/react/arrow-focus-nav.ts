@@ -99,7 +99,7 @@ export interface AdjustTarget {
   disabled?: boolean
   /** The `aria-expanded` attribute verbatim, or null when absent. A disclosure
    *  header is the one control where stepping past it and opening it are
-   *  different intents, so Left/Right drive it -- Roy's call from the band. */
+   *  different intents, so Left/Right drive it -- the user's call from the band. */
   ariaExpanded?: string | null
 }
 
@@ -112,7 +112,7 @@ export function resolveArrowAction(el: AdjustTarget, dir: Direction): ArrowActio
   // off) and that can lock you out: Left on Screen sharing kills the mirror you
   // are navigating BY, and the swipe that undoes it needs the screen that just
   // went dark. A section header is safe to drive because collapsing one hides
-  // nothing you need to get back -- a toggle isn't. Roy on the band, 2026-08-10.
+  // nothing you need to get back -- a toggle isn't. The user on the band, 2026-08-10.
   return 'step'
 }
 
@@ -200,7 +200,7 @@ export function pickNextFocus<T>(
   //
   // EXCEPT inside a sheet, where Up/Down invert to WYSIWYG: the deck is a
   // spatial ring of buttons around a trackpad, but a sheet is a vertical list,
-  // and on a list "up" has to mean up the screen. Roy on the band, both times.
+  // and on a list "up" has to mean up the screen. The user on the band, both times.
   // Left/Right are unaffected -- they carry no spatial meaning either way.
   const vertical = dir === 'up' || dir === 'down'
   const forward = vertical && inSheet ? dir === 'down' : dir === 'up' || dir === 'right'

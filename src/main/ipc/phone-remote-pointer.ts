@@ -1,7 +1,7 @@
 /**
  * Phone Remote — cursor/pointer domain. Move deltas, glide interpolation,
  * scroll throttling, and the mirror-warp helpers. Extracted verbatim from
- * ipc/phone-remote.ts (PRD lane C). Owns the tracked/posted cursor position
+ * ipc/phone-remote.ts. Owns the tracked/posted cursor position
  * and drag-held state, since every function here reads or writes them.
  */
 import { screen } from 'electron'

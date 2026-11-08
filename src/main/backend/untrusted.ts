@@ -22,7 +22,6 @@
  * talk a model into misbehaving. The companion mitigations are positional (keep
  * untrusted text out of the SYSTEM prompt — see prompts.ts) and capability-based
  * (deny irreversible verbs — see adapters.ts). See
- * prds/active/2026-07-23-1784792061-prompt-injection-hardening.md.
  */
 
 /** Opening/closing sentinels. Named so no caller hand-types them (magic-string rule). */

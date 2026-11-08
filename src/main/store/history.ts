@@ -47,7 +47,7 @@ export function parseTs(ts: string): Date {
 // The JSONL is parsed once per app session into this array; append() pushes to it
 // so reads never re-touch disk after the first load. At a heavy 30 runs/day this is
 // ~11k rows/year — a few MB of JS objects, trivially cached. Sqlite/qmd is the named
-// upgrade seam (see PRD) once a real user crosses ~20k rows.
+// upgrade seam once a real user crosses ~20k rows.
 let _cache: HistoryEntry[] | null = null
 let _appendCount = 0
 
@@ -96,7 +96,7 @@ function invalidateCache(): void {
 }
 
 // ── Backup-then-convert (encrypt ⇄ decrypt the whole file) ─────────────────────
-// Roy's hard constraints: (1) never risk existing records, (2) the encryption state
+// The user's hard constraints: (1) never risk existing records, (2) the encryption state
 // is a free-flip toggle. So every conversion COPIES the live file to a timestamped
 // backup FIRST, writes the transformed file to a .tmp, then atomically renames over
 // the original. ANY error leaves the original untouched and the backup in place.

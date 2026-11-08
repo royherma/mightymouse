@@ -7,7 +7,6 @@
 // process that writes into it; PCM arrives here from the WebRTC mirror and is
 // piped straight to its stdin.
 //
-// Stage B of prds/active/2026-08-01-1785560393-phone-mic-as-mac-input.md.
 // Spawn/resolve shape mirrors system-audio.ts.
 
 import { ChildProcess, spawn } from 'child_process'

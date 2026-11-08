@@ -11,7 +11,7 @@ import { installCursorlessWatch } from './cursorless-host'
 import { capabilities } from './host-capabilities'
 import { primeDeviceHints } from './device-hints'
 import './theme.css'
-/* Skin blocks, split out of theme.css (2026-07-24). Each is scoped entirely to
+/* Skin blocks, split out of theme.css. Each is scoped entirely to
    `.proRoot[data-skin='<id>']`, so they are independent of each other.
 
    IMPORTED HERE, NOT via @import in theme.css. `@import` is only legal BEFORE

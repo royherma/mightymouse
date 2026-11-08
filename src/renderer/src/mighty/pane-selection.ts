@@ -3,7 +3,6 @@
  * used to derive its highlight independently of the grid, so a chat live in a
  * non-focused pane rendered identically to one that wasn't open at all.
  *
- * Full audit table: prds/active/2026-08-04-1785826838-chat-sidebar-open-behavior.md
  */
 
 import type { ChatPaneRef, ChatWorkspaceTab } from '../../../shared/types'

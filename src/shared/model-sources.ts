@@ -1,4 +1,4 @@
-import { opencodeAccount } from './model-label'
+import { claudeModelLabel, opencodeAccount } from './model-label'
 import type { ProviderIconId } from './provider-icon'
 
 export type PickerSurface = 'chat' | 'code'
@@ -72,7 +72,7 @@ export function opencodeSourceModels(models: string[], surface: PickerSurface): 
     .map((model) => ({
       source: 'opencode',
       model,
-      label: model.slice(model.indexOf('/') + 1),
+      label: claudeModelLabel(model.slice(model.indexOf('/') + 1)),
       hint: opencodeAccount(model)
     }))
 }

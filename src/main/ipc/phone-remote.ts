@@ -400,7 +400,7 @@ export function registerPhoneRemoteHandlers(): void {
 
     if (!next) {
       // Tunnel + DNS stay provisioned server-side for a fast re-enable; this
-      // only stops the local cloudflared process (PRD §4).
+      // only stops the local cloudflared process.
       stopTunnel()
       return { ok: true }
     }

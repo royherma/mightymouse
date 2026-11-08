@@ -161,7 +161,7 @@ export function registerSystemHandlers(): void {
   // ── Setup Check ───────────────────────────────────────────────────────────
   // One surface for every dependency, with a real action per failure. Replaces
   // the two dead-end warning sentences that lost two external testers on
-  // 2026-07-23. See prds/active/2026-07-23-1784776098-zero-dead-ends-setup-check.md
+  // 2026-07-23.
   ipcMain.handle(CHANNELS.setupGetChecks, () => buildSetupChecks())
 
   ipcMain.handle(CHANNELS.setupRunFix, async (event, id: SetupCheckId) => {

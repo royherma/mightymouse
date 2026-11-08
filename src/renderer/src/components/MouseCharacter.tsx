@@ -6,11 +6,10 @@ import { CONFIG } from '../../../shared/config'
 import type { CompanionState } from '../../../shared/companion-state'
 
 /**
- * Live Voice Companion — Phase 3 of the PRD
- * (prds/active/2026-07-12-1783824131-live-voice-companion.md §5, §6
- * `CharacterRenderer`, Option A). A small procedural 3D mouse built from
+ * Live Voice Companion — Phase 3 of the design
+ * A small procedural 3D mouse built from
  * plain three.js primitives (sphere body/head/ears, cone snout, cylinder/
- * cone limbs+tail) — NOT a rigged GLTF asset. The PRD explicitly calls out
+ * cone limbs+tail) — NOT a rigged GLTF asset. The design explicitly calls out
  * that no rigged mouse asset exists yet and scopes this phase down to a
  * primitive-based rig instead of sourcing/loading external art, so this
  * component has zero external asset dependency and works the moment it's
@@ -25,7 +24,7 @@ import type { CompanionState } from '../../../shared/companion-state'
  *   reacting  — a quick bounce/hop on entry, then settles back to idle motion
  *
  * All animation runs through r3f's `useFrame` (synced to the shared r3f render
- * loop), never a manual `requestAnimationFrame` — per the PRD's explicit ask.
+ * loop), never a manual `requestAnimationFrame` — per the design's explicit ask.
  *
  * Drag-to-reposition: since the companion is a real (non click-through) OS
  * window (see companion-window.ts), a pointer-down+move on the canvas moves
@@ -131,7 +130,7 @@ function Mouse({ state, mouthOpen }: MouseCharacterProps): JSX.Element {
       if (earR.current) earR.current.rotation.z += (-0.15 - earR.current.rotation.z) * 0.15
     } else if (state === 'talking') {
       // Jaw (lower snout piece) scales open/closed driven directly by the live
-      // mouth-openness signal — no viseme set, matches the PRD's §3 non-goal.
+      // mouth-openness signal — no viseme set, matches the design's non-goal.
       h.rotation.x += (0 - h.rotation.x) * 0.1
       h.rotation.z += (0 - h.rotation.z) * 0.1
       if (jaw.current) {

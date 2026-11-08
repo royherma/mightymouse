@@ -27,7 +27,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   // Only ever reached with NOTHING PAIRED -- stay-awake.ts refuses to arm the
   // watchdog once a device exists, because no elapsed time distinguishes a
   // pocketed phone from an abandoned one and guessing wrong locks the user out
-  // of the Mac their phone was the only way into (Roy, 2026-09-09). This value
+  // of the Mac their phone was the only way into. This value
   // caps the battery leak of a server holding the display awake for a phone
   // that never paired; it is not a session timeout and must not become one.
   IDLE_LOCK_REARM_MS: 10 * 60 * 1000,
@@ -70,15 +70,15 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   CONNECT_LOG_FLUSH_MS: 2_000,
   CLIENT_ERROR_PATH: '/client-error',
   // Authed POST: the phone registers its APNs device token here after every
-  // launch (agent-relay PRD §5). Token is stored next to the device
+  // launch. Token is stored next to the device
   // credential; the cloud relay never sees it until a push is actually sent.
   PUSH_TOKEN_PATH: '/push-token',
   // Authed GET (?requestId=&credential=): the Notification Service Extension
   // fetches a pending request's real content over the tunnel (agent-relay
-  // PRD §5 item 4) -- the push itself carries only a request_id.
+  // design) -- the push itself carries only a request_id.
   RELAY_REQUEST_PATH: '/relay-request',
   // Authed POST: the lock-screen notification action posts its answer back
-  // here with the same request_id (agent-relay PRD §4).
+  // here with the same request_id.
   RELAY_RESPOND_PATH: '/relay-respond',
   // Authed GET (?requestId=&credential=): the NSE's second fetch for a
   // 'show' verb -- the image bytes themselves. Scoped by request_id, not a
@@ -109,7 +109,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   // evict the live deck.
   INTENT_PATH: '/intent',
   // How many resolved relay cards the Code sheet keeps visible (grayed out)
-  // below the pending ones. Was 5 per PRD §6b "the last few resolved ones",
+  // below the pending ones. Was 5 per design "the last few resolved ones",
   // which is a tail across ALL agents -- so once a session detail sheet
   // started filtering it per-agent, a busy agent's timeline could come back
   // empty because five other agents had spoken more recently. A row is a few
@@ -171,13 +171,13 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   DISCOVERY_PROBE_TIMEOUT_MS: 2500,
   // How many /24 host addresses to probe concurrently. Capped well below
   // 254 so this doesn't look like a port scan to network monitoring or the
-  // phone's own iOS Local Network permission heuristics (PRD §5 risk).
+  // phone's own iOS Local Network permission heuristics.
   DISCOVERY_PROBE_CONCURRENCY: 32,
   // localStorage key for the last host that successfully completed a WS
-  // connection -- candidate #3 in the discovery order (PRD §4 Layer 2).
+  // connection -- candidate #3 in the discovery order.
   DISCOVERY_LAST_HOST_KEY: 'mm-remote-last-host',
   // localStorage key for the last Cloudflare Tunnel hostname a /whoami hit
-  // advertised -- candidate #3.5, off-LAN discovery (cloudflare-tunnel PRD).
+  // advertised -- candidate #3.5, off-LAN discovery.
   DISCOVERY_LAST_TUNNEL_HOST_KEY: 'mm-remote-last-tunnel-host',
   CLOSE_REASON_REVOKED: 'credential-revoked',
   // Evicted by a newer connection. Credentials stay valid, so this is NOT a
@@ -301,7 +301,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   CHAT_PREVIEW_MAX_CHARS: 80,
   CHAT_TRANSCRIPT_TURN_LIMIT: 1000,
   CHAT_STEP_LIMIT: 24,
-  // Off-LAN access via Cloudflare Tunnel (cloudflare-tunnel PRD). The Edge
+  // Off-LAN access via Cloudflare Tunnel. The Edge
   // Function provisions per-install; this block only holds client-side knobs
   // for the cloudflared download + process lifecycle (cloudflare-tunnel.ts).
   TUNNEL: {
@@ -496,7 +496,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   //
   // Briefly set to 200 on the theory that rtt=2168ms meant uneven arrival
   // needing absorption. Reverted: the benches showed freeze=0-2/1.5s, i.e.
-  // nothing to absorb, and Roy read the result as slow. The RTT spike is the
+  // nothing to absorb, and the user read the result as slow. The RTT spike is the
   // radio waking (see MIRROR_GLASSES_TRICKLE_FPS), not jitter. Raise this
   // only against a bench showing real freezes.
   MIRROR_GLASSES_JITTER_TARGET_MS: 0,
@@ -531,7 +531,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   // 'auto' parked 2026-08-12: the detector promotes on sustained INPUT
   // motion, and hands-off video playback has none -- Streamio ran a full
   // session at video=false. Forced true until detection is content-driven.
-  // OFF, and this is the measured default, not a parked experiment (§9.13).
+  // OFF, and this is the measured default, not a parked experiment.
   // 'auto' re-acquires the capture ~2s after every connect (setVideoDetected
   // -> swapCapture), and that keyframe burst lands while the estimate is
   // still settling: 1032k at connect -> 192k two seconds after the swap, then
@@ -594,7 +594,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   //
   // Do not raise this to chase smoothness; raising it is what cost the
   // smoothness. It also matches MIRROR_GLASSES_FRAME_RATE's 12 -> 10 cut,
-  // made for the same reason (docs/gotchas.md, 2026-08-12). If more is wanted
+  // made for the same reason. If more is wanted
   // here, buy quality at a STABLE size -- not a bigger frame-rate request.
   MIRROR_GLASSES_VIDEO_FRAME_RATE: 10,
   // Capture width while video mode is on, in px.
@@ -620,7 +620,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   // like the camera/haptics prefs: whether you want the Mac's sound in THIS
   // hand right now is a property of the device, not app-wide config.
   SHARE_AUDIO_KEY: 'mm-remote-share-audio',
-  // Phone mic -> Mac wire format (phone-mic-as-mac-input PRD). Mono because
+  // Phone mic -> Mac wire format. Mono because
   // the source is one phone microphone; a second channel would carry a
   // duplicate and double the relay bytes for nothing.
   PHONE_MIC_CHANNELS: 1,
@@ -733,7 +733,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   KEYS_POSITION_DEFAULT: 'bottom' as const,
   DECK_MODE_DEFAULT: 'stacked' as const,
   // Which split, when deck mode is 'split'. 'fan' is the only variant measured
-  // with zero controls past the regrip limit — see the PRD's results table.
+  // with zero controls past the regrip limit — see the design's results table.
   SPLIT_CONCEPT_DEFAULT: 'fan' as const,
   // Portrait-only: where the mirror sits. 'stacked' is the shipped layout and
   // emits no attribute at all, so a bug in the other three can never reach a
@@ -757,7 +757,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   APP_RING_ICON_PEAK_PX: 40,
   // Resting icons sit at this until the thumb nears them. 0.35 read as
   // greyed-out rather than idle -- the icons are the whole point of the ring,
-  // so they must be identifiable BEFORE the finger arrives (Roy, on device).
+  // so they must be identifiable BEFORE the finger arrives.
   APP_RING_ICON_REST_OPACITY: 0.7,
   APP_RING_ICON_PEAK_OPACITY: 1,
   APP_RING_FALLOFF_PX: 64,
@@ -796,7 +796,7 @@ export const buildPhoneRemote = (supabaseUrl: string) => ({
   // carries a knob rather than a row of icons, and every px of radius here
   // comes off the pad's usable drag area.
   RING_ZOOM_BAND_PX: 34,
-  // Clearance between the two painted strokes. Set on device (Roy): the two
+  // Clearance between the two painted strokes. Set on device: the two
   // arcs must read as separate controls, not one thick band. Still smaller
   // than the SUM of the two bands' grab slack, so the hit regions overlap in
   // the seam -- the outer one takes a touch there by radius, which is why

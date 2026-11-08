@@ -166,7 +166,7 @@ export function useMirror({ onReady }: AppProps = {}) {
   // the composer shows is a wait, not a live level meter.
   const [chatDictating, setChatDictating] = useState(false)
   const [codeOpen, setCodeOpen] = useState(false)
-  // Off by default (PRD decision: opt-in, phone-side toggle). Quality flag
+  // Off by default. Quality flag
   // only matters once mirroring is on, but it's kept independent so choosing
   // native/capped doesn't itself start/stop the stream.
   const [mirrorOn, setMirrorOn] = useState(false)
@@ -1199,7 +1199,6 @@ export function useMirror({ onReady }: AppProps = {}) {
   // keep running with the screen off and put the Live Activity up. Gated on
   // BOTH flags: a connected mirror with audio off is silent, and holding the
   // phone awake for it would be the battery lie the whole design refuses
-  // (`prds/active/2026-08-08-1786192267-ios-background-mode.md` §4).
   // `micOn` is the THIRD case and does not fit that pair: `shareAudio` is the
   // Mac's audio coming HERE, and a voice call is this phone's mic going THERE.
   // Without it, pocketing the phone mid-call drops the hold and kills the mic --
@@ -1221,7 +1220,7 @@ export function useMirror({ onReady }: AppProps = {}) {
 
   // The second H.264 stream that feeds Swift's PiP layer. Native shell only:
   // no other client can decode it, and asking for it would cost the Mac a real
-  // encoder for nothing (prds/active/2026-08-09-*-native-pip.md).
+  // encoder for nothing.
   // Keyed on `mirrorActive` ALONE. `send` is a useCallback that changes identity
   // with the socket, and this effect's cleanup tells Swift the PiP stream ended:
   // re-running it on a reconnect emitted pipActivity(false)+(true) milliseconds

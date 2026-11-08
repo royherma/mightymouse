@@ -1149,7 +1149,7 @@ export default function PlaygroundApp(): JSX.Element {
               ))}
             </Section>
 
-            {/* ── Tour press-to-confirm — the 4 cap states (PRD §4.4) ────────── */}
+            {/* ── Tour press-to-confirm — the 4 cap states ────────── */}
             <Section title="Tour — Hotkey Confirm States">
               <Row label="idle">
                 <HotkeyConfirmStatePreview state={TOUR.CONFIRM_STATE.idle} />

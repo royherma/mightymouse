@@ -53,7 +53,7 @@ const project = (id: string): MightyProject => ({
 })
 
 // rewriteFile() used to silently no-op under incognito while callers had already
-// computed `true` — see docs/gotchas.md "A store function's return value must reflect...".
+// computed `true`.
 describe('Mighty deletes are not silently swallowed by incognito', () => {
   beforeAll(async () => {
     MIGHTY = (await import('../mighty')).MIGHTY

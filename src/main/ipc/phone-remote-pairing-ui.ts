@@ -30,7 +30,7 @@ import { devLog } from '../../shared/env'
 import { recordMirrorBench } from '../phone-remote/mirror-tuning-ledger'
 import { recordJournal } from '../phone-remote/connection-journal'
 // Circular by construction: phoneRemoteCallbacks() stays on the donor per the
-// PRD (it wires handlePhoneMessage + friends), and freshPairingQrs() is the
+// design (it wires handlePhoneMessage + friends), and freshPairingQrs() is the
 // one place here that needs to restart-probe the server through it. Both
 // sides only call the import at runtime, never at module-eval time, so the
 // cycle resolves fine -- same pattern C4/C5 already use for phoneMayControlMac.

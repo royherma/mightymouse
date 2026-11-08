@@ -86,7 +86,7 @@ export interface RelayRequestParamsWire {
   /** Whether the Mac can READ the terminal this came from (a tmux pane id). The
    *  derived boolean, not the origin: it is the only fact the card needs, and
    *  the phone has no business holding pane ids. Decides whether an interview
-   *  can be finished here or hands back after Q1 (PRD §5). */
+   *  can be finished here or hands back after Q1. */
   canReadPane?: boolean
   context?: string
   decision?: DecisionWire
@@ -127,7 +127,7 @@ export interface PhotoMatchWire {
   favorite: boolean
 }
 
-/** What an agent may narrow a photo search by. Date + type only (PRD decision
+/** What an agent may narrow a photo search by. Date + type only (design decision
  *  3): album and location were cut because both leak far more than the one
  *  photo the agent is actually after. */
 export interface PhoneMatchQuery {
@@ -419,7 +419,7 @@ export type PhoneRemoteMessage =
   | { type: 'mirrorStop'; cause?: MirrorStopCause }
   | { type: 'mirrorDiag'; detail: string }
   | { type: 'mirrorGetIceServers' }
-  // Native PiP (prds/active/2026-08-09-*-native-pip.md). iOS-app only -- the
+  // Native PiP. iOS-app only -- the
   // web deck can't decode what these start.
   | { type: 'pipStreamStart' }
   | { type: 'pipStreamStop' }
@@ -443,7 +443,7 @@ export type PhoneRemoteMessage =
   | { type: 'chatStop'; sessionId: string }
   | { type: 'modelsGet'; scope: ModelScope }
   | { type: 'modelsSet'; scope: ModelScope; id: string }
-  // Code agent relay (PRD 2026-08-12-1786501335 §6b): answer a pending
+  // Code agent relay: answer a pending
   // notify/ask/approve/show card from the phone's Code sheet.
   | { type: 'relayRespond'; requestId: string; response: RelayResponseWire }
   // Put a cleared card back in the inbox. Only honoured while the dismiss is
@@ -665,7 +665,7 @@ export type PhoneRemoteEvent =
       limit?: number
     }
   /** Raise the iOS photo permission prompt. Sent only after a search already
-   *  came back `scope: 'none'`, never speculatively (PRD decision 1). */
+   *  came back `scope: 'none'`, never speculatively. */
   | { type: 'photosRequestAccess'; requestId: string }
   /** Fetch one photo's bytes by an id a previous search minted. The bytes come
    *  back over the existing imageMeta+binary path, not in a JSON field. */

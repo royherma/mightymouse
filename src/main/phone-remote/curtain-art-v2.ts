@@ -2,7 +2,7 @@
  * Curtain art, variant 2 — the shipped look. `privacy-curtain.ts` loads this;
  * `curtain-art-v1.ts` is the previous flat grid, kept importable as a fallback.
  *
- * Structure is lifted from a reference comp Roy supplied (a dark "brand lock
+ * Structure is lifted from a reference comp the user supplied (a dark "brand lock
  * screen": spotlight, dotted grid, emblem ring, tracked wordmark, status pill,
  * footer). Two deliberate departures from that comp:
  *

@@ -1,5 +1,5 @@
 /**
- * The connect-layer rewrite's contract (PRD 2026-08-02-1785667000 §7 step 1).
+ * The connect-layer rewrite's contract.
  * Every transition and every reason has a test -- this file lands before any
  * wiring so the vocabulary is settled before server/hook/UI consume it.
  */

@@ -3,7 +3,7 @@
  *
  * Nothing here is painted. There is no D-pad widget, no mode chip -- the arrows
  * simply do something different depending on the mode, and Select toggles it.
- * Roy's call: "it doesn't get drawn anywhere. it just works."
+ * the user's call: "it doesn't get drawn anywhere. it just works."
  *
  * Pure and DOM-free, because this repo's vitest has no DOM -- same reason
  * `arrow-focus-nav.ts` reduces its inputs to plain shapes.
@@ -32,7 +32,7 @@ export function nextDpadMode(mode: DpadMode): DpadMode {
  *  pair rather than a duplicate of Up/Down, which would waste two of the four
  *  gestures the band has.
  *
- *  Up/Right = forward (in), Left/Down = back (out): the pairing Roy set on the
+ *  Up/Right = forward (in), Left/Down = back (out): the pairing the user set on the
  *  band, locked in memory `cursorless-arrow-direction-pairing`. Do not re-pair
  *  these to reading order. */
 export function resolveDpad(mode: DpadMode, dir: Direction): DpadAction {

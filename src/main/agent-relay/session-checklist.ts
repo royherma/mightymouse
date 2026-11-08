@@ -66,7 +66,7 @@ export function readSessionChecklist(sessionId: string | undefined): AgentCheckl
     if (!subject) continue
 
     if (subject.startsWith(GOAL_PREFIX)) {
-      // Last GOAL wins: a second one means Roy moved the goal, and the dir is
+      // Last GOAL wins: a second one means the user moved the goal, and the dir is
       // walked oldest-id first, so keeping the first showed a retired goal.
       goal = subject.slice(GOAL_PREFIX.length).trim().slice(0, SUBJECT_MAX)
       continue

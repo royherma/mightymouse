@@ -1,9 +1,8 @@
 /**
- * Live Voice Companion — screen-aware vision trigger (Phase 4 of the PRD,
- * prds/active/2026-07-12-1783824131-live-voice-companion.md §5).
+ * Live Voice Companion — screen-aware vision trigger (Phase 4 of the design,
  *
  * A voice turn should NOT attach a screenshot on every utterance — per the
- * PRD's reality-check table, a vision frame costs real image tokens on top of
+ * design's reality-check table, a vision frame costs real image tokens on top of
  * a text turn, and "always on" cadence could get expensive fast if every turn
  * paid for one. This is a cheap, synchronous keyword gate (matches the
  * `mightBeRecall` gate's role in the history-recall pipeline: a free filter

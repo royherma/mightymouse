@@ -4,7 +4,7 @@
  *
  * WHY this exists: every iOS notification change costs a physical-device
  * install plus an APNs round trip, and the two surfaces that could already be
- * tested (the HUD card, `bin/mm-relay`) share no code with a *notification* --
+ * tested (the HUD card, the relay CLI) share no code with a *notification* --
  * they render React and print text. So the one thing that kept breaking, what
  * a notification actually shows and what its buttons do, had no fast loop at
  * all. This is that loop: `Notification.actions` is macOS's `UNNotificationAction`,
@@ -13,7 +13,7 @@
  * makes. A working notification here means the verb/store/resolve half works;
  * only the iOS category registration remains device-only.
  *
- * Answers race the phone deliberately: first answer wins (§6b), so replying on
+ * Answers race the phone deliberately: first answer wins, so replying on
  * the Mac while a push is in flight is a supported outcome, not a conflict.
  */
 

@@ -25,7 +25,7 @@ const VISIBLE_STEPS = 3
  *
  * NON-MODAL, unlike every other sheet here: no .historyScrim, and .actCard caps
  * the height so it clears the trackpad. A run takes minutes and watching it must
- * not cost you the pad -- Roy, on-device. That also removes the usual dismiss
+ * not cost you the pad -- the user, on-device. That also removes the usual dismiss
  * (tap the scrim), which for a while left Stop as the only control on the card:
  * the sole way to get the steps off screen was to kill the run. Hide is that
  * missing dismiss. The "Running…" toast stays up either way and re-opens the

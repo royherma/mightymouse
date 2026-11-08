@@ -8,7 +8,7 @@
 //
 // This boots ONE frame and resizes it, portrait -> landscape -> portrait, the
 // way a real rotation does. The measurement is deliberately NOT the deck
-// viewer's "does the pad cover a button" -- in Roy's screenshot no button was
+// viewer's "does the pad cover a button" -- in the reported screenshot no button was
 // covered. The pad was carved to a LANDSCAPE-width shape while the phone was
 // portrait, leaving bare steel down the right side and slicing the
 // DRAG/TAP/SCROLL hint mid-word. So the quantity that matters is how far the
@@ -128,7 +128,7 @@ function measurePad(win, doc) {
 // This matters enormously here: with the mirror OFF, --pro-mirror-w is never
 // set in EITHER orientation, so there is no stale value to carry across a
 // rotation and the bug is unreachable. The first run of this probe passed for
-// exactly that reason. Roy's screenshot shows "Live" -- the mirror is on.
+// exactly that reason. The reported screenshot shows "Live" -- the mirror is on.
 const MAC_ASPECT = 16 / 10
 let padMinWidth = 256 // resolved from the bundle in main(); never hardcode-and-forget
 
@@ -228,7 +228,7 @@ async function main() {
     const bad = [back, back2].filter((m) => m && m.gapRight > 24)
     if (bad.length) {
       say(`VERDICT: REPRODUCED — pad short by ${bad.map((b) => b.gapRight).join(', ')}px`, 'bad')
-      say('after rotating back to portrait. This is Roy\'s screenshot.', 'bad')
+      say('after rotating back to portrait. This is the reported screenshot.', 'bad')
     } else {
       say('VERDICT: pad reaches its full width in portrait after rotations.', 'ok')
     }

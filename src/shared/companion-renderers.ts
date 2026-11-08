@@ -2,10 +2,9 @@
  * SINGLE SOURCE OF TRUTH for the Live Voice Companion's character-RENDERER
  * choices — i.e. WHICH visualization draws the companion, a different axis from
  * `CompanionState` (idle/listening/thinking/talking/reacting), which is WHAT the
- * character is doing. This is the concrete implementation of the PRD's §6
+ * character is doing. This is the concrete implementation of the design's
  * `CharacterRenderer` seam: every renderer takes the exact same props
  * (`state` + `mouthOpen`), so swapping one for another touches no call site.
- * (prds/active/2026-07-12-1783824131-live-voice-companion.md §6.)
  *
  * Add a new visualization by (1) appending an entry here and (2) handling its id
  * in CompanionApp.tsx's renderer switch. Everything else (the debug-panel picker,

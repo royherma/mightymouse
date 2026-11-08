@@ -1,10 +1,10 @@
 /**
  * "Go to session" — resolves an AgentOrigin (§5.3 of the take-me-to-the-session
- * PRD) into a focused window on THIS Mac. Runs once, on a click, never on a
+ * design) into a focused window on THIS Mac. Runs once, on a click, never on a
  * render or a poll: with 60 open panes across 4+ cmux workspaces measured on
- * Roy's machine, this only has to be fast enough for a single button press.
+ * the user's machine, this only has to be fast enough for a single button press.
  *
- * Ordered fallback, first hit wins — mirrors the table in the PRD exactly, so
+ * Ordered fallback, first hit wins — mirrors the table in the design exactly, so
  * a missing/stale cmux id degrades to tmux, then to just raising the host app,
  * rather than failing outright. A third-party CLI (cmux) can change its verbs
  * or reject an id that closed between mint and click; nothing here throws past
@@ -74,7 +74,7 @@ async function tmuxSessionOf(tmux: string, socket: string[], pane: string): Prom
  *  0 and moves nothing. `resume_binding.checkpoint_id` IS the session name.
  *
  *  `surface.list '{}'` returns ONLY the current workspace's surfaces, so the
- *  lookup MUST be scoped — see docs/gotchas.md "go lands on the wrong agent". */
+ *  lookup MUST be scoped. */
 export async function focusCmuxSurfaceFor(
   cli: string,
   tmuxSession: string,

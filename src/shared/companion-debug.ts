@@ -1,6 +1,5 @@
 /**
- * Live Voice Companion — debug/verify stage events (Phase 0.5 of the PRD,
- * prds/active/2026-07-12-1783824131-live-voice-companion.md §5).
+ * Live Voice Companion — debug/verify stage events (Phase 0.5 of the design,
  *
  * Every adapter behind the companion's §6 seam (VoiceInputSource,
  * TranscriptSource, ResponseSource, SpeechOutput, CharacterRenderer — mock AND

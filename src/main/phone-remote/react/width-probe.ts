@@ -2,7 +2,7 @@
  * Walks the box chain from a leaf up to <body>, reporting per box the rendered
  * width, scrollWidth/clientWidth and right edge -- it names WHICH ancestor grows
  * past the viewport. Desktop harnesses cannot reproduce these (see
- * docs/gotchas.md, 2026-08-17); the phone is the only trustworthy instrument.
+ * , 2026-08-17); the phone is the only trustworthy instrument.
  */
 
 // Sink injected from App.tsx (same shape as nav-trace): this module stays

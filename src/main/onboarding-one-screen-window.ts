@@ -5,7 +5,7 @@ import { is } from '@electron-toolkit/utils'
 import { CONFIG } from '../shared/config'
 import { IS_DEV } from '../shared/env'
 
-// Preview window for the one-screen setup (PRD 2026-08-05). Deliberately its own
+// Preview window for the one-screen setup. Deliberately its own
 // factory rather than a flag on showOnboardingWindow: that one is a HARD GATE —
 // alwaysOnTop, and its completion releases the app-tail gate in index.ts. This
 // opens the same screen as an ordinary window that can be closed and ignored, so

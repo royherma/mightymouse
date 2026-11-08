@@ -15,7 +15,7 @@ vi.mock('../../../store/paths', async (importOriginal) => {
 
 vi.mock('../../relay-send', () => ({
   agentRelayOffReason: () => null,
-  sendRelayPush: async () => ({ ok: true, deviceLabel: "Roy's iPhone" })
+  sendRelayPush: async () => ({ ok: true, deviceLabel: "Pat's iPhone" })
 }))
 vi.mock('../../../platform', () => ({ captureScreenshot: async () => null }))
 

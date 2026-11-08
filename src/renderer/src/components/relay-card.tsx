@@ -105,7 +105,7 @@ export function RelayCard(props: {
   }
 
   // Same derivation as the phone card, from the same shared helper -- the two
-  // cards render one interview and must not hold separate cursors (PRD §7.3).
+  // cards render one interview and must not hold separate cursors.
   // Which question is being LOOKED at, when that is not the one the interview is
   // waiting on. null means "follow the cursor" -- an untouched interview behaves
   // exactly as it did before back-nav existed.

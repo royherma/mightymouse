@@ -91,7 +91,7 @@ let lastMoveY: number | null = null
 
 // For inferring auto-repeat: uiohook's events carry no repeat flag, so "same
 // keycode again with no keyup in between" is the only observable. One held key
-// generated 861 keydowns in a session (2026-08-07).
+// generated 861 keydowns in a session.
 let downKeycode: number | null = null
 
 // When the last unattributed wheel landed, so a second one inside WHEEL_PAIR_MS
@@ -114,7 +114,7 @@ export function noteAppGeneratedInput(): void {
  * pthread but hands events to JS through `napi_call_function` on the main loop,
  * so a blocked main thread defers delivery and inflates `sinceStamp` by the
  * whole stall. That is how a correctly-stamped `ctrl+b` from the phone read as a
- * human 5.4s later and locked Roy out (2026-09-08). The blocking spawnSync in
+ * human 5.4s later and locked the user out. The blocking spawnSync in
  * app-context (3s) and app-switcher-list (2s) are the usual culprits.
  */
 let lastLoopTurnAt = Date.now()

@@ -1,11 +1,11 @@
 /**
- * The Mac-side request store — spine of the agent-relay PRD (§6, §6b, §6c).
+ * The Mac-side request store — spine of the agent-relay design.
  *
  * Owns the lifecycle of every notify/ask/approve/show call an MCP tool makes:
  * mint a request_id, hold it pending, resolve it from whichever surface
  * answers first (phone sheet, HUD, notification), expire it on timeout, and
  * write every resolution to an append-only audit log. This module has no
- * knowledge of MCP, push, or UI — those are separate PRD items that import
+ * knowledge of MCP, push, or UI — those are separate design items that import
  * this store's typed API.
  */
 
@@ -27,7 +27,7 @@ export type RelayVerb = (typeof RELAY_VERBS)[number]
 // is -- a question is not a warning, so severity could never express this.
 // Defaults to 'done': fire-and-forget means nobody is waiting.
 //
-// 'waiting' was REMOVED (2026-08-14) rather than reworded. A notify settles
+// 'waiting' was REMOVED rather than reworded. A notify settles
 // inside mint() below, so no notify has ever been waiting on anyone -- the
 // state was unspellably false, and its "Waiting on You" headline read exactly
 // like `ask`, the one verb that does block and does render reply buttons.
@@ -35,7 +35,7 @@ export type RelayVerb = (typeof RELAY_VERBS)[number]
 // holding no way to answer. Zod REJECTS it now instead of mapping it to a
 // neighbour: falling back to 'done' would tell someone a stopped agent had
 // finished, and the error names `ask` as the verb that actually waits.
-// 'blocked' went the same way, and for the same reason (2026-08-14): a notify
+// 'blocked' went the same way, and for the same reason: a notify
 // resolves on mint, so "⛔ Can't Continue" printed a demand on a card with no
 // buttons and a "Delivered" outcome. Agents reached for it to mean "I need your
 // permission", which is `approve` -- the verb that waits, carries risk, and
@@ -53,11 +53,11 @@ export type RelayNotifyState = (typeof RELAY_NOTIFY_STATES)[number]
 export const RELAY_REQUEST_STATUSES = ['pending', 'resolved', 'timedout', 'dismissed'] as const
 export type RelayRequestStatus = (typeof RELAY_REQUEST_STATUSES)[number]
 
-// PRD §6 cross-cutting: "suggest 600s" default for any blocking verb so an
+// design cross-cutting: "suggest 600s" default for any blocking verb so an
 // unattended agent at 3am doesn't hang forever without a floor.
 export const RELAY_DEFAULT_TIMEOUT_MS = 600_000
 
-// notify never blocks (§6): it resolves the instant it's minted, so callers
+// notify never blocks: it resolves the instant it's minted, so callers
 // never wait on a human. Kept far below the blocking default rather than 0 --
 // a 0 timeout would collide with "resolved before anyone read it" bookkeeping.
 const RELAY_NOTIFY_TIMEOUT_MS = 1_000
@@ -72,7 +72,7 @@ export const RELAY_SHOW_TIMEOUT_MS = 120_000
 export const RELAY_UNDO_WINDOW_MS = 8_000
 
 /** How long a part-answered interview may sit untouched before the human gets
- *  a nudge (PRD §7.7). The alternative is burning the full 600s timeout in
+ *  a nudge. The alternative is burning the full 600s timeout in
  *  silence: they answered question 1 on a lock screen, never opened the card,
  *  and the agent is blocked on questions they don't know exist. */
 export const RELAY_STALL_NUDGE_MS = 60_000
@@ -134,7 +134,7 @@ export interface RelayRequestParams {
    *  panes in one checkout share, and joining on it alone marked both rows
    *  "Handed back" when only one of them stopped. Absent on an older shim. */
   sessionId?: string
-  /** A drill, not a real request. Set by `bin/mm-relay --test` so a rehearsal
+  /** A drill, not a real request. Set by the relay CLI so a rehearsal
    *  that reads "drop the prod table" can never be mistaken for the real thing.
    *  Every surface that renders a request must show it -- a marker on one screen
    *  is worse than none, because the other screens then look trustworthy. */
@@ -582,7 +582,7 @@ class RelayRequestStore extends EventEmitter {
   }
 
   /** Resolve from whichever surface answered. First answer wins regardless of
-   *  which surface it came from (§6b) -- a request already resolved or timed
+   *  which surface it came from -- a request already resolved or timed
    *  out is a no-op, not an error, and a late answer past timeout is dropped
    *  and audit-logged (§6 cross-cutting) rather than silently accepted. */
   resolve(
@@ -609,7 +609,7 @@ class RelayRequestStore extends EventEmitter {
     if (request.status === 'resolved' || request.status === 'dismissed') return 'already-resolved'
 
     // Multi-question: hold the answer and leave the request PENDING. Nothing is
-    // typed into the picker until every question is answered (PRD §4) -- the
+    // typed into the picker until every question is answered -- the
     // whole array arrived up front, so the full set is validated before the
     // first keystroke rather than discovered one Enter at a time.
     const questions = request.params.questions
@@ -651,7 +651,7 @@ class RelayRequestStore extends EventEmitter {
         if (revising || !isComplete(questions, request.buffered)) {
           // Questions remain: start (or restart) the quiet countdown, so a card
           // abandoned after question 1 gets a nudge instead of burning the full
-          // timeout in silence (PRD §7.7).
+          // timeout in silence.
           this.armStallNudge(id)
           this.emit('changed' satisfies RelayStoreEvent, request)
           return 'buffered'
@@ -817,7 +817,7 @@ class RelayRequestStore extends EventEmitter {
     if (pick && this.scoredPicks) this.scoredPicks = [...this.scoredPicks, pick].slice(-DECISION_HISTORY_CAP)
     // notify is nobody's answer -- it settles itself at mint -- so it logs as
     // 'sent' rather than 'resolved'. It still logs: §6 audits EVERY verb, and
-    // an unpaired Mac has the log as notify's only surface (§9).
+    // an unpaired Mac has the log as notify's only surface.
     appendAudit({
       ts: new Date().toISOString(),
       requestId: id,
@@ -900,7 +900,7 @@ export function onRelayDelivered(listener: (request: RelayRequest) => void): () 
   return () => relayRequestStore.off('delivered' satisfies RelayStoreEvent, listener)
 }
 
-/** A part-answered interview has gone quiet (PRD §7.7). Fires once per quiet
+/** A part-answered interview has gone quiet. Fires once per quiet
  *  stretch and only while the request is still pending, so a listener may push
  *  without re-checking whether the human already finished. */
 export function onRelayStalled(listener: (request: RelayRequest) => void): () => void {

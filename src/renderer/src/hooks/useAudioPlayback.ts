@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
- * Live Voice Companion — Phase 2 of the PRD
- * (prds/active/2026-07-12-1783824131-live-voice-companion.md §5, §6
- * `CharacterRenderer`'s mouth-openness input). Plays one TTS clip's raw
+ * Live Voice Companion — Phase 2 of the design
+ * Plays one TTS clip's raw
  * encoded bytes (mp3, from `src/main/audio/tts.ts` via `LiveTurnResult.audio`)
  * through a real `<audio>` element, and taps its output with a Web Audio
  * AnalyserNode to derive a live 0..1 "mouth openness" value from the actual
  * playback amplitude — the Live2D-style "RMS → ParamMouthOpenY" pattern the
- * PRD's §3 non-goals call for (no viseme set, just amplitude).
+ * design's non-goals call for (no viseme set, just amplitude).
  *
  * Mirrors `useMicLevel.ts`'s AnalyserNode + rAF-loop shape, but taps an
  * `<audio>` element's OWN output (via `createMediaElementSource`) instead of

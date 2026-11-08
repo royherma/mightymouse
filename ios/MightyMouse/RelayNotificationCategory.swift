@@ -1,6 +1,6 @@
 import UserNotifications
 
-/// The lock-screen action buttons for each relay verb (agent-relay PRD §6).
+/// The lock-screen action buttons for each relay verb.
 /// Compiled into BOTH the app and the NSE: the extension stamps a category
 /// identifier onto the notification it rewrites, and the app registers what
 /// those identifiers actually mean. Two copies of these strings would let a

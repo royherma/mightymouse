@@ -6,8 +6,8 @@ import { credentialStore } from './credential-store'
 import { nativeBridge } from './native-bridge'
 
 /**
- * Self-healing host resolution (PRD Layer 2). Tries cheapest-first, first hit
- * wins -- see the PRD's resolution-order table for why each candidate exists
+ * Self-healing host resolution. Tries cheapest-first, first hit
+ * wins -- see the design's resolution-order table for why each candidate exists
  * and why both mDNS AND the subnet probe are needed (neither alone covers
  * every network). Returns null only when every candidate failed, which means
  * App.tsx should render the full rescan state, not retry silently again.
@@ -15,7 +15,7 @@ import { nativeBridge } from './native-bridge'
  * A "hit" is a `/whoami` fetch succeeding, NOT a WS connect -- probing must
  * never open a WebSocket per candidate (server.ts closes the previous phone
  * session on every new WS connection; a sweep of probe sockets would kick a
- * still-live real session, same bug class as the shipped agent-browser PRD).
+ * still-live real session, same bug class as the shipped agent-browser design).
  */
 
 const WHOAMI_PATH = '/whoami'
@@ -74,7 +74,7 @@ function candidatePorts(): number[] {
 }
 
 /** host:port pairs to try against a given hostname, across the whole port
- *  drift range (PRD §5 "port drift" risk -- 17771-17775, not just the base). */
+ *  drift range. */
 function hostCandidates(host: string): { host: string; port: number }[] {
   return candidatePorts().map((port) => ({ host, port }))
 }
@@ -186,7 +186,7 @@ export async function discoverHost(): Promise<HostDiscoveryResult | null> {
 
   // 5. Subnet probe -- only the /24 the phone was last known to be on, never
   // a blind scan, and capped well under 254 concurrent to avoid reading as a
-  // port scan (PRD §5 risk).
+  // port scan.
   const seedIp = lastHost && subnetPrefix(lastHost) ? lastHost : subnetPrefix(currentHost) ? currentHost : null
   const prefix = seedIp ? subnetPrefix(seedIp) : null
   if (prefix) {

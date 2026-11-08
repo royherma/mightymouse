@@ -10,7 +10,7 @@
  * So `list()` is empty and `requiredPermissionKeys()` is empty, and the
  * onboarding wizard shows no permission step rather than three rows that all
  * say "not applicable". The one real Windows privacy gate — the microphone
- * toggle in Settings — belongs to capture, which is Tier 2 (PRD §3) and has no
+ * toggle in Settings — belongs to capture, which is Tier 2 and has no
  * caller here yet; adding a row for a feature that doesn't ship would be the
  * fake-pass in reverse.
  *
@@ -65,7 +65,7 @@ export function buildPermissionChecks(): Promise<PermissionCheck[]> {
  * The macOS version also re-gates a user whose permission grant later broke.
  * With no permissions to break, that clause has nothing to test — so the
  * remaining reason to show onboarding is the one thing it still does on
- * Windows: installing a backend CLI (PRD §5, phase 5.5).
+ * Windows: installing a backend CLI.
  */
 export function needsOnboarding(onboardingComplete: boolean): Promise<boolean> {
   return Promise.resolve(!onboardingComplete)

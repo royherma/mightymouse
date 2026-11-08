@@ -102,9 +102,9 @@ export const PERMISSIONS = {
   /**
    * Trigger the OS prompt where possible, else deep-link to the right pane.
    *
-   * Two users (2026-07-31) were stranded here: the screen request was a silent
+   * Two users were stranded here: the screen request was a silent
    * no-op AND we opened System Settings on top of the prompt we'd just asked
-   * for. Both are fixed below; see the PRD §2.5 for the forensics.
+   * for. Both are fixed below; see the design for the forensics.
    */
   async request(key: PermissionKey): Promise<void> {
     if (key === 'accessibility') {

@@ -6,7 +6,7 @@ import type { MightySession } from '../../shared/types'
  * The phone already has a History sheet listing every dictation and capture, so a
  * session that is nothing but one unanswered voice note is a second copy of a row
  * the user can already see — and it buries the real conversations under it.
- * Measured against real data (2026-07-27): 623 sessions reached the picker, 561 of
+ * Measured against real data: 623 sessions reached the picker, 561 of
  * them (90%) were single-bubble `listen` rows, so the entire first page but one was
  * noise. The Mac's sidebar deliberately keeps showing them; it has no History sheet
  * beside it and far more room.

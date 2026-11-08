@@ -90,7 +90,7 @@ describe('notch entrance geometry', () => {
 // a fixed CORNER_R regardless: it bulged out over exactly that row (pad painted
 // ON TOP of Esc), and the edge run that followed it went BACKWARDS up the edge
 // whenever first.y < CORNER_R, self-intersecting the subpath. Both are the same
-// bug Roy caught on-device 2026-07-23 ("the pad goes under" the top-right keys).
+// bug the user caught on-device 2026-07-23 ("the pad goes under" the top-right keys).
 describe('notch corner yields to a near-edge first level', () => {
   // The right edge is traced top-down, so y must never decrease across the
   // corner arc into the run that follows it.
@@ -199,7 +199,7 @@ describe('notch corner yields to a near-edge first level', () => {
   // with its own ~10px rounded corner). Turns deliberately cut an envelope's
   // sharp corner diagonally (that's what lets the cork sit ON the band line
   // instead of hovering a whole blend above it -- the "spacing above Esc"
-  // Roy kept reporting, 2026-07-23), so the check is two-zone, mirroring
+  // The user kept reporting, 2026-07-23), so the check is two-zone, mirroring
   // scripts/notch-diag.mjs:
   //   corner zones: within CUT_ZONE of a band edge, the path must keep
   //     CLEAR_MIN px of air off the button's rounded corner
@@ -282,7 +282,7 @@ describe('notch corner yields to a near-edge first level', () => {
     // still turns about the level's own y (200) -- travelling 200 -> 150 with
     // its control points straddling that midpoint rather than sitting on it.
     // The straddle is what curves the corner; the old both-on-the-midline form
-    // is what rendered as a hard 90-degree cut (Roy, on-device 2026-07-23).
+    // is what rendered as a hard 90-degree cut.
     const p = buildRightPath(W, H, noBand)
     const step = p.match(/C200,([\d.]+) 150,([\d.]+) 150,([\d.]+)/)
     expect(step, `expected a 200->150 step in ${p}`).not.toBeNull()
@@ -295,7 +295,7 @@ describe('notch corner yields to a near-edge first level', () => {
   // Cork is a soft material and the notch is meant to read as carved out of
   // it. A turn whose control points all sit on one horizontal line renders as
   // a dead-square 90-degree corner -- which is what shipped when the turn was
-  // clamped to the (negative) gap between two overlapping bands, and what Roy
+  // clamped to the (negative) gap between two overlapping bands, and what the user
   // caught on-device 2026-07-23: "you can't have these super sharp edges, it
   // should curve, feels more real". Rows overlap in BOTH real orientations, so
   // this is the normal case, not an edge case.
@@ -338,7 +338,7 @@ describe('notch corner yields to a near-edge first level', () => {
 // at -4, so its outer strip stayed under cork with an orphan lobe beside Esc.
 // Only reachable with the mirror ON, which is the one case that drives the pad to
 // its floor -- and invisible to every frozen-fixture test above, which is why this
-// asserts the INVARIANT rather than a path string (Roy, on-device, 2026-07-26).
+// asserts the INVARIANT rather than a path string.
 describe('landscape pad floor', () => {
   // 60 mic + 3x44 icons + 4x8 gaps, matching .proIconRow/.proMicBtn/.proIconBtn
   // in theme.css. A change there must move the floor with it.
@@ -365,8 +365,8 @@ describe('landscape pad floor', () => {
 
 // The guard that zeroes sub-minStepX columns must never fire on the DEEPEST
 // level: there is no carve behind it to fall back to, so zeroing opens the notch
-// to the pad's full width. That is the cork slab under the mic (Roy, on-device
-// landscape + mirror, 2026-07-26) -- a shape bug with no button OVERLAP, which
+// to the pad's full width. That is the cork slab under the mic
+// -- a shape bug with no button OVERLAP, which
 // is why both the deck viewer's overlap check and the floor test above went
 // green on it.
 describe('sliver guard', () => {
@@ -428,7 +428,7 @@ describe('sliver merge direction', () => {
 // ref). The hook used to require BOTH refs and returned early, which left
 // `path` null -- and a <clipPath> with no <path> child clips away EVERYTHING.
 // The pad kept its full layout box and painted zero pixels, so the skin plate
-// showed through: "the trackpad is not showing" (Roy, on-device 2026-07-26).
+// showed through: "the trackpad is not showing".
 // Nothing caught it because typecheck, the overlap check, and every geometry
 // test above operate on levels that already exist.
 describe('single-row cluster (groups split)', () => {

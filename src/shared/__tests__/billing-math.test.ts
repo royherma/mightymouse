@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { spendableCents, shouldShowBucketBreakdown } from '../billing-math'
 
 // spendableCents is the single sum every gate/display must use (packs +
-// subscription, migration 0016). The bug this PRD fixes — settings.ts's `ok:`
+// subscription, migration 0016). The bug this design fixes — settings.ts's `ok:`
 // gate denying a subscriber with $0 packs and a funded monthly bucket — is
 // exactly this arithmetic used wrong. Locking it here means any future caller
 // that reads only balance_cents is a visible regression, not a repeat incident.
@@ -12,7 +12,7 @@ describe('spendableCents', () => {
   })
 
   it('the denial-of-service case: $0 packs, funded subscription still counts', () => {
-    // This is 2c in the PRD — settings.ts used to gate on balance_cents alone
+    // This is 2c in the design — settings.ts used to gate on balance_cents alone
     // (0), refusing a subscriber whose subscription_cents (2000) made them
     // fully able to spend. ok: cents > 0 must see the combined total.
     const cents = spendableCents(0, 2000)
@@ -43,7 +43,7 @@ describe('spendableCents', () => {
 // shows the "$X packs, never expires / $Y monthly, resets <date>" split. This
 // is the exact boolean both Membership.tsx and visual-harness.tsx call — no
 // jsdom/@testing-library in this repo, so this predicate (not a rendered DOM)
-// is what proves the breakdown hides for one-bucket users, per the PRD's test
+// is what proves the breakdown hides for one-bucket users, per the design's test
 // requirement.
 describe('shouldShowBucketBreakdown', () => {
   it('both buckets non-zero → shows the breakdown', () => {

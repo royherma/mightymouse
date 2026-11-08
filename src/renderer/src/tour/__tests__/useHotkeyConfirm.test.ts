@@ -10,7 +10,7 @@ import type { TourProbeEventPayload } from '../../../../shared/tour/types'
 // jsdom/@testing-library — see hotkeyConfirmMachine.ts's header comment), so
 // these tests drive startSession() — the exact logic the hook wires into a
 // useEffect — with a fully faked `deps` object standing in for window.api +
-// timers + focus, per the PRD's "mock window.api" requirement.
+// timers + focus, per the design's "mock window.api" requirement.
 
 function makeDeps(overrides: Partial<SessionDeps> = {}): {
   deps: SessionDeps

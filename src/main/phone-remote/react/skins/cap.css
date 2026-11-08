@@ -17,7 +17,7 @@
 /* ══ SKIN: CAP ═════════════════════════════════════════════════════════════
    The first skin authored AFTER Pro II, and deliberately built the cheap way
    (a third value on the layout union) to measure what a skin actually costs
-   before paying for the axis split in the skin-system PRD. Read the block
+   before paying for the axis split in the skin-system design. Read the block
    header there before generalising from this one.
 
    Material story, one step from Pro II's milled steel + cork:
@@ -236,7 +236,7 @@
 }
 /* Cool seams (see above). Structure is a straight copy of the Pro II rule --
    which is precisely the duplication the token promotion in phase 2 of the
-   PRD is meant to remove; noted here rather than fixed, so the experiment
+   design is meant to remove; noted here rather than fixed, so the experiment
    reports the real cost. */
 .proRoot[data-skin='cap'] .proKeyPill,
 .proRoot[data-skin='cap'] .proIconBtn {

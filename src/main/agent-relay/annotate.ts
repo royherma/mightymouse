@@ -35,7 +35,7 @@ export type Mark = {
 }
 
 /** A bare string is the banner shorthand — the only mark an agent that has NOT
- *  seen the screenshot can place honestly (§6d). */
+ *  seen the screenshot can place honestly. */
 export type MarkInput = Mark | string
 
 const PALETTE: Record<MarkColor, string> = {
@@ -137,7 +137,7 @@ function normalize(input: MarkInput): Mark {
 
 /** Drops rather than clamps an out-of-range coordinate: a clamped guess is a
  *  confident lie, and an agent that fired `capture: true` has not seen the
- *  screen it is annotating (§6d). */
+ *  screen it is annotating. */
 function usable(m: Mark): boolean {
   if (!m || !m.at || !clamp01(m.at.x) || !clamp01(m.at.y)) return false
   if (m.from && (!clamp01(m.from.x) || !clamp01(m.from.y))) return false

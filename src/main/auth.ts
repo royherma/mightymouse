@@ -72,7 +72,7 @@ export async function initAuth(): Promise<AuthUser | null> {
   // a stalled network would freeze app startup so hotkeys/tray never register. Race
   // it against a ceiling; on timeout treat as signed-out (the correct fallback —
   // the auth window opens, and onAuthStateChange above still fires if it resolves later).
-  // DIAGNOSTIC (auth-session-not-persisting PRD): snapshot encryption/decrypt state,
+  // DIAGNOSTIC: snapshot encryption/decrypt state,
   // then time getSession() and record whether the timeout fallback fired.
   logAuthDiagnosticStartup();
   const started = Date.now();

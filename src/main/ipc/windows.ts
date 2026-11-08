@@ -114,11 +114,11 @@ export function registerWindowHandlers(): void {
 
   // Phase 1: one finished VAD segment arrives as raw WAV bytes (renderer's
   // useVoiceActivity.ts already decided the segment boundaries — see the
-  // PRD's §6 VoiceInputSource). `send` (fire-and-forget), not `invoke`: the
+  // design's VoiceInputSource). `send` (fire-and-forget), not `invoke`: the
   // renderer doesn't block on the result, it gets it back via the
   // liveTurnResult push once live-listen.ts's transcribe-then-mock-respond
   // loop finishes — matches the "audio in / transcript event out" shape the
-  // PRD asks for, rather than a single blocking round trip.
+  // design asks for, rather than a single blocking round trip.
   ipcMain.handle(CHANNELS.liveTurnDraft, (_, wavBytes: Uint8Array, echoTail: unknown) =>
     runLiveDraft(wavBytes, typeof echoTail === 'string' ? echoTail : '')
   )

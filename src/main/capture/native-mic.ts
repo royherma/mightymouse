@@ -2,7 +2,7 @@
 //
 // Why: a RESIDENT AVAudioEngine restarts in ~180 ms to first buffer, vs
 // 640–1250 ms for a process spawned per press (and ~600–850 ms for ffmpeg
-// -f avfoundation). Measured 2026-08-29 — see the listen-drops-first-word PRD.
+// -f avfoundation). Measured 2026-08-29 — see the listen-drops-first-word design.
 //
 // Gated behind PREFS.getUseNativeMic() — default OFF. Enable by writing '1'
 // to ~/MightyMouse/use-native-mic.txt (or calling PREFS.setUseNativeMic(true)).

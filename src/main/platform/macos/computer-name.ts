@@ -1,7 +1,7 @@
 // computer-name.ts — the Mac's human-readable name for the phone widget.
 //
 // Why not `os.hostname()`: on a DHCP network macOS reports the reverse-DNS name
-// the router hands out, which is routinely the bare IP -- Roy's Mac returns
+// the router hands out, which is routinely the bare IP -- Pat's Mac returns
 // "192.168.1.12" while its actual name is "MacBook Pro (7)". `scutil` reads the
 // name the user set in System Settings → General → About, which is what the
 // widget must show.

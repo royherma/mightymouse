@@ -72,7 +72,7 @@ export function isRemoteRefusal(body: unknown): body is RemoteRefusal {
  * The upgrade pitch, built from what the user actually spent.
  *
  * Rendered from `usage`, never hardcoded: a user can be capped on all three
- * windows at once (Roy's staging account is), so a blanket "back tomorrow" is a
+ * windows at once, so a blanket "back tomorrow" is a
  * lie for exactly the people who hit this most. `window` is the narrowest
  * exhausted one because that's the soonest they get anything back.
  */

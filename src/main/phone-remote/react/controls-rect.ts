@@ -14,8 +14,8 @@
  *
  *  Excluding it is also what makes the arc FIT. A circle enclosing the buttons
  *  AND the bar needs ~259px on a 393pt portrait pad that offers ~227, so the
- *  pad-edge cap won and the arc's icons sat behind the tab chips (Roy,
- *  on-device). Sizing to the buttons alone clears them at r=204 with room to
+ *  pad-edge cap won and the arc's icons sat behind the tab chips.
+ *  Sizing to the buttons alone clears them at r=204 with room to
  *  spare, and the bar gets out of the way instead. */
 export function controlsRect(cluster: HTMLElement): DOMRect | null {
   const btns = cluster.querySelectorAll<HTMLElement>('.proKeyPill, .proMicBtn, .proIconBtn')

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // probeBackend's http-transport branch is the backend preflight gate — the
-// severest bug in PRD 2026-07-23-credit-balance-under-reports.md (§2c):
+// severest bug in a design doc:
 // `ok: cents > 0` used to read balance_cents (packs) alone, so a subscriber
 // with $0 packs and a funded subscription_cents bucket was told the backend
 // was unusable, even though the real paywall (llm-proxy) would have served
@@ -107,7 +107,7 @@ describe('probeBackend (mightymouse / http transport) — balance gate', () => {
 
   it('THE BUG: $0 packs + funded subscription still passes the gate (ok: true)', async () => {
     getSessionMock.mockResolvedValue({ userId: 'u1' })
-    // This is the exact denial case from PRD §2c: balance_cents (packs) is 0,
+    // This is the exact denial case from design: balance_cents (packs) is 0,
     // subscription_cents is funded. The old code read balance_cents alone and
     // returned ok: false here, blocking a paying subscriber.
     selectChain.single.mockResolvedValue({ data: { balance_cents: 0, subscription_cents: 2000 } })

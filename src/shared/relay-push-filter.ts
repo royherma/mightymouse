@@ -10,7 +10,6 @@
  * Mac-OWNED, not Mac-only: it gates the send, so the phone can never enforce it
  * -- but the phone's alerts sheet reads and writes the same one answer.
  *
- * PRD: prds/active/2026-08-14-1786690000-relay-push-notification-filters.md
  */
 
 import type { RelayVerbWire } from './phone-remote-protocol'

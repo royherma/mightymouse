@@ -13,7 +13,7 @@ struct QueuedClip: Codable, Identifiable {
     let createdAt: Date
     /// What the PHONE heard, for display while the clip waits. Never what gets
     /// pasted -- the Mac re-transcribes on arrival and its text always wins
-    /// (PRD §3b C2). Optional so index entries written before this shipped
+    /// Optional so index entries written before this shipped
     /// still decode, and nil whenever recognition was denied or unavailable.
     var phoneText: String?
     /// The Mac was unreachable when this was RECORDED, so it drains late: the
@@ -230,7 +230,7 @@ final class AudioCapture: NSObject, ObservableObject {
     ///
     /// But a dead webview can never emit that false -- its JS died with it --
     /// so a genuinely-gone deck would otherwise leave the session active with
-    /// an empty `holds` set forever (Roy's report, PRD §7b). Arms a deadline
+    /// an empty `holds` set forever. Arms a deadline
     /// instead: a remount cancels it via `hold()`, silence lets it fire and
     /// deactivate.
     func releaseHoldsForTeardown() {
@@ -323,7 +323,6 @@ final class AudioCapture: NSObject, ObservableObject {
     /// WebKit independently owns its own session for the inline `<video>`. Which
     /// wins a re-assert is UNVERIFIED on device -- if mirror audio ever cuts out
     /// the moment a voice note starts, look here first
-    /// (`prds/active/2026-08-08-1786192267-ios-background-mode.md` §9 F8).
     private func applyRole(incoming: Reason? = nil, outgoing: Reason? = nil) {
         // `.mirrorInline` deliberately does not activate: WebKit already owns a
         // session for the inline video, and activating underneath it interrupts
@@ -598,7 +597,7 @@ final class AudioCapture: NSObject, ObservableObject {
         // Deliberately AFTER the enqueue and deliberately not awaited: the clip
         // is saved and drainable the instant it exists, and recognition on a
         // long recording takes seconds the user is not going to stand still for
-        // (PRD §7 risk 6). The words catch up; the save never waits for them.
+        // The words catch up; the save never waits for them.
         guard transcribing else { return clip }
         Task { @MainActor in
             let outcome = await ClipTranscriber.transcribe(fileURL: fileURL)
@@ -634,7 +633,7 @@ extension AudioCapture: AVAudioRecorderDelegate {
 ///
 /// Exists so a queued clip isn't silent to its owner: without it you record,
 /// get "saved", and have no idea what you said until you walk back to your Mac
-/// (PRD §3b). The text is a RECEIPT, never the artifact -- the Mac re-runs
+/// The text is a RECEIPT, never the artifact -- the Mac re-runs
 /// whisper on the same audio and its transcript is what reaches the cursor.
 ///
 /// Apple Speech rather than a bundled Whisper deliberately: no model download,

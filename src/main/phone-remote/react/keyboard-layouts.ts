@@ -1,6 +1,6 @@
 // keyboard-layouts.ts — the on-screen virtual keyboard's layouts as DATA, not JSX.
 //
-// Roy's brief (voice note phone:e075659a, then V2 2026-07-24): "the auto
+// The user's brief (voice note phone:e075659a, then V2 2026-07-24): "the auto
 // keyboard will be based on the same keyboard of the device... I have a
 // MacBook Pro... I want to have the exact same keyboard. It's very critical."
 // v1 shipped one generic QWERTY behind a seam built for exactly this; V2 adds
@@ -111,7 +111,7 @@ export type KeyboardLayoutId = (typeof KEYBOARD_LAYOUT_ID)[keyof typeof KEYBOARD
 export const KEYBOARD_LAYOUT_FOR_HOST: Record<HostKeyboard, KeyboardLayoutId> = {
   mac: KEYBOARD_LAYOUT_ID.macUs,
   // An ISO board has one extra key left of Z (§/±). It's detected and reported,
-  // but deliberately NOT drawn -- Roy has an ISO Mac and asked for it removed
+  // but deliberately NOT drawn -- the user has an ISO Mac and asked for it removed
   // after using it: the glyph reads as noise on a phone-sized cap, and the keys
   // he actually wanted turned out to be elsewhere on the board. Route ISO to the
   // ANSI layout rather than deleting the host value, so the finding survives and
@@ -170,9 +170,9 @@ const QWERTY_GENERIC: KeyboardLayout = {
 
 /** The full US-ANSI MacBook keyboard, row for row: esc+F-row, number row,
  *  and the fn/control/option/command bottom row with arrows. Mirrors what's
- *  physically under Roy's hands ("exact same keyboard. It's very critical"),
+ *  physically under the user's hands ("exact same keyboard. It's very critical"),
  *  so muscle-memory combos (⌘C, ⌘S, ⌥⌫) work from the phone. F-keys send
- *  plain F1-F12 (no media functions -- PRD non-goal). */
+ *  plain F1-F12 (no media functions -- design non-goal). */
 const MAC_US: KeyboardLayout = {
   id: KEYBOARD_LAYOUT_ID.macUs,
   label: 'Mac (US)',

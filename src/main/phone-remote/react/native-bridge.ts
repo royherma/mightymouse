@@ -34,7 +34,7 @@ export type NativeMessage =
   | { t: 'pushSettingsOpen' }
   /** The WebView is the connection authority; this is the only thing Swift
    *  knows about connection state, and it uses it only to time the launch
-   *  cover (PRD §2.4/§2.5). Sent on every ConnState transition, no exceptions. */
+   *  cover. Sent on every ConnState transition, no exceptions. */
   | { t: 'connState'; state: string; reason?: string }
   /** Swift deletes its queued clip only on this ack, never speculatively. */
   | { t: 'clipDelivered'; clipId: string }
@@ -225,7 +225,7 @@ export type NativeIntent =
    *  credential is gone and only pairing again recovers it, while `unreachable`
    *  is a sleeping Mac or a dead tunnel that fixes itself. Previously BOTH ended
    *  at an os_log line nobody reads, so a tapped button did nothing at all and
-   *  gave no way to find out why (Roy, on device: "I click and it won't work"). */
+   *  gave no way to find out why. */
   | { type: 'relayAnswerFailed'; requestId: string; reason: 'unauthorized' | 'unreachable' }
   /** Metadata only, never pixels -- the whole point of the search half is that
    *  an agent can narrow a library down without any photo leaving the phone.

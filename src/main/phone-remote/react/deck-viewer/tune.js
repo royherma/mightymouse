@@ -4,7 +4,7 @@
 // broken?" across a grid of ten decks. That is the wrong tool for "which value
 // moves this edge?", because every experiment costs an edit + a rebuild + a
 // full-grid remeasure, and the answer arrives as a pass/fail verdict rather
-// than a number. Roy spent a session on the landscape safe zone that way and
+// than a number. The user spent a session on the landscape safe zone that way and
 // the answer was still a guess (a flat 10px swapped for a flat 14px -- same
 // class of bug, a constant where a relationship belongs).
 //

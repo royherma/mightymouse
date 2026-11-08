@@ -145,7 +145,7 @@ export interface RewritePromptOptions {
   memoryBlob?: string
   /** Retrieved THIRD-PARTY content (connector emails/Slack, recall slices). Goes in
    *  the USER turn, never the system prompt: system position is unearned trust for
-   *  text a stranger wrote. See the prompt-injection-hardening PRD. */
+   *  text a stranger wrote. See the prompt-injection-hardening design. */
   retrievedBlob?: string
   /** Reference file/folder paths for the agent to read (e.g. a capture folder,
    *  a screenshot). The CLI backends have filesystem access, so naming the paths

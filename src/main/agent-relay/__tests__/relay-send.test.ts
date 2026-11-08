@@ -1,5 +1,5 @@
 /**
- * PRD §6c: "relay toggle off -> MCP calls fail fast ... the error string IS
+ * "relay toggle off -> MCP calls fail fast ... the error string IS
  * the guide." This is the one place that exact string is asserted verbatim
  * so a future copy edit can't silently break the fail-fast contract.
  */
@@ -108,9 +108,9 @@ describe('agentRelayOffReason / sendRelayPush relay-off fail-fast', () => {
 })
 
 /**
- * PRD 2026-08-14-1786690000: which kinds of message may buzz the phone. All
- * four verbs are muteable (Roy's call, overruling the draft that hard-coded
- * ask/approve as always-on), so the test covers all four rather than a subset.
+ * design: which kinds of message may buzz the phone. All
+ * four verbs are muteable,
+ * so the test covers all four rather than a subset.
  */
 describe('sendRelayPush push filter', () => {
   const loadSend = () => import('../relay-send')
@@ -260,7 +260,7 @@ describe('sendRelayPush notify severity floor', () => {
 
   /** The turn-end ping is untagged AND has its own opt-in switch, so the floor
    *  above would eat every one of it -- two switches silently cancelling each
-   *  other, which is exactly what shipped (Roy, 2026-08-15). `idle` is the flag
+   *  other, which is exactly what shipped. `idle` is the flag
    *  the Stop hook sets, and it is the exemption. */
   it('lets an untagged idle ping through the problems floor', async () => {
     const { sendRelayPush } = await loadSend()
@@ -272,7 +272,7 @@ describe('sendRelayPush notify severity floor', () => {
 
   /** Same exemption, one state wider: an "All done" is the end of the work, not
    *  a step in it, so the floor muting it left the one card a person is waiting
-   *  on as the only one they never got (Roy, 2026-08-15). */
+   *  on as the only one they never got. */
   it('lets an untagged done notify through the problems floor', async () => {
     const { sendRelayPush } = await loadSend()
     const done = { ...notifyWith(), params: { title: 'All done', state: 'done' as const } }
@@ -293,7 +293,7 @@ describe('sendRelayPush notify severity floor', () => {
 })
 
 /**
- * The defect this PRD exists to fix (2026-08-22-1787388684 §2a): the Mac mirror
+ * The defect this design exists to fix: the Mac mirror
  * used to sit BELOW the phone's gates, so a `return` for a phone-muted verb was
  * also a return for the Mac. Muting updates on the phone silently killed every
  * Mac alert of that kind. These lock the two surfaces apart.

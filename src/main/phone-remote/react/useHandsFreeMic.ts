@@ -61,7 +61,7 @@ export interface UseHandsFreeMicResult {
   error: string | null
   /**
    * Suspend the VAD's auto-stop for a deliberate press-and-hold, so a manual
-   * hold and the VAD never race to stop one recorder (PRD Q2b). Returns the
+   * hold and the VAD never race to stop one recorder. Returns the
    * shared stream when hands-free owns the mic, so the caller records on it
    * instead of opening a second one; null when not armed.
    */

@@ -13,14 +13,13 @@
  * `SetupCheck.fix` is non-optional when `status === 'fail'`. A failing row with
  * no button is the bug this module exists to make impossible to write.
  *
- * THE OPACITY RULE (PRD §4.0): none of this vocabulary — npm, Node, Homebrew,
+ * THE OPACITY RULE: none of this vocabulary — npm, Node, Homebrew,
  * ffmpeg, CLI, PATH — may reach the user. A row names a CAPABILITY ("Screen
  * recording needs one more piece"), never our plumbing. Dependencies of
  * dependencies (installing Node so we can install a CLI) happen silently under
  * ONE button with ONE progress bar. See CONFIG.SETUP_CHECK for all user copy;
  * nothing in this file is user-visible.
  *
- * See prds/active/2026-07-23-1784776098-zero-dead-ends-setup-check.md
  */
 
 /** Stable ids — one per thing that can be broken. Never shown to the user. */
@@ -75,7 +74,7 @@ export type SetupFixKind = (typeof SETUP_FIX_KIND)[keyof typeof SETUP_FIX_KIND]
  *
  * The zero-install backend needs a signed-in account with a non-zero balance
  * (probeBackend, ipc/settings.ts). Switching a signed-out user would land them
- * in a fourth dead end — the exact failure this PRD exists to kill — so the
+ * in a fourth dead end — the exact failure this design exists to kill — so the
  * fix declares what it has to chain through first, and the runner does it.
  */
 export const SETUP_CHAIN = {
@@ -177,7 +176,7 @@ export function toSetupDiagnosticProps(d: SetupDiagnostic): {
  * Electron — the reason the original defect had no test at all.
  *
  * THE DEFECT IT ENCODES: the row used to be `whisper && model`, which proves
- * the FILES exist, never that voice works. A real user (2026-09-06) read
+ * the FILES exist, never that voice works. A real user read
  * "Voice transcription — Ready" while his microphone was blocked, pressed the
  * install button four times in four minutes, re-fetched a 148MB engine that was
  * already on disk, and never transcribed a word. A capability row has to

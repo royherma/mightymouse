@@ -20,7 +20,7 @@
  *    swaps cannot save each other's text as "the original".
  *
  * Keystrokes go through SendKeys rather than a SendInput addon: Tier 1 ships no
- * native toolchain (PRD §4b), and SendKeys is the same synthesized-input channel
+ * native toolchain, and SendKeys is the same synthesized-input channel
  * with a PowerShell spawn in front of it.
  */
 import { clipboard } from 'electron'

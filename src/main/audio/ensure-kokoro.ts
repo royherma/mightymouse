@@ -14,7 +14,7 @@ import { PATHS } from '../store/paths'
  *
  * Two candidate homes, in priority order:
  *   1. PATHS.MODELS/kokoro/bin — the managed payload we will ship (not built yet;
- *      Gate 0 in the PRD gates it on Gatekeeper/notarization evidence).
+ *      Gate 0 in the design gates it on Gatekeeper/notarization evidence).
  *   2. ~/.local/bin — a `uv tool install mlx-audio` the user already has. This is
  *      the DEV path: it makes the rung reachable on a machine with the benchmark
  *      install, so the voice can be A/B'd before the payload work is paid for.

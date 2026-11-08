@@ -86,7 +86,7 @@ describe('POST /pair CORS preflight', () => {
     expect(started.ok, 'test server must start to prove anything').toBe(true)
     if (started.ok) activePort = started.port
     // Belt and braces: if the port mock ever stops applying, fail loudly here
-    // rather than firing requests at Roy's live phone session.
+    // rather than firing requests at the user's live phone session.
     expect(activePort, 'must never bind the real phone-remote port').not.toBe(17771)
   }, 60_000)
 

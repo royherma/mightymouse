@@ -14,7 +14,7 @@ import type { AgentRelaySessionInfo } from '../types'
 
 const approveAsk: HideoutAsk = {
   id: 'r1',
-  project: 'petfomo',
+  project: 'acme',
   question: 'deploy prod',
   options: ['Approve', 'Deny'],
   recommended: 0,
@@ -36,7 +36,7 @@ const dbAsk: HideoutAsk = {
 const world = (over: Partial<HideoutWorld> = {}): HideoutWorld => ({
   open: true,
   paused: false,
-  projects: ['mighty-mouse', 'petfomo'],
+  projects: ['mighty-mouse', 'acme'],
   stuck: null,
   asks: [],
   focus: null,
@@ -67,7 +67,7 @@ describe('planHideout answering agent decisions', () => {
   })
 
   it('naming the project approves its ask without focusing it first', () => {
-    expect(planHideout('approve petfomo', world({ asks: [approveAsk] })).commands).toEqual([
+    expect(planHideout('approve acme', world({ asks: [approveAsk] })).commands).toEqual([
       { kind: 'answer', askId: 'r1', option: 0 }
     ])
   })
@@ -102,8 +102,8 @@ describe('planHideout commands', () => {
   })
 
   it('"tell <project> to X" sends X to that project', () => {
-    expect(planHideout('tell petfomo to run the tests.', world()).commands).toEqual([
-      { kind: 'tell', project: 'petfomo', name: 'petfomo', message: 'Run the tests' }
+    expect(planHideout('tell acme to run the tests.', world()).commands).toEqual([
+      { kind: 'tell', project: 'acme', name: 'acme', message: 'Run the tests' }
     ])
   })
 
@@ -163,7 +163,7 @@ describe('placeHideout', () => {
 describe('hideoutAsks', () => {
   const wire = (over: Partial<RelayRequestWire> & Pick<RelayRequestWire, 'id' | 'verb' | 'params'>): RelayRequestWire =>
     ({ createdAt: 0, timeoutMs: 1, status: 'pending', response: null, ...over }) as RelayRequestWire
-  const sessions = [{ label: 'x', cwd: '/w/pf', project: { name: 'petfomo' } }] as AgentRelaySessionInfo[]
+  const sessions = [{ label: 'x', cwd: '/w/pf', project: { name: 'acme' } }] as AgentRelaySessionInfo[]
 
   it('turns pending approve/ask cards into voice-answerable asks, oldest first', () => {
     const asks = hideoutAsks(
@@ -175,16 +175,16 @@ describe('hideoutAsks', () => {
       sessions
     )
     expect(asks.map((a) => a.id)).toEqual(['a', 'b'])
-    expect(asks[0]).toMatchObject({ project: 'petfomo', question: 'deploy - prod', options: ['Approve', 'Deny'], approve: true })
+    expect(asks[0]).toMatchObject({ project: 'acme', question: 'deploy - prod', options: ['Approve', 'Deny'], approve: true })
     expect(asks[1]).toMatchObject({ recommended: 0, pcts: [60, 40] })
   })
 
   it('a stuck verdict on a live session names its project; a stale one does not', () => {
     const list = [
       { label: 'a', sessionId: 's1', stale: true, project: { name: 'old' } },
-      { label: 'b', sessionId: 's2', project: { name: 'petfomo' } }
+      { label: 'b', sessionId: 's2', project: { name: 'acme' } }
     ] as AgentRelaySessionInfo[]
-    expect(hideoutStuck(list, { s1: 'looping', s2: 'off_goal' })).toBe('petfomo')
+    expect(hideoutStuck(list, { s1: 'looping', s2: 'off_goal' })).toBe('acme')
     expect(hideoutStuck(list, { s1: 'looping', s2: 'on_track' })).toBeNull()
   })
 })

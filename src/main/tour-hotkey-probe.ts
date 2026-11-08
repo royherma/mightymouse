@@ -2,7 +2,7 @@
 // global hotkey?" without a second uiohook watcher. capture-hotkey.ts calls
 // probeIntercept() at the top of each shortcut's dispatch branch; a hit here
 // means the branch returns early and the real handler (open panel / start
-// recording / start listening) never runs — see PRD §4.2 for why suppression
+// recording / start listening) never runs — see design for why suppression
 // is deliberate (a real capture/listen session mid-tour would steal focus and
 // leave the user in a state the tour can't explain).
 //
@@ -56,7 +56,7 @@ export function setTourDemoHooks(hooks: TourDemoHooks): void {
 let armedShortcutId: ShortcutId | null = null
 let latched = false
 // Last emitted modifier trio, so 'mods' events only fire on an actual change
-// (throttle per PRD's mandated-simplifications bullet) — every keydown/keyup
+// — every keydown/keyup
 // while armed would otherwise spam the renderer.
 let lastMods: { meta: boolean; alt: boolean; shift: boolean } | null = null
 
@@ -115,7 +115,7 @@ export function probeIntercept(id: ShortcutId): boolean {
  * Consume ANY other Cmd+Opt+Shift chord while armed (H/S/J/D/K/;/digits — every
  * registered shortcut besides the three tour steps). These aren't one of the
  * armed step's own aliases, but a wrong-key press during the tour still
- * shouldn't fall through to its real action (PRD mandated-simplification
+ * shouldn't fall through to its real action (design mandated-simplification
  * bullet: "keycode matches ANY other registered tour shortcut OR any ⌘⌥⇧
  * chord branch"). Returns true (always consumes) when armed; false when not.
  */

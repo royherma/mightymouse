@@ -3,7 +3,6 @@
 # Re-runnable: exits early if the target already exists so it's safe to
 # re-invoke after a partial run or a project reset.
 #
-# PRD: prds/active/2026-08-02-1785661910-ios-widgets-hold-to-note.md §5 step 1.
 # Why a script and not a hand-authored pbxproj diff: ios/Config.xcconfig
 # documents this file breaking on a bare PBXGroup edit -- the xcodeproj gem
 # (verified 2026-08-03, gem 1.27.0) is the only route that has round-tripped

@@ -3,7 +3,7 @@
 // Why this exists: opening the mic costs ~640-1250 ms per PROCESS (dyld +
 // engine.inputNode + first HAL start), and the old design spawned a fresh
 // process per hotkey press — so every listen lost its first word. Measured
-// 2026-08-29 (prds/active/…listen-drops-first-word…): a resident engine that
+// 2026-08-29: a resident engine that
 // is built + prepare()d once restarts in ~180 ms to first buffer, with the
 // HAL idle (no orange mic dot) between sessions. This binary is the mic path
 // only; screen-recording still uses ffmpeg.

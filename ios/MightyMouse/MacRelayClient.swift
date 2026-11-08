@@ -77,7 +77,7 @@ enum MacRelayClient {
     /// credential. Returns silently on any failure -- callers that need to
     /// react to a failure inspect the thrown error, but nothing here retries:
     /// a stale host or a dead credential resolves itself on the NEXT launch's
-    /// call, per PRD §6c ("re-registered on every launch, invisible").
+    /// call, per design ("re-registered on every launch, invisible").
     @discardableResult
     static func post(
         _ path: String,

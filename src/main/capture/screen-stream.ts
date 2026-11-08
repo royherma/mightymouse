@@ -14,7 +14,7 @@ import {
   writePhoneMicPcm
 } from './phone-mic-device'
 
-// Screen mirror (prds/active/2026-07-18-1784360957-phone-remote-screen-mirror.md):
+// Screen mirror:
 // a small HIDDEN window (?window=webrtc-capture) whose sole job is running
 // getDisplayMedia + RTCPeerConnection in a renderer context -- the main process
 // cannot call WebRTC capture APIs directly. This module owns its lifecycle
@@ -25,7 +25,7 @@ import {
 
 let captureWindow: BrowserWindow | null = null
 
-// Phone mic (prds/active/2026-08-01-1785560393-phone-mic-as-mac-input.md).
+// Phone mic.
 // Audio goes to the HAL device so other apps can select it as a microphone;
 // the peak log stays because silence and a dead stream are indistinguishable
 // without one, and that ambiguity has already cost a debugging session.
@@ -119,7 +119,7 @@ export interface ScreenStreamCallbacks {
 
 let callbacks: ScreenStreamCallbacks | null = null
 
-// TEMP instrumentation (phone-connect-degrades-glasses-mirror PRD): the 30-on-10-cores
+// TEMP instrumentation: the 30-on-10-cores
 // question — was the Mac starved during the stall, or was the estimator frozen on a
 // quiet machine? limMs cpu:0 only watches the encode thread, so log the whole box.
 let loadTimer: NodeJS.Timeout | null = null
@@ -255,11 +255,11 @@ export function startScreenStream(
   // otherwise). Passed in rather than read here so main stays the single
   // owner of credential fetching — see phone-remote/ice-servers.ts.
   iceServers: unknown[],
-  // Share computer audio (computer-audio PRD). When on, the native SCK helper
+  // Share computer audio. When on, the native SCK helper
   // is spawned here and its PCM piped to the capture renderer, which turns it
   // into an audio track on the SAME peer connection as video.
   shareAudio: boolean,
-  // Audio-only mirror mode (Siri -> ChatGPT voice PRD): the capture renderer
+  // Audio-only mirror mode (Siri -> ChatGPT voice design): the capture renderer
   // must skip getDisplayMedia and video entirely -- no screen-recording
   // prompt, no frames -- while still answering the offer so the phone's mic
   // transceiver negotiates. Same boolean-flag shape as shareAudio above.
@@ -466,7 +466,7 @@ export function noteScreenStreamInput(source: UserInputSource = 'input'): void {
   // A bare cursor move never downscales -- at worst it pans the follow-view,
   // and the physical Mac mouse already does exactly that with no herald at
   // all, at full resolution, and looks fine. Downscaling only the phone's
-  // moves bought nothing but blur (2026-08-12).
+  // moves bought nothing but blur.
   if (source === 'cursor') return
   if (!motionOn) {
     motionOn = true

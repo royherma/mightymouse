@@ -84,13 +84,11 @@ function buildCurtain(bounds: Electron.Rectangle): BrowserWindow {
   // This is what makes the ONE screen show black to the room while the phone's
   // getDisplayMedia stream skips the curtain and sees the live desktop beneath —
   // without it, the capture composites the curtain in and the phone goes black
-  // too, defeating the whole point (Roy, on-device: "on phone I should not see
-  // it, on the computer it should be there").
+  // too, defeating the whole point.
   win.setContentProtection(true)
   win.setAlwaysOnTop(true, 'screen-saver')
   // Cover the menu bar / tray strip too. A screen-saver-level window still sits
   // BELOW the macOS menu bar, leaving the top ~24px of desktop showing through
-  // (Roy, on-device: "the top can't you make it go over the tray bar as well").
   // setSimpleFullScreen takes the window over the menu bar without the native
   // fullscreen animation or a Space of its own.
   win.setSimpleFullScreen(true)

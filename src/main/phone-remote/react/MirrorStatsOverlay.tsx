@@ -12,7 +12,7 @@
  * Cursorless hosts ONLY, on top of that flag. The phone shows the same mirror
  * and is the device you can just look at, so there the numbers are pure
  * occlusion over the picture being judged -- and a build:phone-remote is also
- * what serves Roy's own phone while iterating, so "debug build" alone is not a
+ * what serves the user's own phone while iterating, so "debug build" alone is not a
  * narrow enough gate.
  */
 

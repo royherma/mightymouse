@@ -1,7 +1,7 @@
 /**
  * Phone-side connect attempts, shared by the phone buffer and the Mac ingest.
  *
- * One formatter so `bin/mm-phone-log` cannot drift from the producer. The body
+ * One formatter so a dev script cannot drift from the producer. The body
  * carries an outcome and a host, never a credential — POST /connect-log is
  * unauthenticated, same as GET /whoami.
  */

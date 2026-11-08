@@ -4,7 +4,7 @@
  * The companion overlay (?window=companion) cycles through these states to show
  * what the mouse character is "doing" at any moment. Phase 0 drives this with a
  * scripted timer loop (no mic, no LLM); later phases drive it from the real
- * VoiceInputSource/ResponseSource/SpeechOutput pipeline (see the PRD's §6 adapter
+ * VoiceInputSource/ResponseSource/SpeechOutput pipeline (see the design's adapter
  * seam) without changing this union or its consumers.
  *
  * Named union + const array (not bare string literals) per the repo's no-magic-

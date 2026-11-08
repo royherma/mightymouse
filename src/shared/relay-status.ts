@@ -556,7 +556,7 @@ export function sessionHaystack(session: AgentRelaySessionInfo, row: SessionRow)
     session.hostAppName,
     session.whereLabel,
     session.pid !== undefined ? String(session.pid) : undefined,
-    // Never on the card, but it is what `bin/mm-relay sessions` prints and what
+    // Never on the card, but it is what the relay CLI prints and what
     // a hook or a log names a session by, so it is the id someone pastes in.
     session.sessionId
   ]

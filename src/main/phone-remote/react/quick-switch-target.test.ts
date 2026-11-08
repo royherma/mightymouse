@@ -4,7 +4,6 @@
  * the same app. Both come from quickSwitchTargetIndex, so these cases pin its
  * arithmetic to what the Mac's quickSwitchApps() does with the same inputs.
  *
- * See docs/gotchas.md, "phone-remote quick-switch".
  */
 import { describe, it, expect } from 'vitest'
 import { quickSwitchTargetIndex, type QuickSwitchTarget } from './TouchpadControls'

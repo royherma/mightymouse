@@ -61,8 +61,8 @@ export default function SkinPreview({
      a rectangle laid on top of it: it measures the REAL rects of the two key
      rows and the icon row and carves the pad's edge to hug each one.
      An earlier preview skipped it and squared the pad off at the cluster band
-     instead, which left the bottom third of every card as bare deck (Roy,
-     on-device 2026-07-23). Running the real hook is both more honest and less
+     instead, which left the bottom third of every card as bare deck.
+     Running the real hook is both more honest and less
      code than any approximation of it. */
   const padRef = useRef<HTMLDivElement>(null)
   const keyGridRef = useRef<HTMLDivElement>(null)
@@ -98,7 +98,7 @@ export default function SkinPreview({
          theme.css hangs off [data-img-skin] -- so the pad painted its fallback
          colour and the card showed a sculpted deck in the wrong palette, which
          is precisely the "picture of a product you are not using" the
-         data-orient comment below refuses to ship (Roy, on-device 2026-07-24). */
+         data-orient comment below refuses to ship. */
       data-img-skin={imageSkin ? '' : undefined}
       /* Pinned light regardless of the viewer's colour-scheme pref. Every
          skin's tokens are built over the LIGHT base (see LIGHT_PINNED_SKINS),

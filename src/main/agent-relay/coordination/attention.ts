@@ -78,7 +78,7 @@ function chunks<T>(items: readonly T[], size: number): T[][] {
 /**
  * Rule-placed rows never reach Jev. Everything else re-scores only when its
  * cache key changed since the last call, so a reload with nothing new makes
- * zero calls -- the PRD's own line.
+ * zero calls -- the design's own line.
  */
 export async function computeAttention(
   relaySessions: readonly AgentRelaySessionInfo[]

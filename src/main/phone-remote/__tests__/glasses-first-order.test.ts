@@ -7,7 +7,7 @@
  * only one of them was ever covered, and it was the one that worked.
  *
  * Binds a high test-only port -- never 17771 -- so this cannot touch a real
- * phone session (see CLAUDE.local.md). Enforced by the CONFIG mock below plus
+ * phone session. Enforced by the CONFIG mock below plus
  * the assertion in `beforeAll`, not by this comment.
  */
 

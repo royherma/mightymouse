@@ -58,7 +58,7 @@ describe('ringBand', () => {
 
   it('clears the LONGER cluster leg, not the shorter one', () => {
     // Clearing only the near leg put the icons straight on top of Esc, Tab and
-    // the mic (Roy on-device 2026-07-31): a circle that clears the short leg
+    // the mic: a circle that clears the short leg
     // cuts through the long one, which is where the buttons are.
     const wide = ringBand({ ...anchor, clusterX: 340, clusterY: 40, reachX: 500, reachY: 500 })!
     expect(wide.radius).toBe(340 + GAP + BAND / 2)
@@ -212,7 +212,7 @@ describe('ringSlotCount', () => {
 describe('ringDismissZoneT', () => {
   // The regression this exists for: a flat 0.12 zone reached past slot 0's
   // centre from five apps up, so holding the first icon put the ring away
-  // instead of opening its app (Roy, on-device portrait 2026-08-01).
+  // instead of opening its app.
   it('ends below slot 0 at every slot count', () => {
     for (let slots = 1; slots <= CONFIG.PHONE_REMOTE.APP_RING_MAX_SLOTS; slots++) {
       expect(ringDismissZoneT(slots)).toBeLessThan(ringSlotCenter(0, slots))
@@ -460,7 +460,7 @@ describe('ringPopoutAt', () => {
   })
 
   it('holds the finger ANGLE, so the preview rides the touch', () => {
-    // Roy's rule: it follows the touch, angled out of the ring. Same bearing
+    // The user's rule: it follows the touch, angled out of the ring. Same bearing
     // from the corner as the thumb, only further out.
     // A pad with room to spare on every side, so the edge clamp cannot fire and
     // this case tests the bearing alone. The clamp has its own case below.

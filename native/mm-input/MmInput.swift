@@ -182,7 +182,7 @@ func scroll(direction: String, lines: Int32) {
 /// trackpad pinch as an NSEvent magnification with no public API to synthesize
 /// it; the private kCGEventGesture (type 29) route was tried and rejected --
 /// its fields set and read back cleanly, but the event is routed as a plain
-/// scroll and never zooms. See prds/active/2026-08-11-*-trackpad-pinch-zoom.md §4
+/// scroll and never zooms.
 /// before reaching for it again.
 ///
 /// Consequence to keep in mind: this zooms anything bound to ⌘-scroll (Safari,

@@ -220,7 +220,7 @@ export function RelayCard(props: {
   // someone taps Back -- so an untouched interview behaves exactly as before.
   const [viewIndex, setViewIndex] = useState<number | null>(null)
 
-  // One question at a time (PRD §7.3). For N=1 `isInterview` is false and every
+  // One question at a time. For N=1 `isInterview` is false and every
   // field below falls back to the single-question params, so today's verified
   // flow renders byte-for-byte as it did.
   const interview = interviewView(
@@ -568,7 +568,7 @@ export function RelayCard(props: {
   )
 }
 
-/** Read-only tail (§6b). Shows what the answer WAS so a card that resolved on
+/** Read-only tail. Shows what the answer WAS so a card that resolved on
  *  another surface explains itself rather than just vanishing. Lives here, not
  *  in CodeSheet: CodeDetail renders it too, and CodeSheet imports CodeDetail. */
 export function ResolvedCard({

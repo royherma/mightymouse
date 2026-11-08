@@ -132,7 +132,7 @@ export function requestApproval(
   // A cursorless host SAYS it is glasses, which beats the UA guess: the Display
   // ships an Android UA with no 'mobile' token, so parseDeviceIdentity reads it
   // as "Android tablet" -- asking the user to admit a device that is not the one
-  // in front of them (Roy, on-device). Declared facts over sniffed ones.
+  // in front of them. Declared facts over sniffed ones.
   const cursorless = paramFromRequestUrl(req.url, CONFIG.PHONE_REMOTE.CURSORLESS_PARAM) === '1'
   const label = cursorless ? 'your glasses' : identity.model
 
@@ -164,7 +164,7 @@ export function requestApproval(
   )
   // The waiting device must say it is WAITING. Without this it fell through to
   // the generic 'connect your Mac' code form -- so the one device the user was
-  // looking at was the only one with no idea a prompt existed (Roy, on-device).
+  // looking at was the only one with no idea a prompt existed.
   ws.send(JSON.stringify({ type: 'approvalPending', expiresAt } satisfies PhoneRemoteEvent))
   devLog.log('[phone-remote] approval requested', { from: remoteIp, label })
   recordJournal('rejected', { detail: `waiting on phone approval (${label})` })

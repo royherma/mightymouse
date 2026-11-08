@@ -120,7 +120,7 @@ async function showExternal(frame, src, howEl) {
     frame.addEventListener('load', () => (howEl.textContent = how), { once: true })
     frame.src = src
   } catch {
-    fail(howEl, 'Portal dev server is down - run: bin/mm-ui screens')
+    fail(howEl, 'Portal dev server is down')
   }
 }
 

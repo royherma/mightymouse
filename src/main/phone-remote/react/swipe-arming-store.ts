@@ -1,6 +1,6 @@
 // swipe-arming-store.ts — which action this phone armed last time, per card shape.
 //
-// Phone-local, same reasoning as app-context-cache.ts: which option Roy tends to
+// Phone-local, same reasoning as app-context-cache.ts: which option the user tends to
 // pick is a property of the person holding the phone, not Mac state, and it must
 // never round-trip over the wire.
 //

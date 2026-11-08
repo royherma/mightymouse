@@ -182,7 +182,7 @@ export const ADMIN_ONLY_SECTIONS: SectionKey[] = [
   'smallPanel',
   // Still being dogfooded — the tray row is admin-gated too (main/index.ts).
   'voice',
-  // PRD 2026-08-12-1786501335 §8: a dev-facing surface, kept off the main
+  // a dev-facing surface, kept off the main
   // consumer flow so it never adds a noun to onboarding.
   'agentRelay'
 ]

@@ -4,7 +4,7 @@ import { CONFIG } from '../../../shared/config'
 import type { CompanionState } from '../../../shared/companion-state'
 
 /**
- * Live Voice Companion — Option C renderer (PRD §6 `CharacterRenderer`):
+ * Live Voice Companion — Option C renderer:
  * a single still PORTRAIT deformed live in WebGL. No video generation, no
  * streaming, no per-turn cost — the "talking head WebGL warp rig" technique
  * (2D image-as-texture on a deformable mesh; jaw/eyes/head vertices displaced
@@ -31,7 +31,7 @@ import type { CompanionState } from '../../../shared/companion-state'
  * loop to hook, unlike MouseCharacter).
  *
  * Missing-asset fallback: if the portrait texture can't be loaded (asset not
- * generated yet — see the PRD note that the mouse portrait is blocked on an
+ * generated yet — see the design note that the mouse portrait is blocked on an
  * image-gen credit top-up), the component throws so CompanionApp's
  * CharacterBoundary degrades to the placeholder blob, exactly like a WebGL init
  * failure. It never renders a broken/empty canvas.

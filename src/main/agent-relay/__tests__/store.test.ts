@@ -1,5 +1,5 @@
 /**
- * PRD §6 cross-cutting rules, one test per rule: timeout expiry, late-response
+ * design cross-cutting rules, one test per rule: timeout expiry, late-response
  * drop, first-answer-wins across surfaces, never-auto-approve-on-timeout.
  */
 

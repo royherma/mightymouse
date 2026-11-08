@@ -1,5 +1,5 @@
 // remote-skins.ts — fetch, sanitise, cache and serve skins that are NOT in the
-// phone bundle (PRD 2026-07-23-1784771137, Phase: remote skins).
+// phone bundle.
 //
 // WHY THIS EXISTS: adding a skin used to mean a CSS block, a union member, and
 // an app release. The catalog endpoint decouples the last one — new paint ships
@@ -245,7 +245,7 @@ async function fetchWithTimeout(url: string, accept: string): Promise<Response> 
  * Read the catalog. Called ONLY when the phone opens the skin store — never on
  * connect, never on a timer. That is a privacy property, not an optimisation:
  * a fetch on connect would tell the catalog host that a MightyMouse device came
- * online every time one did, which is the phone-home the skin PRD ruled out.
+ * online every time one did, which is the phone-home the skin design ruled out.
  */
 export async function fetchRemoteSkinCatalog(): Promise<RemoteSkinCatalog | null> {
   try {

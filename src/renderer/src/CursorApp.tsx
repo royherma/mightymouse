@@ -775,7 +775,7 @@ function SuggestionBubble({
   // to fix the stationary-cursor dead-hover — it STOLE FOCUS / yanked the cursor off
   // the compose field on the real overlay (clickable-only is NOT focus-safe there,
   // contrary to the focusable:false theory). Reverted. Overlay hover-delivery must be
-  // solved WITHOUT making the whole overlay clickable on show. See the PRD.
+  // solved WITHOUT making the whole overlay clickable on show. See the design.
 
   // ── ETA ring ────────────────────────────────────────────────────────────────
   // The loading bubble traces a thin accent sweep around its border as a "this is

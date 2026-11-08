@@ -12,24 +12,24 @@ export interface HotkeyConfirmResult {
   /** Current cap state — idle/held/confirmed/wrong. */
   state: HotkeyConfirmState
   /** True once the 8s timer has elapsed with no correct press — Next silently
-   *  unlocks (PRD §4.3) without changing `state`. */
+   *  unlocks without changing `state`. */
   unlocked: boolean
-  /** Live ⌘⌥⇧ held-state for the `held` cap treatment (§4.4). */
+  /** Live ⌘⌥⇧ held-state for the `held` cap treatment. */
   mods: Mods
 }
 
 /**
  * Press-to-confirm state machine for one hotkey step. Arms the main-process
  * probe (tour-hotkey-probe.ts) on mount/step-change, disarms on unmount — the
- * ONLY renderer-side owner of the arm/disarm lifecycle (PRD §5.2: an armed
+ * ONLY renderer-side owner of the arm/disarm lifecycle (an armed
  * probe that outlives its step must never happen; belt-and-braces disarm also
  * lives in tour-window.ts's `closed` handler for a crashed renderer).
  *
- * Auto-advance timing (§4.3/§5.3): on a correct press the state flips to
+ * Auto-advance timing: on a correct press the state flips to
  * `confirmed` immediately (so the animation always plays), but `onConfirmed`
  * only fires TOUR_ADVANCE_MS later AND only once the tour window has real OS
  * focus — `document.hasFocus()` is this renderer's own focus state, exactly
- * the signal the PRD asks for (no new IPC needed: a BrowserWindow's focus
+ * the signal the design asks for (no new IPC needed: a BrowserWindow's focus
  * *is* its webContents document's focus).
  *
  * This hook is a thin React shell around hotkeyConfirmSession.ts (timers/IPC

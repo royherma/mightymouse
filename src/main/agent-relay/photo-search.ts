@@ -1,5 +1,5 @@
 /**
- * The Mac half of `photos_search` (PRD §4a). Every other Mac->phone event is
+ * The Mac half of `photos_search`. Every other Mac->phone event is
  * fire-and-forget or single-flight; this one needs a real answer back, so it
  * owns the correlation ids and the timeouts nothing else here needed.
  *

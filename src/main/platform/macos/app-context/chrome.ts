@@ -465,8 +465,8 @@ async function activeChromeProfile(): Promise<string> {
 
   // ONLY profiles with a window open can own the front window. Without this the
   // match ran against all 24 profiles including dormant ones, and a dormant
-  // profile literally named "Roy" matched the title of a window belonging to a
-  // signed-in profile whose GIVEN name is also Roy -- uniquely, so the result
+  // profile literally named "Pat" matched the title of a window belonging to a
+  // signed-in profile whose GIVEN name is also Pat -- uniquely, so the result
   // looked confident. The bar then drew that dead profile's (absent) avatar as a
   // monogram while Chrome's own toolbar showed the real account photo.
   const live = liveProfileDirs(state)
@@ -485,7 +485,7 @@ const TITLE_PROFILE_SUFFIX = / - Google Chrome - (.+)$/
  * ambiguous. So a BARE given name shared by several live profiles is not
  * ambiguous at all — it identifies the one Chrome did not feel the need to
  * qualify. Reading a bare name as ambiguous is what dropped the highlight on
- * the Default profile here, where "Roy" is also Profile 15's given name.
+ * the Default profile here, where "Pat" is also Profile 15's given name.
  *
  * Exported for the test: this is pure string→directory logic over data that is
  * a pain to stage on disk, and it has now been wrong in two different ways.
@@ -504,7 +504,7 @@ export function resolveProfileFromTitle(
   //
   // Matched by SEARCHING for a name the suffix ends with, not by parsing out
   // the parens: a display name may itself contain them ("TechGuyver (roy's
-  // socials)" yields "Tech (TechGuyver (my socials))"), and no single
+  // socials)" yields "Tech (Studio (my socials))"), and no single
   // greedy-or-lazy regex splits that correctly. Longest name first so a name
   // that is a suffix of another cannot win.
   const byName = candidates

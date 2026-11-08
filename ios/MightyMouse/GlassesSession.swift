@@ -14,7 +14,6 @@ import MWDATMockDevice
 #endif
 
 // Meta Wearables Device Access Toolkit, wrapped
-// (prds/active/2026-08-11-*-glasses-as-camera-and-mic-source.md).
 //
 // DAT runs on THIS phone, not on the glasses: the SDK talks to the Meta AI app
 // over Bluetooth and hands back the wearer's camera stream. The Mac and the
@@ -106,7 +105,7 @@ final class GlassesSession: NSObject {
     /// only to decode it again on the page would be a round trip for nothing.
     private var frameSink: ((String) -> Void)?
 
-    /// 15fps at .low. The PRD's budget: a POV framing view, not a recording.
+    /// 15fps at .low. The design's budget: a POV framing view, not a recording.
     private static let streamFrameRate: UInt = 15
     /// 3s: the SDK's handshake with the Meta AI app settles well inside this on a
     /// warm app, and the page's own start timeout is 12s -- so waiting longer

@@ -61,7 +61,7 @@ export function SessionDetail(props: {
    *  on screen. */
   backLabel?: string
   backTo?: string
-  /** Roy's title-bar toggle: hides the standing column, never a different screen. */
+  /** The user's title-bar toggle: hides the standing column, never a different screen. */
   withRail?: boolean
   onToggleRail?: () => void
   /** The message that started this agent, while it is still being spawned. Shown

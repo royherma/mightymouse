@@ -27,9 +27,8 @@ import { Check, AlertTriangle, Minus } from 'lucide-react'
  * problem and has nothing to press.
  *
  * All copy comes from CONFIG.SETUP_CHECK — no user-facing string is written
- * here, so the opacity rule (PRD §4.0) stays enforceable by grep + test.
+ * here, so the opacity rule stays enforceable by grep + test.
  *
- * See prds/active/2026-07-23-1784776098-zero-dead-ends-setup-check.md
  */
 
 const COPY = CONFIG.SETUP_CHECK
@@ -138,7 +137,7 @@ function CheckRow({
               fix.label
             )}
           </Button>
-          {/* The one sanctioned second button (PRD §4.0 rule 3): a genuine
+          {/* The one sanctioned second button: a genuine
               product choice between using your own AI and using ours. Never a
               choice between two ways for US to install something. */}
           {fix.alternate && !busy && (

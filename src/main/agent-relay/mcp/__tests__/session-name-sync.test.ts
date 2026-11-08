@@ -130,7 +130,7 @@ describe('syncRenameFromTranscript', () => {
   it('copies a live reproducing transcript into a temp HOME, not the real one', () => {
     const real = join(
       process.env.HOME || '',
-      '.claude/projects/-Users-royhermannn-new-Desktop-Development-ShowAndTell/abfc7e33-c7b4-402d-ac6c-dfc31f7c5e75.jsonl'
+      '.claude/projects/-Users-pat-Desktop-Development-ShowAndTell/abfc7e33-c7b4-402d-ac6c-dfc31f7c5e75.jsonl'
     )
     if (!existsSync(real)) return
     expect(

@@ -571,8 +571,8 @@ body.recording {
   .virtualKeyboard.vkDockRight {
     width: clamp(280px, 50%, 460px);
   }
-  /* The board shrinks PROPORTIONALLY, not just in width (Roy: "50% of the
-     width and then of course height it proportionally") -- a half-width
+  /* The board shrinks PROPORTIONALLY, not just in width
+     -- a half-width
      board with full-height keys reads as a cropped keyboard, not a smaller
      one. Explicit sizes rather than transform:scale() so tap targets, the
      safe-area padding, and text rendering all stay honest. */
@@ -1276,8 +1276,8 @@ body.recording {
   /* Slight lift so the target reads instantly in peripheral vision. */
   transform: scale(1.08);
   /* The 18% wash sits BEHIND an opaque app icon, so on its own the selection
-     was near-invisible -- three tiles read as identical at a glance (Roy,
-     2026-07-23). The glow escapes the icon's own box, which the wash can't. */
+     was near-invisible -- three tiles read as identical at a glance.
+     The glow escapes the icon's own box, which the wash can't. */
   box-shadow:
     0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent),
     0 4px 14px color-mix(in srgb, var(--accent) 35%, transparent);
@@ -1779,7 +1779,7 @@ body.recording {
    under the sheet (42) and the button (41 -- above this, deliberately). */
 /* The sheet band must clear the keyboard strip, the virtual keyboard and the
    quick-switch overlay -- below them, all three punched straight through the
-   open sheet (Roy on-device). That is why --z-sheet-scrim/--z-sheet sit above
+   open sheet. That is why --z-sheet-scrim/--z-sheet sit above
    --z-overlay. The scrim is dim like .settingsScrim for the same reason: the
    app behind it was tappable. */
 /* The app-switcher grid is NOT a sheet -- it opens from the bottom cluster but
@@ -1812,7 +1812,7 @@ body:has(.aiScreen) .appSwitchBar {
    top buttons and the bottom cluster) so nothing behind the sheet is tappable
    and the panel reads as a takeover you dismiss, not an overlay you tap around.
    A transparent scrim BELOW those buttons left the whole app live behind the
-   sheet -- Roy: "you can tap behind it". Tapping anywhere on the scrim (the
+   sheet -- the user: "you can tap behind it". Tapping anywhere on the scrim (the
    gear included, now under it) dismisses. This is why --z-modal-scrim sits
    above --z-cluster and not below it. */
 .settingsScrim {
@@ -3447,8 +3447,8 @@ body:has(.aiScreen) .appSwitchBar {
 }
 
 /* Live screen mirror, stacked above the trackpad when the settings-panel
-   toggle is on (prds/active/2026-07-18-1784360957-phone-remote-screen-
-   mirror.md). Height defaults to a placeholder until the stream's real
+   toggle is on.
+   Height defaults to a placeholder until the stream's real
    aspect ratio is known, then App.tsx sets an inline height matching the
    Mac's actual display ratio at full pane width -- avoids letterboxing an
    ultrawide screen down into a sliver (pinch-zoom needs real pixels, not
@@ -3801,7 +3801,7 @@ body:has(.aiScreen) .appSwitchBar {
   box-shadow: none;
 }
 
-/* Phone mic (phone-mic-as-mac-input PRD). Shares the speaker badge's box and
+/* Phone mic. Shares the speaker badge's box and
    sits immediately inline-start of it -- 8px gap + the 40px badge. */
 .micInputBadge {
   position: absolute;
@@ -3946,7 +3946,7 @@ body:has(.aiScreen) .appSwitchBar {
   gap: 8px;
   /* Whole pill is the tap target for lock/unlock (not just the icon) --
      padded up to a real touch target (Apple HIG ~44pt) since 5x10 read as
-     too small to reliably tap (Roy, 2026-07-20). */
+     too small to reliably tap. */
   min-height: 40px;
   padding: 8px 16px;
   border-radius: 999px;
@@ -4610,7 +4610,7 @@ body:has(.aiScreen) .appSwitchBar {
      rect, because which one is set is what makes the bar sit on the handedness
      side: pinning both to 10px stretched the row across the full width and left
      the chips against the FAR gutter, on the opposite side from the thumb the
-     cluster is positioned for (Roy, on-device). `max-width` is inline too --
+     cluster is positioned for. `max-width` is inline too --
      it is the room from the cluster's outer edge to the far gutter. */
   display: flex;
   align-items: center;
@@ -4969,7 +4969,7 @@ body:has(.aiScreen) .appSwitchBar {
    It anchors to the BAR, not to .bbGroup. Anchored to the group it lined up
    with that plate but not with the row -- the tmux zoom button is the group's
    SIBLING, so it hung ~100px further out and the floating plate ended short of
-   the row's real outer edge (Roy, on-device). The bar is the box whose edge
+   the row's real outer edge. The bar is the box whose edge
    every other chip is pinned to, so it is the one to measure from.
 
    Edge-anchored and content-width, NOT stretched: a pane named after a two-word
@@ -5131,7 +5131,7 @@ body:has(.aiScreen) .appSwitchBar {
   mask-image: var(--bb-fade);
 }
 /* Sized as a SHARE of the sheet, not a fixed 34px -- that read as barely-there
-   on a tall list (Roy, on-device). The percentage resolves against the
+   on a tall list. The percentage resolves against the
    scroller's own height, so the ramp grows with the list; the clamp keeps it
    from vanishing on a short one or swallowing half a tall one.
    The middle stop deepens it further: alpha is held to ~0.3 at the halfway
@@ -5236,7 +5236,7 @@ body:has(.aiScreen) .appSwitchBar {
   z-index: var(--z-modal-scrim);
 }
 
-/* Reconnect banner (PRD Layer 3) -- pinned to the safe-area top, full width,
+/* Reconnect banner -- pinned to the safe-area top, full width,
    above everything else on screen since a dead connection blocks every other
    action on the page. */
 .reconnectBanner {
@@ -6179,8 +6179,8 @@ body:has(.swipeDeck.open:not(.skinPreview)) .toast:not(.tappable) {
 /* Labels sit ON THE TOP FACE, not on the footprint. The caps flex-center
    their content in the full 44px box, but the face is inset asymmetrically
    (5px top vs --pro-key-face-lip at the front) -- so every label and icon
-   rendered ~(lip-5)/2 px LOW, visibly off-center on the face (Roy's report,
-   2026-07-22). Bottom padding equal to the inset asymmetry moves the flex
+   rendered ~(lip-5)/2 px LOW, visibly off-center on the face.
+   Bottom padding equal to the inset asymmetry moves the flex
    center up by half of it, which lands content dead-center on the face.
    Tokenised against the same lip variable, so retuning cap height keeps the
    label glued to the face for free. The 5px literal is the ::before's top
@@ -6430,8 +6430,8 @@ body:has(.swipeDeck.open:not(.skinPreview)) .toast:not(.tappable) {
   /* Breathing room between the header band and the pad's top edge. The band
      value above is the header's own height, so without this the pad lands
      EXACTLY on it and the two surfaces butt together -- no seam, which reads as
-     the pad being welded to the status bar rather than sitting below it (Roy,
-     on-device 2026-07-22). Deliberately its own token instead of +4 on the band:
+     the pad being welded to the status bar rather than sitting below it.
+     Deliberately its own token instead of +4 on the band:
      --pro-header-band is consumed as "how tall is the header" by the landscape
      rules too, and inflating it there would push the pad down for the wrong
      reason. */
@@ -6835,7 +6835,7 @@ body:has(.swipeDeck.open:not(.skinPreview)) .toast:not(.tappable) {
   /* Three-layer separation, because the first cut derived BOTH the frame and
      the view box from the pad's own ink/accent at low alpha -- on an already
      ink-tinted pad that made all three surfaces the same value and the map
-     unreadable (Roy, on-device). Now: a near-opaque dark well for the desktop
+     unreadable. Now: a near-opaque dark well for the desktop
      it isn't looking at, a light hairline lifting the whole widget off the pad,
      and an opaque bright view box below. Fixed colors, not skin tokens: an
      image skin can set --pro-ink to anything, and this must stay legible on
@@ -7065,8 +7065,8 @@ body:has(.swipeDeck.open:not(.skinPreview)) .toast:not(.tappable) {
    would push it a full knob outside the strip.
    Then --pro-rail-knob-lift pushes it clear ABOVE that centre, because the
    thumb driving the rail covers its own contact point -- centered, the knob
-   was painting underneath the finger and could not be seen at all (Roy,
-   on-device). The lift is the knob's own height plus a gap, so the finger's
+   was painting underneath the finger and could not be seen at all.
+   The lift is the knob's own height plus a gap, so the finger's
    top edge and the knob's bottom never meet. */
 .proScrollRailKnob {
   position: absolute;
@@ -7223,7 +7223,7 @@ html[data-debug-layout='on'] .proControlsCell [class*='proKeyPill'] {
 
 /* Hidden skin quick-switch: two invisible bottom-corner targets, double-tap.
    Height is its OWN constant (--pro-safe-bottom is 8px in Safari, not a dead
-   band) and width clears the control cluster. Four failures: docs/gotchas.md. */
+   band) and width clears the control cluster. */
 .skinCorner {
   position: fixed;
   bottom: 0;
@@ -7355,7 +7355,7 @@ html[data-debug-layout='on'] .skinCorner::after {
      data-skin -- get the same grid: the notch is measured from the real button
      rects, and Plain's old smaller 56x44/14px caps made a smaller cluster, so
      the carved bite stopped short of the buttons (the "pad doesn't hug" gap,
-     Roy on-device 2026-07-24). Same geometry, Plain keeps its own flat look. */
+     the user on-device 2026-07-24). Same geometry, Plain keeps its own flat look. */
   min-width: 60px;
   height: 48px;
   padding: 0 24px;
@@ -7570,8 +7570,8 @@ html[data-debug-layout='on'] .skinCorner::after {
 /* Image skins: the glow has to be a FILTER, not a box-shadow.
    `[data-img]` sets `border-radius: 0` (the sculpt's rounding would pie-cut a
    square asset), so every box-shadow on these buttons traces the rectangular
-   border box -- a square halo around a round mic picture, which is what Roy saw
-   on gold-lace after the box-shadow bloom above (2026-07-25). drop-shadow reads
+   border box -- a square halo around a round mic picture, which is what the user saw
+   on gold-lace after the box-shadow bloom above. drop-shadow reads
    the background image's ALPHA instead, so the glow follows whatever shape the
    asset actually paints. Two stacked passes because a single large-radius
    drop-shadow reads thin and flat next to a real bloom. */
@@ -7599,7 +7599,7 @@ html[data-debug-layout='on'] .skinCorner::after {
    static one outright -- so sharing it wiped this button's seated inset and
    replaced it with micPulse's `0 0 0 8px` ring. Zero blur radius reads as a
    hard outline, not a glow, and it drew a crisp circle against the square deck
-   behind it (Roy, on-device 2026-07-25). Blur with NO spread is the difference
+   behind it. Blur with NO spread is the difference
    between a bloom and a border. */
 @keyframes proMicPulse {
   0%,
@@ -7627,7 +7627,7 @@ html[data-debug-layout='on'] .skinCorner::after {
      text caps use one row over. It was --pro-ink-strong, which is the DECK's
      ink (a near-white meant for text on the dark deck); on cap/military the
      face is near-white/sand too, so a near-white glyph on it vanished --
-     settings + app-switcher read as blank caps (Roy, on-device 2026-07-24).
+     settings + app-switcher read as blank caps.
      The .active (lit) state below still overrides to --pro-icon-lit-ink. */
   color: var(--pro-key-ink);
   /* Same four-layer keycap build as .proKeyPill (contact shadow / hard wall /
@@ -8095,7 +8095,7 @@ html[data-cursorless='on'] .proStatus .debugCopy {
 
 /* rails -- the cluster runs as ONE vertical column up the outer edge rather
    than stacking a grid over a row. Trades the pad's full height for a reach
-   that never crosses the midline; the PRD measured this as costing pad area,
+   that never crosses the midline; the design measured this as costing pad area,
    which is the trade the shape exists to let you see. */
 .proRoot[data-orient='landscape'][data-split='rails'] .proControlsCell {
   max-width: 22%;
@@ -8230,8 +8230,8 @@ html[data-cursorless='on'] .proStatus .debugCopy {
 .proRoot[data-orient='landscape'] .remoteMenuBtn,
 .proRoot[data-orient='landscape'] .brandWatermark {
   /* Landscape has no top notch, so `safe-area-inset-top` is 0 and +2px jammed
-     the whole row against the very top edge (Roy: "buttons too close to the
-     top"). The 34px buttons carry ~4px internal padding above their glyph, so
+     the whole row against the very top edge.
+     The 34px buttons carry ~4px internal padding above their glyph, so
      ~12px of clearance is what actually reads as centered breathing room. */
   /* --top-banner-h is restated because this rule REPLACES the portrait `top`
      wholesale -- without it a landscape banner paints over the row again. */
@@ -8532,7 +8532,7 @@ html[data-cursorless='on'] .proStatus .debugCopy {
 
 /* IMAGE SKINS -- paint any of the deck's 10 surfaces with a picture.
    EVERY rule below must gate on `[data-img-skin]`; an ungated one blanks the
-   sculpted skins, twice-shipped. Contract + both incidents: docs/gotchas.md. */
+   sculpted skins, twice-shipped. */
 
 /* Registered so an unset region token drops its paint declaration entirely. */
 @property --pro-deck-img {
@@ -9014,7 +9014,7 @@ html[data-cursorless='on'] .proStatus .debugCopy {
   display: none;
 }
 
-/* ── Code relay (agent-relay PRD §6b) ────────────────────────────────────── */
+/* ── Code relay ────────────────────────────────────── */
 
 /* Third slot in the same top-right row: history +10, chat +52, code +94. */
 .codeBtn {
@@ -11882,7 +11882,7 @@ button.codeSender:active .codeSenderName {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  /* Roy on-device: the first pass hugged the buttons so tightly the plate read
+  /* The user on-device: the first pass hugged the buttons so tightly the plate read
      as a crop of them rather than a surface holding them. */
   padding: 10px 12px 12px;
 }

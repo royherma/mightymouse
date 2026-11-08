@@ -1,10 +1,10 @@
 /**
- * The WS authentication gate (security-hardening PRD, Fix A + Fix B).
+ * The WS authentication gate.
  *
  * This is the one boundary standing between "a device on the network" and
  * full keystroke injection, clipboard writes, screen mirror, and agentic Act
  * runs on the Mac. It was previously verified by code read only -- the shipped
- * PRD flagged exactly this: "nothing asserts *unauthenticated WS upgrade is
+ * design flagged exactly this: "nothing asserts *unauthenticated WS upgrade is
  * rejected* or *the legit session survives a concurrent unauthenticated
  * connect*", which are its two ship-gate clauses.
  *
@@ -16,7 +16,7 @@
  * above it and reopened the original hijack.
  *
  * The server binds a high test-only port -- never 17771 -- so this can never
- * touch a real phone session (see CLAUDE.local.md).
+ * touch a real phone session.
  */
 
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest'
@@ -461,7 +461,7 @@ describe('phone-remote WS auth gate', () => {
     expect(prompts, 'an active phone must be asked to vouch').toHaveLength(1)
     // The Display sends an Android UA with no 'mobile' token, so the UA sniff
     // called it an "Android tablet" -- naming a device that is not the one the
-    // user is wearing (Roy, on-device). A declared cursorless host outranks it.
+    // user is wearing. A declared cursorless host outranks it.
     expect(prompts[0].label, 'the glasses must not be labelled by UA sniffing').toBe('your glasses')
     // ...and the WAITING device must know it is waiting, or it falls through to
     // the pairing-code form and looks refused while being approved.

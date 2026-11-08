@@ -4,7 +4,7 @@ import UserNotifications
 
 /// APNs registration -- request/response only, no state machine (ios/CLAUDE.md:
 /// Swift owns no connection state). The token half still self-heals on every
-/// launch (a rotated token needs no user action, agent-relay PRD §6c) via
+/// launch (a rotated token needs no user action, agent-relay design) via
 /// `registerIfAuthorized`; the PROMPT half waits for the first connected deck --
 /// see `requestOnFirstConnection`. The delegate below only converts the token
 /// iOS hands back and forwards it, nothing more.
@@ -91,7 +91,7 @@ enum PushRegistration {
     }
 
     /// The lobby/settings banner's source of truth for "notifications are off
-    /// and only Settings can fix it" (PRD §6c). Reads live rather than caching:
+    /// and only Settings can fix it". Reads live rather than caching:
     /// this is exactly the kind of state that changes underneath the app while
     /// backgrounded, and a stale read would show a stale banner.
     static func authorizationStatus() async -> UNAuthorizationStatus {
@@ -144,7 +144,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     /// Without this the notification is owned by iOS and outlives the request
     /// forever: it keeps rendering its option buttons, and tapping one posts an
     /// answer to a request that no longer exists, which fails silently. A card
-    /// you cannot tell is dead is worse than no card (Roy, on device).
+    /// you cannot tell is dead is worse than no card.
     ///
     /// Matched on the PAYLOAD, not the identifier. A remote notification's
     /// identifier is assigned by APNs (random unless the push sets

@@ -1,5 +1,5 @@
 // Tour live demos — the payoff for pressing a hotkey correctly during the
-// walkthrough. See prds/active/2026-07-22-1784702216-tour-live-demos.md.
+// walkthrough.
 //
 // THE RULE: real components, fake payload.
 //

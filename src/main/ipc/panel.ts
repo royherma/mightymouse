@@ -1016,7 +1016,6 @@ export function registerPanelHandlers(): void {
       // travel in SEPARATE fields now. First-party memory keeps its system-prompt
       // slot; retrieved third-party content (connector emails/Slack) rides in the
       // user turn instead, so a stranger's words never occupy the system position.
-      // See prds/active/2026-07-23-1784792061-prompt-injection-hardening.md.
       const memoryBlob = recallBlob !== null ? '' : buildMemoryBlob({ mode })
       const retrievedBlob = recallBlob ?? ''
 

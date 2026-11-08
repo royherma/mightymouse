@@ -66,14 +66,27 @@ export const opencodeAccount = (model: string): string | undefined => {
 
 export function opencodeModelLabel(model: string): string {
   const account = opencodeAccount(model)
-  return account ? `${model.split('/').slice(1).join('/')} ${account}` : model
+  return account ? `${claudeModelLabel(model.split('/').slice(1).join('/'))} ${account}` : model
 }
 
-// "claude-opus-5-5" -> "Opus 5.5"; anything else (an alias, another vendor's id) passes through.
+// "claude-opus-5-5" / "anthropic/claude-opus-5.5" -> "Opus 5.5"; anything else passes through.
 export function claudeModelLabel(model: string): string {
-  const m = /^claude-([a-z]+)-(\d+)(?:-(\d{1,2}))?(?:-\d{8})?$/.exec(model)
+  const m = /^(?:[a-z0-9-]+\/)*claude-([a-z]+)-(\d+)(?:[-.](\d{1,2}))?(?:-\d{8})?$/.exec(model)
   if (!m) return model
   return `${m[1][0].toUpperCase()}${m[1].slice(1)} ${m[3] ? `${m[2]}.${m[3]}` : m[2]}`
+}
+
+const CLAUDE_ALIASES = new Set(['opus', 'sonnet', 'haiku', 'fable'])
+
+export function modelDisplayName(model: string, backend?: string): string {
+  if (!model || model === 'unknown') return (backend && CONFIG.BACKEND_META[backend]?.label) || 'Not recorded'
+  if (model === FAST_SUBMODEL) return `${CONFIG.APP_NAME} Fast`
+  if (model === 'codex-default') return 'Codex default'
+  const id = model.includes('/') ? model.slice(model.lastIndexOf('/') + 1) : model
+  if (CLAUDE_ALIASES.has(id)) return id[0].toUpperCase() + id.slice(1)
+  if (id.startsWith('claude-')) return claudeModelLabel(id)
+  if (id.includes(':')) return prettyOllamaModel(id)
+  return id
 }
 
 // These CLIs run on the user's own subscription; their cost figure is an API-price estimate, not a charge.

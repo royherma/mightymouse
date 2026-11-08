@@ -7,7 +7,6 @@
  * back to* when something breaks later — from Settings, from an error toast, or
  * from an onboarding row. It closes freely and nothing waits on it.
  *
- * See prds/active/2026-07-23-1784776098-zero-dead-ends-setup-check.md
  */
 import { BrowserWindow } from 'electron'
 import { chrome } from './platform'

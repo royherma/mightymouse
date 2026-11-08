@@ -284,17 +284,17 @@ function HudApp(): React.ReactElement {
   // the user must see the decision immediately, not discover it by hovering.
   const [confirmAct, setConfirmAct] = useState(false)
   // Present = this card is a code-agent-relay ask/approve/show request, not a
-  // normal run result (PRD 2026-08-12-1786501335 §6b). Renders its own row
+  // normal run result. Renders its own row
   // instead of the confirmAct/actions branches below.
   const [relay, setRelay] = useState<HudRelayCard | null>(null)
-  // §5.4: "the button is not rendered" when nothing resolves. origin never
+  // "the button is not rendered" when nothing resolves. origin never
   // rides HudRelayCard itself (it lives on the main-process RelayRequest), so
   // this is a one-shot invoke keyed by requestId rather than a card field.
   const [canGoToOrigin, setCanGoToOrigin] = useState(false)
   const [relayAnswer, setRelayAnswer] = useState('')
   const [relayNote, setRelayNote] = useState('')
   // Same shared derivation the Panel and phone cards use -- three surfaces on
-  // one interview must not each hold their own cursor (PRD §7.3).
+  // one interview must not each hold their own cursor.
   // Which question is being LOOKED at, when that is not the one the interview is
   // waiting on. null follows the cursor, which is every card until Back is used.
   const [viewIndex, setViewIndex] = useState<number | null>(null)
@@ -650,7 +650,7 @@ function HudApp(): React.ReactElement {
     if (answer === 'confirm') setFollowUpRunning(true)
   }
 
-  // Answer a pending relay card (§6b). Optimistic close, same shape as
+  // Answer a pending relay card. Optimistic close, same shape as
   // handleConfirmAct — first answer wins regardless of surface, so a stale
   // duplicate from another surface just no-ops in main and this card is
   // already gone by then (dismissRelayHud fires off the SAME store event).
@@ -1016,7 +1016,7 @@ function HudApp(): React.ReactElement {
       {followUpRunning ? (
         <div className="hud-followup-running">Working…</div>
       ) : relay ? (
-        // Code agent relay card (PRD §6b): always visible, same reasoning as
+        // Code agent relay card: always visible, same reasoning as
         // confirmAct — a request an agent is BLOCKED on must not hide behind
         // a hover. High-risk approve shows Approve/Deny directly: the iOS
         // Face ID gate has no macOS counterpart, so an extra click here

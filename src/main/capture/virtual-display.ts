@@ -3,7 +3,7 @@
 //
 // Why native: phone-remote's "extended display" mode needs a display that ISN'T
 // the real monitor, so the phone can show something different from the Mac
-// (prds/active/2026-07-25-1784959720-phone-remote-extended-display.md). macOS has
+// macOS has
 // no public API for that, so the helper uses the private CGVirtualDisplay; see
 // its header for why that's the only path and how it fails safe.
 //

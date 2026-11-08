@@ -157,7 +157,7 @@ export function stamp(now: Date = new Date()): string {
  *  no accidental words), and no 0/O/1/I/5/S pairs. */
 const CODE_ALPHABET = 'BCDFGHJKLMNPQRTVWXYZ2346789'
 
-/** A short handle for ONE mirror session, minted where the bench resets. Roy
+/** A short handle for ONE mirror session, minted where the bench resets. The user
  *  reads it off the glasses and says "#K7QW got choppy"; the same code is on
  *  every BENCH log line, so the run is greppable from a spoken report. Four
  *  chars is ~531k combinations -- collisions across a day of runs are not a
@@ -262,7 +262,7 @@ function selectedPair(report: RTCStatsReport): Record<string, unknown> | null {
  *  parks at exactly 184k on a LAN route with 0% loss and 20-50ms rtt, which is a
  *  CAP rather than congestion. If this number reads ~184k too, the glasses are
  *  the ones asking for it and no sender-side knob can beat it -- two sender-side
- *  fixes were already spent on that assumption (see docs/gotchas.md).
+ *  fixes were already spent on that assumption.
  *
  *  -1, not 0, when absent: Safari does not populate availableIncomingBitrate on
  *  every build, and a 0 would read as "the receiver wants nothing" -- the most

@@ -928,7 +928,7 @@ export function useDictation({
       lastDownAt = now
 
       if (handsFreeArmedRef.current) {
-        // Any tap while armed disarms — the PRD's "tap mic to stop listening".
+        // Any tap while armed disarms — the design's "tap mic to stop listening".
         // Deliberately before micDown so it never starts a recording instead.
         remoteLog(`handsfree disarm reason=tap gap=${gapMs}ms`)
         setHandsFreeArmed(false)

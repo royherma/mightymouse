@@ -171,8 +171,8 @@ describe('runSelfTest — microphone', () => {
     expect(r.detail).toMatch(/device/i)
   })
 
-  // A dyld-crashed ffmpeg enumerates nothing. Blaming the mic there sent Roy
-  // to an already-granted permission toggle (2026-08-20).
+  // A dyld-crashed ffmpeg enumerates nothing. Blaming the mic there sent the user
+  // to an already-granted permission toggle.
   it('ffmpeg failed to run → blames ffmpeg, not the microphone', async () => {
     H.audioDevices = []
     H.deviceError = 'dyld[1]: Library not loaded: /opt/homebrew/opt/x265/lib/libx265.215.dylib'

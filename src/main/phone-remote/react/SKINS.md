@@ -7,25 +7,11 @@ cascade. You should not need to touch geometry, JSX, or gesture code.
 Read this before writing one. It is short on purpose; the long-form rationale for each
 decision lives in the comments at the matching line in `theme.css`.
 
-## Two ways to ship a skin — pick the remote one
+## Shipping a skin
 
-**Remote (default).** Append an entry to `SKINS` in
-`supabase/functions/phone-remote-skins/index.ts`, run `supabase/scripts/deploy.sh`. Done —
-**no app files, no release, no user update.** Every installed app picks it up the next time
-someone opens the skin store. This is the path to use unless you have a reason not to.
-
-Your CSS is sanitised on the way in: only `--pro-*` custom properties survive, and every
-`url()` must name a file in the entry's `assets` array (downloaded at install, repointed at a
-local path). Ordinary CSS properties are **silently dropped** — that is the point, not a bug.
-So a remote skin is tokens and declared images, nothing else. Write the same block you would
-write below; just expect anything that isn't a token to vanish. Details:
-`src/main/phone-remote/remote-skins.ts`.
-
-One thing a remote skin cannot do today: ship assets that aren't already deployed under
-`web/skins/<id>/`. Deploy the files first, then the catalog entry.
-
-**Built-in (rarer).** A skin compiled into the app — for one shipping in the default set, or
-one that needs CSS beyond tokens.
+A built-in skin is compiled into the app. Remote skins come from a server-side catalog that lives
+outside this repo; `src/main/phone-remote/remote-skins.ts` sanitises them so only `--pro-*` tokens
+and declared `url()` assets survive.
 
 | # | File | What you add |
 |---|---|---|
@@ -146,6 +132,4 @@ rather than to a raw value — the skin then opts in only if it cares.
   `make restart` alone will not pick up changes in `react/`.
 - Look at it. Typecheck and tests say nothing about layout or overlap. Check idle **and**
   recording states, portrait **and** landscape.
-- **Do not point a browser at the live phone-remote server to check.** It kicks Roy's real
-  device off via the single-active-socket rule. Use a static harness on a separate port, or
-  ask him to look.
+- **Do not point a browser at the live phone-remote server to check.** It kicks the paired phone off via the single-active-socket rule. Use a static harness on a separate port.

@@ -21,7 +21,7 @@ import './theme.css'
 import './ai/ai.css'
 import './ai.local.css'
 import mmLogo from './harness-logos/mightymouse.png?inline'
-import petfomoLogo from './harness-logos/petfomo.png?inline'
+import acmeLogo from './harness-logos/acme.png?inline'
 
 function injectTheme(): void {
   const root = document.documentElement
@@ -71,10 +71,10 @@ const PROJECT_MM: RelayProjectWire = {
 }
 const PROJECT_GROWTH: RelayProjectWire = {
   id: 'p-growth',
-  name: 'petfomo',
-  folderName: 'petfomo-growth',
+  name: 'acme',
+  folderName: 'acme-growth',
   pinned: true,
-  imageBase64: base64(petfomoLogo)
+  imageBase64: base64(acmeLogo)
 }
 const PROJECTS = [PROJECT_GROWTH, PROJECT_MM]
 
@@ -119,8 +119,8 @@ const IDLE_SESSION = session({
 })
 
 const GROWTH_SESSION = session({
-  label: 'petfomo-ads-021 - petfomo/growth',
-  stated: 'petfomo-ads-021',
+  label: 'acme-ads-021 - acme/growth',
+  stated: 'acme-ads-021',
   project: PROJECT_GROWTH,
   progress: 0.64,
   since: NOW - 6 * MIN,
@@ -644,7 +644,7 @@ function Harness(): React.JSX.Element {
               </div>
             }
             controls={<div />}
-            macName="Roy's MacBook Pro"
+            macName="Pat's MacBook Pro"
             send={NOOP}
             onBack={NOOP}
           />
@@ -661,7 +661,7 @@ function Harness(): React.JSX.Element {
               </div>
             }
             controls={<div />}
-            macName="Roy's MacBook Pro"
+            macName="Pat's MacBook Pro"
             send={NOOP}
             onBack={NOOP}
           />

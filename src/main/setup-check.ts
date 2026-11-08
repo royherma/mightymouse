@@ -12,11 +12,10 @@
  * Here they become one `SetupCheck[]`, and — the whole point — every failing
  * row carries the ACTION that fixes it.
  *
- * OPACITY (PRD §4.0): every user-visible string comes from CONFIG.SETUP_CHECK.
+ * OPACITY: every user-visible string comes from CONFIG.SETUP_CHECK.
  * We never surface a binary name, a path (paths leak $HOME → a real name), or
  * raw tool output. `detail` is written for a person, not an operator.
  *
- * See prds/active/2026-07-23-1784776098-zero-dead-ends-setup-check.md
  */
 import { existsSync } from 'fs'
 import { basename } from 'path'
@@ -94,7 +93,7 @@ function parakeetWanted(): boolean {
   const s = SETTINGS.get()
   if ((s.transcribeEngine ?? 'parakeet') !== 'parakeet') return false
   if (!parakeetCanTranscribe(s.whisperLang || CONFIG.WHISPER_LANG)) return false
-  // Only Apple Silicon is measured (PRD 2026-09-21). Intel Macs and Windows get
+  // Only Apple Silicon is measured. Intel Macs and Windows get
   // NVIDIA's CPU/Vulkan builds, which are untimed — until someone runs the same
   // 22 clips there, whisper stays the default rather than a guess.
   return process.platform === 'darwin' && process.arch === 'arm64'
@@ -343,7 +342,7 @@ function captureChecks(binaries: BinaryStatus[], micOk: boolean): SetupCheck[] {
  * What the zero-install escape hatch has to do BEFORE switching is meaningful.
  *
  * Switching a signed-out user to the managed backend would land them in a
- * FOURTH dead end — the exact failure this whole PRD exists to kill. So the
+ * FOURTH dead end — the exact failure this whole design exists to kill. So the
  * fix declares its prerequisite and the runner walks it.
  */
 async function switchChain(): Promise<SetupChain> {
@@ -546,7 +545,7 @@ async function downloadFfmpeg(
   const res = await downloadManagedFfmpeg((pct) => onProgress(COPY.recording.working, pct))
   // Fired here, not next to setup_fix_ran in the renderer: that event only
   // carries ok/fail, and WHY a download failed is what decides whether the
-  // removed Homebrew path has to come back (managed-ffmpeg PRD §4.6).
+  // removed Homebrew path has to come back.
   track('binary_downloaded', {
     binary: 'ffmpeg',
     arch: process.arch,

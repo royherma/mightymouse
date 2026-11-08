@@ -23,7 +23,7 @@ export const relayRespondAttempts = rateLimitBucket()
 export const RELAY_AVATAR_ATTEMPTS = rateLimitBucket()
 
 /** GET /relay-request?requestId=&credential= — the Notification Service
- *  Extension's content-free push (agent-relay PRD §5 item 4: the payload
+ *  Extension's content-free push (agent-relay design: the payload
  *  carries only a request_id) resolves into real question/options/image data
  *  by calling this over the tunnel. Query params, not the WS, since the NSE
  *  process never opens the phone-remote socket. */
@@ -162,7 +162,7 @@ const RELAY_IMAGE_CONTENT_TYPES: Record<string, string> = {
 }
 
 /** GET /relay-image?requestId=&credential= -- the NSE's second fetch for a
- *  `show` verb (agent-relay PRD §5/§6 item 6). Deliberately keyed by
+ *  `show` verb. Deliberately keyed by
  *  request_id, never a client-supplied filesystem path: the store, not the
  *  wire, decides which file this credential is allowed to read. */
 export function handleRelayImage(req: IncomingMessage, res: ServerResponse): void {
@@ -278,7 +278,7 @@ async function replyToRelayRequest(requestId: string, text: unknown): Promise<bo
 }
 
 /** POST /relay-respond — the answer path for a notification action tapped
- *  from the lock screen (agent-relay PRD §4). Stateless request/response, no
+ *  from the lock screen. Stateless request/response, no
  *  new connection state in Swift (ios/CLAUDE.md) -- this is the one HTTP call
  *  a lock-screen tap makes, answered by relayRequestStore's own first-answer-
  *  wins + late-drop logic, same as any other surface that resolves a request. */
@@ -408,7 +408,7 @@ export function handleRelayRespond(req: IncomingMessage, res: ServerResponse): v
 
 const sessionWrapAttempts = rateLimitBucket()
 
-/** POST /session-wrap — ends one agent session (clear-a-session PRD §6).
+/** POST /session-wrap — ends one agent session.
  *
  *  On the credentialed port on purpose: 17781 takes no credential at all, so a
  *  kill verb there would let any local process close any terminal. This is the
@@ -461,7 +461,7 @@ export function handleSessionWrap(req: IncomingMessage, res: ServerResponse): vo
       reply(400, { error: 'bad-request' })
       return
     }
-    // The dev-loopback exemption exists so `bin/mm-relay wrap` can drive this
+    // The dev-loopback exemption exists so the relay CLI can drive this
     // with no phone: a device credential is safeStorage-sealed to the Electron
     // binary, so a terminal script has no way to hold one. Same posture the
     // observer socket already takes -- dev build, loopback, and refused on a

@@ -192,7 +192,7 @@ describe('phone-remote stay-awake', () => {
       expect(isStayAwakeActive()).toBe(false)
     })
 
-    // Roy's Mac idle-locked on 2026-09-09 because his pocketed iPhone read as
+    // Pat's Mac idle-locked on 2026-09-09 because his pocketed iPhone read as
     // an abandoned session: the socket closes on visibilitychange, the short
     // window released the blocker, macOS locked, and the phone could not undo
     // it. No window is right -- a week away looks exactly like a pocket -- so a
@@ -241,7 +241,7 @@ describe('phone-remote stay-awake', () => {
     })
   })
 
-  // Measured on Roy's Mac 2026-08-14: `pmset -g assertions` showed Electron
+  // Measured on Pat's Mac 2026-08-14: `pmset -g assertions` showed Electron
   // holding NoDisplaySleepAssertion for 1h11m with Phone Remote enabled, stay-
   // awake on and no phone ever paired. The watchdog above existed but was wired
   // only to onDisconnect, which a phone that never connects never reaches.

@@ -1,7 +1,7 @@
 // Presentation-only grid layout for 1-6 panes with drag-to-resize row/col dividers.
 // Knows nothing about MightySession/chat — the caller supplies opaque pane ids and a
 // render-prop for pane content, and reads resize-ratio changes back out via onLayoutChange
-// to persist (this component never writes to disk itself, per the PRD's split of concerns).
+// to persist (this component never writes to disk itself, per the design's split of concerns).
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import type { PaneLayoutState, PaneViewMode } from '../../../shared/types'
 import {
@@ -26,7 +26,7 @@ export interface PaneGridProps {
   onLayoutChange: (next: PaneLayoutState) => void
   /** Render one pane's content by id. Kept as a render-prop rather than importing
    *  ConversationPane directly, so this file stays chat-agnostic and testable with a
-   *  placeholder box (see the PRD's parallelization note on step 7). */
+   *  placeholder box. */
   renderPane: (paneId: string) => React.ReactNode
   /** 'single' shows only `soloPaneId`, with the rest kept MOUNTED but hidden — never
    *  filter them out of paneIds instead, or a background pane's streaming run dies
@@ -125,7 +125,7 @@ export function PaneGrid({
 
         // Convert the divider's new absolute fraction into an updated pair of
         // neighboring ratios, leaving every other row/col untouched — a per-cell
-        // arbitrary resize is out of scope (PRD: only row/col dividers move).
+        // arbitrary resize is out of scope.
         const applyAt = (clientPos: number): number[] => {
           const before = startRatios.slice(0, dividerIndex).reduce((a, b) => a + b, 0)
           const pairSum = startRatios[dividerIndex] + startRatios[dividerIndex + 1]

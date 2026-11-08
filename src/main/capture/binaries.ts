@@ -329,7 +329,7 @@ export function installWhisperViaBrew(
 /**
  * Try to install ffmpeg via Homebrew. Recording is dead without it, so this is
  * the one-click path behind the "Can't find ffmpeg" error — the first external
- * tester (2026-07-23) hit that error with no way to act on it.
+ * tester hit that error with no way to act on it.
  */
 export function installFfmpegViaBrew(
   onOutput?: (line: string) => void
@@ -382,7 +382,7 @@ const NPM_PKG_RE = /^[@a-z0-9._/-]+$/
  * Install a CLI package, obtaining Node FIRST if we can't already write to a
  * global npm prefix.
  *
- * This is the whole "opaque, one click" promise in one function (PRD §4.0):
+ * This is the whole "opaque, one click" promise in one function:
  * the caller asks for a CLI, and whatever has to happen underneath — installing
  * Node via Homebrew because the user has no Node, or because their Node's
  * prefix needs sudo — happens silently under the SAME button and the SAME
@@ -401,7 +401,7 @@ export async function installCliPackage(
 
   // No npm, or an npm whose global prefix needs sudo (nodejs.org .pkg installs
   // land in /usr/local). Either way the answer is the same: get a Node we can
-  // actually write to. We never ask for a password — see the ffmpeg PRD.
+  // actually write to. We never ask for a password — see the ffmpeg design.
   if (!npmPath || !npmPrefixWritable(npmPath)) {
     if (!resolveBrewBin()) return { ok: false, output: '', reason: 'no-route' }
     const node = await installViaBrew('node', CONFIG.BREW_INSTALL_TIMEOUT_MS, onOutput)

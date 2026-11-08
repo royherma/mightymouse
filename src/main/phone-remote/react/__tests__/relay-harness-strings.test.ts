@@ -48,7 +48,7 @@ describe('relay harness mirrors the iOS notification strings', () => {
     expect(harness).not.toContain("'Open the screen'")
   })
 
-  // Title Case: the phone renders these as headlines (Roy, 2026-08-14). All
+  // Title Case: the phone renders these as headlines. All
   // three copies -- NSE, harness, this list -- move together or the test is
   // asserting a string no surface shows.
   // The leading glyph is part of the string on purpose: ❓/🔑 mark the two verbs
@@ -69,8 +69,8 @@ describe('relay harness mirrors the iOS notification strings', () => {
   })
 
   // Weight is hierarchy, and the harness had asserted the opposite in a CSS
-   // comment: title and subtitle are BOTH bold on a real card (Roy's photo of
-  // one, 2026-08-20), with the body the only regular line. Read off the CSS
+   // comment: title and subtitle are BOTH bold on a real card,
+  // with the body the only regular line. Read off the CSS
   // because that is where it was wrong.
   it('the iOS card sets title and subtitle bold, body regular', () => {
     const css = readFileSync(HARNESS_CSS, 'utf8')

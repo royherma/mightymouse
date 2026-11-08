@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 
 /**
- * The "did it break anything" suite for the Kokoro TTS rung (PRD §4.6/§5.1).
+ * The "did it break anything" suite for the Kokoro TTS rung.
  *
  * There are real users on a shipped, notarized build. The rung they will never
  * touch must be provably invisible to them, so the load-bearing assertion here is

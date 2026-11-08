@@ -751,7 +751,7 @@ export function doneHud(
   if (card.dismissTimeout) clearTimeout(card.dismissTimeout)
   // A confirm gate or a relay ask/approve/show waits on a real decision — no
   // auto-dismiss timer at all, or a slow read would silently drop (or worse,
-  // someday auto-fire) the destructive act. The store's own timeout (PRD §6,
+  // someday auto-fire) the destructive act. The store's own timeout (design,
   // up to 600s) is what eventually resolves an ignored relay card, never the
   // HUD's cosmetic auto-hide; dismissRelayHud() closes this window when that fires.
   if (!opts.confirmAct && !opts.relay) {
@@ -902,7 +902,7 @@ export function handleHudClick(runId: string): boolean {
 
 /**
  * Raise (or update, if already open) one HUD card for a pending code-agent-
- * relay request (PRD 2026-08-12-1786501335 §6b). Reuses the request's own id
+ * relay request. Reuses the request's own id
  * as the card's runId — a relay request already IS a one-per-card identity,
  * so minting a second UUID here would just be an indirection to keep in sync.
  * The card is born already "done" (no running phase to show) and never
@@ -917,8 +917,8 @@ function relayCardsChosen(): boolean {
 
 export function startRelayHud(request: RelayRequest): void {
   if (request.status !== 'pending') return
-  // A `notify` reaches here only when Roy picked MightyMouse cards over macOS
-  // notifications (PRD 2026-08-22-1787388684) -- the store feed at
+  // A `notify` reaches here only when the user picked MightyMouse cards over macOS
+  // notifications -- the store feed at
   // ipc/agent-relay.ts still filters it out, so nothing else changed. It has
   // nothing to answer, so it rides the ordinary STICKY_DISMISS_MS timer home
   // instead of waiting for a decision that is never coming.
@@ -1002,7 +1002,7 @@ export function dismissRelayHud(requestId: string): void {
 }
 
 /**
- * "Go to session" — take-me-to-the-session PRD §5.3/§5.5. Replaces the old
+ * "Go to session" — take-me-to-the-session design/§5.5. Replaces the old
  * "Open the screen" affordance on the Mac card: that button opened phone
  * pairing settings, which was never honest here (it was written for the
  * PHONE card, where the sheet closes onto a live mirror). On the Mac the

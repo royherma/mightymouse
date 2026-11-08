@@ -3,7 +3,7 @@
 // Cursor ships no scripting dictionary, so this reads System Events' AX tree and
 // reports GROUPS ONLY (group = window/project). Editor tabs are unreachable and
 // cannot be made so — see "Cursor's editor tabs are unreachable" in
-// docs/gotchas.md. Safari is the mirror shape, so the bar drops an empty menu.
+// Safari is the mirror shape, so the bar drops an empty menu.
 
 import { devLog } from '../../../../shared/env'
 import {
@@ -85,7 +85,7 @@ function activeWindowId(raw: string): string {
 
 /** Raise a window by the index the read handed out. AX exposes no stable window
  *  id, so this carries the same index risk chrome.ts does for tab indices —
- *  see "Cursor's editor tabs are unreachable" in docs/gotchas.md. */
+ *  */
 export function activateCursorWindow(id: string): boolean {
   const index = Number.parseInt(id, 10)
   // Rejected before interpolation: `id` arrives off the wire.

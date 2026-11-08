@@ -2,7 +2,7 @@
  * The verbs an App Intent can fire at the Mac with nobody at the keyboard.
  *
  * Deliberately a SMALL closed table, not a bridge to the ~70 phone-remote verbs
- * (mac-as-an-intent-target PRD §4b). Siri hands us an opaque string off the
+ * Siri hands us an opaque string off the
  * network; anything that is not one of these names must fail before it reaches
  * a synthesis call, so the table is the allowlist and there is no default arm.
  *
@@ -126,7 +126,7 @@ export interface AxActionMeta {
  *
  * Split out by timing because the two halves fail differently and only one of
  * them is ours: a slow capture is a machine under load, a slow model is the
- * backend. Siri's timeout is the thing this path lives or dies by (August PRD
+ * backend. Siri's timeout is the thing this path lives or dies by (August design
  * §10 Q1, still unmeasured), so the numbers that decide it get recorded on
  * every run rather than measured once by hand.
  */
@@ -213,7 +213,7 @@ const COLD_PRESS_TIMEOUT_MS = 20000
 /**
  * Bring ChatGPT forward, then press its voice button.
  *
- * The activate is not cosmetic: AXPress works on a background window, but Roy's
+ * The activate is not cosmetic: AXPress works on a background window, but the user's
  * success test is a session he can see and talk to, and an app that isn't
  * running has no tree to search at all -- so raising it first turns a confusing
  * "control-missing" into an honest "app-missing".
@@ -254,7 +254,7 @@ export async function startChatGptVoice(): Promise<IntentActionResult> {
  *
  * A first-class verb rather than a nicety: a realtime voice session bills for
  * as long as it is open, so the thing that starts one hands-free must be able
- * to close one hands-free. Roy, on discovering it had been left running:
+ * to close one hands-free. The user, on discovering it had been left running:
  * "please turn it off as well ... bc it costs money".
  */
 export async function stopChatGptVoice(): Promise<IntentActionResult> {
@@ -290,14 +290,14 @@ export async function stopChatGptVoice(): Promise<IntentActionResult> {
 }
 
 /**
- * "Hey Siri, what's on my Mac?" — the ship gate (mac-as-an-intent-target §9.4).
+ * "Hey Siri, what's on my Mac?" — the ship gate.
  *
  * The one verb here that reads the screen rather than pressing something, so it
  * is the only one with a privacy gate. Three refusals come BEFORE the capture,
  * never after: a screenshot that was taken and then discarded has already been
  * taken.
  *
- * `siriScreenAnswer` defaults ON (Roy, 2026-09-15). The curtain and away-mode
+ * `siriScreenAnswer` defaults ON. The curtain and away-mode
  * guards below are what actually protect the deliberately-hidden screen, and a
  * default-off switch would make the headline phrase answer "turn me on first"
  * for every new user. Note redact.ts cannot help here — it scrubs TEXT, and
@@ -431,7 +431,7 @@ export function describeFailure(reason: IntentActionFailure): string {
       return "I couldn't open ChatGPT on your Mac."
     // The ChatGPT case above names its app because only one intent raises it.
     // The router's openApp can name ANY app, so it cannot borrow that string --
-    // it spoke "I couldn't open ChatGPT" for a Spotify request (2026-09-15).
+    // it spoke "I couldn't open ChatGPT" for a Spotify request.
     case 'named-app-missing':
       return "I couldn't find that app on your Mac."
     case 'control-missing':

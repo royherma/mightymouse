@@ -1,5 +1,5 @@
 /**
- * The observer socket (observer-socket PRD).
+ * The observer socket.
  *
  * A read-only client must never disturb the phone in the user's hand. That
  * holds because observers branch out before `decideTakeover`; these tests lock
@@ -49,7 +49,7 @@ describe('decideObserver', () => {
     ).toBe(false)
   })
 
-  // The point of gating per-request: Roy's phone stays on the tunnel while an
+  // The point of gating per-request: the user's phone stays on the tunnel while an
   // agent observes over LAN. Gating on "is the tunnel up" broke both at once.
   it('admits a local request while the tunnel serves the phone', () => {
     expect(

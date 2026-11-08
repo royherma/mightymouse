@@ -97,7 +97,7 @@ export function resolveState(): AppState {
  * routing), which is what makes a gate-skipping entry point unwritable rather
  * than merely discouraged.
  *
- * Verified failures this replaces (2026-09-03, prds/active/…-routing-chokepoint):
+ * Verified failures this replaces (2026-09-03):
  * a signed-out tester got the wizard from the tray, then the panel from the
  * wizard's red X.
  */

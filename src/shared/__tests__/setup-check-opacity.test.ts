@@ -8,14 +8,13 @@ import {
 } from '../setup-check'
 
 /**
- * The opacity rule, enforced (PRD §4.0).
+ * The opacity rule, enforced.
  *
  * Two external testers lost their first-run setup on 2026-07-23 to copy that
  * named our plumbing and offered no button. The fix is a rule, and a rule
  * nobody checks is a comment — so this test is the thing that actually holds
  * the line. Adding a word like "npm" to a setup string fails CI.
  *
- * See prds/active/2026-07-23-1784776098-zero-dead-ends-setup-check.md
  */
 
 /**

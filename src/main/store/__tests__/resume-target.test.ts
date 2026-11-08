@@ -53,7 +53,7 @@ describe('resumableTurns', () => {
   })
 
   it('turns a listen transcript into the first message', () => {
-    // Roy's "Start a convo". On a real listen row the transcript lands in BOTH
+    // The user's "Start a convo". On a real listen row the transcript lands in BOTH
     // instruction and result (checked against rewrite-history.jsonl), so the
     // synthesized turn is the transcript asked and answered — one message to open on.
     const transcript = 'buy milk on the way home'
@@ -93,7 +93,7 @@ describe('resolveSessionId', () => {
   })
 
   it('is null for a legacy row that matches nothing', () => {
-    // The majority of Roy's existing rows. Callers must seed a transient thread —
+    // The majority of the user's existing rows. Callers must seed a transient thread —
     // this is the case that has to NOT look like a session id.
     expect(resolveSessionId(row(), finder())).toBeNull()
   })

@@ -33,7 +33,7 @@ export const TOUR = {
     navigator: 'navigator'
   },
 
-  /** Press-to-confirm state machine (§4.4 of the PRD). One cap component reads
+  /** Press-to-confirm state machine. One cap component reads
    * this to pick its treatment + motion; `idle` is the resting/breathing state,
    * `held` tracks live modifier state, `confirmed`/`wrong` are the two outcomes. */
   CONFIRM_STATE: {

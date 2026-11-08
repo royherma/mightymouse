@@ -1,6 +1,6 @@
 import { CONFIG } from '../../shared/config'
 
-// Native PiP video pipe (prds/active/2026-08-09-*-native-pip.md). Must run HERE
+// Native PiP video pipe. Must run HERE
 // -- reaching these pixels from anywhere else means a second screen capture.
 
 // Real in Chromium 140 (this Electron), absent from lib.dom.

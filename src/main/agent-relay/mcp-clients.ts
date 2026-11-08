@@ -1,5 +1,5 @@
 /**
- * One-click MCP client setup (PRD 2026-08-12-1786501335 item 3b) — detect which
+ * One-click MCP client setup — detect which
  * agent clients exist on this Mac and write our server entry into their config,
  * so the user never opens a config file to use `mightymouse-code`.
  *

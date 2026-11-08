@@ -228,7 +228,7 @@ const SAFE_CSS =
   // The app's rule holds the pad ${SAFE_SIDE}px off the notch side, but the key
   // cluster ends at inset+${CELL_PAD_X} (its box is right:0 in the card,
   // theme.css:5087, padded ${CELL_PAD_X}px), so the cork stopped 49px short of
-  // the buttons below it -- Roy: the pad ends where the buttons end (2026-07-28).
+  // the buttons below it -- the user: the pad ends where the buttons end.
   // Measured: keys right 819, island's on-screen strip starts at 827.8, so the
   // aligned edge still clears the island by ~9px.
   `.proRoot[data-orient='landscape'][data-hand='right'] .proTouchpad{` +
@@ -248,7 +248,7 @@ const SAFE_CSS =
   // buttons having no safe zone -- they always did.
   // The mirror/screenshare pane is the THIRD box on this edge and it reads the
   // same dead env() (theme.css:6253+). Measured at -1 alongside the pad, so the
-  // screenshare surface ran to the bezel too (Roy, 2026-07-28). All three boxes
+  // screenshare surface ran to the bezel too. All three boxes
   // that touch the bottom edge in landscape restate it here, together, because
   // fixing them one at a time is what produced two rounds of "still not fixed".
   `.proRoot[data-orient='landscape'] .proTouchpad,` +
@@ -279,7 +279,7 @@ const MIRROR_CSS =
   // Portrait-scoped: landscape sizes the rail from aspect-ratio in CSS, and a
   // hard height there would fight it.
   `.proRoot[data-orient='portrait'] .proMirrorPane{height:${MIRROR_H}px!important}` +
-  // The mirror POPS IN rather than being there on load. Roy: it should arrive
+  // The mirror POPS IN rather than being there on load. the user: it should arrive
   // after about half a second, so the viewer sees the phone first and then
   // watches the Mac land on it -- a screen that is already mirrored on frame 1
   // reads as a static screenshot and gives away nothing about what the product
@@ -472,7 +472,7 @@ const HEAT_MIN_STEP = 5 // px between stamps; below this, dwelling stacks in pla
 
 /** Paint one comet (head + tail) at a pixel position, from CursorApp.tsx
  *  renderComet(). Shared by BOTH comets: the Mac pointer in the mirror, and the
- *  one under the finger on the trackpad. Roy: the flare "is kind of our default
+ *  one under the finger on the trackpad. the user: the flare "is kind of our default
  *  thing" and belongs on the pad too, not just the screen.
  *
  *  `wave` is the app's idle breathing. The first port of this dropped it, which
@@ -522,7 +522,7 @@ class MMPhoneDemo extends HTMLElement {
     // Explicitly a boolean. Left undefined, fit()'s classList.toggle('land',
     // undefined) becomes a bare toggle -- the first pre-boot fit() flipped the
     // class ON and the loading phone lay sideways until the first beat stood
-    // it back up, live on screen (Roy, hero screenshot 2026-07-28).
+    // it back up, live on screen.
     this.landscape = false
     this.build()
     this.start()
@@ -747,7 +747,7 @@ class MMPhoneDemo extends HTMLElement {
                       position:relative; z-index:3; }
         .capBox { position:relative; height:var(--mm-cap-h); width:100%; }
 
-        /* Chapter ticks. Roy wants this to read as "its own trailer", and a
+        /* Chapter ticks. the user wants this to read as "its own trailer", and a
            trailer tells you it ENDS -- a loop with no visible length reads as
            an idle animation you can ignore. One segment per beat, widths
            proportional to duration so the bar is an honest map of the runtime.
@@ -816,7 +816,7 @@ class MMPhoneDemo extends HTMLElement {
                           transform:translateX(-50%); width:14%; height:34%;
                           border-radius:0 0 99px 99px; background:#14161a; }
 
-        /* The desktop behind the pairing card. Roy asked for "a nice Mac vibe
+        /* The desktop behind the pairing card. the user asked for "a nice Mac vibe
            bg with the QR in front" -- a flat panel filling the lid reads as a
            kiosk, not as someone's Mac. So: a warm dusk wallpaper in the brand's
            own orange, a menu bar, and a dock. All three are pure CSS at ~200px
@@ -966,7 +966,7 @@ class MMPhoneDemo extends HTMLElement {
         .macApp { position:absolute; top:53%; left:50%;
                   transform:translate(-50%,-50%);
                   /* 34%, not 52: at half the screen the pairing card read as
-                     the whole desktop being a QR code (Roy, 2026-07-28). */
+                     the whole desktop being a QR code. */
                   width:34%; display:flex; flex-direction:column; align-items:center;
                   gap:5%; padding:6% 5%; border-radius:3.5%/4.5%;
                   background:rgba(28,30,38,.82); backdrop-filter:blur(14px);
@@ -1022,7 +1022,7 @@ class MMPhoneDemo extends HTMLElement {
         .macPaired .dot { width:1.4cqw; height:1.4cqw; border-radius:50%;
                           background:#3fbf8f; box-shadow:0 0 1.4cqw #3fbf8f; }
 
-        /* The camera viewfinder. Roy: the phone should read as a CAMERA held up
+        /* The camera viewfinder. the user: the phone should read as a CAMERA held up
            to the screen -- it sees the QR, and only then does the UI appear.
            Without this the phone is just a second device parked next to a
            laptop and nothing explains why the code matters.
@@ -1103,7 +1103,7 @@ class MMPhoneDemo extends HTMLElement {
            slow", a lit screen reads as "it's waking up". */
         /* A dim take on the app's own dusk gradient, not near-black: at 0.16
            alpha on #14161c the sweep was invisible in practice and the loading
-           phone read as a dead slab (Roy, hero screenshot 2026-07-28). */
+           phone read as a dead slab. */
         .skel { position:absolute; inset:0; z-index:6; pointer-events:none;
                 background:linear-gradient(170deg,#232138,#2a2440 55%,#382840);
                 transition:opacity .5s ease-out; }
@@ -1136,7 +1136,7 @@ class MMPhoneDemo extends HTMLElement {
            LANDSCAPE does not. Rotated, the device's top edge becomes the side
            the key cluster lives on, so that inset walked the pill off the bezel
            and straight over the keyboard button -- a black slab across
-           Esc/Enter (Roy, hero screenshot 2026-07-28).
+           Esc/Enter.
 
            A top offset CANNOT anchor it to the bezel, which is what two attempts
            got wrong. Two reasons, both measured: top resolves against the
@@ -1174,7 +1174,7 @@ class MMPhoneDemo extends HTMLElement {
                   transform:translate(-50%,-50%); z-index:6; opacity:0;
                   transition:opacity .25s, scale .12s; pointer-events:none; }
         .finger.down { scale:.85; }
-        /* Trackpad touch = a HEAT MAP, not the comet. Roy, correcting an
+        /* Trackpad touch = a HEAT MAP, not the comet. the user, correcting an
            earlier build: "it's not a comet it's a heat map". The distinction is
            accumulation. A comet is one orb with a directional tail -- it says
            WHERE YOU ARE and WHICH WAY. Heat says WHERE YOU HAVE BEEN, and it
@@ -1226,7 +1226,7 @@ class MMPhoneDemo extends HTMLElement {
         /* Caption. Sits under the phone, not over it -- an overlay would cover
            the deck, which is the thing being sold. -14% put it into the next
            section on the page; it belongs inside the host's own box. */
-        /* The caption ANIMATES IN, it doesn't crossfade. Roy: it should feel
+        /* The caption ANIMATES IN, it doesn't crossfade. the user: it should feel
            like a trailer's lower-third. It rises, settles, and overshoots
            slightly on the scale -- a pure opacity fade reads as a slideshow,
            which is the thing that made the old loop feel static.
@@ -1250,8 +1250,7 @@ class MMPhoneDemo extends HTMLElement {
            predicts. The wrap carries the landscape rotation, so a child's
            top/left resolve in the TURNED frame: the tag rode the phone round
            and rendered as vertical text over Esc/Enter, its border-radius:99px
-           pill reading as a black slab across the keyboard button (Roy,
-           landscape hero screenshot 2026-07-28). Outside the wrap it simply
+           pill reading as a black slab across the keyboard button. Outside the wrap it simply
            never rotates, so one anchor is right in both orientations.
 
            Anchored under the HUD rather than to the phone's own notch: the tag
@@ -1955,7 +1954,7 @@ class MMPhoneDemo extends HTMLElement {
    * being read every frame: reading the live position each frame makes the
    * finger chase a receding target and it never arrives. Capturing it means a
    * beat entered from any previous position glides in continuously rather than
-   * teleporting to a hardcoded start point -- the jump Roy saw between beats.
+   * teleporting to a hardcoded start point -- the jump the user saw between beats.
    */
   glideTo(key, x, y, p, span) {
     if (this._glideKey !== key) {
@@ -2647,7 +2646,7 @@ class MMPhoneDemo extends HTMLElement {
   buildTimeline() {
     const beats = [
       {
-        // The hook, and the only beat that has to land in under a second. Roy:
+        // The hook, and the only beat that has to land in under a second. the user:
         // "it shows the mouse on the screen, and then boom, the screen gets a
         // lot smarter." So the ONE object on screen at t=0 is the cursor, and
         // the thing that changes is that same cursor -- MightyMouse takes it,
@@ -2684,7 +2683,7 @@ class MMPhoneDemo extends HTMLElement {
           const cy = 0.58 - 0.1 * travel
           this.macDeskCursor(cx, cy, true)
           this.macPtrLit(lit)
-          // The wake is FAST -- Roy wants "boom". Full colour ~260ms after the
+          // The wake is FAST -- the user wants "boom". Full colour ~260ms after the
           // ignite, then it just holds while the answer writes itself.
           this.macWake(easeInOut(clamp01((p - LIT) / 0.14)))
           // Panel opens just behind the wake so the two read as one event with
@@ -2694,7 +2693,7 @@ class MMPhoneDemo extends HTMLElement {
       },
       {
         // The one concrete, zero-setup thing MightyMouse does, placed before any
-        // mechanics: no pairing, no key, no cloud. Roy: it shows value
+        // mechanics: no pairing, no key, no cloud. the user: it shows value
         // immediately. Matches Smart's length rather than the 1s it started at:
         // a 24-char line typing in under a second reads as a flicker, and the
         // claim only lands if the finished sentence sits still long enough to
@@ -2743,7 +2742,7 @@ class MMPhoneDemo extends HTMLElement {
         at: (p) => {
           this.showMac(true, 1)
           // The phone slips in from the right over the back half of the beat,
-          // which puts its arrival at ~0.5s -- the timing Roy asked for.
+          // which puts its arrival at ~0.5s -- the timing the user asked for.
           // It comes to rest DEAD CENTRE, held up in front of the laptop.
           // Parking it off to one side (the first build used x=24cqw) reads as
           // two devices sitting next to each other; a camera being pointed at
@@ -2796,7 +2795,7 @@ class MMPhoneDemo extends HTMLElement {
         }
       },
       {
-        // Paired -- so PROVE it, with both devices still on screen. Roy: show
+        // Paired -- so PROVE it, with both devices still on screen. the user: show
         // the phone moving the mouse and see it happen on the Mac, while you
         // can still see both, and only THEN hide the Mac.
         // This beat does not touch showMac at all: the laptop stays exactly
@@ -2838,7 +2837,7 @@ class MMPhoneDemo extends HTMLElement {
         // point: for a moment the same screen is on both devices at once, which
         // is what seeing your screen from anywhere actually means. Opening it
         // after the Mac had gone (the old order) meant the pane appeared, the
-        // Mac vanished, and the pane re-appeared -- read as a flicker (Roy).
+        // Mac vanished, and the pane re-appeared -- read as a flicker.
         name: 'Mirror',
         ms: 2400,
         cap: 'See your screen, from anywhere',
@@ -2912,7 +2911,7 @@ class MMPhoneDemo extends HTMLElement {
       },
       {
         name: 'Switch',
-        // The flick itself stays snappy -- Roy: "people don't have that much
+        // The flick itself stays snappy -- the user: "people don't have that much
         // patience". The extra length is TAIL, not a slower switch: appSwitch
         // closes the overlay by 40% of the beat and the rest dwells on the app
         // you landed on, which is the payload. A leisurely *switch* reads as the
@@ -2960,7 +2959,7 @@ class MMPhoneDemo extends HTMLElement {
           // new box, then drive the SAME drag the portrait Pad beat uses. The
           // beat used to move only the Mac cursor, so landscape showed a pointer
           // travelling with no finger and no heat trail behind it -- the one
-          // thing this demo is meant to prove was missing from it (Roy).
+          // thing this demo is meant to prove was missing from it.
           // padDrag measures .proTouchpad itself, so it needs no landscape
           // coordinates of its own; re-basing p onto 0..1 is the whole change.
           if (p < 0.22) {
@@ -2974,7 +2973,7 @@ class MMPhoneDemo extends HTMLElement {
       },
       // Only the first three. The skins are the tail of the loop and the one
       // stretch with no finger and no motion, so every extra one is dead air
-      // before it wraps -- three is enough to say "there are skins" (Roy).
+      // before it wraps -- three is enough to say "there are skins".
       ...this.skins.slice(0, 3).map((s, i) => ({
         name: s.label,
         // Each skin needs long enough to READ the tag and see the deck it names.
@@ -3014,7 +3013,7 @@ class MMPhoneDemo extends HTMLElement {
     //
     // The phone goes sideways at the Landscape beat and STAYS there to the end:
     // the skins run last, and rotating back upright just to show them read as a
-    // random flip (Roy). Positional rather than by name so adding or removing a
+    // random flip. Positional rather than by name so adding or removing a
     // skin can't silently leave a beat on the wrong side of the rule.
     const landFrom = beats.findIndex((b) => b.name === 'Landscape')
     // The intro's staging is sticky state too, and the worst kind: it scales the
@@ -3147,7 +3146,7 @@ class MMPhoneDemo extends HTMLElement {
     // The loading stage is the OPENING beat's own first frame: the asleep Mac,
     // no phone. Holding the full-size phone here instead meant a slow network
     // showed a giant dark slab that then vanished for the Mac-only opening
-    // (Roy, hero screenshot 2026-07-28). Smart's enter/at assert this exact
+    //. Smart's enter/at assert this exact
     // state, so boot finishing is a wake-up, not a scene change.
     this.wrapEl?.classList.add('gone')
     this.showMac(true, 1)

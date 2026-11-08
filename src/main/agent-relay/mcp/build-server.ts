@@ -34,9 +34,8 @@ export function buildAgentRelayMcpServer(
     // so flipping the toggle reaches the next agent without a restart. Absent
     // rather than erroring is the point -- an agent must not see a tool it is
     // not allowed to call, or it will promise the user a photo it cannot get
-    // (PRD decision 4).
     if (PHOTO_VERBS.has(verb) && !PREFS.getAgentRelayPhotosEnabled()) continue
-    // Only the four PRD §6 verbs declare `from`; the local-tooling tools
+    // Only the four design verbs declare `from`; the local-tooling tools
     // (relay_pending/relay_resolve) would have it silently stripped by their
     // own schema, so they are never handed one.
     const carriesFrom = verb in VERB_HANDLERS

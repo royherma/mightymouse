@@ -437,7 +437,7 @@ const notifyHandler: VerbHandler<{
     })
     const sent = await sendRelayPush(request)
     if (!sent.ok) {
-      // §6c: the send failing does not fail the tool call -- the request
+      // the send failing does not fail the tool call -- the request
       // already lives in the store (HUD/Code sheet still show it), so the
       // agent gets a soft warning, not a hard error, and keeps going.
       return textResult(`Saved, but the push didn't go out: ${sent.detail}`)
@@ -457,7 +457,7 @@ const notifyHandler: VerbHandler<{
 
 /** A follow-up question on the SAME card. Sent whole up front rather than one
  *  call per question: the hook fires once per AskUserQuestion and there is no
- *  second event between Q1 and Q2 to mint anything on (PRD §3). */
+ *  second event between Q1 and Q2 to mint anything on. */
 const questionsField = z
   .array(
     z.object({
@@ -776,8 +776,8 @@ const showHandler: VerbHandler<{
 }
 
 /** Read + resolve the pending queue from the same MCP surface the verbs use.
- *  These are NOT PRD §6 verbs -- an agent never calls them. They exist so a
- *  terminal (bin/mm-relay) is a first-class answering surface alongside the
+ *  These are NOT design verbs -- an agent never calls them. They exist so a
+ *  terminal (the relay CLI) is a first-class answering surface alongside the
  *  phone and the HUD, sharing the store's first-answer-wins path rather than
  *  reaching into the store behind it. Registered as tools because the loopback
  *  MCP port is the only door into the running Electron main process. */
@@ -1333,7 +1333,7 @@ export const SESSION_HANDLERS: Record<string, VerbHandler<z.ZodRawShape>> = {
 }
 
 /** Local-tooling tools, kept OUT of VERB_HANDLERS so that map stays exactly the
- *  four PRD §6 verbs and its RelayVerb key stays exhaustive. */
+ *  four design verbs and its RelayVerb key stays exhaustive. */
 export const TOOLING_HANDLERS: Record<string, VerbHandler<z.ZodRawShape>> = {
   // Photo search and fetch live here, not in VERB_HANDLERS: that map is keyed
   // by RelayVerb because every member mints a card, and neither of these does.

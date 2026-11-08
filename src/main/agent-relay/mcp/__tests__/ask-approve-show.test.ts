@@ -44,7 +44,7 @@ describe('ask / approve / show verb handlers', () => {
     agentRelayOffReason.mockReset()
     agentRelayOffReason.mockReturnValue(null)
     sendRelayPush.mockReset()
-    sendRelayPush.mockResolvedValue({ ok: true, deviceLabel: "Roy's iPhone" })
+    sendRelayPush.mockResolvedValue({ ok: true, deviceLabel: "Pat's iPhone" })
     captureScreenshot.mockReset()
     store = await import('../../store')
     mod = await import('../verbs')
@@ -206,7 +206,7 @@ describe('ask / approve / show verb handlers', () => {
       expect.objectContaining({ params: expect.objectContaining({ imagePath: '/tmp/rewrite-ctx-shot.png' }) })
     )
     expect(result.isError).toBeFalsy()
-    expect(result.content[0]!.text).toBe("Sent to Roy's iPhone.")
+    expect(result.content[0]!.text).toBe("Sent to Pat's iPhone.")
   })
 
   it('show with capture:true surfaces an actionable error when the screenshot fails', async () => {

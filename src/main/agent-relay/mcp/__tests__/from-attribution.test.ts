@@ -59,7 +59,7 @@ describe('a card with no --from is attributed from its origin', () => {
     writeFileSync(shot, 'fake-png-bytes')
     sessions.length = 0
     sendRelayPush.mockReset()
-    sendRelayPush.mockResolvedValue({ ok: true, deviceLabel: "Roy's iPhone" })
+    sendRelayPush.mockResolvedValue({ ok: true, deviceLabel: "Pat's iPhone" })
     vi.resetModules()
     store = await import('../../store')
     mod = await import('../verbs')

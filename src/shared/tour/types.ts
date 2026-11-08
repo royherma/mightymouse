@@ -60,7 +60,7 @@ export interface TourStep {
 
 // ── Press-to-confirm IPC payloads (renderer <-> main) ──────────────────────
 // ONE channel pair carries every hotkey-probe message (see CLAUDE.md IPC
-// lockstep + the PRD's mandated simplification — no per-step channel sprawl).
+// lockstep + the design's mandated simplification — no per-step channel sprawl).
 
 /** Renderer -> main: arm the probe for one shortcut, or null to disarm. */
 export interface TourProbeArmPayload {

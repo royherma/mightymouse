@@ -71,7 +71,7 @@ export const BUG_REPORT_BODY_MIN = 5
  * METADATA ONLY — hard rule. `label` is an event name / mode / error kind, never
  * the user's instruction, selection, result, or a file path. The history store
  * holds the user's actual content and none of it belongs in a bug report. See
- * the PRD's §4.5 content rule.
+ * the design's content rule.
  */
 export interface BugReportActivityEntry {
   /** ISO-8601. */

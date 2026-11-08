@@ -1,5 +1,5 @@
 /**
- * POST /push-token, end to end (agent-relay PRD item 1a). Drives a REAL server
+ * POST /push-token, end to end. Drives a REAL server
  * on a test-only port -- copies the observer-live.test.ts harness -- because
  * the property that matters is the whole authed-route contract (OPTIONS
  * preflight, method guard, rate limit, body cap, credential check, persistence

@@ -37,7 +37,7 @@ type DeviceRecord = {
    *  events row's `app_version` (the Mac's) can't stand in for it. */
   iosAppBuild: string | null
   /** APNs device token, hex. Re-sent (and overwritten) on every iOS launch, so
-   *  a rotated token self-heals with no user action -- see PRD §6c. */
+   *  a rotated token self-heals with no user action -- see design. */
   pushToken: string | null
 }
 

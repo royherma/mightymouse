@@ -1,5 +1,5 @@
 /**
- * The observer socket, end to end (observer-socket PRD).
+ * The observer socket, end to end.
  *
  * `observer-socket.test.ts` covers the decision rule in isolation. This drives
  * a REAL server over real WebSockets, because the property that matters is
@@ -8,10 +8,10 @@
  * pass if someone moved it below and started evicting the live phone again.
  *
  * Binds a high test-only port -- never 17771 -- so this cannot touch a real
- * phone session (see CLAUDE.local.md). That is enforced by the CONFIG mock
+ * phone session. That is enforced by the CONFIG mock
  * below plus the assertion in `beforeAll`, not by this comment: it shipped
  * WITHOUT the mock, bound the real port behind the running app, and paired
- * ~12 junk devices into Roy's live store mid-session.
+ * ~12 junk devices into the user's live store mid-session.
  */
 
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'

@@ -35,7 +35,7 @@ import { ANALYTICS_EVENT } from '../shared/analytics-events'
 export type DeepLinkRoute =
   | { kind: 'checkout'; status: CheckoutReturnStatus; sessionId?: string }
   | { kind: 'onboard'; email: string }
-  // agent-relay PRD §7 "Open the screen": every notify/ask/approve/show card
+  // agent-relay design "Open the screen": every notify/ask/approve/show card
   // carries this so any Mac-side surface can jump straight to phone-remote
   // pairing/mirror instead of a bare Settings link.
   | { kind: 'phone-remote' }

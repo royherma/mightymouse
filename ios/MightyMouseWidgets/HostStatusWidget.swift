@@ -26,7 +26,7 @@ struct HostStatusEntry: TimelineEntry {
 
 struct HostStatusProvider: TimelineProvider {
     func placeholder(in context: Context) -> HostStatusEntry {
-        HostStatusEntry(date: Date(), batteryPercent: 82, charging: false, hostname: "Roy's Mac", at: Date())
+        HostStatusEntry(date: Date(), batteryPercent: 82, charging: false, hostname: "Pat's Mac", at: Date())
     }
 
     func getSnapshot(in context: Context, completion: @escaping (HostStatusEntry) -> Void) {

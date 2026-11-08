@@ -184,7 +184,7 @@ foreach ($w in $sh.Windows()) {
  * Best-effort screen context for a run. Resolves null when there's no usable
  * screenshot — every caller treats that as "run without the image".
  *
- * Not implemented in Tier 1: screen capture is Tier 2 (PRD §3 non-goals), and
+ * Not implemented in Tier 1: screen capture is Tier 2, and
  * the callers that want a screenshot (the suggest bubble, Panel "include screen
  * context") already treat it as an enhancement. Returning null degrades to a
  * text-only run, which is the same thing a denied Screen Recording grant does on

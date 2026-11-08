@@ -5080,7 +5080,7 @@ textarea#i::placeholder {
   }
 }
 
-/* ── Tour press-to-confirm cap states (PRD §4.4) ─────────────────────────── */
+/* ── Tour press-to-confirm cap states ─────────────────────────── */
 /* held: a physical modifier is down right now. The cap is a raised button, so
    this travels far enough to read as a real press (1px was invisible against a
    76px cap) — the shadow swap to inset does the rest. */
@@ -5159,7 +5159,7 @@ textarea#i::placeholder {
   }
 }
 
-/* §4.5: no motion-only signal — color + the ✓ glyph still carry every state,
+/* no motion-only signal — color + the ✓ glyph still carry every state,
    so swapping animations for instant changes loses nothing. */
 @media (prefers-reduced-motion: reduce) {
   .tour-cap-held,
@@ -6164,7 +6164,7 @@ textarea#i::placeholder {
    it is fixed-width and everything else lives on its own line.
 
    Truncates at the HEAD, not the tail: these names share a long generated prefix
-   ("techguyver-side-projects-…") and differ in their last few characters, so a
+   ("side-projects-…") and differ in their last few characters, so a
    normal ellipsis cuts off the only part that identifies the pane. `rtl` moves
    the ellipsis to the front; the inner `ltr` span keeps the text itself in
    reading order, and `plaintext` stops a leading "/" or "-" being reordered. */
@@ -9893,7 +9893,7 @@ textarea#i::placeholder {
 
 /* With a rail the sheet is two columns: the conversation, then standing facts. */
 /* The rail gives ground before the conversation does: it is a percentage with a
-   floor, so a narrow window squeezes the facts, never the turns. Roy's title-bar
+   floor, so a narrow window squeezes the facts, never the turns. The user's title-bar
    toggle is what removes it — no width breakpoint second-guesses that. */
 .session-detail[data-rail] {
   display: grid;

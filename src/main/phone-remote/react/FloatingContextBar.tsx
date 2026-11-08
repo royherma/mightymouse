@@ -170,7 +170,7 @@ export default function FloatingContextBar(props: {
   // Room to the far gutter keeps the bar on screen; on its own it is nearly the
   // whole width (~380 of 393pt with the cluster against a gutter), so it bounds
   // nothing a real title would hit. A Chrome tab title is an unbounded string
-  // and simply ran the bar across the entire deck (Roy, on-device).
+  // and simply ran the bar across the entire deck.
   //
   // MAX_SHARE is the one that actually bites: past ~60% of the screen the bar
   // stops reading as a control parked over the trackpad and starts reading as a

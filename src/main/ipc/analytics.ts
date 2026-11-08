@@ -12,6 +12,7 @@ import { FEEDBACK } from '../store/feedback'
 import { SPEECH } from '../store/speech'
 import { AGENT_SESSIONS } from '../store/agent-sessions'
 import { readAgentSpend, type AgentSpendRow } from '../agent-relay/session-spend'
+import { modelDisplayName } from '../../shared/model-label'
 import { runBackend } from '../backend/runner'
 import { OutcomeStore, SUGGESTION_DECISIONS } from '../insights/outcome-store'
 import type {
@@ -116,7 +117,7 @@ function buildAnalyticsData(range: AnalyticsRange = 'alltime', spendRows: AgentS
 
   const modelCounts: Record<string, number> = {}
   for (const e of runEntries) {
-    const m = e.model || 'unknown'
+    const m = modelDisplayName(e.model, e.backend)
     modelCounts[m] = (modelCounts[m] ?? 0) + 1
   }
   const byModel = Object.entries(modelCounts)

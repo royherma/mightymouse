@@ -1,5 +1,5 @@
 /**
- * Code agent relay IPC (PRD 2026-08-12-1786501335 §6c) — the Settings toggle,
+ * Code agent relay IPC — the Settings toggle,
  * health line, and "Send test notification" button. Starting/stopping the MCP
  * listener itself lives in agent-relay/mcp/http-listener.ts; this module is
  * just the glue Settings talks to, mirroring registerPhoneRemoteHandlers()'s
@@ -978,11 +978,11 @@ export function registerAgentRelayHandlers(): void {
     return result
   })
 
-  // §6b: the HUD is a live surface for EVERY pending ask/approve/show, not
+  // the HUD is a live surface for EVERY pending ask/approve/show, not
   // just ones the MCP calls decided to push — raised/dismissed straight off
   // the store's own change feed, on every launch (relay works even with the
   // phone unpaired or push disabled; those only gate the REMOTE surfaces).
-  // §7.7: they answered a question and then went quiet, so the agent is blocked
+  // they answered a question and then went quiet, so the agent is blocked
   // on questions they may not know exist. Re-push the same card -- it re-opens
   // at the question the cursor is on, so the nudge IS the way back in.
   onRelayStalled((request) => {

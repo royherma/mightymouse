@@ -58,11 +58,11 @@ describe('relayStatusLine', () => {
 
   it('is ready once a phone can be pushed to as well', () => {
     const line = relayStatusLine(
-      { enabled: true, running: true, deviceLabel: "Roy's iPhone", ...SEEN, ...LIVE },
+      { enabled: true, running: true, deviceLabel: "Pat's iPhone", ...SEEN, ...LIVE },
       []
     )
     expect(line.health).toBe('ready')
-    expect(line.text).toContain("Roy's iPhone")
+    expect(line.text).toContain("Pat's iPhone")
     expect(line.hint).toBeUndefined()
   })
 
@@ -198,7 +198,7 @@ describe('sessionRow', () => {
     expect(row.health).toBe('your-turn')
   })
 
-  // The bug Roy hit: nothing clears idleSince, so a session that went back to
+  // The bug the user hit: nothing clears idleSince, so a session that went back to
   // work kept reading "Handed back" with a ticking age while it wrote files.
   it('lets a LIVE turn spend an older handoff — an agent back at work is not handed back', () => {
     const row = sessionRow({ label: 'a', idleSince: NOW - 60_000, busySince: NOW - 5_000 }, NOW)
@@ -472,7 +472,7 @@ describe('session search', () => {
   })
 
   // A NAMED session's id appears nowhere in its label, so before the id joined
-  // the haystack the one string bin/mm-relay prints matched nothing at all.
+  // the haystack the one string the relay CLI prints matched nothing at all.
   it('finds a named session by the id the CLI and the hooks print', () => {
     const h = hay({ ...named, sessionId: '9a5c9662-1c4d-4f0e-9a01-6b2f8e3d7a45' })
     expect(matchesSession(h, '9a5c9662')).toBe(true)

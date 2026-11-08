@@ -176,7 +176,7 @@ export function resolveBrewBin(): string | null {
  * Presence of npm is not the question — writability of its global prefix is.
  * A Node from the nodejs.org .pkg puts the prefix at /usr/local, which needs
  * sudo, and we refuse to raise a password prompt from a rewrite tool (it is
- * shape-identical to malware; see the ffmpeg PRD). A Homebrew or
+ * shape-identical to malware; see the ffmpeg design). A Homebrew or
  * version-manager Node keeps the prefix under the user's own tree.
  *
  * So: ask npm where it would write, then test that we may write there. If not,

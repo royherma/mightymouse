@@ -497,7 +497,7 @@ export function runMighty(opts: RunMightyOpts): Promise<MightyChatResult> {
     // that can't call tools has nothing to run it with, so it streams prose about
     // what it WOULD have done and settles as a turn that looks successful and
     // changed nothing — the same silent-wrong-answer shape as serving an embedding
-    // model (see the local-backend PRD §4.2). Refuse before anything spawns.
+    // model. Refuse before anything spawns.
     //
     // Asked per-MODEL via getCapabilities, not the adapter's static flag (mlx defaults toolCalls:false).
     const caps =

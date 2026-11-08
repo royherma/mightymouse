@@ -205,7 +205,7 @@ export async function sendPickerAnswer(
   if (request.params.test) return 'skipped'
 
   // A multi-question ask types its whole buffered burst, one question at a
-  // time, confirming the picker advanced between each (PRD §7.5).
+  // time, confirming the picker advanced between each.
   if (request.params.questions && request.params.questions.length > 1) {
     return sendPickerBurst(request)
   }
@@ -359,7 +359,7 @@ export async function sendPaneText(
 }
 
 /** Types every buffered answer into one picker, in question order. tmux only
- *  (PRD §8.1): each question needs the pane read back to prove the picker moved
+ *  each question needs the pane read back to prove the picker moved
  *  on, and tmux is the only transport that can read. Stops at the first question
  *  that does not advance -- a half-typed burst leaves the human at a real picker
  *  they can finish; a blind one leaves wrong answers. */

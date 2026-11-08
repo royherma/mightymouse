@@ -9,14 +9,7 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-  # SECRETS — never package these. The `.env` entry above matches by LITERAL name
-  # only, so it does NOT catch `.scratch-local/openrouter.env` or any nested env
-  # file. Verified 2026-07-21: v0.8.0's app.asar shipped populated prod Supabase
-  # tokens + DB passwords, an OpenRouter key, a live Stripe rk_, a Cloudflare token
-  # and an Apple app-specific password — extractable with a single `asar
-  # extract-file`. `.gitignore` protects git; it does nothing for electron-builder.
-  # Recursive globs below, directory excludes AND suffix excludes, deliberately
-  # belt-and-braces. Re-verify after any change here with:
+  # SECRETS - never package these. Re-verify after any change here with:
   #   npx @electron/asar list <app.asar> | grep -E 'scratch-local|\.claude/|\.env|\.pem'
   - '!**/.scratch-local/**'
   - '!**/.claude/**'
@@ -85,7 +78,7 @@ win:
     - target: nsis
       arch:
         - x64
-  # UNSIGNED for the beta (PRD §7: no OV/EV cert; SmartScreen "More info → Run
+  # UNSIGNED for the beta (no OV/EV cert; SmartScreen "More info → Run
   # anyway" is the accepted cost). This flag is what makes that safe for
   # auto-update: left true, electron-builder writes a publisherName into
   # app-update.yml and electron-updater then REFUSES every downloaded installer
@@ -164,6 +157,7 @@ npmRebuild: false
 # first-open can only verify by calling Apple. This hook staples each DMG the moment it lands.
 # It must be artifactBuildCompleted, not afterAllArtifactBuild — the latter runs after
 # latest-mac.yml is hashed and after uploads are scheduled. See scripts/staple-dmg.mjs.
+afterPack: scripts/check-asar-secrets.mjs
 artifactBuildCompleted: scripts/staple-dmg.mjs
 # Auto-update feed. Release artifacts (.dmg/.zip + latest-mac.yml + .blockmap) are
 # published to a SEPARATE PUBLIC repo so the (private) app repo never needs a token

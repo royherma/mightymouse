@@ -8,7 +8,7 @@ import { HintCard } from '../components/HintCard'
 import { Button } from '../components/Button'
 import type { HotkeyConfirmResult } from './useHotkeyConfirm'
 
-// Visual layer for the press-to-confirm caps (PRD §4.4). Pure props-in — all
+// Visual layer for the press-to-confirm caps. Pure props-in — all
 // state/timing lives in useHotkeyConfirm; this just renders one frame of it.
 //
 // Each hotkey step is TWO stacked mini-steps, not one four-cap chord:

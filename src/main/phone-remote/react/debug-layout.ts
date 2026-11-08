@@ -193,7 +193,7 @@ function measureSafeAreaInset(): string {
  *
  * Exists because the status line is one line on a phone screen, but the
  * questions that actually get asked about this layout need more than six
- * numbers -- and the alternative was Roy screenshotting the phone and someone
+ * numbers -- and the alternative was the user screenshotting the phone and someone
  * transcribing values out of the image by eye. Three bottom-strip fixes in a
  * row were shipped against WRONG assumptions that a single line of this
  * output would have killed immediately (the decisive fact the third time was

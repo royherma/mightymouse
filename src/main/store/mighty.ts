@@ -101,7 +101,7 @@ function latestById<T extends { id: string }>(rows: T[]): Map<string, T> {
 
 // Rewrite a whole file from a record list, honoring encryption. Used by deleteSession /
 // deleteJob / deleteProject / removeArtifact. Deliberately does NOT consult incognito —
-// removal isn't an append, see docs/gotchas.md. Returns whether it actually wrote.
+// removal isn't an append. Returns whether it actually wrote.
 function rewriteFile(path: string, records: unknown[]): boolean {
   try {
     const encrypt = PREFS.getHistoryEncryption()

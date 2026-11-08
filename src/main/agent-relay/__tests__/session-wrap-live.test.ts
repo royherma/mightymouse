@@ -1,5 +1,5 @@
 /**
- * The refusal half of wrap-up (clear-a-session PRD §7), end to end.
+ * The refusal half of wrap-up, end to end.
  *
  * `startSessionWrap` is the only verb in the product that CAUSES a session to
  * end, so what matters is not that a good case works -- it is that every bad
@@ -12,7 +12,7 @@
  * the decision: the assertion is "zero keys were typed", not "it returned the
  * string I expected".
  *
- * Binds port 0 (OS-assigned) -- NEVER 17781, which is Roy's running app holding
+ * Binds port 0 (OS-assigned) -- NEVER 17781, which is the user's running app holding
  * 30-40 live sessions. `startAgentRelayMcp(port)` documents that parameter as
  * test-only for exactly this reason, and `beforeAll` asserts it rather than
  * trusting this comment.
@@ -238,7 +238,7 @@ describe('session wrap-up refusals, live listener', () => {
       [CONFIG.AGENT_RELAY.FACTS_HEADER]: facts({ agentPid: DEAD_PID })
     })
 
-    // Every surface (phone, Mac list, bin/mm-relay, the agent's own wrap_up)
+    // Every surface (phone, Mac list, the relay CLI, the agent's own wrap_up)
     // arrives holding a NAME, never a session object. Each resolving it
     // differently is how a wrap lands on the wrong terminal, so both spellings
     // must reach the same row.
@@ -291,7 +291,7 @@ describe('session wrap-up refusals, live listener', () => {
     expect(source, 'wrap-up must never close the terminal it ran in').not.toContain('kill-pane')
   })
 
-  it('resolves the short id that bin/mm-relay sessions prints', async () => {
+  it('resolves the short id that the relay CLI prints', async () => {
     await registerSession({
       [CONFIG.AGENT_RELAY.IDENTITY_HEADER]: 'prefix-lookup-session',
       [CONFIG.AGENT_RELAY.SESSION_HEADER]: 'dbce4a88-9865-4dff-9326-968f0c92cd28',

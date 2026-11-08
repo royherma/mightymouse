@@ -10,12 +10,11 @@ import type { SpokenWord } from '../../shared/types'
 import { PREFS } from '../store/prefs'
 
 /**
- * Live Voice Companion — SpeechOutput adapter (Phase 2 of the PRD,
- * prds/active/2026-07-12-1783824131-live-voice-companion.md §5 §6).
+ * Live Voice Companion — SpeechOutput adapter (Phase 2 of the design,
  *
  * ElevenLabs Flash v2.5 request -> audio bytes. This is a narrow request/response
  * adapter, NOT a BACKENDS entry (adapters.ts) — TTS isn't an LLM backend, it's an
- * output stage, per the PRD's explicit call ("new src/main/audio/tts.ts module").
+ * output stage, per the design's explicit call ("new src/main/audio/tts.ts module").
  *
  * Playback lives in the renderer (the companion window), not here: the Electron
  * MAIN process has no audio-output device to write PCM to (see sound-window.ts's
@@ -193,7 +192,7 @@ function isKokoroEnabled(): boolean {
  * Spawns the CLI per call, which reloads the 82M model every time: measured ~5.1s
  * for 6s of audio on an M1 Max (26 Jul 2026). That is the cost of process
  * isolation in v1; a resident warm process is the known optimization if this
- * latency proves unacceptable in real use (PRD §8).
+ * latency proves unacceptable in real use.
  *
  * NEVER throws. Every failure path — not installed, spawn error, timeout, missing
  * output file — resolves by delegating to `speakWithSay()`, so a broken Kokoro
@@ -251,7 +250,7 @@ export async function speakLocal(text: string): Promise<SpeakResult> {
 }
 
 /**
- * Speak `text` via ElevenLabs Flash v2.5 (per the PRD's TTS choice — official
+ * Speak `text` via ElevenLabs Flash v2.5 (per the design's TTS choice — official
  * ~75ms generation latency claim, §5 Phase 2). Returns the encoded mp3 bytes, or
  * a null-audio SpeakResult when:
  *   - no key is configured (silent/mock mode — the one no-throw contract this

@@ -4,7 +4,7 @@ import Foundation
 ///
 /// Thin on purpose: `MacRelayClient.post` already owns host resolution, the
 /// device credential and the 401-means-re-pair split, and its own doc comment
-/// names this PRD as the thing that should reuse it rather than opening a
+/// names this design as the thing that should reuse it rather than opening a
 /// second client. All this adds is the `/intent` envelope and the rule that
 /// every outcome -- including a refusal -- comes back as something speakable.
 ///

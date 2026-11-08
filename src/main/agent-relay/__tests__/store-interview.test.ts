@@ -1,5 +1,5 @@
 /**
- * PRD §7.2: a multi-question ask BUFFERS answers and settles exactly once, at
+ * a multi-question ask BUFFERS answers and settles exactly once, at
  * the end. The N=1 contract is unchanged -- the first two tests are here to
  * fail loudly if buffering ever leaks into the single-question path.
  */

@@ -6,7 +6,7 @@ import { CONFIG } from '../../../shared/config'
 
 // reconcileHistoryEncryption() runs on EVERY app startup and rewrites the user's
 // entire history file — this is the highest-blast-radius untested path in the repo
-// (PRD #4, prds/active/2026-07-11-...-prelaunch-top5-cleanup.md). Zero direct tests
+// Zero direct tests
 // existed before this file.
 //
 // Same trick as feedback.test.ts / prefs.test.ts / run-folder.test.ts: paths.ts

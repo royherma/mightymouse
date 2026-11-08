@@ -320,14 +320,14 @@ export interface HudUpdatePayload {
   speaking?: boolean
 }
 
-/** A pending code-agent-relay card (PRD 2026-08-12-1786501335 §6b) riding the
+/** A pending code-agent-relay card riding the
  *  same HUD card window as any other run. One card = one RelayRequest; born
  *  already "done" (there's no running phase) and never auto-dismisses until
  *  answered, mirroring confirmAct's destructive-act gate. */
 export interface HudRelayCard {
   requestId: string
-  /** `notify` only ever appears when Roy chose MightyMouse cards over macOS
-   *  notifications (PRD 2026-08-22-1787388684). It has nothing to answer, so it
+  /** `notify` only ever appears when the user chose MightyMouse cards over macOS
+   *  notifications. It has nothing to answer, so it
    *  is the one verb here that carries no controls and dismisses on its own. */
   verb: 'ask' | 'approve' | 'show' | 'photos_get' | 'notify'
   /** Minted-at + budget -- `waitingLabel`'s (relay-cards.ts) only inputs. The
@@ -1089,7 +1089,7 @@ export interface StoredSettings {
    *  opt-in — there is no settings row for it. */
   transcribeEngine?: TranscribeEngineRan
   /** "Let Siri see your Mac's screen" — gates the screenshot an App Intent takes
-   *  with nobody at the keyboard. On by default (Roy, 2026-09-15): the curtain and
+   *  with nobody at the keyboard. On by default: the curtain and
    *  away-mode guards already cover the case this would protect, and a default-off
    *  toggle makes the headline phrase dead on arrival for every new user.
    *  A screenshot cannot be scrubbed — redact.ts is text-only — so this switch is
@@ -2591,7 +2591,7 @@ export interface DigestFlag {
   stuckDays: number
   evidence: string
   /** When a human last reached out, if they have. Suppresses the flag for a
-   *  configured window, so a row Roy already handled stops shouting at him. */
+   *  configured window, so a row the user already handled stops shouting at him. */
   contactedAt?: string | null
 }
 
@@ -3302,7 +3302,7 @@ export interface PhoneRemoteTunnelStatus {
   refusal?: RemoteRefusal
 }
 
-/** Code agent relay (PRD 2026-08-12-1786501335) health line for Settings —
+/** Code agent relay health line for Settings —
  *  one shape covers "off", "on but nobody to push to", and "ready". */
 /** Which sub-tab the Code tab lands on. Shared because the tray asks for one,
  *  main forwards it, and CodePanel reads it. */
@@ -3459,7 +3459,7 @@ export interface AgentHelper {
 export interface AgentChecklistItem {
   label: string
   status: 'pending' | 'in_progress' | 'completed'
-  /** The item is open because it needs Roy's hands or eyes, not because the
+  /** The item is open because it needs the user's hands or eyes, not because the
    *  agent is still on it. */
   waiting?: boolean
 }
@@ -3607,7 +3607,7 @@ export interface AgentRelaySessionInfo {
   progress?: number
 }
 
-/** MCP clients we can configure for the user (PRD item 3b). */
+/** MCP clients we can configure for the user. */
 export type McpClientId = 'claude-code' | 'codex' | 'cursor' | 'vscode'
 
 /** One detected client. Absent from the list entirely = not installed on this Mac. */

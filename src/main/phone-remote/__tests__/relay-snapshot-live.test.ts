@@ -7,8 +7,8 @@
  * either side alone cannot tell them apart -- `sendToPhone` is a silent no-op
  * when no socket is open, which is exactly what an empty list looks like.
  *
- * Binds a high test-only port -- never 17771 -- so this cannot touch Roy's live
- * phone session (see CLAUDE.local.md). Enforced by the CONFIG mock plus the
+ * Binds a high test-only port -- never 17771 -- so this cannot touch the user's live
+ * phone session. Enforced by the CONFIG mock plus the
  * assertion in `beforeAll`, same protocol as `observer-live.test.ts`.
  */
 

@@ -17,7 +17,6 @@
  * a hotkey, so the black-frame path was mostly unreachable. Now it's the normal
  * path for anyone who skipped the step.
  *
- * See prds/active/2026-07-31-1785464152-onboarding-order-and-jit-screen-permission.md
  */
 
 import { desktopCapturer, systemPreferences } from 'electron'

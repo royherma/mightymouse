@@ -30,7 +30,7 @@ The product name is **MightyMouse**. "ShowAndTell" is an old folder name, never 
 | `src/main/capture/` | Screen recording, transcription, global hotkeys |
 | `src/shared/` | Code used by both main and renderer: `config.ts`, `types.ts`, `ipc.ts`, `shortcuts.ts` |
 | `src/preload/` | `index.ts` defines `window.api`, `index.d.ts` types it |
-| `src/main/phone-remote/` | Phone remote. It has its own `CLAUDE.md`/notes in the folder if present: read them first |
+| `src/main/phone-remote/` | Phone remote. Read `docs/phone-remote-flows.md` first |
 | `native/` | Swift and C helpers, built by `npm run build:helpers` |
 | `ios/`, `android/` | The phone apps |
 

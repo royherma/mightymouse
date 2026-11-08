@@ -66,9 +66,9 @@ describe('voice turns are one conversation, not N single-shot asks', () => {
 
   it('continues a session it is handed — this is what makes voice remember', async () => {
     runMighty.mockResolvedValue(ok('sess-1'))
-    const first = await runCompanionAskTurn('my name is Roy')
+    const first = await runCompanionAskTurn('my name is Pat')
 
-    runMighty.mockResolvedValue(ok('sess-1', 'You said Roy.'))
+    runMighty.mockResolvedValue(ok('sess-1', 'You said Pat.'))
     await runCompanionAskTurn('what is my name', first.sessionId)
 
     // runMighty replays a session's prior turns as context, so forwarding the id

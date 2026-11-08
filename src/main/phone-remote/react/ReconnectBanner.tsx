@@ -2,7 +2,7 @@ import { LoaderCircle } from 'lucide-react'
 import type { TunnelReach } from '@shared/types'
 import { Button } from '@shared/ui/Button'
 
-// Persistent banner while the WS is down (PRD Layer 3). Distinct from the
+// Persistent banner while the WS is down. Distinct from the
 // small inline status line -- a dead connection is a state the user should be
 // able to act on (Retry now), not just read.
 export default function ReconnectBanner(props: {

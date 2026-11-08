@@ -165,14 +165,14 @@ import trayIconAsset from '../../resources/trayTemplate.png?asset'
 // Electron project's DevTools can't collide (see electron.vite.config.ts).
 if (IS_DEV) app.commandLine.appendSwitch('remote-debugging-port', envVar('MM_CDP_PORT') || '9322')
 
-// Encoder bitrate floor — tuning protocol PRD 2026-08-13-1786586731 (run log
+// Encoder bitrate floor — tuning protocol design (run log
 // there is the record). Without a floor goog-cc drops to its internal 30k
 // (0-1fps) on any link dip and never climbs back; 800k overran the link into
 // 24% loss (REVERTED); 150k held 7.6fps stable with falling loss. The floor
 // must stay under the degraded link's real budget (~184-300k observed).
 // GLOBAL to every peer connection, phone mirror included.
 // Do NOT add WebRTC-Bwe-LossBasedBweV2/Enabled:false again: tried Run 10-11
-// (2026-08-13), it let target follow estimate in good phases but on a bad-link
+// it let target follow estimate in good phases but on a bad-link
 // phase the sender kept pushing into the choked pipe -- loss went 1% -> 29%
 // (#7Q3M). The loss brake is what keeps bad-link loss at ~1%.
 app.commandLine.appendSwitch('force-fieldtrials', 'WebRTC-Video-MinVideoBitrate/Enabled,br:200kbps/')
@@ -504,7 +504,7 @@ async function gateAfterAuth(): Promise<void> {
     if (resumingSetup) route('setup')
   } else {
     // Permissions already valid — this is the "returning user" case that used to
-    // show nothing at all after sign-in (see prds/active/2026-07-11-1783779969).
+    // show nothing at all after sign-in.
     startAppTail('returning')
     // The restart worked: the row that forced it is now green. Show that rather
     // than dropping the user on a silent desktop with no proof anything changed.
@@ -1162,7 +1162,7 @@ if (!gotTheLock) {
     // phone connect because "the Mac locked with nothing running" is precisely
     // the case the journal could not prove.
     startAwayModeLockWatch()
-    // Dev-only headless mode for bin/mm-smoke: `--print-jwt` boots just far enough
+    // Dev-only headless mode for a dev script: `--print-jwt` boots just far enough
     // to resolve the signed-in session (via the app's OWN Supabase client, so the
     // Keychain-encrypted token decrypts under the right app identity — a bare
     // `electron` binary can't), prints the access_token to stdout, and quits. Gated
@@ -1221,7 +1221,7 @@ if (!gotTheLock) {
     // human to click a picker (it's a headless renderer) -- feed it a
     // desktopCapturer source programmatically so it resolves instead of hanging
     // forever waiting for a dialog that will never appear. Still no picker UI
-    // (PRD non-goal); the target is chosen for the user:
+    // the target is chosen for the user:
     //   extended mode on  → the virtual display (phone shows its OWN desktop)
     //   otherwise         → the primary display (classic mirror)
     // Matched by id against each source's display_id, which is a string.
@@ -1336,7 +1336,6 @@ if (!gotTheLock) {
     // When the user finishes onboarding, release the app-tail gate.
     // 'new' only for a genuine first run — a reauth (permission re-granted after
     // it broke) is a returning user, not someone who needs first-run orientation.
-    // See prds/active/2026-07-11-1783779969-post-auth-welcome-state.md.
     configureOnboarding({
       onComplete: (reauth) => startAppTail(reauth ? 'returning' : 'new'),
       // Red X on the gate: closing it means SKIP, not "ask me again in 600ms".

@@ -1,5 +1,5 @@
 /**
- * Phone Remote — msg.type -> handler dispatch table (PRD lane C9). Replaces
+ * Phone Remote — msg.type -> handler dispatch table. Replaces
  * the inline switch that used to live in phone-remote.ts's handlePhoneMessage.
  * C9c finishes the migration: every message type now resolves here, so
  * handlePhoneMessage no longer falls through to any switch at all.

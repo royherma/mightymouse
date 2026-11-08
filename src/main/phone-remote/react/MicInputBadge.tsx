@@ -5,7 +5,7 @@ import { MicWaveform } from './MicWaveform'
 import { Button } from '@shared/ui/Button'
 
 // The phone-mic control: TAP sends this phone's microphone to the Mac, where it
-// becomes an input device other apps can select (phone-mic-as-mac-input PRD).
+// becomes an input device other apps can select.
 //
 // Both layouts render this, for the reason MirrorAudioBadge's header records --
 // duplicated per-layout JSX broke twice. One component, two call sites.

@@ -8,7 +8,7 @@ import UIKit
 ///
 /// Nothing here prompts on its own. The permission ask is a deliberate call the
 /// web layer makes only after a search has already failed for lack of access
-/// (PRD decision 1) -- asking at launch is what makes a photo grant feel like a
+/// -- asking at launch is what makes a photo grant feel like a
 /// toll booth rather than a trade.
 enum PhotoLibrary {
     /// What the agent is allowed to reach. Sent back on EVERY response, not
@@ -50,7 +50,7 @@ enum PhotoLibrary {
     ///
     /// The agent never sees a raw `PHAsset.localIdentifier`: those are stable
     /// across launches, so a leaked one is a durable handle on someone's photo
-    /// library. An opaque short id that dies with the session is not (PRD
+    /// library. An opaque short id that dies with the session is not (design
     /// decision 6). Cleared by `endSession` on every background edge.
     private static var sessionIds: [String: String] = [:]
     private static let sessionLock = NSLock()

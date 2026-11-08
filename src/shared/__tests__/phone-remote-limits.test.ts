@@ -1,6 +1,6 @@
 // The relay-allowance contract. Two things are load-bearing and neither is
 // obvious from reading the types: an unrecognised reason must resolve to NOT
-// capped (fail-open, §4d of the entitlement PRD), and a stale/absent reset
+// capped (fail-open), and a stale/absent reset
 // timestamp must yield null rather than a negative countdown.
 
 import { describe, it, expect } from 'vitest'

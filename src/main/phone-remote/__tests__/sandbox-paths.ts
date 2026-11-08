@@ -7,7 +7,7 @@
  * REAL absolute path for every key nobody thought to list. The journal was one
  * of those, so the suite wrote connect/pair/revoke entries straight into
  * `~/MightyMouse Staging/phone-remote-journal.json` -- flooding the 200-entry
- * ring buffer that exists to diagnose Roy's phone, and evicting the real
+ * ring buffer that exists to diagnose the user's phone, and evicting the real
  * disconnect it was being read for.
  *
  * Rebasing by string replacement rather than by listing keys is the point: a

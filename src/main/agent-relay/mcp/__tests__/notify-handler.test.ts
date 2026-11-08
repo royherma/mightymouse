@@ -67,7 +67,7 @@ describe('notify verb handler', () => {
   it('mints and sends, returning the device label on success', async () => {
     agentRelayOffReason.mockReturnValue(null)
     mint.mockReturnValue(mintedRequest())
-    sendRelayPush.mockResolvedValue({ ok: true, deviceLabel: "Roy's iPhone" })
+    sendRelayPush.mockResolvedValue({ ok: true, deviceLabel: "Pat's iPhone" })
     const { VERB_HANDLERS } = await import('../verbs')
 
     const result = await VERB_HANDLERS.notify!.run({ title: 'Build finished' })
@@ -77,7 +77,7 @@ describe('notify verb handler', () => {
       expect.objectContaining({ title: 'Build finished' })
     )
     expect(result.isError).toBeFalsy()
-    expect(result.content[0]?.text).toBe("Sent to Roy's iPhone.")
+    expect(result.content[0]?.text).toBe("Sent to Pat's iPhone.")
   })
 
   it('mints the request even when the push send fails, and returns a soft warning not an error', async () => {
@@ -100,15 +100,15 @@ describe('notify verb handler', () => {
   })
 
   // Pins what stops a card contradicting its own body: the headline is DERIVED
-  // from the state, never worded by the caller. Incident: docs/gotchas.md.
+  // from the state, never worded by the caller.
   describe('state drives the headline', () => {
     beforeEach(() => {
       agentRelayOffReason.mockReturnValue(null)
       mint.mockReturnValue(mintedRequest())
-      sendRelayPush.mockResolvedValue({ ok: true, deviceLabel: "Roy's iPhone" })
+      sendRelayPush.mockResolvedValue({ ok: true, deviceLabel: "Pat's iPhone" })
     })
 
-    // 'waiting' is GONE (2026-08-14), not reworded. A notify settles inside
+    // 'waiting' is GONE, not reworded. A notify settles inside
     // mint(), so it never waited on anyone, and its "Waiting on You" headline
     // read exactly like `ask` -- the one verb that blocks and renders reply
     // buttons. Rejected rather than remapped: silently landing it on 'done'
@@ -121,7 +121,7 @@ describe('notify verb handler', () => {
       expect(state!.safeParse('done').success).toBe(true)
     })
 
-    // Same defect as 'waiting', one state over (2026-08-14): it printed
+    // Same defect as 'waiting', one state over: it printed
     // "⛔ Can't Continue" on a card that resolves at mint, so the outcome line
     // read "Delivered" under a demand and the buttons that would unblock the
     // agent did not exist. Rejected, not remapped -- 'progress' would claim a

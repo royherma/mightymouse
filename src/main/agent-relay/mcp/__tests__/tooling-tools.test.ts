@@ -1,5 +1,5 @@
 /**
- * The local-tooling MCP tools (bin/mm-relay's whole surface), driven against a
+ * The local-tooling MCP tools (the relay CLI's whole surface), driven against a
  * REAL McpServer over an in-memory transport rather than mocks -- the tool
  * NAMES are the contract the CLI hardcodes, so a rename has to fail here.
  *
@@ -60,7 +60,7 @@ describe('agent-relay local tooling tools', () => {
     relayRequestStore.resetForTests()
   })
 
-  it('registers the four verbs, the session verbs, and the three tooling tools bin/mm-relay calls', async () => {
+  it('registers the four verbs, the session verbs, and the three tooling tools the relay CLI calls', async () => {
     const client = await connectedClient()
     const names = (await client.listTools()).tools.map((t) => t.name).sort()
     expect(names).toEqual([

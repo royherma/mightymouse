@@ -147,7 +147,7 @@ describe('capturePaneTail', () => {
   // emits ╎ (U+254E) -- it passed while every phone preview leaked the banner.
   it('strips chrome captured verbatim from a real pane', async () => {
     captureOut = [
-      'royhermannn_new@192 ShowAndTell % clear',
+      'pat@192 ShowAndTell % clear',
       'claude update && claude --dangerously-skip-permissions',
       ' ▐▛███▜▌   Claude Code v2.1.233',
       '▝▜█████▛▘  Opus 5 · Claude Max',
@@ -294,7 +294,7 @@ describe('sendPickerAnswer — multi-question burst', () => {
     vi.mocked(resolveBinary).mockReturnValue('/opt/homebrew/bin/tmux')
   })
 
-  // Copied off a live 2-question picker (2026-08-15), the screen that broke the
+  // Copied off a live 2-question picker, the screen that broke the
   // burst: answering Q1 checked EVERY box and jumped straight here.
   const REVIEW = [
     '←  ☒ Roast  ☒ Milk  ✔ Submit  →',
@@ -310,7 +310,7 @@ describe('sendPickerAnswer — multi-question burst', () => {
     '  2. Cancel'
   ].join('\n')
 
-  // The bug Roy hit twice: the picker was fully filled in and never submitted,
+  // The bug the user hit twice: the picker was fully filled in and never submitted,
   // because nothing ever landed on the review screen's "Submit answers" row.
   it('lands on Submit answers when the review screen appears', async () => {
     captureQueue = [

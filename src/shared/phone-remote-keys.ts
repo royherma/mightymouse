@@ -87,7 +87,7 @@ export function isTmuxAction(value: unknown): value is TmuxAction {
 
 /** NOT keys: ctrl+arrow is consumed by WindowServer above mm-input's HID tap,
  *  so it exits 0 and does nothing. The Mac maps the Mission Control pair to
- *  `open -a` and `escape` instead (docs/gotchas.md), and smartZoom to ⌘0 —
+ *  `open -a` and `escape` instead, and smartZoom to ⌘0 —
  *  macOS exposes no synthesizable two-finger-double-tap. */
 export const PAD_GESTURES = ['missionControl', 'closeMissionControl', 'smartZoom'] as const
 export type PadGesture = (typeof PAD_GESTURES)[number]
@@ -105,8 +105,8 @@ export function isPadGesture(value: unknown): value is PadGesture {
 }
 
 /** What kind of physical keyboard the HOST machine has — sent to the phone in
- *  the layoutPrefs event so the virtual keyboard can mirror it (Roy: "the auto
- *  keyboard will be based on the same keyboard of the device"). ANSI and ISO are
+ *  the layoutPrefs event so the virtual keyboard can mirror it.
+ *  ANSI and ISO are
  *  genuinely different boards, not localizations: ISO has one extra key left of
  *  Z, so drawing 'mac' at an ISO user hides a key they reach for. 'generic' is
  *  the typed fallback a non-Mac host (or an older Mac build, which only ever

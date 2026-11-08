@@ -11,7 +11,7 @@ import { resolveBinary, clearBinaryCache } from '../platform'
  * points then did a bare `existsSync(s.ffmpegPath)` against that frozen string.
  * So a user who installed ffmpeg *while the app was running* kept getting
  * "Can't find ffmpeg" until they quit and relaunched — reported by the first
- * external tester (2026-07-23), alongside "I had to restart the app a couple of
+ * external tester, alongside "I had to restart the app a couple of
  * times after changes". Same root shape: state read at load, never re-read.
  *
  * The hit path stays a single `existsSync`. Only a miss pays for re-resolution,

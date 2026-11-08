@@ -4,8 +4,8 @@ import { barTopFor } from '../useClusterTop'
 // Where the floating context bar's edge lands. The rule exists because the app
 // ring cannot be made to enclose the bar: a circle clearing the buttons AND the
 // bar wants ~259px on a 393pt portrait pad that offers ~227, so `ringBand` caps
-// at the pad edge and the arc's icons end up behind the tab chips (Roy,
-// on-device 2026-08-03). The bar moves instead.
+// at the pad edge and the arc's icons end up behind the tab chips.
+// The bar moves instead.
 
 // Gap-inset values in one space, shaped like a portrait deck: cluster keys near
 // the bottom of the screen, arc sweeping up past them.

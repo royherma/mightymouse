@@ -2,7 +2,7 @@
 //
 // Why this exists: the phone-remote "extended display" mode needs a display that
 // isn't the real monitor, so the phone can show something different from the Mac
-// (prds/active/2026-07-25-1784959720-phone-remote-extended-display.md). macOS has
+// macOS has
 // NO public API for this — verified across ScreenCaptureKit, DriverKit,
 // CoreMediaIO, CGDisplayStream and Sidecar. The only path is the private
 // CGVirtualDisplay in CoreGraphics, which is what BetterDisplay, DeskPad and
@@ -28,7 +28,7 @@
 //   exit    — nonzero only when no display was ever created.
 //
 // Two traps, each of which produced a SILENT FALSE SUCCESS during the spike and
-// cost real time (see the PRD's §6 for the raw findings):
+// cost real time:
 //
 //   1. applySettings: returns true even when NOTHING attaches. It is not a
 //      success signal. The only proof is polling CGGetActiveDisplayList for the

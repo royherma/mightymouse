@@ -56,7 +56,7 @@ describe('refusalCopy', () => {
     expect(copy.cta).toBe(UPGRADE_CTA)
   })
 
-  // Roy's staging account is capped on all three windows at once. A hardcoded
+  // The user's staging account is capped on all three windows at once. A hardcoded
   // "back tomorrow" would be a lie for exactly the users who hit this most, so
   // the sentence is rendered from the window the server named.
   it('reads the monthly cap when monthly is what ran out', () => {

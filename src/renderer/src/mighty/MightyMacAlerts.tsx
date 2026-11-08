@@ -4,7 +4,7 @@
  * WHY it is separate from the phone's sheet (src/main/phone-remote/react/
  * CodeSheet.tsx): they used to be one set of answers, and the send path checked
  * the phone's copy first -- so turning off updates on the phone silently killed
- * every Mac alert of that kind too (PRD 2026-08-22-1787388684 §2a). Two
+ * every Mac alert of that kind too. Two
  * surfaces, two answers, one screen each.
  *
  * Writes the whole object per change rather than one switch at a time: this

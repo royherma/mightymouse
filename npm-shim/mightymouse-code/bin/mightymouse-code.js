@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// npx mightymouse-code -- the "second door" from PRD decision 2 (two doors,
+// npx mightymouse-code -- the "second door" from design (two doors,
 // one implementation). This process holds NO server logic of its own: it is
 // a stdio<->HTTP proxy in front of the exact same McpServer that runs inside
 // the Electron app (src/main/agent-relay/mcp/build-server.ts), reached over
-// loopback. Forking the verb logic here would violate the PRD's "never fork"
+// loopback. Forking the verb logic here would violate the design's "never fork"
 // rule, so every tool call this shim proxies is answered by the real Mac app.
 
 import { execFileSync } from 'child_process'
@@ -661,7 +661,7 @@ function holdPresence(cwd, onRegistered = () => {}) {
     if (stopped) return
     // A throw here (not a socket error -- connect() validates its arguments)
     // would take out presence for the process's whole life with no trace, which
-    // is candidate (c) in the PRD's list.
+    // is candidate (c) in the design's list.
     try {
       openSocket()
     } catch (err) {

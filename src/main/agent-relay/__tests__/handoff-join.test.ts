@@ -4,7 +4,7 @@
  * The bug this locks down: `from` is a human NAME, and Cursor/VS Code export no
  * session-id env var, so two panes in one checkout send a byte-identical one.
  * Joining an idle ping on the name alone marked BOTH rows "Handed back" when
- * only one agent had stopped -- Roy watched a session claim it had handed back
+ * only one agent had stopped -- the user watched a session claim it had handed back
  * while it was still writing.
  *
  * Driven through the real store so the ping shape is the one `verbs.ts` mints,

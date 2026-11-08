@@ -1,7 +1,7 @@
 /**
  * Curtain art, variant 1 — the flat-grid version, kept as a fallback.
  *
- * Superseded by `curtain-art-v2.ts` (the branded layout Roy chose on 2026-08-07),
+ * Superseded by `curtain-art-v2.ts` (the branded layout the user chose on 2026-08-07),
  * which is what `privacy-curtain.ts` actually loads. This stays importable so the
  * swap back is a one-line change rather than a git archaeology exercise.
  *

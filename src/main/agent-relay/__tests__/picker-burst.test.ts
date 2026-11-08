@@ -1,6 +1,6 @@
 /**
  * The burst refuses to type question K+1 until the pane proves it left question
- * K: one wrong Down-count silently mis-answers everything after it (PRD §7.5).
+ * K: one wrong Down-count silently mis-answers everything after it.
  * tmux is mocked at the execFile boundary, so a "pane" is a scripted sequence of
  * capture-pane outputs -- exactly what the real code reads.
  */

@@ -11,13 +11,13 @@ const ended: AgentRelaySessionInfo = {
   origin: { tmuxPane: '%43' }
 }
 const live: AgentRelaySessionInfo = {
-  label: 'robotjobshq/main',
+  label: 'jobboard/main',
   sessionId: 'new',
-  cwd: '/work/robotjobshq',
+  cwd: '/work/jobboard',
   since: 9_000,
   origin: { tmuxPane: '%43' }
 }
-const started = { pane: '%43', cwd: '/work/robotjobshq', since: 9_000 }
+const started = { pane: '%43', cwd: '/work/jobboard', since: 9_000 }
 
 describe('startedSession', () => {
   it('waits for the new session when only an ended one holds the same pane id', () => {

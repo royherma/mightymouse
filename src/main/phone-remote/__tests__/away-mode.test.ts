@@ -514,7 +514,7 @@ describe('away-mode', () => {
       expect(m.getAwayModeState()).toBe('off')
     })
 
-    // The 2026-08-09 repro: the phone dropped, Roy kept typing, and the window
+    // The 2026-08-09 repro: the phone dropped, the user kept typing, and the window
     // covered his screen 600s later to the second. Postponing armed the COVER
     // timer only, so the grace timer ran on with nobody consulting the watch.
     it('a human at the Mac stands the window down, phone still gone', async () => {

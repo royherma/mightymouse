@@ -246,7 +246,7 @@ export function setIconServer(server: HttpServer | null): void {
 
 // The device WATCHING (glasses). Same reason it sits outside activeSocket: it
 // is not the recipient of the 64 sendToPhone() call sites, so none of them has
-// to learn it exists. Singular -- one person, two devices (PRD §5a).
+// to learn it exists. Singular -- one person, two devices.
 let viewerSocket: WebSocket | null = null
 
 export function getViewerSocket(): WebSocket | null {
@@ -531,7 +531,7 @@ export function choosePushTarget<
   )
 }
 
-/** For the agent-relay MCP send path (PRD 2026-08-12-1786501335 §6c): who to
+/** For the agent-relay MCP send path: who to
  *  push to and their token, or a stated reason there's nobody. */
 export function pushableDevice():
   | { deviceId: string; label: string; pushToken: string; credential: string }
@@ -705,7 +705,7 @@ export function sendToPhone(event: PhoneRemoteEvent): void {
     activeSocket.send(payload)
   }
   // The watching device gets everything the controller does except the mirror
-  // negotiation above -- prefs, host status, lock state (PRD §5c).
+  // negotiation above -- prefs, host status, lock state.
   if (viewerSocket && viewerSocket.readyState === WebSocket.OPEN) {
     viewerSocket.send(payload)
   }
@@ -726,7 +726,7 @@ const PIP_BACKPRESSURE_BYTES = 256 * 1024
  *  Never fanned out to observers: they read text only. */
 export function sendBinaryToPhone(kind: PipBinaryKind, payload: Buffer): void {
   // Follows the mirror peer, not activeSocket: when the glasses are the screen,
-  // the frames belong to them (PRD §5c). Falls back to the controller for the
+  // the frames belong to them. Falls back to the controller for the
   // ordinary one-device case.
   const target = mirrorPeerSocket ?? activeSocket
   if (!target || target.readyState !== WebSocket.OPEN) return

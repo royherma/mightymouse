@@ -4,7 +4,6 @@ import UIKit
 import VideoToolbox
 
 // Native Picture-in-Picture for the screen mirror
-// (prds/active/2026-08-09-*-native-pip.md).
 //
 // The web <video> can never get automatic PiP: only a native AVPlayerLayer or
 // AVSampleBufferDisplayLayer may set canStartPictureInPictureAutomaticallyFrom-
@@ -106,7 +105,7 @@ final class PipMirror: NSObject {
         )
         let controller = AVPictureInPictureController(contentSource: source)
         // Off until `setAutoStart(true)` -- a live layer with this left on is
-        // the orphaned black LIVE window after the mirror stops (PRD §7c).
+        // the orphaned black LIVE window after the mirror stops.
         controller.canStartPictureInPictureAutomaticallyFromInline = false
         // Hides the skip-back/forward buttons. They are drawn for any sample-
         // buffer source and do nothing on a live mirror -- `skipByInterval` has
@@ -140,10 +139,10 @@ final class PipMirror: NSObject {
         pipController?.stopPictureInPicture()
     }
 
-    /// Auto-PiP is legal only while a stream is flowing (PRD §7c), so arming it
+    /// Auto-PiP is legal only while a stream is flowing, so arming it
     /// also marks the stream live. Armed for the stream's whole life: iOS reads
     /// the flag before the web view sees the hide edge, so arming on
-    /// backgrounding is always too late (2026-08-21). Only `streamEnded` clears it.
+    /// backgrounding is always too late. Only `streamEnded` clears it.
     func setAutoStart(_ on: Bool) {
         if on { streamLive = true }
         pipController?.canStartPictureInPictureAutomaticallyFromInline = on

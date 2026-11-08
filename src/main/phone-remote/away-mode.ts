@@ -1,7 +1,7 @@
 /**
  * Away Mode — the ONE owner of "the Mac is deliberately running unlocked for a
  * phone". Composes idle-lock-suppressor, privacy-curtain and local-input-watch; never wire
- * those from a call site. Four rules, each paid for (see docs/gotchas.md):
+ * those from a call site. Four rules, each paid for:
  *
  * 1. THE LOCK IS NEVER SUSPENDED WITHOUT A WORKING WAY TO RESTORE IT — hence the
  *    ordering: watch armed first, and on the way out lock back before uncover.
@@ -498,7 +498,7 @@ export async function handback(
 
 /**
  * ON EXPIRY: COVER, NEVER LOCK. A relocked Mac gives the returning phone
- * nothing, permanently. Accepted cost, Roy's call: a cafe Mac stays unlocked
+ * nothing, permanently. Accepted cost, the user's call: a cafe Mac stays unlocked
  * (screen black) indefinitely — a human touching it relocks instantly.
  */
 export function armCurtainOnPhoneGone(): void {

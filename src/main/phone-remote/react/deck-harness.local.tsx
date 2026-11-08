@@ -1,5 +1,5 @@
 /**
- * Dev-only harness for the swipe deck (PRD 2026-08-16-swipe-deck-on-mac, step 1).
+ * Dev-only harness for the swipe deck.
  *
  * Why this exists: the deck is the one relay surface with no way to look at it
  * except a paired phone and a live idle agent. That loop is too slow to iterate

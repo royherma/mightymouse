@@ -125,7 +125,7 @@ export function exitFtueMock(): void {
 }
 
 /**
- * §7.3: dev-only escape hatch for the tour's press-to-confirm steps, so a
+ * dev-only escape hatch for the tour's press-to-confirm steps, so a
  * replay doesn't require physically pressing all three chords every time.
  * Fakes a 'hit' straight to the tour window — same payload shape a real probe
  * hit sends, so useHotkeyConfirm can't tell the difference. IS_DEV-gated like

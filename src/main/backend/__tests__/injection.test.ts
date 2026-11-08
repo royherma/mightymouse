@@ -20,7 +20,7 @@ import {
 //                 SYSTEM prompt, where models weight instructions most heavily.
 //
 // Each test drives a canary through a real assembly path and asserts where it
-// landed. See prds/active/2026-07-23-1784792061-prompt-injection-hardening.md.
+// landed.
 
 // Module mocks. Top-level on purpose: vi.mock is hoisted regardless, and nesting
 // it inside a describe misrepresents the real execution order (and is slated to

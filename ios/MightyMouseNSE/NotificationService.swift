@@ -4,7 +4,7 @@ import UIKit
 import UserNotifications
 
 /// Runs OUTSIDE the app, in its own process, on delivery of a `mutable-content`
-/// push (agent-relay PRD §5). The push carries only a `requestId` -- this
+/// push. The push carries only a `requestId` -- this
 /// fetches the real question/options/image from the Mac over the tunnel and
 /// rewrites the notification before iOS shows it. Three problems solved by
 /// this one hop: the 4KB APNs payload cap, images for `show`, and privacy
@@ -454,8 +454,8 @@ final class NotificationService: UNNotificationServiceExtension {
     /// A collapsed banner shows NO actions at all -- they appear on long-press
     /// or swipe -- so an ask with four one-tap answers and one with none look
     /// identical on the glass. Without this the buttons are only found by
-    /// someone who already suspects they exist (Roy, on device: "I don't always
-    /// know if there's more options"). The count, not a bare "choose an option",
+    /// someone who already suspects they exist.
+    /// The count, not a bare "choose an option",
     /// because knowing there are 4 is what makes the long-press worth doing.
     /// The server appends its own `[Dark ro…/Light r…/Decaf]` hint to the body it
     /// pushes, so this rebuild starts from the FETCHED question -- which has no

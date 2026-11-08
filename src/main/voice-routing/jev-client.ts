@@ -3,7 +3,7 @@
 // Jev is a decision model: it ranks, it never writes. We hand it the transcript,
 // the list of apps that are open and the list of skills/agents that could handle
 // it, and it tells us which should receive the text. The transcript we paste is always the verbatim Whisper output — see
-// the PRD's "What Jev decides, and what it does not".
+// the design's "What Jev decides, and what it does not".
 //
 // Wire format verified against docs.typesafe.ai on 2026-09-18:
 //   - `state` may be a string, object or array; we send an object.

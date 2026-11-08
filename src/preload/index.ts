@@ -1444,7 +1444,7 @@ const api = {
       ipcRenderer.invoke(CHANNELS.setupSwitchBackend),
     open: (): Promise<void> => ipcRenderer.invoke(CHANNELS.setupOpen),
     // Live progress while a fix runs. Main sends only plain-English lines here —
-    // raw tool output never crosses this boundary (PRD §4.0).
+    // raw tool output never crosses this boundary.
     onFixProgress: (callback: (payload: SetupFixProgress) => void) => {
       const handler = (_: unknown, payload: SetupFixProgress): void => callback(payload)
       ipcRenderer.on(CHANNELS.setupFixProgress, handler)

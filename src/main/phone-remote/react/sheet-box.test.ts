@@ -6,7 +6,7 @@ import { SHEET_ANCHOR_GAP, sheetBoxIn } from './AppContextBar'
  * exactly the occluded region, which is the whole hazard this file guards: the
  * sheet is portalled to document.body, so `position: fixed` resolves against
  * the LAYOUT height, while anything measuring "what can I see" wants the VISUAL
- * one. Numbers are from Roy's device trace (occluded=335, top=517).
+ * one. Numbers are from the user's device trace (occluded=335, top=517).
  */
 const IPHONE = { vw: 393, layoutH: 853, visualH: 518 }
 /** y of the keyboard's top edge on that device -- where the bar sits. */

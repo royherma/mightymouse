@@ -62,7 +62,7 @@ export function useNativeIntents({
       // The square is a STOP, not a pause. Relaying `playing:false` on its own
       // stopped the Mac's encoder but left the window open on a dead stream --
       // black, badged LIVE, still holding the audio session with nothing
-      // playing (PRD 2026-08-17-*-ios-2-5-4 §7c). `stopMirror` clears
+      // playing. `stopMirror` clears
       // `mirrorActive`, whose effect cleanup is the only sender of `pipEnded`.
       if (event.type === 'pipSetPlaying') {
         if (event.playing) send({ type: 'pipStreamSetPlaying', playing: true })

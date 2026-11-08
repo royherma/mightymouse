@@ -217,7 +217,7 @@ const second: FactoryProject = {
   ...project,
   id: 'jobs-project',
   mightyId: 'rj',
-  name: 'robotjobshq'
+  name: 'jobboard'
 }
 const onLine = (task: FactoryTask): boolean => task.stage !== 'draft'
 const waiting = (task: FactoryTask): boolean => task.condition !== 'clear' || task.stage === 'ready'
@@ -422,12 +422,12 @@ createRoot(document.getElementById('root')!).render(
               },
               {
                 id: 'rj',
-                name: 'robotjobshq',
+                name: 'jobboard',
                 created: '',
                 updated: '',
                 agentProjectId: second.id
               },
-              { id: 'os', name: 'OpenString', created: '', updated: '', repoFolder: '/os' }
+              { id: 'os', name: 'StringLab', created: '', updated: '', repoFolder: '/os' }
             ] as never)
       }
       focusTaskId={query.get('task')}

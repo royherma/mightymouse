@@ -134,7 +134,7 @@ describe('binary-resolver — setup matrix', () => {
   })
 
   it('two binaries present (~/.local + homebrew) → ~/.local wins (the newer, logged-in one)', () => {
-    // This is Roy's actual machine: ~/.local/bin/claude @2.1.207 logged-in vs an
+    // This is the user's actual machine: ~/.local/bin/claude @2.1.207 logged-in vs an
     // older /opt/homebrew/bin/claude @2.0.30 logged-out. Priority must pick ~/.local.
     existsSync.mockImplementation((p) => p === LOCAL || p === HOMEBREW)
     const r = resolveBinaryVerbose('claude')

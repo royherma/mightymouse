@@ -112,9 +112,9 @@ function slugVariants(name: string): string[] {
 export function guessRepoFolder(projectName: string): string | null {
   const home = homedir()
   const roots = [
-    join(home, 'Desktop/Development/techguyver-side-projects'),
+    join(home, 'Desktop/Development/side-projects'),
     join(home, 'Desktop/Development'),
-    join(home, 'Development/techguyver-side-projects'),
+    join(home, 'Development/side-projects'),
     join(home, 'Development')
   ]
   for (const v of slugVariants(projectName)) {
@@ -137,11 +137,11 @@ export function resolveProjectRepoFolder(project: {
 /** Repo-relative picks for known monorepos (checked before generic discovery). */
 const CURATED_REL: Record<string, string> = {
   showandtell: 'web/remote/icon-512.png',
-  petfomo: 'design/brand-pack/assets/favicon-192.png',
-  datalabellingco: 'apps/web/public/favicon.svg',
-  robotjobshq: 'public/favicon.svg',
-  creatorsoftoday: 'apps/web/dist/icon-192.png',
-  openstring: 'apps/mobile/assets/icon.png'
+  acme: 'design/brand-pack/assets/favicon-192.png',
+  labelco: 'apps/web/public/favicon.svg',
+  jobboard: 'public/favicon.svg',
+  creatorhub: 'apps/web/dist/icon-192.png',
+  stringlab: 'apps/mobile/assets/icon.png'
 }
 
 function projectSlug(name: string): string {

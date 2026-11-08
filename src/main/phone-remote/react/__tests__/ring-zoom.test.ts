@@ -102,7 +102,7 @@ describe('ringZoomBand', () => {
   // The user's ask, and the reason the solo case exists at all: the track is
   // there whether or not the switcher is on, AT THE SAME RADIUS either way.
   // A control that moves when an unrelated setting is toggled is one the thumb
-  // has to find again (Roy, on device).
+  // has to find again.
   it('sits at the same radius whether or not the app ring is painted', () => {
     const a = anchor()
     const withRing = ringZoomBand(a, ringBand(a))

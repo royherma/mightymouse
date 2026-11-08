@@ -1,7 +1,7 @@
 import { PHONE_AUDIO_TO, type PhoneAudioDestination } from '@shared/types'
 
 /** Identity of the mounted mic buttons, so a bind effect can key on the nodes
- *  themselves rather than on a proxy for them. See docs/gotchas.md. */
+ *  themselves rather than on a proxy for them. */
 
 /** `.proMicBtn` is TouchpadLayout's mic button. */
 export const THOUGHT_MIC_CLASS = 'aiThoughtMic'

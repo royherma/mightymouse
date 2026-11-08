@@ -117,7 +117,7 @@ const GLASS_CONTEXT_GAP = 8
 // The floating Paste button, parked off. It works -- built and verified
 // on-device 2026-08-17 -- but pastes the MAC's clipboard, and the thing a phone
 // in your hand makes you want is the other direction: something copied on the
-// PHONE, sent to the Mac. Roy's call after trying it. Kept as a flag rather
+// PHONE, sent to the Mac. The user's call after trying it. Kept as a flag rather
 // than commented-out JSX so it keeps typechecking against the props around it
 // and cannot rot while it is parked. Flip to true to bring it back.
 const FLOATING_PASTE_ENABLED = false

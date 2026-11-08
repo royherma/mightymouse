@@ -13,7 +13,7 @@ export function toRelayWire(r: RelayRequest, keepImagePath = false): RelayReques
   const withImage = keepImagePath && imagePath ? { ...withFlag, imagePath } : withFlag
   // A multi-question card has to know whether the Mac can READ the terminal it
   // came from -- that decides whether it may collect every answer or hands back
-  // after Q1 (PRD §5). The derived boolean crosses, never the pane id.
+  // after Q1. The derived boolean crosses, never the pane id.
   const paramsWire = r.params.questions?.length
     ? {
         ...withImage,

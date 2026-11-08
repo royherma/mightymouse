@@ -5,7 +5,6 @@
 // capture on Windows and ChromeOS. On macOS `audio: true` yields no track, so
 // the phone-remote mirror captures audio through SCK instead and injects it
 // into the existing peer connection. See
-// prds/active/2026-07-21-1784600649-phone-remote-computer-audio.md.
 //
 // Permission: rides the SAME Screen Recording grant the video mirror holds —
 // verified live, no new TCC prompt.

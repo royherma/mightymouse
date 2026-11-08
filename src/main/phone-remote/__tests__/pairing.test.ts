@@ -1,5 +1,5 @@
 /**
- * In-PWA enrollment (PWA-stranded PRD). A durable credential from a typed code
+ * In-PWA enrollment. A durable credential from a typed code
  * is the installed Home Screen app's only way in -- it can't receive the QR's
  * session token. What matters: a code is single-use, and credentials survive a
  * restart but not a revoke.

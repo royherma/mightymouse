@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// The bug this pins (2026-08-17): the panel stopped responding to its own close
+// The bug this pins: the panel stopped responding to its own close
 // button. cancel/panelHide/resize all reached main and all silently no-opped,
 // because every one of them starts with `if (!panelWindow) return` and the
 // module-level `panelWindow` had gone null while the real window was still on

@@ -270,7 +270,7 @@ async function main() {
     if (operation === 'name' || operation === 'rename') args.name = args.name || argv[1]
     if (operation === 'archive') args.archived = true
     if (operation === 'restore') args.archived = false
-    if (operation === 'remove' && !args.approval) throw new Error('Removing a project needs an approval id from bin/mm-relay approve.')
+    if (operation === 'remove' && !args.approval) throw new Error('Removing a project needs an approval id from a relay approve request.')
     console.log(JSON.stringify(await rpc(PROJECT_ALIASES[operation], args, client(who).token), null, 2))
     return
   }

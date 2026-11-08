@@ -14,7 +14,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-/** The four placements, in the order Roy proposed them. */
+/** The four placements, in the order the user proposed them. */
 export type ScreenVariant =
   | 'off'
   | 'inCard'

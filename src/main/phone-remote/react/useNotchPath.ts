@@ -8,8 +8,8 @@ import type { PhoneRemoteHandedness, PhoneRemoteKeysPosition } from '@shared/typ
 // rows + the icon row) via ResizeObserver and build a clip-path that cascades
 // in to hug each row's actual inner edge. Each level-to-level transition is
 // one tangent-continuous S-cubic (not fillet + line + fillet) so the whole
-// notch reads as a flowing wave -- the curve style Roy picked from rendered
-// mock variants (2026-07-19), not a stepped rectangle.
+// notch reads as a flowing wave -- the curve style the user picked from rendered
+// mock variants, not a stepped rectangle.
 const MARGIN = 10
 const CORNER_R = 28
 
@@ -261,7 +261,7 @@ export function useNotchPath(
       const unscale = (v: number): number => v / scale
       const w = unscale(pad.width)
       const h = unscale(pad.height)
-      // TEMPORARY (2026-07-27): reports what recompute MEASURES, to tell
+      // TEMPORARY: reports what recompute MEASURES, to tell
       // "never ran" apart from "ran and measured the wrong box". Remove with
       // the App.tsx rotation diagnostic.
       ;(window as unknown as { __notchTrace?: (s: string) => void }).__notchTrace?.(

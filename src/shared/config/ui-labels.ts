@@ -337,7 +337,7 @@ export const buildUiLabels = (appName: string) => ({
   // Why the button is missing rather than dead. The old proxy cannot say which
   // process the agent is, so closing it would leave the agent running.
   CODE_SESSION_WRAP_UNAVAILABLE: 'Restart this agent once to close it from here.',
-  // Shared work groups. Never "score"/"attention" -- these are what Roy does next.
+  // Shared work groups. Never "score"/"attention" -- these are what the user does next.
   // Each HINT is the box's hover, saying how a row got in there.
   CODE_ATTENTION_TALK: 'Stuck without you',
   CODE_ATTENTION_TALK_HINT: 'They asked a question or hit something they cannot decide alone.',
@@ -822,7 +822,7 @@ export const buildUiLabels = (appName: string) => ({
   // Subtitle under either escalation line. Says the exit is not one-way, which
   // is the actual worry behind "my hotkeys don't work" on a first run.
   TOUR_HINT_REVISIT: 'You can always revisit this tour from Settings.',
-  // Next button label while a hotkey step is armed and un-pressed (§4.3).
+  // Next button label while a hotkey step is armed and un-pressed.
   TOUR_NEXT_WAITING: 'Press the keys',
   // Same gate, one-key (fn) path — "keys" plural is wrong when there's one cap.
   TOUR_NEXT_WAITING_SOLO: 'Press the key',

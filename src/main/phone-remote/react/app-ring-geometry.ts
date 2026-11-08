@@ -109,7 +109,7 @@ export function ringZoomBand(anchor: RingAnchor, app: RingBand | null): RingBand
  *  takes when the ring is up, rather than sliding inward to fill the empty
  *  corner. The switcher is off for most users and can be toggled mid-session,
  *  so a radius that depended on it would move this control under the thumb
- *  (Roy, on device). `ringBand` is the one definition of that radius; this
+ *  `ringBand` is the one definition of that radius; this
  *  reads it rather than restating the arithmetic, which is how the two drifted
  *  apart the first time. */
 function soloZoomRadius(anchor: RingAnchor, band: number): number {

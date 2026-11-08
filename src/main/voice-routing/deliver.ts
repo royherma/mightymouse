@@ -7,7 +7,7 @@
 // clipboard: the text lands in the agent's prompt box and runs.
 //
 // The text delivered is ALWAYS the verbatim transcript. Nothing in this file
-// rewrites it — see the PRD's "What Jev decides, and what it does not".
+// rewrites it — see the design's "What Jev decides, and what it does not".
 import { pasteTextToApp, context, input } from '../platform'
 import { devLog } from '../../shared/env'
 import type { DesktopSink } from './sinks'

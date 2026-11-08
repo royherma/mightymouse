@@ -393,7 +393,7 @@ describe('local-input-watch', () => {
       emitKey('keydown', 36)
       expect(onHuman).toHaveBeenCalledTimes(1)
 
-      // One held key generated 861 keydowns in a single session (2026-08-07).
+      // One held key generated 861 keydowns in a single session.
       // Re-armed for the postpone reading, the repeats must count for nothing.
       for (let i = 0; i < 100; i++) {
         m.rearmLocalInputWatch(onHuman)

@@ -22,7 +22,7 @@
 
 // Landscape viewports: the portrait table rotated, since that is the only
 // orientation this proposal touches. safeSide is the notch, which becomes a
-// LEFT/RIGHT inset when rotated -- the trap the PRD calls out.
+// LEFT/RIGHT inset when rotated -- the trap the design calls out.
 const DEVICES = [
   { name: 'iPhone SE',         w: 667, h: 375, safeSide: 0,  safeBottom: 0 },
   { name: 'iPhone 13 mini',    w: 812, h: 375, safeSide: 50, safeBottom: 21 },

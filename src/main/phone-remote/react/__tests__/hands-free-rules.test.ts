@@ -82,7 +82,7 @@ describe('shouldStartUtterance', () => {
     expect(shouldStartUtterance({ disposed: false, hasStream: true, manualHold: false })).toBe(true)
   })
 
-  // PRD Q2b: press-and-hold coexists with armed. If the VAD also opened a
+  // design Q2b: press-and-hold coexists with armed. If the VAD also opened a
   // recorder here, the hold and the VAD would race to stop one stream.
   it('yields the recorder to a manual hold', () => {
     expect(shouldStartUtterance({ disposed: false, hasStream: true, manualHold: true })).toBe(false)

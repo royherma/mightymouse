@@ -462,7 +462,7 @@ export async function captureSelection(passive = false): Promise<string> {
 
   // A passive caller (the selection watcher, firing after EVERY mouseup) must
   // never reach the fallback: its synthesized ⌘C lands in whatever is open —
-  // it was closing the tray's NSMenu ~1s after every click (2026-08-16).
+  // it was closing the tray's NSMenu ~1s after every click.
   if (passive) return ''
 
   // FALLBACK: clipboard-swap race (original behaviour).

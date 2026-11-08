@@ -97,7 +97,7 @@ export interface PhonePairConfirmResult {
  *
  * That reuse is deliberate: the timer/latch/teardown/focus-gated-advance logic
  * is identical for both, and cloning it would be ~90 LOC of duplicated
- * correctness (see the PRD's reuse audit). Nothing here re-implements it.
+ * correctness. Nothing here re-implements it.
  *
  * The server is started, never stopped, on unmount. Stopping it would kill a
  * phone the user JUST paired — the whole point of the step. The toggle in

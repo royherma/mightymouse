@@ -7,14 +7,14 @@
  * deck both hosts mount. A per-surface copy of an SVG arc is exactly how two
  * lists end up disagreeing about what 43% looks like.
  *
- * A ring in its OWN slot, never around the avatar. Roy rejected the overlay on
- * sight (2026-08-22): agent faces are not all circles, so a ring around one
+ * A ring in its OWN slot, never around the avatar. The user rejected the overlay on
+ * sight: agent faces are not all circles, so a ring around one
  * reads as a rendering mistake rather than a measurement. The ring sits beside
  * the number instead, which also makes it legible at 13px -- the overlay had to
  * be avatar-sized and could never carry text.
  *
  * A ring and its number on every surface, with no linear-bar variant anywhere.
- * The detail sheet had one and Roy cut it (2026-08-22): a full-width bar spends
+ * The detail sheet had one and the user cut it: a full-width bar spends
  * a whole row of a phone sheet on the number the compact meter already carries.
  *
  * Hosts pass their own class names, same contract as `relay-interview-nav.tsx`:

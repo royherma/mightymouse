@@ -7,7 +7,7 @@
 // three-row fixtures), and previously only checkable by loading it on a real
 // iPhone -- which is also the one thing we must not do casually, since a second
 // client kicks the real phone off its socket. So a pad-over-buttons regression
-// could only be caught by Roy noticing it on his device.
+// could only be caught by the user noticing it on his device.
 //
 // This runs the REAL built bundle in an iframe per device, which means the real
 // notch algorithm against real rects, and then MEASURES whether the clipped pad
@@ -48,7 +48,7 @@ const SKINS = ['proII', 'default']
  *  simply absent here, and the profile sheet (the surface that has been wrong
  *  twice) could only be checked on a real phone.
  *
- *  Modelled on Roy's actual Chrome, because the two failure modes are both
+ *  Modelled on the user's actual Chrome, because the two failure modes are both
  *  about REAL data: four profiles open and twenty dormant ones, names that
  *  repeat, and a display name carrying its own parentheses. A tidy fixture of
  *  three short names would render beautifully and prove nothing.
@@ -63,12 +63,12 @@ const FAKE_CONTEXT = {
   activeGroupId: 'Default',
   groups: [
     { id: 'Default', name: 'Person 1', iconPngBase64: '', subtitle: 'dev@example.com', itemCount: 10, active: true },
-    { id: 'Profile 16', name: "TechGuyver (my socials)", iconPngBase64: '', subtitle: 'dev2@example.com', itemCount: 14, active: true },
+    { id: 'Profile 16', name: "Studio (my socials)", iconPngBase64: '', subtitle: 'dev2@example.com', itemCount: 14, active: true },
     { id: 'Profile 25', name: 'sidecar', iconPngBase64: '', subtitle: 'dev3@example.com', itemCount: 2, active: true },
     { id: 'Profile 15', name: 'acme.example', iconPngBase64: '', subtitle: 'alex@acme.example', itemCount: 1, active: true },
-    // The idle half of the split. "Roy" is the impostor that used to win the
+    // The idle half of the split. "Pat" is the impostor that used to win the
     // title match despite having no window open.
-    { id: 'Profile 9', name: 'Roy', iconPngBase64: '', subtitle: '', itemCount: 0, active: false },
+    { id: 'Profile 9', name: 'Pat', iconPngBase64: '', subtitle: '', itemCount: 0, active: false },
     { id: 'Profile 3', name: 'studio.example', iconPngBase64: '', subtitle: 'alex@studio.example', itemCount: 0, active: false },
     { id: 'Profile 7', name: 'studio.example', iconPngBase64: '', subtitle: 'support@studio.example', itemCount: 0, active: false }
   ],
@@ -203,7 +203,7 @@ const CORNERS = [
 
 const DECK_MODES = ['stacked', 'split']
 
-// The four split shapes from the landscape-split PRD. Order matches the measured
+// The four split shapes from the landscape-split design. Order matches the measured
 // ranking there -- fan first, because it is the only one that strands no control
 // outside the thumb arc.
 const SPLIT_CONCEPTS = ['fan', 'pods', 'rails', 'mirror', 'groups']
@@ -279,7 +279,7 @@ const MAC_ASPECT = 16 / 10
 // A hardcoded copy of PRO_LANDSCAPE_PAD_MIN_WIDTH sat here at 244 while
 // config.ts said 256, so the viewer kept rendering the PRE-FIX geometry and
 // reported "pad 242" on a build that had already been fixed -- three rounds of
-// "it's back!" chasing a stale duplicate (Roy, 2026-07-26). Never copy a
+// "it's back!" chasing a stale duplicate. Never copy a
 // constant the bundle already ships.
 const PRO_INSET = 14
 const PRO_GUTTER = 18

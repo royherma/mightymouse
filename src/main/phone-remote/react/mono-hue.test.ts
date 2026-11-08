@@ -10,7 +10,7 @@ const group = (id: string, iconPngBase64?: string): AppContextGroup => ({
   iconPngBase64
 })
 
-/** Roy's real cmux tabs — the data that broke the previous hash-only version,
+/** The user's real cmux tabs — the data that broke the previous hash-only version,
  *  where two of these landed 0.5° apart and rendered as one color. */
 const REAL_CMUX = [
   'tg-paperclip',

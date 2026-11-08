@@ -14,7 +14,7 @@ import { sanitizeBody } from '../verbs'
 
 describe('sanitizeBody', () => {
   it('passes clean prose through untouched', () => {
-    const clean = "Peer has the tables. Both of Roy's questions are still open."
+    const clean = "Peer has the tables. Both of Pat's questions are still open."
     expect(sanitizeBody(clean)).toBe(clean)
   })
 

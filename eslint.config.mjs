@@ -43,7 +43,7 @@ export default defineConfig(
                 'showSetupWindow'
               ],
               message:
-                'Open a surface via route() in src/main/routing.ts — a direct show*Window() skips the signed-out gate (prds/active/*routing-chokepoint.md)'
+                'Open a surface via route() in src/main/routing.ts — a direct show*Window() skips the signed-out gate'
             },
             {
               group: [
@@ -57,7 +57,7 @@ export default defineConfig(
                 '**/macos/**'
               ],
               message:
-                'Import from src/main/platform (the OS boundary), never an OS dir directly — prds/active/*windows-feature-parity.md §4'
+                'Import from src/main/platform (the OS boundary), never an OS dir directly'
             }
           ]
         }

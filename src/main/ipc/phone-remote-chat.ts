@@ -59,7 +59,7 @@ function chatPreview(text: string): string {
     : flat
 }
 
-/** Pushed to the phone on connect and on every store change (PRD §6b: the
+/** Pushed to the phone on connect and on every store change (the
  *  sheet never polls). The snapshot itself is shared with the Mac panel's Code
  *  sheet -- see agent-relay/wire.ts for why both surfaces read one definition. */
 export function sendRelayPending(): void {

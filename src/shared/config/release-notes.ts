@@ -1130,7 +1130,6 @@ export const RELEASE_NOTES = [
   // Broadcast-only entry, not a shipped version. The in-app "What's new" screen
   // reads the per-version entries below; this one exists so a win-back email can
   // span 0.21-0.24 without those entries claiming features they didn't ship.
-  // Mail it with: bin/mm-release-email --version 0.24.0-broadcast
   {
     version: '0.24.0-broadcast',
     date: '2026-08-03',

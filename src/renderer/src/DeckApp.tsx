@@ -7,7 +7,7 @@
  * names instead of camelCase, a keyboard instead of a thumb, and no haptics.
  *
  * The arming store is per-window rather than persisted. On the phone it is
- * localStorage because which action Roy tends to pick is a property of the
+ * localStorage because which action the user tends to pick is a property of the
  * person holding it; here the window is opened to clear a queue and closed
  * again, so a session-lived memory is the whole useful lifetime.
  */

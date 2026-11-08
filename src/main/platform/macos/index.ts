@@ -200,7 +200,7 @@ export const macos: PlatformImpl = {
   chrome,
   // Existing behaviour: every mac-only capability is on except browser-URL
   // context, which today is Chrome/Cmux/Cursor-specific (app-context/*.ts),
-  // not a general capability — see PRD §8 2.2.
+  // not a general capability — see design 2.2.
   capabilities: {
     phoneMic: true,
     virtualDisplay: true,

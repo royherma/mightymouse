@@ -13,7 +13,6 @@ import { PipEncoder } from './pip-encoder'
 import { PipAudioEncoder } from './pip-audio-encoder'
 
 // Screen mirror hidden capture window (?window=webrtc-capture) — see
-// prds/active/2026-07-18-1784360957-phone-remote-screen-mirror.md and
 // src/main/capture/screen-stream.ts (the main-side half of this relay). This
 // window is never shown (BrowserWindow show:false) — its only job is running
 // getDisplayMedia + RTCPeerConnection, APIs the main process cannot call
@@ -41,13 +40,13 @@ function logSetParams(site: string, p: RTCRtpSendParameters): void {
 export default function WebrtcCaptureApp(): null {
   const pcRef = useRef<RTCPeerConnection | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  // Share-computer-audio graph (computer-audio PRD). Kept in refs and rebuilt
+  // Share-computer-audio graph. Kept in refs and rebuilt
   // per session: PCM arrives from a native SCK subprocess via IPC, gets pushed
   // into the worklet, and comes back out as a real MediaStreamTrack.
   const audioCtxRef = useRef<AudioContext | null>(null)
   const pcmNodeRef = useRef<AudioWorkletNode | null>(null)
   const audioDestRef = useRef<MediaStreamAudioDestinationNode | null>(null)
-  // Inbound phone-mic graph (phone-mic-as-mac-input PRD). The mirror image of
+  // Inbound phone-mic graph. The mirror image of
   // the three refs above: the phone's mic track feeds a recorder worklet whose
   // batches go up to main, instead of PCM from main feeding a player worklet.
   const micCtxRef = useRef<AudioContext | null>(null)
@@ -390,7 +389,7 @@ export default function WebrtcCaptureApp(): null {
       quality: MirrorQuality,
       iceServers: unknown[],
       shareAudio: boolean,
-      // Audio-only mirror mode (Siri -> ChatGPT voice PRD): skip screen capture
+      // Audio-only mirror mode (Siri -> ChatGPT voice design): skip screen capture
       // entirely -- no getDisplayMedia call (so no screen-recording permission
       // prompt) and no video track -- while still answering the phone's offer
       // so its mic transceiver negotiates normally.
@@ -1022,8 +1021,8 @@ export default function WebrtcCaptureApp(): null {
     // Trade resolution for SPEED while the user is actually driving.
     //
     // The metric is latency to the first updated frame after motion starts;
-    // quality during motion is explicitly not wanted (Roy: update immediately at
-    // low quality, sharpen after settle). At the measured ~180k estimate a
+    // quality during motion is explicitly not wanted.
+    // At the measured ~180k estimate a
     // 1200-wide keyframe takes seconds to push, which is the entire complaint --
     // so motion drops the encoder far enough that the first frame is a few KB
     // and transits in a fraction of a second.
@@ -1249,7 +1248,7 @@ export default function WebrtcCaptureApp(): null {
         }
       }
       // Motion flips degradationPreference ONLY -- a scaleResolutionDownBy write
-      // blanked the encoder ~1s per edge, measured (docs/gotchas.md, 2026-08-18).
+      // blanked the encoder ~1s per edge, measured.
       if (motionOnRef.current === moving) return
       const sender = pcRef.current?.getSenders().find((s) => s.track?.kind === 'video')
       if (!sender) return
@@ -1270,7 +1269,7 @@ export default function WebrtcCaptureApp(): null {
       sender
         .setParameters(p)
         .then(() => {
-          // Verify instrument for the degradation-only write (PRD
+          // Verify instrument for the degradation-only write (design
           // phone-connect-degrades-glasses-mirror): kf must NOT bump on a motion
           // edge and encoded must keep advancing across all three samples.
           const seq = setParamsSeq

@@ -209,7 +209,7 @@ export const SCENARIOS: DeckScenario[] = [
     sessions: [],
     requests: []
   },
-  /* Real names off Roy's phone, not invented ones: every other fixture here is
+  /* Real names off the user's phone, not invented ones: every other fixture here is
      ~12 chars (`mm-dev-735`), which fits with room to spare and is why the
      session card's title overflowed its border on device while this harness
      stayed green. The first has no state chip and still overflowed, so a

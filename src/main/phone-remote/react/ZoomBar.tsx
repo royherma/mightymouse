@@ -91,7 +91,7 @@ export default function ZoomBar(props: {
     holdFiredRef.current = false
 
     // Only a press that lands ON the current value arms the hold -- that's the
-    // gesture Roy described ("hold on the current position"), and it keeps a
+    // gesture the user described ("hold on the current position"), and it keeps a
     // deliberate scrub elsewhere on the track from ever locking.
     const rect = trackRef.current?.getBoundingClientRect()
     const onKnob = !!rect && isOnZoomKnob(touch.clientX, pct, rect.left, rect.width)

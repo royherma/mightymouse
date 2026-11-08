@@ -1,5 +1,5 @@
 /**
- * Battery + hostname pushed to the phone so the widget (PRD step 4) has
+ * Battery + hostname pushed to the phone so the widget has
  * something to show without the Mac being reachable. `powerMonitor` has no
  * percentage anywhere in its surface -- see battery-status.ts for why that
  * read goes through `pmset` instead. `on-ac`/`on-battery` still fire the

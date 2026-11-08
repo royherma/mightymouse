@@ -8,9 +8,9 @@ import type { PageOwner } from './page-owner'
 //
 // Records the transcript and the full option list Jev ranked, each with the
 // description string that was actually sent as Choice criteria — that string IS
-// the basis of the ranking, so a bad pick is otherwise undiagnosable (Roy hit a
+// the basis of the ranking, so a bad pick is otherwise undiagnosable (the user hit a
 // case that recommended "Robot Jobs HQ" for a note about "Kuna" and there was no
-// way to see why). Roy asked for this explicitly 2026-09-18, reversing the
+// way to see why). The user asked for this explicitly 2026-09-18, reversing the
 // earlier no-transcript design. Capped rather than unbounded: TRANSCRIPT_CAP
 // chars of transcript and MAX_OPTIONS options logged per row, since a runaway
 // past either is itself a bug worth seeing rather than data worth keeping whole.

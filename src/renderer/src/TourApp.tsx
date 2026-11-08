@@ -35,7 +35,7 @@ export default function TourApp(): JSX.Element {
   const isFirst = idx === 0
   const isLast = idx === total - 1
 
-  // §7.1: track how many hotkey steps timed out with no press ever landing —
+  // track how many hotkey steps timed out with no press ever landing —
   // this is the exact population most likely to have a broken Accessibility
   // grant. From the SECOND timeout on, the unlocked line under the caps says
   // "your shortcuts aren't responding" outright instead of the soft "no luck?"
@@ -176,7 +176,7 @@ export default function TourApp(): JSX.Element {
           soloEnabled={fnListen}
         />
 
-        {/* §7.1: quiet failure signal on the last step only, when every hotkey
+        {/* quiet failure signal on the last step only, when every hotkey
             step timed out with no press ever landing. */}
         {isLast && allTimedOut && (
           <div className="flex items-center justify-center gap-3 text-sm text-muted mb-2">

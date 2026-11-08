@@ -627,7 +627,7 @@ describe('mlx adapter runHttp (OpenAI SSE)', () => {
     vi.restoreAllMocks()
   })
 
-  // Mirrors a REAL rapid-mlx 0.10.10 stream (prds/active/rapid-mlx-samples/chat-stream.sse):
+  // Mirrors a REAL rapid-mlx 0.10.10 stream:
   // a role-only opener, a `: keepalive` SSE comment, content deltas, a finish chunk,
   // then `data: [DONE]`. The keepalive + [DONE] lines are exactly what a naive
   // NDJSON parser chokes on — that's why they're in the fixture.
@@ -738,7 +738,7 @@ describe('mlx adapter runHttp (OpenAI SSE)', () => {
 
 describe('mlx adapter parsePhase (OpenAI SSE chunks — real shapes)', () => {
   // These payloads are the JSON *inside* a `data:` line, exactly as captured live
-  // (prds/active/rapid-mlx-samples/chat-stream.sse). runHttp strips the `data: `
+  // runHttp strips the `data: `
   // prefix before calling parsePhase, so parsePhase receives the bare JSON.
   it('a content delta → Writing', () => {
     const chunk = JSON.stringify({

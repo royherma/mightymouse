@@ -51,7 +51,7 @@
   /* Caps stay warm cream against the cool deck -- that temperature split is
      most of what makes the reference load as two materials.
 
-     Walls pushed markedly DARKER and WARMER (2026-07-22). On the reference
+     Walls pushed markedly DARKER and WARMER. On the reference
      the front wall of each cap is a big brown slab in shadow, nothing like a
      slightly-grey version of the top face -- and a low-contrast wall is what
      kept reading as "rounded rectangle with a border" rather than a solid
@@ -258,7 +258,7 @@
   border-radius: var(--pro-r-key);
 }
 
-/* Real-keycap proportions (2026-07-22, Roy): the pills were reading as squat
+/* Real-keycap proportions: the pills were reading as squat
    app buttons. Wider text caps + a touch taller, and the icon pill keeps
    square at the same height. Widths stay inside --pro-col: worst row is the
    icon row at mic 76 + 12 margin + 3x44 caps + 2px gaps = 222 < 260. */
@@ -293,7 +293,7 @@
    one 2px-thick dark line that reads as a drawn border, while 1px keeps a
    hairline of deck visible between caps, which is what the reference shows.
 
-   The MIC is deliberately exempt (see the margin below): Roy's call -- it
+   The MIC is deliberately exempt (see the margin below): the user's call -- it
    stays round, bigger, and visibly detached from the block, the way the
    reference's rubber button sits apart from the keycaps. */
 .proRoot[data-skin='proII'] .proKeyGrid,
@@ -519,7 +519,7 @@
 }
 
 /* Settings -- the ESPRESSO cap. Was a smoked translucent tint; re-read of the
-   reference crop (2026-07-22, Roy's call) says opaque: a dark roasted-brown
+   reference crop says opaque: a dark roasted-brown
    cap with a coarse, sparkly grain across the top face, like bead-blasted
    dark resin. Tokens go opaque so the shared sculpt (dish, keylight, chamfer,
    wall) reshades it exactly like its neighbours. */
@@ -562,7 +562,7 @@
 }
 
 /* ── Square caps ───────────────────────────────────────────────────────────
-   Roy's call: the icon buttons become square keycaps like the reference, and
+   the user's call: the icon buttons become square keycaps like the reference, and
    only the mic stays a circle. 50% -> the same radius as the key pills, so
    round and square controls read as one machined set. */
 .proRoot[data-skin='proII'] .proIconBtn {

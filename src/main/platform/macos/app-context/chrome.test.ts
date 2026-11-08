@@ -7,25 +7,25 @@ import { pairsWindow, resolveProfileFromTitle } from './chrome'
  * This mapping has shipped wrong twice, both times looking confident:
  *  1. Matched `info_cache.name` against a title that actually carries
  *     `gaia_given_name`, across ALL 24 profiles including dormant ones. A
- *     signed-out profile named "Roy" uniquely matched a window owned by a
- *     signed-in profile whose given name is "Roy", so the bar drew a monogram
+ *     signed-out profile named "Pat" uniquely matched a window owned by a
+ *     signed-in profile whose given name is "Pat", so the bar drew a monogram
  *     while Chrome's own toolbar showed the account photo.
  *  2. Split the qualified form with a regex, which mis-parsed a display name
  *     that itself contains parentheses and dropped that window's 14 tabs.
  *
- * The fixture is Roy's real machine, reduced to the profiles that matter.
+ * The fixture is Pat's real machine, reduced to the profiles that matter.
  */
 const CACHE = {
-  Default: { name: 'Person 1', gaia_given_name: 'Roy', user_name: 'dev@example.com' },
-  'Profile 15': { name: 'acme.example', gaia_given_name: 'Roy', user_name: 'alex@acme.example' },
+  Default: { name: 'Person 1', gaia_given_name: 'Pat', user_name: 'dev@example.com' },
+  'Profile 15': { name: 'acme.example', gaia_given_name: 'Pat', user_name: 'alex@acme.example' },
   'Profile 16': {
-    name: "TechGuyver (my socials)",
+    name: "Studio (my socials)",
     gaia_given_name: 'Tech',
     user_name: 'dev2@example.com'
   },
-  'Profile 25': { name: 'sidecar', gaia_given_name: 'roy', user_name: 'dev3@example.com' },
+  'Profile 25': { name: 'sidecar', gaia_given_name: 'pat', user_name: 'dev3@example.com' },
   // Signed out, no window open. The impostor from failure #1.
-  'Profile 9': { name: 'Roy' }
+  'Profile 9': { name: 'Pat' }
 }
 /** The four with a window open — what `last_active_profiles` reports. */
 const LIVE = ['Default', 'Profile 16', 'Profile 25', 'Profile 15']
@@ -35,31 +35,31 @@ const resolve = (title: string, candidates = LIVE): string =>
 
 describe('resolveProfileFromTitle', () => {
   it('reads a bare given name as the default profile, not as ambiguous', () => {
-    // Both Default and Profile 15 have the given name "Roy". Chrome qualifies
+    // Both Default and Profile 15 have the given name "Pat". Chrome qualifies
     // Profile 15's windows and leaves Default's bare, so bare IS the answer.
-    expect(resolve('Home / X - Google Chrome - Roy')).toBe('Default')
+    expect(resolve('Home / X - Google Chrome - Pat')).toBe('Default')
   })
 
   it('prefers the parenthesised profile name over the given name', () => {
-    expect(resolve('New Tab - Google Chrome - Roy (acme.example)')).toBe('Profile 15')
+    expect(resolve('New Tab - Google Chrome - Pat (acme.example)')).toBe('Profile 15')
   })
 
   it('handles a display name that itself contains parentheses', () => {
     // Failure #2: a regex split on the outer parens left "my socials" and
     // matched nothing, silently losing this window's tabs.
-    expect(resolve("Generative Session | Runway AI - Google Chrome - Tech (TechGuyver (my socials))")).toBe(
+    expect(resolve("Generative Session | Runway AI - Google Chrome - Tech (Studio (my socials))")).toBe(
       'Profile 16'
     )
   })
 
   it('never picks a profile that has no window open', () => {
-    // Failure #1: "Profile 9" is named "Roy" and would match this title, but it
+    // Failure #1: "Profile 9" is named "Pat" and would match this title, but it
     // is not in the live set, so it must not be considered at all.
-    expect(resolve('Home / X - Google Chrome - Roy')).not.toBe('Profile 9')
+    expect(resolve('Home / X - Google Chrome - Pat')).not.toBe('Profile 9')
   })
 
   it('distinguishes given names that differ only by case', () => {
-    expect(resolve('Gmail - Google Chrome - roy (sidecar)')).toBe('Profile 25')
+    expect(resolve('Gmail - Google Chrome - pat (sidecar)')).toBe('Profile 25')
   })
 
   it('returns empty for a title with no profile suffix', () => {
@@ -74,7 +74,7 @@ describe('resolveProfileFromTitle', () => {
 
   it('falls back to the display name for a signed-out profile', () => {
     // No Google account means no given name, so Chrome titles with `name`.
-    expect(resolve('Notes - Google Chrome - Roy', ['Profile 9'])).toBe('Profile 9')
+    expect(resolve('Notes - Google Chrome - Pat', ['Profile 9'])).toBe('Profile 9')
   })
 })
 
@@ -94,7 +94,7 @@ describe('resolveProfileFromTitle', () => {
  */
 describe('chrome/System Events window pairing checksum', () => {
   it('accepts a correctly aligned pair', () => {
-    expect(pairsWindow('MightyMouse', "MightyMouse - Google Chrome - Tech (TechGuyver (my socials))")).toBe(true)
+    expect(pairsWindow('MightyMouse', "MightyMouse - Google Chrome - Tech (Studio (my socials))")).toBe(true)
   })
 
   it('rejects a pair shifted by an extra System Events window', () => {
@@ -106,12 +106,12 @@ describe('chrome/System Events window pairing checksum', () => {
   it('accepts a title that itself contains the separator', () => {
     // A tab title with " - " in it must not be mistaken for a drifted pair.
     const chrome = 'Search results - dev3@example.com - Gmail'
-    expect(pairsWindow(chrome, `${chrome} - Google Chrome - roy (sidecar)`)).toBe(true)
+    expect(pairsWindow(chrome, `${chrome} - Google Chrome - pat (sidecar)`)).toBe(true)
   })
 
   it('accepts when Chrome reports no title rather than dropping the window', () => {
     // An empty Chrome title carries no signal, so it cannot prove drift — and
     // discarding the window would lose its tabs for no reason.
-    expect(pairsWindow('', 'Untitled - Google Chrome - Roy')).toBe(true)
+    expect(pairsWindow('', 'Untitled - Google Chrome - Pat')).toBe(true)
   })
 })

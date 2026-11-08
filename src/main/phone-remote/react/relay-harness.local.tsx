@@ -1,5 +1,5 @@
 /**
- * Dev-only harness for the agent-relay notification surfaces (PRD §6, §6b, §6c).
+ * Dev-only harness for the agent-relay notification surfaces.
  *
  * Why this exists: a relay request renders in TWO places -- the iOS lock
  * screen and the Mac HUD row -- and the only way to see
@@ -22,7 +22,7 @@
  * That last point is the reason this column exists rather than being dropped:
  * `ask` is answerable from a locked phone via UNTextInputNotificationAction,
  * which is a real interaction with real states (collapsed banner -> expanded ->
- * text field -> sent), and it is the PRD's headline ship gate. Previewing it as
+ * text field -> sent), and it is the design's headline ship gate. Previewing it as
  * a dead placeholder would have been worse than not previewing it.
  *
  * Never imported by main.tsx. Reachable only via relay-harness.local.html.
@@ -560,7 +560,7 @@ function HudRow({
  *  left to right is how you catch a verb that says three different things.
  *
  *  All three columns write into ONE log, because "first answer wins regardless
- *  of which surface it came from" (PRD §6b) is the behaviour, and a per-column
+ *  of which surface it came from" is the behaviour, and a per-column
  *  log would show three independent toys instead of three doors to one request. */
 function ScenarioRow({
   scenario,

@@ -265,7 +265,7 @@ export function admitSocket(ws: WebSocket, req: IncomingMessage, port: Admission
           })
         : 'refuse'
     // A DIFFERENT device joins as a viewer whether or not the incumbent is
-    // idle. PRD §8.4 originally scoped this to 'refuse' only, to preserve
+    // idle. design originally scoped this to 'refuse' only, to preserve
     // idle-handover -- on-device that was wrong: glasses sit idle by nature
     // (you are looking, not touching), so the phone connecting 2 minutes
     // later hit 'admit' and evicted them, which is the exact behavior this
@@ -277,7 +277,7 @@ export function admitSocket(ws: WebSocket, req: IncomingMessage, port: Admission
     if (!wantsControl) {
       const seated = port.viewer()
       if (seated && seated !== ws && seated.readyState === WebSocket.OPEN) {
-        // Second viewer. One viewer is the cap (PRD §9), and refusing the
+        // Second viewer. One viewer is the cap, and refusing the
         // NEWCOMER is what keeps the incumbent pair undisturbed.
         recordJournal('rejected', {
           deviceId: claimed ? deviceIdFor(claimed) : null,
@@ -323,7 +323,7 @@ export function admitSocket(ws: WebSocket, req: IncomingMessage, port: Admission
       publishViewerState()
       // Deliberately NOT returning: the viewer falls through to the shared
       // message + ping wiring below, so its input is validated by the exact
-      // same path as the controller's (PRD v2 step 4) and a dead viewer is
+      // same path as the controller's and a dead viewer is
       // detected by the same keepalive. Returning here is what made viewer
       // input a no-op and left the socket with no liveness check at all.
     }

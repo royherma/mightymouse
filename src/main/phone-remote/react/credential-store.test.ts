@@ -89,7 +89,7 @@ describe('credentialStore inside the native shell', () => {
     expect(credentialStore.get('mm-remote-device-credential')).toBe('freshly-paired')
   })
 
-  // Roy scanned three times on 2026-08-17 because of this: a transient refusal
+  // The user scanned three times on 2026-08-17 because of this: a transient refusal
   // tombstoned the key, and with no retirement event the Keychain copy stayed
   // unreadable for the rest of the launch. A QR scan was the only way back.
   it('a reached Mac retires the tombstone and the Keychain reads again', () => {

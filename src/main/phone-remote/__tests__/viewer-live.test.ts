@@ -1,5 +1,5 @@
 /**
- * Two devices on one Mac, end to end (PRD 2026-08-10-1786351800).
+ * Two devices on one Mac, end to end.
  *
  * The property under test is ordering and routing inside `wss.on('connection')`
  * and `sendToPhone`, neither of which a unit test of the predicate can see:
@@ -8,7 +8,7 @@
  * as happily against the old code that closed the socket.
  *
  * Binds a high test-only port -- never 17771 -- so this cannot touch a real
- * phone session (see CLAUDE.local.md). Enforced by the CONFIG mock plus the
+ * phone session. Enforced by the CONFIG mock plus the
  * assertion in `beforeAll`, not by this comment.
  */
 
@@ -161,7 +161,7 @@ describe('two devices on one Mac, live server', () => {
 
   /** Makes the incumbent look IN USE. Without this `decideTakeover` returns
    *  'admit' past the 20s grace window and the newcomer evicts instead of
-   *  joining -- the viewer door is the refuse path only (PRD §8.4). */
+   *  joining -- the viewer door is the refuse path only. */
   async function markBusy(ws: WebSocket): Promise<void> {
     ws.send(JSON.stringify({ type: 'move', dx: 1, dy: 1 }))
     await new Promise((r) => setTimeout(r, 100))
@@ -226,7 +226,7 @@ describe('two devices on one Mac, live server', () => {
 
     // The controller claims the mirror. Its answer/ICE must reach nobody else:
     // fanning these out crosses two peers' SDP, which was the bug the naive
-    // fan-out would have shipped (PRD §5c).
+    // fan-out would have shipped.
     controller.send(JSON.stringify({ type: 'mirrorStart', sdp: 'v=0', quality: 'auto' }))
     await new Promise((r) => setTimeout(r, 400))
 
@@ -374,7 +374,7 @@ describe('two devices on one Mac, live server', () => {
   }, 30_000)
 
   it('lets a stranded viewer take control after the controller has gone', async () => {
-    // Roy's iPhone 16, 2026-09-10: "it actually works but it doesn't remove
+    // Pat's iPhone 16, 2026-09-10: "it actually works but it doesn't remove
     // the snack bar". The controller dropped (journal 16:40:09 "close 1006"),
     // leaving activeSocket null and this device still flagged viewer. Every
     // "Use this one instead" tap died on swapControl's old `!activeSocket`
@@ -416,7 +416,7 @@ describe('two devices on one Mac, live server', () => {
 
 describe('the role rides beside the state, never inside it', () => {
   it('leaves ConnState at 4 kinds and BlockedReason at 5', async () => {
-    // PRD §5f: a viewer is genuinely `connected`, so folding it into the union
+    // a viewer is genuinely `connected`, so folding it into the union
     // would fork every `kind === 'connected'` consumer for a connected device.
     // Counting the source is what stops the role leaking in later.
     const { readFileSync } = await import('fs')

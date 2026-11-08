@@ -22,9 +22,8 @@ import { isHideoutOpen, isHideoutPaused, recordHideoutTurn, runHideoutTurn, setH
 import { HIDEOUT_HOP, voiceHop, type HideoutHop } from '../../shared/hideout'
 
 /**
- * Live Voice Companion — Phase 1 of the PRD
- * (prds/active/2026-07-12-1783824131-live-voice-companion.md §5, §6
- * `TranscriptSource`). Consumer #1 of the segmented-listen core: a VAD-bounded
+ * Live Voice Companion — Phase 1 of the design
+ * Consumer #1 of the segmented-listen core: a VAD-bounded
  * segment becomes a transcript (`segmented-listen.ts`), then this module runs
  * it as a normal Mighty turn and speaks the answer.
  *

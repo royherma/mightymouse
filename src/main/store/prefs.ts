@@ -105,7 +105,7 @@ function readMightyWorkspacesBlob(): MightyWorkspacesBlob {
   }
 }
 
-// One-shot migration (2026-07-22): 'proII' shipped as a third COLOR SCHEME value
+// One-shot migration: 'proII' shipped as a third COLOR SCHEME value
 // but was always a skin of the pro pad; it moves onto the skin axis below.
 // If the scheme file still holds 'proII', rewrite both files so an already-paired
 // phone keeps its look instead of silently snapping back to plain pro/light.
@@ -149,7 +149,7 @@ const LEGACY_LAYOUT_SKINS: Readonly<Record<string, PhoneRemoteSkin>> = {
   cap: 'cap'
 }
 
-// One-shot migration (2026-07-23): 'proII' and 'cap' shipped as LAYOUT values
+// One-shot migration: 'proII' and 'cap' shipped as LAYOUT values
 // but were always skins of the pro layout — same component, same DOM, different
 // paint. They live on PhoneRemoteSkin now. Rewrite an old layout file to
 // layout='pro' + the matching skin so an already-paired phone keeps its look
@@ -190,7 +190,7 @@ function readRelayPushFile(): Record<string, unknown> {
 
 /** Merge-write, never a whole-file replace. The phone-side setters each rebuild
  *  the file from `{...filter, notifyLevel, turnEndPing}`, which would silently
- *  DROP the Mac's `mac` block every time Roy touched a phone switch. Reading
+ *  DROP the Mac's `mac` block every time the user touched a phone switch. Reading
  *  first and spreading over it keeps whichever half this writer does not own. */
 function writeRelayPushFile(fields: Record<string, unknown>): void {
   writeFileSync(
@@ -529,7 +529,7 @@ export const PREFS = {
     }
   },
 
-  // Agent relay MCP server (PRD 2026-08-12-1786501335). Default OFF -- a
+  // Agent relay MCP server. Default OFF -- a
   // dev-facing tool nobody should discover running by accident.
   getAgentRelayEnabled(): boolean {
     if (!existsSync(PATHS.AGENT_RELAY_PREF)) return false
@@ -586,7 +586,7 @@ export const PREFS = {
   // Whether an agent may pull a photo off the paired phone. Default OFF, and
   // read at REGISTRATION time rather than inside the verb: while this is off
   // the photo tools must be absent from the agent's tool list entirely, not
-  // present and erroring (PRD decision 4).
+  // present and erroring.
   getAgentRelayPhotosEnabled(): boolean {
     if (!existsSync(PATHS.AGENT_RELAY_PHOTOS_PREF)) return false
     try {
@@ -640,9 +640,9 @@ export const PREFS = {
     }
   },
 
-  // Which verbs may buzz the phone (PRD 2026-08-14-1786690000). Gates the PUSH
+  // Which verbs may buzz the phone. Gates the PUSH
   // only -- the card is minted into the store before the push is ever sent, so
-  // a muted verb still reaches every inbox. All four are muteable by Roy's
+  // a muted verb still reaches every inbox. All four are muteable by the user's
   // call; muting `ask`/`approve` can leave an agent blocked with no phone
   // signal, which is why they default on and the Settings copy says out loud
   // that the card still arrives.
@@ -734,10 +734,10 @@ export const PREFS = {
     }
   },
 
-  // The Mac's OWN alert answers (PRD 2026-08-22-1787388684), in the same file
+  // The Mac's OWN alert answers, in the same file
   // as the phone's. Absence means "whatever the phone says", which is exactly
   // what shipped before this block existed -- so an install that has never
-  // opened the new screen behaves identically until Roy touches a switch.
+  // opened the new screen behaves identically until the user touches a switch.
   //
   // `enabled` is the exception and stays false: it replaces the old
   // agent-relay-mac-notify.txt toggle, which also defaulted off.
@@ -747,7 +747,7 @@ export const PREFS = {
     if (!mac || typeof mac !== 'object') {
       // No Mac block yet: mirror the phone's verbs and floor, so switching the
       // master on gives the same alerts the phone already gets rather than a
-      // set of defaults Roy never chose.
+      // set of defaults the user never chose.
       return {
         ...DEFAULT_RELAY_MAC_ALERTS,
         enabled: this.getAgentRelayMacNotify(),

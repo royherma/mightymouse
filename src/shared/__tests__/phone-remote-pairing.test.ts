@@ -249,7 +249,7 @@ describe('derivePairing', () => {
 
 describe('formatCountdown', () => {
   it('shows a full 5:00 for a freshly minted code', () => {
-    // Roy asked to SEE 5:00 then 4:59. Flooring 300_000ms renders "5:00" too,
+    // The user asked to SEE 5:00 then 4:59. Flooring 300_000ms renders "5:00" too,
     // but flooring 299_600 gives 4:59 twice — ceil is what makes the first
     // second land on 5:00 and every later tick fall exactly once.
     expect(formatCountdown(300_000)).toBe('5:00')

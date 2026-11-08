@@ -21,7 +21,7 @@ import { Button } from '@shared/ui/Button'
  * full US-ANSI base set for exactly this split.
  *
  * MODIFIERS ARE HELD BY DEFAULT, LATCHED ON DOUBLE-TAP (all client-side).
- * The first cut latched every modifier as a sticky one-shot and Roy read an
+ * The first cut latched every modifier as a sticky one-shot and the user read an
  * armed ⌘ as "stuck on": "you should be able to multi-press like you would on
  * a regular keyboard and not keep items up unless it's caps lock." So a
  * single press HOLDS, like the physical board: hold ⌘/⌥/⌃/fn/⇧ with one
@@ -35,7 +35,7 @@ import { Button } from '@shared/ui/Button'
  * fill), and un-latches on a third tap of the same key.
  *
  * A latch STAYS ARMED across keypresses. It shipped as a one-shot first
- * (macOS Sticky Keys' behavior) and that was wrong here: Roy latched ⌃ to
+ * (macOS Sticky Keys' behavior) and that was wrong here: the user latched ⌃ to
  * walk tabs with ⌃1, ⌃2, ⌃3 and it disarmed on the first one -- the moment
  * you know more are coming is exactly when you latched. So only three things
  * clear it: tapping the key again, closing the keyboard, or never having
@@ -49,14 +49,14 @@ import { Button } from '@shared/ui/Button'
  *
  * RELEASE IS TRACKED AT THE WINDOW, BY POINTER ID -- not with onPointerUp on
  * the key itself. First cut trusted the button's own pointerup and iOS Safari
- * dropped it under multi-touch, leaving ⌘ held after the finger lifted (Roy:
- * "next time I press another key it auto has like the cmd key down"). A
+ * dropped it under multi-touch, leaving ⌘ held after the finger lifted.
+ * A
  * window-level pointerup/pointercancel ALWAYS fires for every lifted touch,
  * wherever it lands; each hold records its pointerId on the way down, so the
  * matching lift -- and only that lift, not the combo finger's -- releases it.
  */
 
-/** How long a tapped key stays lit. Roy's call after trying it on-device: 140ms
+/** How long a tapped key stays lit. The user's call after trying it on-device: 140ms
  *  read as "too fast" -- the flash was gone before the eye caught it. Long
  *  enough here that the confirmation is unmissable; the restart-on-retap in
  *  flash() is what keeps fast typing from strobing at this duration. */

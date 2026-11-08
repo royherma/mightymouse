@@ -146,7 +146,7 @@ describe('railSummonMove / railSummonQualifies', () => {
   })
 
   it('a diagonal drag starting in the strip but running far sideways is a stray, not a summon', () => {
-    // The false-positive case the PRD ship gate calls out: an ordinary cursor
+    // The false-positive case the design ship gate calls out: an ordinary cursor
     // drag that begins in the edge strip and runs diagonally.
     let trace = railSummonBegin({ x: 10, y: 100, t: 0 }, leftStrip)!
     for (let i = 1; i <= 20; i++) {

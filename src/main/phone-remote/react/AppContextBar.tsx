@@ -313,7 +313,7 @@ export default function AppContextBar(props: {
    * `onSheetOpenChange(false)`, clearing the host's browserSheetOpenRef at the
    * exact moment the sheet is opening. The hidden input's blur then reads as
    * "the user dismissed the keyboard" and tears the whole bar down, so the tap
-   * closed the keyboard instead of opening the dropdown (Roy, on-device).
+   * closed the keyboard instead of opening the dropdown.
    */
   const openSheet = (next: 'items' | 'groups' | 'panes' | null): void => {
     // Pairs with the `sheet open=` line the effect emits. `openSheet items`
@@ -590,7 +590,7 @@ export default function AppContextBar(props: {
         )}
       </div>
 
-      {/* The panes inside the focused terminal -- the level Roy actually
+      {/* The panes inside the focused terminal -- the level the user actually
           navigates, since he runs six agents as panes in ONE terminal. Without
           it the bar drilled to `Terminal 3` while the screen showed six named
           agents, and picking one from the phone was impossible.
@@ -664,8 +664,8 @@ export default function AppContextBar(props: {
           Zoom is the one tmux action that is not typing: it toggles which pane
           fills the window, so its whole point is to change what you are LOOKING
           at -- the same job as the two dropdowns beside it, and useful from the
-          deck with no keyboard up (Roy, who uses it to read a zoomed pane while
-          driving the trackpad). The adapter gate is what keeps it off Chrome and
+          deck with no keyboard up.
+          The adapter gate is what keeps it off Chrome and
           Cursor; a non-cmux app never renders it on any host. */}
       {context.adapterId === APP_ADAPTER.cmux && (
         <Button

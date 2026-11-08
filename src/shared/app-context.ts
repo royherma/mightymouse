@@ -14,7 +14,7 @@ export interface AppContextItem {
   iconPngBase64: string
 }
 
-/** One tmux pane inside a terminal — the level Roy actually navigates, since he
+/** One tmux pane inside a terminal — the level the user actually navigates, since he
  *  runs six agents as panes in a single cmux terminal. Only an adapter that can
  *  prove a terminal is a tmux one ever fills these. */
 export interface AppContextPane {

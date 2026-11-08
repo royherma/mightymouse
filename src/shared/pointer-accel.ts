@@ -17,12 +17,12 @@
  *  distinction is the whole point. The first version cut to a FRACTION (0.5),
  *  which meant raising the slider raised the precision end in lockstep: at 20x
  *  a careful 1.5px nudge still moved the cursor 15px, so accuracy was
- *  unreachable at high settings by construction (Roy: "I'm on 20 and I don't
- *  feel like that exists", 2026-07-26). Pinning the slow end means precision
+ *  unreachable at high settings by construction.
+ *  Pinning the slow end means precision
  *  feels identical at 5x and at 20x, and the slider only decides how much reach
  *  a deliberate swipe gets — which is what someone raising it actually wants.
  *
- *  The VALUE is calibrated to the old fraction at the setting Roy actually
+ *  The VALUE is calibrated to the old fraction at the setting the user actually
  *  runs (~10.6 × 0.5 ≈ 5), not picked for theoretical tightness. 2.5 was
  *  tried first and read as "very slow and jumpy" on-device: at 10.6x it
  *  halved every sub-swipe movement, which both felt sluggish AND dropped the

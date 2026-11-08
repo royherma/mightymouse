@@ -7,7 +7,7 @@ import { Button } from '@shared/ui/Button'
  * dictation from the phone.
  *
  * Three states, one pill, one position: waiting (spinner + stage label +
- * elapsed), waiting-with-Cancel-showing (tap once to reveal, per Roy's ask),
+ * elapsed), waiting-with-Cancel-showing (tap once to reveal, per the user's ask),
  * and failed-but-retryable (Retry + dismiss). Keeping all three in the same
  * fixed band means a transcription that goes wrong never moves the thing the
  * user is looking at -- it just changes what that thing offers.

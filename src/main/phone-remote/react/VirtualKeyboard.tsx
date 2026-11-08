@@ -25,12 +25,12 @@ import { Button } from '@shared/ui/Button'
  * (virtual-keyboard-pref.ts) that MIRRORS THE HOST'S KEYBOARD: the Mac reports
  * hostKeyboard in layoutPrefs, App.tsx resolves it through
  * KEYBOARD_LAYOUT_FOR_HOST, and this component draws whatever layout it's
- * handed (full MacBook layout against a Mac -- Roy: "exact same keyboard.
+ * handed (full MacBook layout against a Mac -- the user: "exact same keyboard.
  * It's very critical").
  *
  * Rendered at App level, sibling to ReferralSheet/HistorySheet -- but unlike
  * them, deliberately WITHOUT a scrim: the touchpad stays live while the
- * keyboard is up (scroll, move, click between keystrokes -- Roy: "I imagine
+ * keyboard is up (scroll, move, click between keystrokes -- the user: "I imagine
  * I'd want to do both"). Dismissal is explicit instead: the header ✕ or the
  * Keyboard pill again (App.tsx toggles). NOT nested inside .settingsPanel's
  * transformed box (see SettingsBody.tsx's skin-store comment for why: a
@@ -186,7 +186,7 @@ export default function VirtualKeyboard(props: {
                 the native one never arrives, and the app sits with NO keyboard
                 and a half-applied switch. The next tap anywhere then resolved
                 the pending state and read as "tapping anything switches
-                keyboards" (Roy, on-device). Every other control that moves
+                keyboards". Every other control that moves
                 keyboard focus in this codebase already fires on pointerdown;
                 this button was the one that did not. */}
             <Button

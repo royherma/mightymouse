@@ -1,11 +1,11 @@
 /**
- * The one connection-state vocabulary (PRD 2026-08-02-1785667000). The Mac
+ * The one connection-state vocabulary. The Mac
  * server is the only authority on connection state; Swift and the WebView
  * both render what it last said. No client-side inference belongs here or
  * anywhere downstream of it.
  */
 
-/** Five reasons, five actions (PRD §2.2). Not a string the client composed --
+/** Five reasons, five actions. Not a string the client composed --
  *  always sent by the server, verbatim, over the wire or the bridge. */
 export type BlockedReason =
   | 'no-credential'
@@ -88,7 +88,7 @@ export function transition(state: ConnState, event: ConnEvent): ConnState {
   }
 }
 
-/** What each `blocked` reason means and the one action offered (PRD §2.2
+/** What each `blocked` reason means and the one action offered (design
  *  table, verbatim). UI copy is written elsewhere per docs/brand-voice.md --
  *  this map is the semantic contract other pieces test against, not the
  *  final on-screen strings. */

@@ -33,8 +33,8 @@ import {
 } from '../../shared/companion-size'
 import { Button } from './components/Button'
 
-// Live Voice Companion overlay (?window=companion) — Phase 2 of the PRD
-// (prds/active/2026-07-12-1783824131-live-voice-companion.md §5, §6). Real mic
+// Live Voice Companion overlay (?window=companion) — Phase 2 of the design
+// Real mic
 // input, real transcript, real LLM reply (existing ask pipeline via
 // companion-orchestrator.ts), real (or gracefully-silent) TTS. State machine:
 //   idle -[VAD speech-start]-> listening -[VAD speech-end]-> thinking
