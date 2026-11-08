@@ -164,15 +164,27 @@ npm run dev
 
 Apps you build yourself are not signed by Apple, so macOS asks you to confirm the first launch (right-click the app, then Open). The iPhone app lives in `ios/` (open it in Xcode) and the Android app in `android/` (open it in Android Studio).
 
-### What runs where
+### Run it yourself, or let us run it
 
-| | Where it runs | Cost |
+Everything works on your own setup. Pro is for when you'd rather we run the hard parts.
+
+| | Run it yourself, free | Let us run it |
 | --- | --- | --- |
-| The app and voice typing | Your computer | Free |
-| Coding agents and chat | Your computer, on your own Claude, Codex, Cursor, OpenCode, Gemini or OpenRouter account | Whatever your plan costs |
-| Phone remote on the same Wi-Fi | Your computer and phone, directly | Free, unlimited |
-| Sign-in | Our servers | Free account |
-| Reaching your computer away from home, push notifications, hosted AI credits, cloud runs | Our servers | [Pro](https://getmightymouse.com/pricing) |
+| The app, voice typing, phone remote on Wi-Fi | ✅ On your computer | |
+| Coding agents and chat | ✅ On your own Claude, Codex, Cursor, OpenCode, Gemini or OpenRouter account | Hosted AI credits with [Pro](https://getmightymouse.com/pricing) |
+| Your computer from anywhere | ✅ Point your own Cloudflare Tunnel or Tailscale at it | One switch, nothing to set up. Free minutes, unlimited with [Pro](https://getmightymouse.com/pricing) |
+| Push notifications on your phone's lock screen | | [Pro](https://getmightymouse.com/pricing) |
+| Agents that run in the cloud | | [Pro](https://getmightymouse.com/pricing) |
+
+Sign-in uses a free MightyMouse account.
+
+**Your own tunnel.** The phone remote listens on port `17771`. Point any tunnel at it, open the address on your phone and approve the phone on your computer the first time:
+
+```sh
+cloudflared tunnel --url https://localhost:17771 --no-tls-verify
+```
+
+A quick tunnel gets a new address each run. A [named tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) keeps one. With Tailscale, open `https://<your computer's Tailscale name>:17771` on the phone.
 
 ## For builders
 
