@@ -164,19 +164,19 @@ npm run dev
 
 Apps you build yourself are not signed by Apple, so macOS asks you to confirm the first launch (right-click the app, then Open). The iPhone app lives in `ios/` (open it in Xcode) and the Android app in `android/` (open it in Android Studio).
 
-### Run it yourself, or let us run it
+### Free and paid
 
-Everything works on your own setup. Pro is for when you'd rather we run the hard parts.
+Everything that runs on your computer is free. Paid plans cover what runs on ours.
 
-| | Run it yourself, free | Let us run it |
+| | Free | Paid plans |
 | --- | --- | --- |
-| The app, voice typing, phone remote on Wi-Fi | ✅ On your computer | Same app, nothing extra |
-| Coding agents and chat | ✅ On your own Claude, Codex, Cursor, OpenCode, Gemini or OpenRouter account | Hosted AI credits with [Pro](https://getmightymouse.com/pricing) |
-| Your computer from anywhere | ✅ Point your own Cloudflare Tunnel or Tailscale at it | One switch, nothing to set up. Free minutes, unlimited with [Pro](https://getmightymouse.com/pricing) |
-| Push notifications on your phone's lock screen | Needs our servers to send them through Apple | ✅ [Pro](https://getmightymouse.com/pricing) |
-| Agents that run in the cloud | Needs our cloud computers | ✅ [Pro](https://getmightymouse.com/pricing) |
+| The app, voice typing, phone remote on Wi-Fi | ✅ Unlimited | ✅ Unlimited |
+| Agents ask and you answer from your phone's lock screen | ✅ | ✅ |
+| Coding agents and chat on your own Claude, Codex, Cursor, OpenCode, Gemini or OpenRouter account | ✅ Unlimited | ✅ Unlimited |
+| Your computer from anywhere | ✅ Unlimited with your own Cloudflare Tunnel or Tailscale, or free minutes on ours | ✅ Ours, built in, unlimited |
+| Our AI and cloud runs, no AI account of your own needed | ✅ A free weekly allowance | ✅ A bigger allowance, plus top-ups |
 
-Sign-in uses a free MightyMouse account.
+See [pricing](https://getmightymouse.com/pricing). Sign-in uses a free MightyMouse account.
 
 **Your own tunnel.** The phone remote listens on port `17771`. Point any tunnel at it, open the address on your phone and approve the phone on your computer the first time:
 
