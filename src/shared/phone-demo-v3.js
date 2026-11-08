@@ -1977,7 +1977,7 @@ class MMPhoneDemo extends HTMLElement {
     await this.press(hold, el)
     if (activate) {
       // pointerdown, not click: every control that raises a keyboard in this
-      // app fires on pointerdown (react/CLAUDE.md), and click lands ~300ms
+      // app fires on pointerdown (src/main/phone-remote/CLAUDE.md), and click lands ~300ms
       // later -- outside the window some of them care about.
       el?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
       el?.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }))
