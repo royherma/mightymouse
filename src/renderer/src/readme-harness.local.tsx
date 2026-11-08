@@ -1,4 +1,5 @@
 import { CONFIG } from '../../shared/config'
+import appIcon from './assets/app-icon.png'
 import { CLAUDE_REASONING_EFFORTS } from '../../shared/model-sources'
 import type { AgentRelaySessionInfo, AgentTranscriptTurn, MightyProject, MightySession, MightySettings } from '../../shared/types'
 
@@ -68,13 +69,16 @@ const settings: MightySettings = {
 
 const readme = state === 'readme'
 const shot = new URLSearchParams(location.search).get('shot') ?? 'code'
-const repo = (name: string): string => `/Users/alex/code/${name}`
+const repo = (name: string): string => `~/code/${name}`
 const readmeProjects: MightyProject[] = [
-  { id: 'rp1', name: 'acme-shop', created: ago(9000), updated: ago(3), pinned: true, icon: 'terminal', repoFolder: repo('acme-shop') },
+  { id: 'rp1', name: 'acme-shop', created: ago(9000), updated: ago(3), pinned: true, imagePath: appIcon, repoFolder: repo('acme-shop') },
   { id: 'rp2', name: 'docs-site', created: ago(8000), updated: ago(40), icon: 'globe', repoFolder: repo('docs-site') },
-  { id: 'rp3', name: 'mobile-app', created: ago(7000), updated: ago(300), repoFolder: repo('mobile-app') }
+  { id: 'rp3', name: 'mobile-app', created: ago(7000), updated: ago(300), icon: 'phone', repoFolder: repo('mobile-app') },
+  { id: 'rp4', name: 'api-server', created: ago(6000), updated: ago(900), icon: 'database', repoFolder: repo('api-server') },
+  { id: 'rp5', name: 'design-system', created: ago(5000), updated: ago(1400), icon: 'palette', repoFolder: repo('design-system') }
 ]
 const now = Date.now()
+let sessionIndex = 0
 const agentSession = (
   label: string,
   cwd: string,
@@ -89,7 +93,7 @@ const agentSession = (
   model,
   tldr,
   sessionId: label,
-  since: now - 40 * 60_000,
+  since: now - (25 + 70 * sessionIndex++) * 60_000,
   pid: 4242,
   canWrapUp: true,
   hostAppName: 'Terminal',
@@ -251,15 +255,25 @@ const readmeChats: MightySession[] = [
   session('rc4', 'Plan a weekend in Lisbon', 2900)
 ]
 const caps = { vision: false, tools: true, thinking: true }
+const readmeApps: Array<[string, string]> = [
+  ['github', 'https://api.githubcopilot.com/mcp/'],
+  ['linear', 'https://mcp.linear.app/mcp'],
+  ['sentry', 'https://mcp.sentry.dev/mcp'],
+  ['figma', 'https://mcp.figma.com/mcp']
+]
 const readmeModels = [
+  { harness: 'claude', model: '', label: 'Default' },
+  { harness: 'claude', model: 'fable', label: 'Fable', reasoningEfforts: CLAUDE_REASONING_EFFORTS },
   { harness: 'claude', model: 'opus', label: 'Opus 5.5', reasoningEfforts: CLAUDE_REASONING_EFFORTS },
   { harness: 'claude', model: 'sonnet', label: 'Sonnet 5.5', reasoningEfforts: CLAUDE_REASONING_EFFORTS },
+  { harness: 'claude', model: 'haiku', label: 'Haiku 5.5', reasoningEfforts: [] },
+  { harness: 'codex', model: '', label: 'Default' },
   { harness: 'codex', model: 'gpt-6.1-sol', label: 'GPT-6.1 Sol', reasoningEfforts: ['low', 'medium', 'high', 'xhigh'] },
-  { harness: 'cursor', model: 'composer-2', label: 'Composer 2' },
-  { harness: 'ollama', model: 'qwen3-coder:30b', label: 'Qwen3 Coder 30B' },
   { harness: 'opencode', model: 'opencode/qwen3-coder', label: 'qwen3-coder' },
   { harness: 'opencode', model: 'openrouter/deepseek/deepseek-v4', label: 'deepseek/deepseek-v4' }
 ]
+const homeLabels = ['acme-shop/fix-checkout-button', 'acme-shop/add-coupon-field', 'acme-shop/refund-button', 'docs-site/fix-broken-links', 'mobile-app/dark-mode']
+const openAgents = shot === 'home' || shot === 'dial' ? readmeAgents.filter((s) => homeLabels.includes(s.label)) : readmeAgents
 const readmeApi: Record<string, unknown> = {
   auth: { getSession: async () => ({ email: 'dev@example.com' }) },
   agentRelayGetStatus: async () => ({
@@ -267,13 +281,17 @@ const readmeApi: Record<string, unknown> = {
     running: true,
     deviceLabel: 'iPhone',
     lastAgentAt: now - 20_000,
-    agentCount: readmeAgents.length,
-    agentNames: readmeAgents.map((s) => s.label),
-    agentSessions: readmeAgents
+    agentCount: openAgents.length,
+    agentNames: openAgents.map((s) => s.label),
+    agentSessions: openAgents
   }),
   agentRelayListClients: async () => [],
   codeConductorWorkspaces: async () => [],
-  mcp: { list: async () => [], health: async () => [] },
+  mcp: {
+    list: async () => readmeApps.map(([name, url]) => ({ name, scope: 'user', spec: { transport: 'http', url } })),
+    health: async () => readmeApps.map(([name, url]) => ({ name, target: url, status: 'connected', detail: '' }))
+  },
+  mediaUrl: (path: string) => path,
   built: { list: async () => [] },
   infra: { list: async () => [] },
   sideBrowser: { recent: async () => [], topSites: async () => [] },
@@ -299,7 +317,7 @@ const readmeApi: Record<string, unknown> = {
   agentRelaySessionTools: async () => [],
   agentRelaySessionAffects: async () => ({ surfaces: [], envs: [] }),
   repoGitState: async () => ({
-    branch: 'fix-checkout-button',
+    branch: shot === 'home' || shot === 'dial' ? 'main' : 'fix-checkout-button',
     upstream: 'origin/fix-checkout-button',
     ahead: 2,
     dirty: 0,
@@ -310,7 +328,9 @@ const readmeApi: Record<string, unknown> = {
   repoGitChanges: async () => readmeChanges,
   repoGitPull: async () => ({ url: 'https://github.com/acme/acme-shop/pull/128', number: 128, state: 'open', base: 'main' }),
   codeAgentModels: async () => ({ options: readmeModels, selected: { harness: 'claude', model: 'opus' }, needsSetup: [] }),
-  planLoginsList: async () => [],
+  planLoginsList: async () => [
+    { id: 'claude-default', backend: 'claude', email: 'you@example.com', plan: 'max', dir: null, windows: [], checkedAt: null, limitedUntil: null }
+  ],
   settingsListLocalModels: async () => [
     { name: 'qwen3-coder:30b', sizeBytes: 18e9, ...caps },
     { name: 'gpt-oss:20b', sizeBytes: 13e9, ...caps }
@@ -321,7 +341,7 @@ const readmeApi: Record<string, unknown> = {
     { source: 'openrouter', model: 'moonshotai/kimi-k2', label: 'Kimi K2' },
     { source: 'opencode', model: 'opencode/qwen3-coder', label: 'qwen3-coder' }
   ],
-  planLoginPicks: async () => ({}),
+  planLoginPicks: async () => ({ claude: 'claude-default' }),
   settingsGet: async () => ({ codeOwnCopy: false }),
   mighty: {
     listSessions: async () => readmeChats,
@@ -336,7 +356,9 @@ const readmeApi: Record<string, unknown> = {
 }
 if (readme) {
   Object.assign(CONFIG, { APP_NAME: 'MightyMouse', BRAND_NAME: 'MightyMouse' })
-  localStorage.setItem('mm.picker.collapsed', JSON.stringify(['mightymouse', 'plan:claude', 'plan:codex', 'local', 'mlx', 'openrouter', 'opencode']))
+  localStorage.setItem('mm.picker.collapsed', JSON.stringify(['mightymouse', 'plan:claude', 'plan:codex', 'local', 'mlx', 'openrouter', 'opencode', 'codex']))
+  localStorage.setItem('mm.code.efforts', JSON.stringify({ 'claude:opus': 'medium' }))
+  localStorage.setItem('mm.code.plan', '0')
 }
 
 const noop = (): void => undefined
@@ -413,7 +435,7 @@ const api = readme
   ? { ...explicit, ...readmeApi, mighty: { ...(explicit.mighty as object), ...(readmeApi.mighty as object) } }
   : explicit
 Object.assign(window, { api: layer(undefined, api) })
-const readmeQuery = shot === 'agents' ? '&tab=code&codeTab=sessions' : shot === 'models' ? '&mode=chat' : `&tab=code&codeSession=${encodeURIComponent(readmeAgents[0].label)}`
+const readmeQuery = shot === 'agents' ? '&tab=code&codeTab=sessions' : shot === 'home' || shot === 'dial' ? '&tab=code' : shot === 'models' ? '&mode=chat' : `&tab=code&codeSession=${encodeURIComponent(readmeAgents[0].label)}`
 history.replaceState(null, '', `?window=mighty&state=${state}${readme ? readmeQuery : ''}${modelPreview ? `&models${['copy', 'open'].filter((k) => new URLSearchParams(location.search).has(k)).map((k) => `&${k}`).join('')}` : ''}${updateReady ? '&update=ready' : ''}`)
 if (modelPreview) await import('./project-scope-harness.local')
 else await import('./main')

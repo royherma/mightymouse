@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src=".github/assets/desktop-agents.webp" width="880" alt="Ten coding agents running side by side across three projects, on Claude, Codex and Cursor">
+  <img src=".github/assets/hero.webp" width="900" alt="MightyMouse on the computer starting a coding agent in acme-shop, with the same agent asking a question on the phone beside it">
 </p>
 
 ## Bring any AI, keep the plan you pay for
@@ -51,6 +51,21 @@ Each one is a single adapter in [`src/main/backend/adapters.ts`](src/main/backen
 </p>
 
 **One home for your coding agents.** Give each agent its own branch, run a few side by side, then review every changed line, open the pull request and merge without leaving the app.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src=".github/assets/desktop-dial.webp" alt="The model picker with Claude models and a thinking dial set to Medium">
+      <h3>Pick the model and how hard it thinks</h3>
+      <p>Choose Claude, Codex or OpenCode, then turn the dial from quick to deep. Switch on Plan first and nothing changes until you say go.</p>
+    </td>
+    <td width="50%" valign="top">
+      <img src=".github/assets/desktop-agents.webp" alt="Ten coding agents running side by side across three projects, on Claude, Codex and Cursor">
+      <h3>Every agent on one board</h3>
+      <p>See which agents are working, which handed work back and which need you, across every project.</p>
+    </td>
+  </tr>
+</table>
 
 <table>
   <tr>
