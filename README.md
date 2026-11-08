@@ -170,11 +170,11 @@ Everything works on your own setup. Pro is for when you'd rather we run the hard
 
 | | Run it yourself, free | Let us run it |
 | --- | --- | --- |
-| The app, voice typing, phone remote on Wi-Fi | ✅ On your computer | |
+| The app, voice typing, phone remote on Wi-Fi | ✅ On your computer | Same app, nothing extra |
 | Coding agents and chat | ✅ On your own Claude, Codex, Cursor, OpenCode, Gemini or OpenRouter account | Hosted AI credits with [Pro](https://getmightymouse.com/pricing) |
 | Your computer from anywhere | ✅ Point your own Cloudflare Tunnel or Tailscale at it | One switch, nothing to set up. Free minutes, unlimited with [Pro](https://getmightymouse.com/pricing) |
-| Push notifications on your phone's lock screen | | [Pro](https://getmightymouse.com/pricing) |
-| Agents that run in the cloud | | [Pro](https://getmightymouse.com/pricing) |
+| Push notifications on your phone's lock screen | Needs our servers to send them through Apple | ✅ [Pro](https://getmightymouse.com/pricing) |
+| Agents that run in the cloud | Needs our cloud computers | ✅ [Pro](https://getmightymouse.com/pricing) |
 
 Sign-in uses a free MightyMouse account.
 
