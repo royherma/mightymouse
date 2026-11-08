@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src=".github/assets/answer-from-phone.webp" width="880" alt="An agent on the computer asks a question and the answer is tapped on a phone lock screen">
+  <img src=".github/assets/desktop-agents.webp" width="880" alt="Ten coding agents running side by side across three projects, on Claude, Codex and Cursor">
 </p>
 
 ## Bring any AI, keep the plan you pay for
@@ -38,28 +38,43 @@ MightyMouse doesn't sell you a model. It runs the ones you already use, signed i
 | **Chat** | Claude · ChatGPT models through Codex · Gemini · any model on OpenRouter |
 | **Offline, on your own computer** | Ollama · Rapid-MLX on Apple Silicon |
 
+<p align="center">
+  <img src=".github/assets/desktop-models.webp" width="720" alt="The model picker listing your Claude plan, your Codex plan, Gemini, Ollama, Rapid-MLX, OpenRouter and OpenCode">
+</p>
+
 Each one is a single adapter in [`src/main/backend/adapters.ts`](src/main/backend/adapters.ts), so the next one is a small pull request away.
 
 ## On your computer
 
+<p align="center">
+  <img src=".github/assets/desktop-code.webp" width="880" alt="A coding agent fixed a checkout bug: the conversation, the three changed files and a Merge button for pull request 128">
+</p>
+
+**One home for your coding agents.** Give each agent its own branch, run a few side by side, then review every changed line, open the pull request and merge without leaving the app.
+
 <table>
   <tr>
-    <td width="50%" valign="top">
-      <img src=".github/assets/your-own-ai-plan.webp" alt="Claude, Codex and Gemini accounts connected in settings">
-      <h3>One home for your coding agents</h3>
-      <p>Give each agent its own branch, run a few side by side, then review the changed files, open the pull request and merge without leaving the app.</p>
-    </td>
     <td width="50%" valign="top">
       <img src=".github/assets/talk-and-it-types.webp" alt="Holding fn and talking types an email">
       <h3>Talk and it types</h3>
       <p>Hold <kbd>fn</kbd> and talk. Your words land where your cursor is, in any app. Speech turns into text on your own computer, so it is free and stays private.</p>
     </td>
-  </tr>
-  <tr>
     <td width="50%" valign="top">
       <img src=".github/assets/fix-any-words.webp" alt="Selected text rewritten warmer in place">
       <h3>Better words, right where you are</h3>
       <p>Select text in any app and tap a fix: shorter, cleaner, easier to read, or ask for anything. The new words replace the old ones in place.</p>
+    </td>
+  </tr>
+</table>
+
+## Agents that keep going while you're out
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src=".github/assets/answer-from-phone.webp" alt="An agent on the computer asks a question and the answer is tapped on a phone lock screen">
+      <h3>Answer from the lock screen</h3>
+      <p>An agent's question arrives with its choices as buttons. Tap one and the work keeps going. Approvals ask for Face ID first.</p>
     </td>
     <td width="50%" valign="top">
       <img src=".github/assets/computer-in-your-hand.webp" alt="A phone showing the computer's live screen with keys and a mic button">
@@ -69,12 +84,9 @@ Each one is a single adapter in [`src/main/backend/adapters.ts`](src/main/backen
   </tr>
 </table>
 
-## Agents that keep going while you're out
-
 | You get | What it means |
 | --- | --- |
 | **Close the lid, work continues** | Turn it on and your computer stays awake with the lid shut, so busy agents keep going and your phone still reaches them. |
-| **Answers from the lock screen** | An agent's question arrives with its choices as buttons. Approvals ask for Face ID first. |
 | **Everything waiting, in one stack** | Swipe through every agent that needs you, one card at a time. |
 | **Undo to any message** | Put the files back to how they were before any earlier message. |
 | **A dark screen for the room** | While you drive from your phone, the computer's own screen stays black to anyone nearby. |
