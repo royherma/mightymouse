@@ -2,11 +2,11 @@
   <img src=".github/assets/logo.png" width="88" alt="MightyMouse logo">
 </p>
 
-<h1 align="center">MightyMouse</h1>
+<h1 align="center">MightyMouse - Make your computer 100x more useful</h1>
 
 <p align="center">
-  <b>Make your computer 100x more useful.</b><br>
-  Talk and it types. AI agents keep working while you're out. Answer them from your phone.
+  Talk and it types. Your coding agents keep working while you're out.<br>
+  Answer them, and drive the whole computer, from your phone.
 </p>
 
 <p align="center">
@@ -18,8 +18,9 @@
 
 <p align="center">
   <a href="https://getmightymouse.com"><b>Download</b></a> &nbsp;·&nbsp;
+  <a href="#how-it-compares"><b>vs T3 Code</b></a> &nbsp;·&nbsp;
   <a href="#coming-from-conductor"><b>Coming from Conductor?</b></a> &nbsp;·&nbsp;
-  <a href="#build-it-yourself"><b>Build from source</b></a> &nbsp;·&nbsp;
+  <a href="#run-it-yourself"><b>Run it yourself</b></a> &nbsp;·&nbsp;
   <a href="#for-builders"><b>Help build it</b></a>
 </p>
 
@@ -27,36 +28,48 @@
   <img src=".github/assets/answer-from-phone.webp" width="880" alt="An agent on the computer asks a question and the answer is tapped on a phone lock screen">
 </p>
 
-## What you get
+## Bring any AI, keep the plan you pay for
+
+MightyMouse doesn't sell you a model. It runs the ones you already use, signed in with your own accounts, and you can switch any time.
+
+| | Works with |
+| --- | --- |
+| **Coding agents** | Claude Code · Codex · Cursor · OpenCode |
+| **Chat** | Claude · ChatGPT models through Codex · Gemini · any model on OpenRouter |
+| **Offline, on your own computer** | Ollama · Rapid-MLX on Apple Silicon |
+
+Each one is a single adapter in [`src/main/backend/adapters.ts`](src/main/backend/adapters.ts), so the next one is a small pull request away.
+
+## On your computer
 
 <table>
   <tr>
+    <td width="50%" valign="top">
+      <img src=".github/assets/your-own-ai-plan.webp" alt="Claude, Codex and Gemini accounts connected in settings">
+      <h3>One home for your coding agents</h3>
+      <p>Give each agent its own branch, run a few side by side, then review the changed files, open the pull request and merge without leaving the app.</p>
+    </td>
     <td width="50%" valign="top">
       <img src=".github/assets/talk-and-it-types.webp" alt="Holding fn and talking types an email">
       <h3>Talk and it types</h3>
       <p>Hold <kbd>fn</kbd> and talk. Your words land where your cursor is, in any app. Speech turns into text on your own computer, so it is free and stays private.</p>
     </td>
-    <td width="50%" valign="top">
-      <img src=".github/assets/your-own-ai-plan.webp" alt="Claude, Codex and Gemini accounts connected in settings">
-      <h3>One home for your coding agents</h3>
-      <p>Run Claude Code, Codex, Cursor or OpenCode on the plan you already pay for. Give each agent its own branch, run a few side by side, then review the changes, open the pull request and merge.</p>
-    </td>
   </tr>
   <tr>
-    <td width="50%" valign="top">
-      <img src=".github/assets/computer-in-your-hand.webp" alt="A phone showing the computer's live screen with keys and a mic button">
-      <h3>Your computer in your hand</h3>
-      <p>Your phone shows your live screen and turns into a trackpad, a keyboard and a microphone. Fix a typo from the couch or check on an agent from the kitchen.</p>
-    </td>
     <td width="50%" valign="top">
       <img src=".github/assets/fix-any-words.webp" alt="Selected text rewritten warmer in place">
       <h3>Better words, right where you are</h3>
       <p>Select text in any app and tap a fix: shorter, cleaner, easier to read, or ask for anything. The new words replace the old ones in place.</p>
     </td>
+    <td width="50%" valign="top">
+      <img src=".github/assets/computer-in-your-hand.webp" alt="A phone showing the computer's live screen with keys and a mic button">
+      <h3>Your computer in your hand</h3>
+      <p>Your phone shows your live screen and turns into a trackpad, a keyboard and a microphone. Fix a typo from the couch or check on an agent from the kitchen.</p>
+    </td>
   </tr>
 </table>
 
-### Agents that keep going while you're out
+## Agents that keep going while you're out
 
 | You get | What it means |
 | --- | --- |
@@ -74,19 +87,35 @@
 </p>
 <p align="center"><sub>Straight from the phone: trackpad, full keyboard, and a screen full of agents at work.</sub></p>
 
+## How it compares
+
+T3 Code puts your agent on your phone. MightyMouse puts the whole computer there, agent included.
+
+| | MightyMouse | T3 Code |
+| --- | :---: | :---: |
+| Runs Claude Code, Codex, Cursor and OpenCode | ✅ | ✅ |
+| Each agent on its own branch, changed files, pull request and merge | ✅ | ✅ |
+| Undo the files back to an earlier message | ✅ | ✅ |
+| iPhone and Android apps | ✅ | ✅ |
+| Open source, MIT | ✅ | ✅ |
+| Your computer's live screen, trackpad and keyboard on the phone | ✅ | ❌ |
+| Voice typing into any app, free and on your own computer | ✅ | ❌ |
+
+An editor gives you agents inside one window. A chat app gives you one company's models. MightyMouse gives you every agent you pay for, across the whole computer, and lets you leave the desk.
+
+<sub>T3 Code checked against github.com/pingdotgg/t3code on 8 Nov 2026. Something out of date? Open an issue and we'll fix it.</sub>
+
 ## Coming from Conductor?
 
 Bring your workspaces with you. MightyMouse finds the Conductor workspaces already on your computer and picks each one up in Claude Code, on its branch, with the end of the old chat so the agent knows where it stopped.
 
 1. Download MightyMouse from [getmightymouse.com](https://getmightymouse.com) and open it.
 2. Go to **Code**. Your workspaces are listed under **From Conductor**.
-3. Click **Continue here** on any of them. That's it.
+3. Click **Continue here** on any of them.
 
-From there you get what you had, plus your phone: a new agent can work on its own copy of the project so it never touches another agent's files, you can plan first and change nothing until you say go, and you can merge the pull request from your pocket.
+From there you get what you had, plus your phone: plan first and change nothing until you say go, and merge the pull request from your pocket.
 
-**On T3 Code?** MightyMouse runs the same Claude Code and Codex you already have signed in, on your own plan. Nothing to move.
-
-## Build it yourself
+## Run it yourself
 
 You need a Mac and a current Node LTS release.
 
@@ -107,6 +136,16 @@ npm run dev
 | Check types, lint and tests | `npm run typecheck` · `npm run lint` · `npm test` |
 
 Apps you build yourself are not signed by Apple, so macOS asks you to confirm the first launch (right-click the app, then Open). The iPhone app lives in `ios/` (open it in Xcode) and the Android app in `android/` (open it in Android Studio).
+
+### What runs where
+
+| | Where it runs | Cost |
+| --- | --- | --- |
+| The app and voice typing | Your computer | Free |
+| Coding agents and chat | Your computer, on your own Claude, Codex, Cursor, OpenCode, Gemini or OpenRouter account | Whatever your plan costs |
+| Phone remote on the same Wi-Fi | Your computer and phone, directly | Free, unlimited |
+| Sign-in | Our servers | Free account |
+| Reaching your computer away from home, push notifications, hosted AI credits, cloud runs | Our servers | [Pro](https://getmightymouse.com/pricing) |
 
 ## For builders
 
@@ -153,11 +192,7 @@ Read [AGENTS.md](AGENTS.md) first. Deeper dives: [docs/agent-relay.md](docs/agen
 - **Teach agents a new trick.** The tools an agent can call (`notify`, `ask`, `approve`, `show`) live in `src/main/agent-relay/mcp/verbs.ts`. Start with [docs/agent-relay.md](docs/agent-relay.md).
 - **Make the phone feel better.** Trackpad, keys and the swipe stack are React in `src/main/phone-remote/react/`.
 - **Faster, sharper speech to text.** The engines are wired in `src/main/capture/whisper.ts`.
-- **The Android app.** A small Kotlin app in `android/` with plenty of room to grow.
-
-## Free and Pro
-
-The app is free and open source. Build it, run it, change it. Pro is a paid plan for the parts that run on our servers: reaching your computer when you're away from home, push notifications to your phone, hosted AI credits and cloud runs. Building from source gives you the app. Pro gives you the service behind it. See [pricing](https://getmightymouse.com/pricing).
+- **Native screens on Android.** The Android app pairs by QR code and loads the same phone remote as the browser. The iPhone app goes further with native lock-screen answers; bringing those to Android is open.
 
 ## Contributing
 
