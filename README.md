@@ -10,14 +10,17 @@
 </p>
 
 <p align="center">
-  <a href="https://getmightymouse.com"><img src="https://img.shields.io/badge/download-getmightymouse.com-e8642c?style=flat-square" alt="Download"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2f7d4f?style=flat-square" alt="License: MIT"></a>
-  <img src="https://img.shields.io/badge/platform-macOS-1f1f1f?style=flat-square&logo=apple" alt="Platform: macOS">
-  <img src="https://img.shields.io/badge/phone-iPhone%20%7C%20Android-1f1f1f?style=flat-square" alt="Phone: iPhone and Android">
+  <a href="https://getmightymouse.com/download"><img src="https://img.shields.io/badge/Download_for_Mac-1f1f1f?style=for-the-badge&logo=apple&logoColor=white" alt="Download for Mac"></a>
+  <a href="https://apps.apple.com/us/app/mightymouse-build-with-ai/id6796192096"><img src="https://img.shields.io/badge/App_Store-0D96F6?style=for-the-badge&logo=appstore&logoColor=white" alt="Download on the App Store"></a>
+  <a href="https://play.google.com/store/apps/details?id=com.mightymouse.android"><img src="https://img.shields.io/badge/Google_Play-414141?style=for-the-badge&logo=googleplay&logoColor=white" alt="Get it on Google Play"></a>
 </p>
 
 <p align="center">
-  <a href="https://getmightymouse.com"><b>Download</b></a> &nbsp;·&nbsp;
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-2f7d4f?style=flat-square" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/platform-macOS-1f1f1f?style=flat-square&logo=apple" alt="Platform: macOS">
+</p>
+
+<p align="center">
   <a href="#how-it-compares"><b>vs T3 Code</b></a> &nbsp;·&nbsp;
   <a href="#coming-from-conductor"><b>Coming from Conductor?</b></a> &nbsp;·&nbsp;
   <a href="#run-it-yourself"><b>Run it yourself</b></a> &nbsp;·&nbsp;
@@ -136,7 +139,7 @@ An editor gives you agents inside one window. A chat app gives you one company's
 
 Bring your workspaces with you. MightyMouse finds the Conductor workspaces already on your computer and picks each one up in Claude Code, on its branch, with the end of the old chat so the agent knows where it stopped.
 
-1. Download MightyMouse from [getmightymouse.com](https://getmightymouse.com) and open it.
+1. [Download MightyMouse for Mac](https://getmightymouse.com/download) and open it.
 2. Go to **Code**. Your workspaces are listed under **From Conductor**.
 3. Click **Continue here** on any of them.
 
@@ -144,7 +147,9 @@ From there you get what you had, plus your phone: plan first and change nothing 
 
 ## Run it yourself
 
-You need a Mac and a current Node LTS release.
+Just want to use it? Get the official apps from the buttons at the top: signed, and they update themselves.
+
+To build it, you need a Mac and a current Node LTS release.
 
 ```sh
 git clone https://github.com/royherma/mightymouse.git
