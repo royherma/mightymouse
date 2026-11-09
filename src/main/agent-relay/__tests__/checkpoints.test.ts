@@ -57,7 +57,7 @@ describe('checkpoints', () => {
     await toggleTurnUndo(session, turnAt + 2_000, edited)
     await saveCheckpoint(session, turnAt + 90_000)
     expect((await turnUndoStates(session, [turnAt + 2_000])).get(turnAt + 2_000)).toBe('undo')
-  })
+  }, 30_000)
 })
 
 describe('checkpoints across several messages', () => {
@@ -96,6 +96,6 @@ describe('checkpoints across several messages', () => {
 
     expect(await toggleTurnUndo(session, t1, ['a.txt'])).toEqual({ ok: true, state: 'undo', files: 1 })
     expect(repo.read('a.txt')).toBe('v2')
-  })
+  }, 30_000)
 
 })

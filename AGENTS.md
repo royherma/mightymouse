@@ -2,7 +2,7 @@
 
 This file is for agents (and people) changing the MightyMouse code. Read it before editing.
 
-MightyMouse is a macOS app that pairs with an iPhone or Android phone: voice typing, a trackpad and live screen on the phone, and coding agents that keep running on the computer and ask the phone for approval. Electron, Vite, React, TypeScript on the Mac, Swift on iOS, Kotlin on Android.
+MightyMouse is a macOS app for coding agents, chat on any AI backend and voice typing into any app. Agents keep running on the computer, and an iPhone or Android remote can answer them and drive the screen. Electron, Vite, React, TypeScript on the Mac, Swift on iOS, Kotlin on Android.
 
 The product name is **MightyMouse**. "ShowAndTell" is an old folder name, never put it in UI or copy.
 
