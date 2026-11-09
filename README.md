@@ -43,7 +43,7 @@
 </p>
 
 <p align="center">
-  <img src=".github/assets/hero.webp" width="900" alt="MightyMouse on the computer starting a coding agent in acme-shop, with the same agent asking a question on the phone beside it">
+  <img src=".github/assets/hero.webp" width="900" alt="MightyMouse on the computer: a coding agent fixed the checkout button in acme-shop, with the changed files and a Merge button, and the phone remote in front showing the same screen above its trackpad and keys">
 </p>
 
 ## Bring any AI, keep the plan you pay for
