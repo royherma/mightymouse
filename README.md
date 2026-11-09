@@ -26,7 +26,7 @@
   <tr>
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/conductor/"><img src=".github/assets/alt/conductor.png" width="48" alt="Conductor"><br><sub>Conductor</sub></a></td>
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/t3-code/"><img src=".github/assets/alt/t3code.png" width="48" alt="T3 Code"><br><sub>T3 Code</sub></a></td>
-    <td align="center" width="96"><a href="#one-app-instead-of-five"><img src=".github/assets/alt/clicky.png" width="48" alt="Clicky"><br><sub>Clicky</sub></a></td>
+    <td align="center" width="96"><a href="https://getmightymouse.com/vs/clicky/"><img src=".github/assets/alt/clicky.png" width="48" alt="Clicky"><br><sub>Clicky</sub></a></td>
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/t3-chat/"><img src=".github/assets/alt/t3chat.png" width="48" alt="T3 Chat"><br><sub>T3 Chat</sub></a></td>
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/chatgpt/"><img src=".github/assets/alt/chatgpt.png" width="48" alt="ChatGPT app"><br><sub>ChatGPT app</sub></a></td>
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/claude/"><img src=".github/assets/alt/claude.png" width="48" alt="Claude app"><br><sub>Claude app</sub></a></td>
