@@ -20,8 +20,22 @@
   <img src="https://img.shields.io/badge/platform-macOS-1f1f1f?style=flat-square&logo=apple" alt="Platform: macOS">
 </p>
 
+<p align="center"><b>The free, open-source alternative to</b></p>
+
+<table align="center">
+  <tr>
+    <td align="center" width="96"><a href="https://getmightymouse.com/vs/conductor/"><img src=".github/assets/alt/conductor.png" width="48" alt="Conductor"><br><sub>Conductor</sub></a></td>
+    <td align="center" width="96"><a href="https://getmightymouse.com/vs/t3-code/"><img src=".github/assets/alt/t3code.png" width="48" alt="T3 Code"><br><sub>T3 Code</sub></a></td>
+    <td align="center" width="96"><a href="#one-app-instead-of-five"><img src=".github/assets/alt/clicky.png" width="48" alt="Clicky"><br><sub>Clicky</sub></a></td>
+    <td align="center" width="96"><a href="https://getmightymouse.com/vs/t3-chat/"><img src=".github/assets/alt/t3chat.png" width="48" alt="T3 Chat"><br><sub>T3 Chat</sub></a></td>
+    <td align="center" width="96"><a href="https://getmightymouse.com/vs/chatgpt/"><img src=".github/assets/alt/chatgpt.png" width="48" alt="ChatGPT app"><br><sub>ChatGPT app</sub></a></td>
+    <td align="center" width="96"><a href="https://getmightymouse.com/vs/claude/"><img src=".github/assets/alt/claude.png" width="48" alt="Claude app"><br><sub>Claude app</sub></a></td>
+    <td align="center" width="96"><a href="https://getmightymouse.com/vs/wispr-flow/"><img src=".github/assets/alt/wispr.png" width="48" alt="Wispr Flow"><br><sub>Wispr Flow</sub></a></td>
+  </tr>
+</table>
+
 <p align="center">
-  <a href="#how-it-compares"><b>vs T3 Code</b></a> &nbsp;·&nbsp;
+  <a href="#how-it-compares"><b>How it compares</b></a> &nbsp;·&nbsp;
   <a href="#coming-from-conductor"><b>Coming from Conductor?</b></a> &nbsp;·&nbsp;
   <a href="#make-it-yours"><b>Skins and more</b></a> &nbsp;·&nbsp;
   <a href="#run-it-yourself"><b>Run it yourself</b></a> &nbsp;·&nbsp;
@@ -121,7 +135,7 @@ Each one is a single adapter in [`src/main/backend/adapters.ts`](src/main/backen
 ## Make it yours
 
 <p align="center">
-  <img src=".github/assets/skins.webp" width="900" alt="The phone remote in six skins: Pro II, Party Cork, Big Red, Field Unit, Drive Thru and Sketchbook">
+  <img src=".github/assets/skins.webp" width="900" alt="The phone remote in six skins, upright: Pro II, Party Cork, Big Red, Field Unit, Drive Thru and Sketchbook">
 </p>
 
 **Skins for the phone remote.** Brushed steel, cork, leather, a red diner, a sketchbook. Pick one in the phone's Settings > Display > Skin, and new ones arrive in the skin store without an app update. Want to make your own? See [Make a skin](#make-a-skin).
@@ -164,7 +178,17 @@ T3 Code puts your agent on your phone. MightyMouse puts the whole computer there
 
 An editor gives you agents inside one window. A chat app gives you one company's models. MightyMouse gives you every agent you pay for, across the whole computer, and lets you leave the desk.
 
-<sub>T3 Code checked against github.com/pingdotgg/t3code on 8 Nov 2026. Something out of date? Open an issue and we'll fix it.</sub>
+### One app instead of five
+
+| If you use | MightyMouse gives you |
+| --- | --- |
+| **Clicky** to talk you through your screen | Talk and it types into any app, with no monthly message cap. It runs on the AI plans you already pay for, and your phone becomes the remote |
+| **Conductor** for agents side by side | The same Claude Code, Codex and Cursor agents plus OpenCode, your Conductor workspaces in one click, and answers from your phone |
+| **T3 Chat** for many models in one chat | Claude, Gemini and any model on OpenRouter in one chat, signed in with your own accounts |
+| **The ChatGPT and Claude apps** | Both, on the plans you already have, next to Gemini and models that run offline on your computer |
+| **Wispr Flow** for voice typing | Speech turns into text on your own computer, free, with no word limit |
+
+<sub>T3 Code checked against github.com/pingdotgg/t3code on 8 Nov 2026. Clicky checked against heyclicky.com on 9 Nov 2026 (free plan: 25 talk messages a month). Something out of date? Open an issue and we'll fix it.</sub>
 
 ## Coming from Conductor?
 
