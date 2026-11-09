@@ -71,14 +71,14 @@ describe('isValidInviteEmail', () => {
   it('accepts what a phone keyboard actually produces', () => {
     // iOS appends a space after autocomplete and capitalises the first letter;
     // both must survive, since the send path lowercases and trims anyway.
-    expect(isValidInviteEmail('Roy@Example.com ')).toBe(true)
+    expect(isValidInviteEmail('Pat@Example.com ')).toBe(true)
     expect(isValidInviteEmail(' roy@example.com')).toBe(true)
   })
 })
 
 describe('normalizeInviteEmail', () => {
   it('trims and lowercases', () => {
-    expect(normalizeInviteEmail('  Roy@Example.COM ')).toBe('roy@example.com')
+    expect(normalizeInviteEmail('  Pat@Example.COM ')).toBe('pat@example.com')
   })
 
   it('is idempotent', () => {
@@ -97,7 +97,7 @@ describe('normalizeInviteEmail', () => {
   it('agrees with what the validator accepted', () => {
     // The value sent must be the value validated: an address checked raw but
     // sent untrimmed would be two different strings.
-    const raw = '  Roy@Example.com  '
+    const raw = '  Pat@Example.com  '
     expect(isValidInviteEmail(raw)).toBe(true)
     expect(isValidInviteEmail(normalizeInviteEmail(raw))).toBe(true)
   })

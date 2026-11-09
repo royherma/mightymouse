@@ -3,7 +3,7 @@
   "version": "0.56.0",
   "description": "MightyMouse floating rewrite and ask AI utility",
   "main": "./out/main/index.js",
-  "author": "Roy Hermann",
+  "author": "Techguyver Labs",
   "homepage": "https://github.com/royherma/mightymouse",
   "scripts": {
     "format": "prettier --write .",

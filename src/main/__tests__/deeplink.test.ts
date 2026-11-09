@@ -83,7 +83,7 @@ describe('parseDeepLink', () => {
   it('parses an onboard email handoff', () => {
     expect(parseDeepLink(`${SCHEME}://onboard?email=roy%40example.com`)).toEqual({
       kind: 'onboard',
-      email: 'roy@example.com'
+      email: 'pat@example.com'
     })
   })
 

@@ -148,7 +148,7 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: Roy Hermann
+  maintainer: Techguyver Labs
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
