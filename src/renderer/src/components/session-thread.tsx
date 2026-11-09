@@ -203,10 +203,12 @@ type AutoPick = {
 function useAutoPick(first: string | undefined, key: string, busy: boolean, send: (text: string) => void): AutoPick {
   const [secs, setSecsState] = useState(readAutoPickSecs)
   const [stoppedKey, setStoppedKey] = useState('')
-  const [clock, setClock] = useState({ start: 0, now: 0 })
-  const sentKey = useRef('')
+  const [sentKey, setSentKey] = useState('')
+  const [clock, setClock] = useState({ id: '', start: 0, now: 0 })
   const sendRef = useRef(send)
-  sendRef.current = send
+  useEffect(() => {
+    sendRef.current = send
+  })
 
   useEffect(() => {
     const sync = (): void => setSecsState(readAutoPickSecs())
@@ -217,26 +219,26 @@ function useAutoPick(first: string | undefined, key: string, busy: boolean, send
       window.removeEventListener('storage', sync)
     }
   }, [])
-  useEffect(() => {
-    if (busy) setStoppedKey(key)
-  }, [busy, key])
+  if (busy && stoppedKey !== key) setStoppedKey(key)
 
   const totalMs = secs * 1000
-  const active = secs > 0 && !!first && !busy && stoppedKey !== key && sentKey.current !== key
+  const active = secs > 0 && !!first && !busy && stoppedKey !== key && sentKey !== key
+  const armedId = `${key}|${first}|${totalMs}`
   useEffect(() => {
     if (!active || !first) return
     const start = Date.now()
-    setClock({ start, now: start })
-    const tick = setInterval(() => setClock({ start, now: Date.now() }), 250)
+    const kick = setTimeout(() => setClock({ id: armedId, start, now: start }), 0)
+    const tick = setInterval(() => setClock({ id: armedId, start, now: Date.now() }), 250)
     const fire = setTimeout(() => {
-      sentKey.current = key
+      setSentKey(key)
       sendRef.current(first)
     }, totalMs)
     return () => {
+      clearTimeout(kick)
       clearInterval(tick)
       clearTimeout(fire)
     }
-  }, [active, first, key, totalMs])
+  }, [active, first, key, totalMs, armedId])
 
   const setSecs = (next: number): void => {
     setSecsState(next)
@@ -247,7 +249,7 @@ function useAutoPick(first: string | undefined, key: string, busy: boolean, send
     }
     window.dispatchEvent(new Event(AUTO_PICK_KEY))
   }
-  const leftMs = active && clock.start ? Math.max(0, totalMs - (clock.now - clock.start)) : undefined
+  const leftMs = active && clock.id === armedId ? Math.max(0, totalMs - (clock.now - clock.start)) : undefined
   return { secs, setSecs, leftMs, totalMs, stop: () => setStoppedKey(key) }
 }
 
@@ -260,7 +262,7 @@ function AutoPickControl({ auto }: { auto: AutoPick }): React.JSX.Element {
   const [open, setOpen] = useState(false)
   if (auto.leftMs !== undefined) {
     return (
-      <div className="session-detail-suggest-auto-wrap" data-counting="">
+      <div className="session-detail-suggest-auto-wrap">
         <Button
           variant="bare"
           className="session-detail-suggest-chip session-detail-suggest-again session-detail-suggest-auto"

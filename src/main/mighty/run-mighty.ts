@@ -7,6 +7,7 @@ import { PREFS } from '../store/prefs'
 import { MIGHTY } from '../store/mighty'
 import { historyTimestamp, HISTORY, failDetail } from '../store/history'
 import { runBackend, abortRun, resolveRunModel, EXIT_TIMEOUT, EXIT_STOPPED } from '../backend/runner'
+import { stoppedReply } from '../../shared/stopped-reply'
 import { transcribeAttachments } from '../backend/audio-transcribe'
 import { parseActResult } from '../backend/parse'
 import { buildMemoryBlob } from '../backend/context-memory'
@@ -424,6 +425,7 @@ export function runMighty(opts: RunMightyOpts): Promise<MightyChatResult> {
   // trail of what Mighty did — otherwise it vanishes the moment the turn lands, since
   // the renderer's own liveTimeline is cleared once the persisted session replaces it.
   const toolCalls: ToolCallSummary[] = []
+  let streamedText = ''
   const openToolCalls = new Map<string, ToolCallSummary>()
   let usage: TurnUsage | undefined
 
@@ -606,7 +608,9 @@ export function runMighty(opts: RunMightyOpts): Promise<MightyChatResult> {
         // Mirror tool_start/tool_end into the persisted summary trail, keyed by the
         // adapter's own tool_use id so a slow/overlapping pair still matches correctly
         // (same id-pairing approach as the renderer's foldRunEvent).
-        if (event.kind === RUN_EVENT.tool_start) {
+        if (event.kind === RUN_EVENT.text) {
+          streamedText = streamedText === '' ? event.text : `${streamedText}\n\n${event.text}`
+        } else if (event.kind === RUN_EVENT.tool_start) {
           const row: ToolCallSummary = { name: event.name, inputPreview: toolCallInputPreview(event.input), ok: true }
           openToolCalls.set(event.id, row)
           toolCalls.push(row)
@@ -654,7 +658,7 @@ export function runMighty(opts: RunMightyOpts): Promise<MightyChatResult> {
           : exitCode === EXIT_TIMEOUT
             ? 'That took too long and timed out. Try again or narrow it down.'
             : exitCode === EXIT_STOPPED
-              ? CONFIG.MIGHTY.STOPPED_REPLY
+              ? stoppedReply(streamedText, CONFIG.MIGHTY.STOPPED_REPLY)
               : exitCode === -2
                 ? CONFIG.UI_LABELS.RUN_FAIL_REASON.out_of_credits
                 : (missingCliMsg ?? providerMsg ?? 'Something went wrong on that run.')

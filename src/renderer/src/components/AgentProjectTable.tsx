@@ -2,6 +2,7 @@ import type { JSX, KeyboardEvent, PointerEvent as ReactPointerEvent } from 'reac
 import { useMemo, useRef, useState } from 'react'
 import { ArrowUp, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search } from 'lucide-react'
 import { TalkButton } from './TalkButton'
+import { deliverTask } from '../../../shared/task-route'
 import { Button } from './Button'
 import { CONFIG } from '../../../shared/config'
 import type { AgentRelaySessionInfo } from '../../../shared/types'
@@ -156,17 +157,18 @@ function ProjectHomeAsk({ home, entries }: { home: ProjectHome; entries: Session
     setBusy(true)
     setProblem('')
     const open = entries.filter((e) => e.row.health !== 'ended' && !e.session.stale)
-    const ref = await window.api.codeRouteTask(
-      said,
-      open.map((e) => ({
-        ref: sessionRef(e.session),
-        title: e.session.tldr || e.session.stated || agentName(e),
-        recap: recapLine(e.row)
-      }))
-    )
+    const candidates = open.map((e) => ({
+      ref: sessionRef(e.session),
+      title: e.session.tldr || e.session.stated || agentName(e),
+      recap: recapLine(e.row)
+    }))
     try {
-      if (ref && (await window.api.agentRelaySessionReply(ref, said)).ok) home.onOpen(ref)
-      else await home.onStartNew(said)
+      const done = await deliverTask(said, candidates, {
+        route: window.api.codeRouteTask,
+        reply: window.api.agentRelaySessionReply,
+        startNew: home.onStartNew
+      })
+      if (done.kind === 'existing') home.onOpen(done.ref)
       setText('')
     } catch {
       setProblem(L.CODE_PROJECT_HOME_FAILED)

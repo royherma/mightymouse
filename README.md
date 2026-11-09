@@ -23,6 +23,7 @@
 <p align="center">
   <a href="#how-it-compares"><b>vs T3 Code</b></a> &nbsp;·&nbsp;
   <a href="#coming-from-conductor"><b>Coming from Conductor?</b></a> &nbsp;·&nbsp;
+  <a href="#make-it-yours"><b>Skins and more</b></a> &nbsp;·&nbsp;
   <a href="#run-it-yourself"><b>Run it yourself</b></a> &nbsp;·&nbsp;
   <a href="#for-builders"><b>Help build it</b></a>
 </p>
@@ -116,6 +117,36 @@ Each one is a single adapter in [`src/main/backend/adapters.ts`](src/main/backen
   <img src=".github/assets/phone-agents.webp" width="260" alt="Several agents running, seen from the phone">
 </p>
 <p align="center"><sub>Straight from the phone: trackpad, full keyboard, and a screen full of agents at work.</sub></p>
+
+## Make it yours
+
+<p align="center">
+  <img src=".github/assets/skins.webp" width="900" alt="The phone remote in six skins: Pro II, Party Cork, Big Red, Field Unit, Drive Thru and Sketchbook">
+</p>
+
+**Skins for the phone remote.** Brushed steel, cork, leather, a red diner, a sketchbook. Pick one in the phone's Settings > Display > Skin, and new ones arrive in the skin store without an app update. Want to make your own? See [Make a skin](#make-a-skin).
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src=".github/assets/draw-on-screen.webp" alt="A price circled with a finger on the phone shows up circled on the computer screen">
+      <h3>Draw on your screen from your phone</h3>
+      <p>Pen, marker or laser pointer, right on the live screen. Circle it, point at it, scribble on it, then copy the result. Phone Settings > Draw on your Mac.</p>
+    </td>
+    <td width="50%" valign="top">
+      <img src=".github/assets/dark-screen.webp" alt="The computer screen shows a dark protected screen while the phone shows it live">
+      <h3>A dark screen for the room</h3>
+      <p>Drive the computer from your phone while its own screen stays dark to anyone nearby. Touch the computer and it locks.</p>
+    </td>
+  </tr>
+</table>
+
+| Also on the phone | Where |
+| --- | --- |
+| **A cursor with a trail** - Comet, Mouse or Sparkle trail | Settings > Trackpad > Animated cursor |
+| **Huge cursor and Find cursor** - for when you lose the pointer | Settings > Trackpad |
+| **Big record button** - a giant mic for when the phone lies on the desk | Settings > Trackpad |
+| **Your screen in your glasses** - Meta Ray-Ban Display, driven with your fingers | Pair the glasses like a phone |
 
 ## How it compares
 
@@ -234,9 +265,37 @@ Read [AGENTS.md](AGENTS.md) first. Deeper dives: [docs/agent-relay.md](docs/agen
 
 - **Bring another coding agent.** Each one is a single adapter in `src/main/backend/adapters.ts`.
 - **Teach agents a new trick.** The tools an agent can call (`notify`, `ask`, `approve`, `show`) live in `src/main/agent-relay/mcp/verbs.ts`. Start with [docs/agent-relay.md](docs/agent-relay.md).
+- **Design a skin.** A skin is one CSS file of colour and image tokens. See [Make a skin](#make-a-skin).
 - **Make the phone feel better.** Trackpad, keys and the swipe stack are React in `src/main/phone-remote/react/`.
 - **Faster, sharper speech to text.** The engines are wired in `src/main/capture/whisper.ts`.
 - **Native screens on Android.** The Android app pairs by QR code and loads the same phone remote as the browser. The iPhone app goes further with native lock-screen answers; bringing those to Android is open.
+
+### Make a skin
+
+A skin repaints the phone remote without touching its layout: colours, the trackpad, the keys, the mic. A simple one is about 15 lines of CSS.
+
+1. Create `src/main/phone-remote/react/skins/<your-id>.css` and set the tokens you want. Anything you leave out keeps the default look:
+
+   ```css
+   .proRoot[data-skin='midnight'] {
+     --pro-bg: #0d1220;
+     --pro-card: #182036;
+     --pro-pad-bg: #222c48;
+     --pro-key-bg: #2b3658;
+     --pro-key-ink: #e8ecff;
+     --pro-key-wall: #1c2440;
+     --pro-key-wall-deep: #121830;
+     --pro-accent: #7c8cff;
+     --pro-accent-ink: #ffffff;
+   }
+   ```
+
+   Every token, and the three that trip people up, are in [SKINS.md](src/main/phone-remote/react/SKINS.md).
+2. Add one import line for it in `src/main/phone-remote/react/main.tsx`, add `'<your-id>'` to `PHONE_REMOTE_SKINS` in `src/shared/types.ts`, and add `{ id, label, blurb }` to `SKIN_OPTIONS` in `src/main/phone-remote/react/skins.ts`.
+3. Run `npm run build:phone-remote`, open the remote on your phone and pick it in Settings > Display > Skin.
+4. Open a pull request with a screenshot of your skin on a real phone.
+
+Good ones go into the skin store, so everyone who uses MightyMouse can wear them.
 
 ## Contributing
 

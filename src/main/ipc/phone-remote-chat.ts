@@ -236,7 +236,10 @@ export async function handleChatSend(sessionId: string | undefined, rawText: str
       ok: result.error === undefined,
       // On failure runMighty still logs the turn, so send the error as the reply
       // text — the thread shows what went wrong in place, not a vanishing toast.
-      reply: result.error === undefined ? result.answer : CONFIG.UI_LABELS.RUN_FAIL_REASON[result.error] ?? CONFIG.UI_LABELS.RUN_FAIL_UNKNOWN
+      reply:
+        result.error === undefined || result.error === 'stopped'
+          ? result.answer
+          : CONFIG.UI_LABELS.RUN_FAIL_REASON[result.error] ?? CONFIG.UI_LABELS.RUN_FAIL_UNKNOWN
     })
   } catch (err) {
     // runMighty documents that it never throws, but this is the outermost frame

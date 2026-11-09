@@ -88,7 +88,7 @@ export const CONFIG = {
   RELEASE_PAGE_URL: `https://github.com/${RELEASES_REPO}/releases/latest`,
   RELEASE_LATEST_API: `https://api.github.com/repos/${RELEASES_REPO}/releases/latest`,
   // Keep in sync with package.json "version". Shown in Settings footer.
-  APP_VERSION: '0.55.0',
+  APP_VERSION: '0.56.0',
 
   // mightymouse:// in prod/dev; mightymouse-staging:// in a staging packaged build
   // (registered in main/index.ts, matched in deeplink.ts — read PROTOCOL_SCHEME

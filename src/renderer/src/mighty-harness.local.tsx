@@ -85,6 +85,24 @@ const prefs = {
   decisionCards: true
 }
 
+const homeClosed = new URLSearchParams(location.search).has('closed')
+const homeLog = <T,>(kind: string, value: T): T => {
+  ;((window as unknown as { __homeLog?: unknown[] }).__homeLog ??= []).push({ kind, value })
+  return value
+}
+const trailTitles = state === 'home' ? ['Phone chat edge cases', 'Landing page lock protection', 'Projects icons addition'] : ['Fix login bug', 'Add dark mode', 'Write release notes']
+const trailSessions = trailTitles.map((label, i) => ({
+  label,
+  stated: label,
+  tldr: label,
+  sessionId: `trail-${i + 1}`,
+  cwd: '/Users/me/shop',
+  since: Date.now() - (i + 1) * 600_000,
+  lastActivityAt: Date.now() - i * 60_000,
+  agent: 'claude',
+  model: 'Opus 5'
+}))
+
 const explicit: Record<string, unknown> = {
   settingsGetPrefs: async () => prefs,
   getRecoveredRecordings: async () => ({ working: false, items: [] }),
@@ -95,8 +113,40 @@ const explicit: Record<string, unknown> = {
   chatSourceModels: async () => [],
   update: { getState: async () => (updateReady ? { state: 'downloaded', version: '0.50.0' } : { state: 'idle' }) },
   auth: { getSession: async () => ({ email: 'dev2@example.com' }) },
-  agentRelayGetStatus: async () => ({ enabled: false, running: false, agentSessions: [] }),
+  agentRelayGetStatus: async () =>
+    state === 'trail' || state === 'home'
+      ? { enabled: true, running: true, agentSessions: trailSessions }
+      : { enabled: false, running: false, agentSessions: [] },
   agentRelayListClients: async () => [],
+  codeConductorWorkspaces: async () => [],
+  codeRouteTask: (said: string) =>
+    new Promise((done) => setTimeout(() => done(homeLog('route', /phone/i.test(said) ? 'trail-1' : null)), 2500)),
+  agentRelaySessionReply: async (ref: string, said: string) =>
+    homeLog('reply', { ref, said, ok: !homeClosed }) && (homeClosed ? { ok: false } : { ok: true, via: 'tmux' }),
+  codeStartupPeek: async () => ({ alive: true, prompt: null, tail: ['Starting Claude Code…'] }),
+  codeStartAgent: async (input: { message?: string }) => homeLog('start', { message: input.message }) && { ok: true, pane: '%harness' },
+  agentRelaySessionTranscript: async () => [],
+  agentRelaySessionChecklist: async () => null,
+  agentRelaySessionKeys: async () => true,
+  agentRelaySessionHelpers: async () => [],
+  agentRelaySessionSent: async () => [],
+  agentRelaySessionScreen: async () => ({ text: '', cols: 96, rows: 40, history: 0, alt: false, streamed: true }),
+  agentRelaySessionWatch: async () => true,
+  agentRelaySessionFit: async () => true,
+  agentRelaySessionUsage: async () => ({ output: 0, context: 0, contextWindow: 200_000 }),
+  agentRelaySuggest: async () => [],
+  agentRelaySessionTools: async () => [],
+  agentRelaySessionAffects: async () => ({ surfaces: [], envs: [] }),
+  repoGitState: async () => ({ branch: 'main', ahead: 0, dirty: 0, pending: [] }),
+  repoGitChanges: async () => [],
+  codeAgentModels: async () => ({ options: [], selected: { harness: 'claude', model: 'opus' }, needsSetup: [] }),
+  planLoginsList: async () => [],
+  planLoginPicks: async () => ({}),
+  markupList: async () => [],
+  built: { list: async () => [] },
+  infra: { list: async () => [] },
+  sideBrowser: { recent: async () => [], topSites: async () => [] },
+  mcp: { list: async () => [], health: async () => [] },
   agentRelayGetRequests: async () => ({ pending: [], resolved: [], dismissed: [] }),
   mighty: {
     onOpenSession: (cb: (id: string) => void) => {
@@ -136,6 +186,6 @@ const layer = (base: unknown, over: unknown): unknown =>
   })
 
 Object.assign(window, { api: layer(undefined, explicit) })
-history.replaceState(null, '', `?window=mighty&state=${state}${modelPreview ? `&models${['copy', 'open'].filter((k) => new URLSearchParams(location.search).has(k)).map((k) => `&${k}`).join('')}` : ''}${updateReady ? '&update=ready' : ''}`)
+history.replaceState(null, '', `?window=mighty&state=${state}${modelPreview ? `&models${['copy', 'open'].filter((k) => new URLSearchParams(location.search).has(k)).map((k) => `&${k}`).join('')}` : ''}${updateReady ? '&update=ready' : ''}${state === 'trail' || state === 'home' ? '&tab=code' : ''}`)
 if (modelPreview) await import('./project-scope-harness.local')
 else await import('./main')

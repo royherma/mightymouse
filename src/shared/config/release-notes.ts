@@ -4,6 +4,42 @@
 
 export const RELEASE_NOTES = [
   {
+    version: '0.56.0',
+    date: '2026-11-09',
+    changes: [
+      {
+        icon: '💬',
+        title: 'Change your mind MID-answer.',
+        detail:
+          'Type while an answer is still coming and it stops and takes your new message, on your computer or your phone. What it already wrote stays in the chat.'
+      },
+      {
+        icon: '⚡',
+        title: 'Agents keep going while you\'re away.',
+        detail:
+          'Hover the reply ideas and pick a timer. If you don\'t answer in time, the first idea sends ITSELF.'
+      },
+      {
+        icon: '🔑',
+        title: 'Switch Claude or Codex accounts in ONE click.',
+        detail:
+          'Pick which login a new session uses right in the model picker. Each session shows the account and plan it runs on.'
+      },
+      {
+        icon: '🏠',
+        title: 'Start a task right from your project.',
+        detail:
+          'Click the house next to a project to see its sessions and start a new one there. Cmd+[ and Cmd+] jump back and forward between sessions.'
+      },
+      {
+        icon: '✨',
+        title: 'Models now have names you recognise.',
+        detail:
+          'Pickers, your phone and Settings say Opus 5.5 or Qwen3.5 9B instead of long model codes.'
+      }
+    ]
+  },
+  {
     version: '0.55.0',
     date: '2026-11-07',
     changes: [

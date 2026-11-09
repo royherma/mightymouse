@@ -59,7 +59,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "store-add-product-structured-data",
@@ -91,7 +91,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "saas-recover-failed-payments-automatically",
@@ -123,7 +123,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "saas-track-the-first-value-moment",
@@ -155,7 +155,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "saas-add-a-one-step-cancel-save-offer",
@@ -187,7 +187,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "app-add-a-paywall-test",
@@ -219,7 +219,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "app-add-onboarding-step-tracking",
@@ -251,7 +251,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "app-fix-crashes-in-startup-path",
@@ -282,7 +282,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "marketplace-fix-empty-search-results",
@@ -314,7 +314,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "marketplace-shorten-the-listing-creation-flow",
@@ -345,7 +345,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "marketplace-add-message-reply-tracking",
@@ -377,7 +377,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "extension-add-a-first-run-welcome-page",
@@ -408,7 +408,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "extension-cut-permissions-to-the-minimum",
@@ -438,7 +438,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "extension-complete-the-store-listing-assets",
@@ -469,7 +469,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "devtool-add-a-copy-paste-quickstart",
@@ -500,7 +500,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "devtool-publish-an-openapi-spec-and-collection",
@@ -531,7 +531,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "devtool-make-error-messages-actionable",
@@ -562,7 +562,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "content-add-article-structured-data-and-meta-tags",
@@ -594,7 +594,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "content-add-sitemap-rss-and-internal-links",
@@ -626,7 +626,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "content-reserve-space-for-images-and-ads",
@@ -657,7 +657,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "landing-shorten-the-signup-form",
@@ -689,7 +689,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "landing-speed-up-the-hero-section",
@@ -720,7 +720,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "landing-add-signup-conversion-tracking",
@@ -752,7 +752,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "internal-add-loading-empty-and-error-states",
@@ -783,7 +783,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "internal-add-usage-logging",
@@ -814,7 +814,7 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   },
   {
     "id": "internal-cut-slow-queries-and-bulk-loads",
@@ -846,6 +846,6 @@
     },
     "status": "live",
     "added": "2026-10-01",
-    "checked": "2026-11-02"
+    "checked": "2026-11-09"
   }
 ]

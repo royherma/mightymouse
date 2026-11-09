@@ -34,7 +34,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   min-width: 0;
   max-width: 22rem;
   height: 30px;
@@ -687,8 +687,7 @@
   transition: opacity 0.16s;
 }
 .session-detail-suggest:hover .session-detail-suggest-auto-wrap,
-.session-detail-suggest-auto-wrap:focus-within,
-.session-detail-suggest-auto-wrap[data-counting] {
+.session-detail-suggest-auto-wrap:focus-within {
   opacity: 1;
   pointer-events: auto;
 }

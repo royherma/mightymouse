@@ -20,6 +20,7 @@ import { useIsAdmin } from '../hooks/useIsAdmin'
  * `@shared/relay-cards`, and nothing about how it looks is shared.
  */
 
+import { EMPTY_TRAIL, claimStepKey, trailBack, trailForward, trailMove, type AgentsTrail } from './agents-trail'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, MouseEvent as ReactMouseEvent } from 'react'
 import {
@@ -149,11 +150,6 @@ import {
 } from '../../../shared/relay-status'
 
 const ADMIN_CODE_TABS: readonly CodeTab[] = ['factory', 'keys']
-const AGENTS_TRAIL_MAX = 30
-
-type AgentsSpot = { label: string | null; tableId: string | null; fromTable: boolean }
-const sameSpot = (a: AgentsSpot, b: AgentsSpot): boolean =>
-  a.label === b.label && a.tableId === b.tableId && a.fromTable === b.fromTable
 
 const L = CONFIG.UI_LABELS
 
@@ -553,22 +549,10 @@ export function CodePanel(props: {
   const [agentTableId, setAgentTableId] = useState<string | null>(null)
   const [agentFromTable, setAgentFromTable] = useState(false)
   const sheetLabelBeforeTable = useRef<string | null>(null)
-  const [agentsTrail, setAgentsTrail] = useState<AgentsSpot[]>([])
-  const [agentsAhead, setAgentsAhead] = useState<AgentsSpot[]>([])
-  const lastAgentsSpot = useRef<AgentsSpot>({ label: null, tableId: null, fromTable: false })
-  const steppingBack = useRef(false)
+  const [agentsTrail, setAgentsTrail] = useState<AgentsTrail>(EMPTY_TRAIL)
   useEffect(() => {
-    const prev = lastAgentsSpot.current
     const next = { label: detailLabel, tableId: agentTableId, fromTable: agentFromTable }
-    if (sameSpot(prev, next)) return
-    lastAgentsSpot.current = next
-    if (steppingBack.current) {
-      steppingBack.current = false
-      return
-    }
-    if (tab !== 'agents') return
-    setAgentsTrail((t) => [...t, prev].slice(-AGENTS_TRAIL_MAX))
-    setAgentsAhead([])
+    setAgentsTrail((t) => trailMove(t, next, tab === 'agents'))
   }, [detailLabel, agentTableId, agentFromTable])
 
   // Set only when the sheet was opened from Shared work. It carries that
@@ -736,43 +720,30 @@ export function CodePanel(props: {
     setAwaitingAgent(null)
   }, [])
 
-  const agentsBack = agentsTrail.at(-1)
-  const stepToAgentsSpot = (spot: AgentsSpot): void => {
-    steppingBack.current = !sameSpot(spot, lastAgentsSpot.current)
+  const agentsBack = agentsTrail.back.at(-1)
+  const stepAgents = (to: AgentsTrail | null): void => {
+    if (!to) return
+    setAgentsTrail(to)
     setAgentDraft(null)
     setAwaitingAgent(null)
-    setDetailLabel(spot.label)
-    setAgentTableId(spot.tableId)
-    setAgentFromTable(spot.fromTable)
+    setDetailLabel(to.at.label)
+    setAgentTableId(to.at.tableId)
+    setAgentFromTable(to.at.fromTable)
   }
-  const goBackInAgents = (): void => {
-    if (!agentsBack) return
-    setAgentsTrail((t) => t.slice(0, -1))
-    setAgentsAhead((a) => [...a, lastAgentsSpot.current].slice(-AGENTS_TRAIL_MAX))
-    stepToAgentsSpot(agentsBack)
-  }
-  const goForwardInAgents = (): void => {
-    const ahead = agentsAhead.at(-1)
-    if (!ahead) return
-    setAgentsAhead((a) => a.slice(0, -1))
-    setAgentsTrail((t) => [...t, lastAgentsSpot.current].slice(-AGENTS_TRAIL_MAX))
-    stepToAgentsSpot(ahead)
-  }
-  const agentsStepKeys = useRef({ back: goBackInAgents, forward: goForwardInAgents, canBack: false, canForward: false })
+  const goBackInAgents = (): void => stepAgents(trailBack(agentsTrail))
+  const agentsStepKeys = useRef({ trail: agentsTrail, enabled: false, step: stepAgents })
   agentsStepKeys.current = {
-    back: goBackInAgents,
-    forward: goForwardInAgents,
-    canBack: variant === 'tab' && active && activeTab === 'agents' && !!agentsBack,
-    canForward: variant === 'tab' && active && activeTab === 'agents' && agentsAhead.length > 0
+    trail: agentsTrail,
+    enabled: variant === 'tab' && active && activeTab === 'agents',
+    step: stepAgents
   }
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
-      if (!e.metaKey || e.shiftKey || e.altKey || e.ctrlKey) return
       const k = agentsStepKeys.current
-      if (e.code === 'BracketLeft' && k.canBack) k.back()
-      else if (e.code === 'BracketRight' && k.canForward) k.forward()
-      else return
+      const key = claimStepKey(e, k.trail, k.enabled)
+      if (!key) return
       e.preventDefault()
+      k.step(key === 'back' ? trailBack(k.trail) : trailForward(k.trail))
     }
     window.addEventListener('keydown', onKey, true)
     return () => window.removeEventListener('keydown', onKey, true)

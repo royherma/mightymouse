@@ -41,14 +41,34 @@ export function usePostNotice(notice: SidebarNotice | null): void {
 }
 
 const DISMISSED_KEY = 'sidebar-notices-dismissed'
+const LEGACY_ID_LIST_KEYS: Record<string, string> = { 'conductor-import-dismissed': 'conductor-import' }
+
+function readJson(key: string, fallback: unknown): unknown {
+  try {
+    return JSON.parse(localStorage.getItem(key) ?? 'null') ?? fallback
+  } catch {
+    return fallback
+  }
+}
 
 function readDismissed(): Record<string, string> {
-  try {
-    const saved: unknown = JSON.parse(localStorage.getItem(DISMISSED_KEY) ?? '{}')
-    return saved && typeof saved === 'object' && !Array.isArray(saved) ? (saved as Record<string, string>) : {}
-  } catch {
-    return {}
+  const saved = readJson(DISMISSED_KEY, {})
+  const dismissed = saved && typeof saved === 'object' && !Array.isArray(saved) ? { ...(saved as Record<string, string>) } : {}
+  let migrated = false
+  for (const [legacyKey, id] of Object.entries(LEGACY_ID_LIST_KEYS)) {
+    const ids = readJson(legacyKey, null)
+    if (!Array.isArray(ids)) continue
+    if (!(id in dismissed)) dismissed[id] = ids.filter((x): x is string => typeof x === 'string').sort().join(',')
+    migrated = true
   }
+  if (!migrated) return dismissed
+  try {
+    localStorage.setItem(DISMISSED_KEY, JSON.stringify(dismissed))
+    for (const legacyKey of Object.keys(LEGACY_ID_LIST_KEYS)) localStorage.removeItem(legacyKey)
+  } catch {
+    return dismissed
+  }
+  return dismissed
 }
 
 export function SidebarNotices(): JSX.Element | null {

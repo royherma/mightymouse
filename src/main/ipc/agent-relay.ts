@@ -58,7 +58,8 @@ import {
 import { isGeneratedTag, isPlaceholderName, nameFromMessage, sessionActiveAt, splitIdentity } from '../../shared/relay-status'
 import { publishedNameFor } from '../agent-relay/mcp/published-names'
 import { recordOpeningTurn, sendToSession, sentTurnsFor } from './phone-remote-chat'
-import { routeTask, type TaskCandidate } from '../agent-relay/task-router'
+import { routeTask } from '../agent-relay/task-router'
+import type { TaskCandidate } from '../../shared/task-route'
 import { setPageReplyHost } from '../agent-relay/page-reply'
 import { computeAttention } from '../agent-relay/coordination/attention'
 import { MIGHTY } from '../store/mighty'
@@ -881,7 +882,7 @@ export function registerAgentRelayHandlers(): void {
     const usage = session ? readSessionUsage(session) : null
     const home = session && usage ? sessionAccountHome(session) : null
     const account = home ? await planAccountFor(home.backend, home.dir) : null
-    return usage && account ? { ...usage, account: account.plan ? `${account.email} · ${planTierLabel(account.plan)}` : account.email } : usage
+    return usage && account ? { ...usage, account: account.plan ? `${planTierLabel(account.plan)} · ${account.email}` : account.email } : usage
   })
 
   ipcMain.handle(CHANNELS.agentRelaySessionAffects, async (_e, ref: string): Promise<SessionAffects> => {

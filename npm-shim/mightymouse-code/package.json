@@ -1,6 +1,6 @@
 {
   "name": "mightymouse-code",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Give your coding agents a channel to your phone -- notify, ask, approve, show, all through the MightyMouse Mac app.",
   "type": "module",
   "bin": {
@@ -15,10 +15,27 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0"
   },
-  "license": "UNLICENSED",
+  "license": "MIT",
   "homepage": "https://getmightymouse.com/code",
   "repository": {
     "type": "git",
-    "url": "https://github.com/royherma/MightyMouse"
-  }
+    "url": "git+https://github.com/royherma/mightymouse.git",
+    "directory": "npm-shim/mightymouse-code"
+  },
+  "bugs": {
+    "url": "https://github.com/royherma/mightymouse/issues"
+  },
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "claude-code",
+    "codex",
+    "coding-agents",
+    "ai-agents",
+    "notifications",
+    "phone",
+    "remote",
+    "open-source",
+    "mightymouse"
+  ]
 }

@@ -2065,7 +2065,8 @@ class MMPhoneDemo extends HTMLElement {
 
   async boot(skin = 'proII') {
     if (!this.html) {
-      const res = await fetch(`${this.bundleUrl}index.html`)
+      const res = await fetch(`${this.bundleUrl}index.html`).catch(() => null)
+      if (!res) return false
       if (!res.ok) throw new Error(`no bundle at ${this.bundleUrl} — build:phone-remote`)
       // The <base> keeps every relative asset resolving once the document is
       // loaded into a srcdoc iframe whose own URL is this page; "./" src/href
@@ -2983,7 +2984,7 @@ class MMPhoneDemo extends HTMLElement {
         // on screen for 3.1s at the very end of the loop -- the decks changed
         // underneath but the card sat frozen, which reads as a stuck demo rather
         // than a beat. Each swap gets its own line so the text moves with them.
-        cap: ['Make it yours', 'Or this one', 'Or build your own'][i],
+        cap: ['Make it yours', 'Or this one', 'More in the skin store'][i],
         hud: 'Custom skins',
         skin: `remote:${s.id}`,
         enter: () => {

@@ -225,7 +225,7 @@ async function changeSet(cwd: string, base: string, from: string, to?: string, w
   const [numstat, untracked, patch] = await Promise.all([
     soft(cwd, ['diff', '--numstat', '--no-renames', ...range]),
     withUntracked ? soft(cwd, ['ls-files', '--others', '--exclude-standard']) : '',
-    git(cwd, ['diff', '--no-renames', ...range], READ_TIMEOUT_MS, PATCH_MAX_BUFFER)
+    git(cwd, ['diff', '--no-renames', ...range], READ_TIMEOUT_MS, PATCH_MAX_BUFFER).catch(() => null)
   ])
   const files = numstat
     .split('\n')
@@ -235,7 +235,7 @@ async function changeSet(cwd: string, base: string, from: string, to?: string, w
       return { path: path.join('\t'), added: Number(added) || undefined, removed: Number(removed) || undefined }
     })
   for (const path of untracked.split('\n').filter(Boolean)) files.push({ path, added: undefined, removed: undefined })
-  return { base, files, patch: patch.slice(0, PATCH_MAX_CHARS), truncated: patch.length > PATCH_MAX_CHARS }
+  return { base, files, patch: (patch ?? '').slice(0, PATCH_MAX_CHARS), truncated: patch === null || patch.length > PATCH_MAX_CHARS }
 }
 
 export async function repoGitChanges(ref: string, scope: ChangeScope = 'branch'): Promise<ChangeSet | null> {

@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>MightyMouse - floating reply window harness</title>
+    <style>
+      html body { margin: 0; height: 100vh; overflow: hidden; background: #e9e6e1 !important; font-family: -apple-system, sans-serif; }
+      .page { position: fixed; inset: 0; display: flex; flex-direction: column; color: #222; }
+      .page-bar { height: 38px; background: #d9d6d1; display: flex; align-items: center; gap: 12px; padding: 0 14px; font-size: 12px; color: #555; }
+      .page-bar i { flex: 1; background: #fff; border-radius: 6px; padding: 4px 10px; font-style: normal; }
+      .page-bar nav { display: flex; gap: 10px; }
+      .page-bar nav a { color: #9a4a10; }
+      .page h1 { margin: 22px 32px 14px; font-size: 22px; }
+      .cards { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 150px; gap: 14px; padding: 0 32px; }
+      .cards div { background: #fff; border-radius: 10px; padding: 12px; font-size: 12px; color: #666; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+      .cards b { display: block; color: #222; font-size: 13px; margin-bottom: 6px; }
+      #root { background: var(--window-bg); position: fixed; left: 50%; transform: translateX(-50%); bottom: 24px; width: 1000px; height: 760px; border-radius: 12px; overflow: hidden; box-shadow: 0 18px 50px rgba(0,0,0,.35), 0 0 0 1px rgba(0,0,0,.12); z-index: 10; }
+      #root > div { height: 100%; }
+      body[data-hidden] #root { visibility: hidden; }
+      #show { position: fixed; right: 24px; bottom: 24px; display: none; padding: 8px 12px; border-radius: 8px; background: #222; color: #fff; font-size: 12px; text-decoration: none; }
+      body[data-hidden] #show { display: block; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <div class="page-bar">
+        <i>file:///Users/roy/Development/jobboard/.claude/artifacts/apply-click-outreach.html</i>
+        <nav>
+          <b>States:</b>
+          <a href="?aim=s1">made this page</a>
+          <a href="?aim=s2&why=Most%20recent">most recent, working</a>
+          <a href="?aim=s3&why=Most%20recent">ended</a>
+          <a href="?n=0">no agents</a>
+          <a href="?aim=s1&fail=1">send fails</a>
+          <a href="?aim=s1&load=1">loading</a>
+          <a href="?aim=s1&menu=1">switcher open</a>
+          <a href="?aim=s1&stay=s2">pinned, page is another agent's</a>
+        </nav>
+      </div>
+      <h1>Apply-click outreach - 42 people</h1>
+      <div class="cards" id="cards"></div>
+    </div>
+    <a id="show" href="javascript:document.body.removeAttribute('data-hidden')">Hidden - the hotkey brings it back (click here)</a>
+    <div id="root"></div>
+    <script>
+      document.getElementById('cards').innerHTML = Array.from({ length: 16 }, (_, i) =>
+        '<div><b>Person ' + (i + 1) + '</b>Clicked apply 2 days ago.<br>Draft: Hi, saw you looked at the role...</div>').join('')
+    </script>
+    <script src="/coord-stub.local.js"></script>
+    <script>
+      {
+      const base = window.api
+      const q = new URLSearchParams(location.search)
+      const now = Date.now()
+      const all = [
+        { label: 'jobboard/main', sessionId: 's1', tldr: 'Apply-click outreach page', project: { name: 'jobboard' }, cwd: '/Users/roy/Development/jobboard', since: now - 3600000, pid: 101, agent: 'claude', model: 'Opus 5' },
+        { label: 'ShowAndTell/dev', sessionId: 's2', tldr: 'Floating reply window', project: { name: 'MightyMouse' }, cwd: '/Users/roy/Development/ShowAndTell', since: now - 900000, pid: 102, agent: 'claude', model: 'Opus 5', busySince: now - 40000 },
+        { label: 'hyperframes/main', sessionId: 's3', tldr: 'Export presets', project: { name: 'hyperframes' }, cwd: '/Users/roy/Development/hyperframes', since: now - 7200000, stale: true, staleSince: now - 600000 }
+      ]
+      const sessions = q.get('n') === '0' ? [] : all
+      const talk = {
+        s1: [
+          { role: 'you', at: now - 900000, text: 'Build the outreach page for everyone who clicked apply.' },
+          { role: 'agent', at: now - 600000, text: 'Page is up: 42 people, one card each, with a drafted email per card. Tell me which ones to change.' }
+        ],
+        s2: [
+          { role: 'you', at: now - 300000, text: 'Make a floating window so I can reply from anywhere.' },
+          { role: 'agent', at: now - 200000, text: 'Building the harness first so we can agree on how it looks.' }
+        ],
+        s3: [{ role: 'agent', at: now - 700000, text: 'Export presets are done and committed.' }]
+      }
+      const sent = []
+      const extra = {
+        agentRelayGetStatus: () => Promise.resolve({ enabled: true, running: true, agentCount: sessions.length, agentSessions: sessions }),
+        agentRelayListClients: () => Promise.resolve([]),
+        agentRelayGetRequests: () => Promise.resolve({ pending: [], resolved: [], dismissed: [] }),
+        onAgentRelayRequestsChanged: () => () => {},
+        onAgentRelayStatusChanged: () => () => {},
+        agentRelaySessionTranscript: (ref) => (q.get('load') ? new Promise(() => {}) : Promise.resolve(talk[ref] ?? [])),
+        agentRelaySessionSent: () => Promise.resolve(sent),
+        agentRelaySessionHelpers: () => Promise.resolve([]),
+        agentRelaySuggest: () => Promise.resolve([{ emoji: '✅', text: 'Yes, draft SO-ARM102 with add-robot' }, { emoji: '✋', text: "No, don't add it; just review the find" }, { emoji: '🔍', text: 'Show the scout log for today' }]),
+        agentRelaySessionReply: (_ref, text, paths) => {
+          if (q.get('fail')) return Promise.resolve({ ok: false })
+          sent.push({ text, at: Date.now(), files: paths })
+          return Promise.resolve({ ok: true, via: 'tmux' })
+        }
+      }
+      window.api = new Proxy({}, { get: (_t, p) => (p in extra ? extra[p] : base[p]) })
+      }
+    </script>
+    <script type="module" src="/src/reply-harness.local.tsx"></script>
+  </body>
+</html>
