@@ -160,7 +160,7 @@ export const CONFIG = {
   OPENCODE_PATH: '',
   OPENCODE_MODEL: 'openrouter/anthropic/claude-sonnet-5.5',
   OPENROUTER_DEFAULT_MODEL: 'anthropic/claude-sonnet-5.5',
-  OPENCODE_FAST_MODEL: 'openrouter/anthropic/claude-fable-5.1',
+  OPENCODE_FAST_MODEL: 'openrouter/anthropic/claude-fable-5.2',
   // gemini's `auto` model selection was unreliable/slow-to-hang in headless runs
   // during testing — always pass an explicit -m, never leave it empty.
   GEMINI_PATH: '',
@@ -207,7 +207,7 @@ export const CONFIG = {
   MODEL_CATALOG: [
     { id: 'anthropic/claude-opus-5.5', label: 'Opus 5.5', tier: 'premium' as const },
     { id: 'anthropic/claude-sonnet-5.5', label: 'Sonnet 5.5', tier: 'mid' as const },
-    { id: 'anthropic/claude-fable-5.1', label: 'Fable 5.1', tier: 'premium' as const },
+    { id: 'anthropic/claude-fable-5.2', label: 'Fable 5.2', tier: 'premium' as const },
     { id: 'anthropic/claude-haiku-5.5', label: 'Haiku 5.5', tier: 'cheap' as const },
     { id: 'openai/gpt-6-astra', label: 'GPT-6 Astra', tier: 'premium' as const },
     { id: 'openai/gpt-6.1-sol', label: 'GPT-6.1 Sol', tier: 'mid' as const },
