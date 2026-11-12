@@ -100,7 +100,8 @@ const trailSessions = trailTitles.map((label, i) => ({
   since: Date.now() - (i + 1) * 600_000,
   lastActivityAt: Date.now() - i * 60_000,
   agent: 'claude',
-  model: 'Opus 5'
+  model: 'Opus 5',
+  ...(i === 0 && new URLSearchParams(location.search).has('busy') ? { busySince: Date.now() - 30_000, pid: 4242 } : {})
 }))
 
 const explicit: Record<string, unknown> = {
@@ -125,6 +126,9 @@ const explicit: Record<string, unknown> = {
     homeLog('reply', { ref, said, ok: !homeClosed }) && (homeClosed ? { ok: false } : { ok: true, via: 'tmux' }),
   codeStartupPeek: async () => ({ alive: true, prompt: null, tail: ['Starting Claude Code…'] }),
   codeStartAgent: async (input: { message?: string }) => homeLog('start', { message: input.message }) && { ok: true, pane: '%harness' },
+  agentRelaySessionBtw: (_ref: string, question: string) =>
+    new Promise((done) => setTimeout(() => done({ ok: true, answer: /url/i.test(question) ? 'The shop runs at http://shop.localhost:4821 - open it now, the login fix is not in yet.' : 'Still on the login fix.' }), 900)),
+  skillsList: async () => [],
   agentRelaySessionTranscript: async () => [],
   agentRelaySessionChecklist: async () => null,
   agentRelaySessionKeys: async () => true,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { JSX, KeyboardEvent, RefObject } from 'react'
 import { X } from 'lucide-react'
 import type { SkillInfo } from '../../../shared/types'
@@ -21,6 +21,7 @@ const APP_COMMANDS: Command[] = [
 ]
 
 const CLAUDE_COMMANDS: Command[] = [
+  { name: 'btw', description: L.SLASH_BTW, midSession: true },
   { name: 'compact', description: L.SLASH_COMPACT, midSession: true },
   { name: 'clear', description: L.SLASH_CLEAR, midSession: true },
   { name: 'init', description: L.SLASH_INIT },
@@ -32,6 +33,42 @@ function rank(list: Command[], query: string): Command[] {
   const hits = list.filter((c) => c.name.toLowerCase().includes(q))
   const starts = (c: Command): number => (c.name.toLowerCase().startsWith(q) ? 0 : 1)
   return hits.sort((a, b) => starts(a) - starts(b)).slice(0, MAX_ITEMS)
+}
+
+const MIRRORED = ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'borderTopWidth', 'borderLeftWidth'] as const
+
+// Drawn over the textarea, not behind it: a positioned sibling always paints above in-flow content.
+function CommandHighlight(props: { inputRef: RefObject<HTMLTextAreaElement | null>; draft: string; command: string }): JSX.Element {
+  const { inputRef, draft, command } = props
+  const [box, setBox] = useState<React.CSSProperties>({ display: 'none' })
+  const [scrollTop, setScrollTop] = useState(0)
+  useLayoutEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    const place = (): void => {
+      const cs = getComputedStyle(el)
+      const style: React.CSSProperties = { top: el.offsetTop, left: el.offsetLeft, width: el.clientWidth, height: el.clientHeight }
+      for (const k of MIRRORED) (style as Record<string, string>)[k] = cs[k]
+      setBox(style)
+    }
+    place()
+    const watch = new ResizeObserver(place)
+    watch.observe(el)
+    const scrolled = (): void => setScrollTop(el.scrollTop)
+    el.addEventListener('scroll', scrolled)
+    return () => {
+      watch.disconnect()
+      el.removeEventListener('scroll', scrolled)
+    }
+  }, [inputRef, draft])
+  return (
+    <div className="slash-highlight" style={box} aria-hidden>
+      <div style={{ transform: `translateY(${-scrollTop}px)` }}>
+        <mark>{command}</mark>
+        {draft.slice(command.length)}
+      </div>
+    </div>
+  )
 }
 
 function useSkills(enabled: boolean): SkillInfo[] {
@@ -92,7 +129,7 @@ export function useSlashMenu(props: {
   cwd?: string
   claude: boolean
   newSession?: boolean
-}): { onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => boolean; menu: JSX.Element | null; popup: JSX.Element | null; openMcp: () => void } {
+}): { onKeyDown: (e: KeyboardEvent<HTMLTextAreaElement>) => boolean; menu: JSX.Element | null; popup: JSX.Element | null; highlight: JSX.Element | null; openMcp: () => void } {
   const { draft, setDraft, inputRef, cwd, claude, newSession } = props
   const [popup, setPopup] = useState<Popup | null>(null)
   const [dismissed, setDismissed] = useState<string | null>(null)
@@ -107,6 +144,12 @@ export function useSlashMenu(props: {
     const skillCommands = skills.map((s) => ({ name: s.name, description: s.description }))
     return rank([...APP_COMMANDS.filter((c) => c.popup !== 'mcp' || cwd), ...CLAUDE_COMMANDS.filter((c) => !(newSession && c.midSession)), ...skillCommands], query)
   }, [query, skills, cwd, newSession])
+
+  const typed = claude ? /^\/([^\s/]+)(?=\s|$)/.exec(draft)?.[1] : undefined
+  const known = typed !== undefined && (
+    [...APP_COMMANDS, ...CLAUDE_COMMANDS].some((c) => !c.popup && c.name === typed) || skills.some((s) => s.name === typed)
+  )
+  const highlight = known ? <CommandHighlight inputRef={inputRef} draft={draft} command={`/${typed}`} /> : null
 
   useEffect(() => setSel(0), [query])
   useEffect(() => {
@@ -198,5 +241,5 @@ export function useSlashMenu(props: {
       </SlashDialog>
     ) : null
 
-  return { onKeyDown, menu, popup: dialog, openMcp: () => setPopup('mcp') }
+  return { onKeyDown, menu, popup: dialog, highlight, openMcp: () => setPopup('mcp') }
 }

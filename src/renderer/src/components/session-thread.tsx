@@ -3,7 +3,7 @@ import { HoverScroll } from './hover-scroll'
 /** The conversation half of the session sheet: the turns and the box you answer in. */
 
 import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import { ArrowUp, Check, ChevronRight, ListChecks, Pencil, RefreshCw, RotateCcw, Sparkles, Square, Timer, Undo2, X } from 'lucide-react'
+import { ArrowUp, Check, ChevronRight, ListChecks, MessageCircleQuestion, Pencil, RefreshCw, RotateCcw, Sparkles, Square, Timer, Undo2, X } from 'lucide-react'
 import { CONFIG } from '../../../shared/config'
 import { suggestContext, type Suggestion } from '../../../shared/swipe-suggest'
 import { agentVendor, isInterruptMarker, sessionCanReply } from '../../../shared/relay-status'
@@ -435,6 +435,31 @@ function ReplySuggestions(props: {
   )
 }
 
+type Aside = { question: string; at: number; answer?: string; failed?: string }
+
+function SideQuestion({ item, cwd, onClose }: { item: Aside; cwd?: string; onClose: () => void }): React.JSX.Element {
+  return (
+    <div className="session-btw" aria-live="polite">
+      <div className="session-btw-head">
+        <MessageCircleQuestion size={13} />
+        <span className="session-btw-question">{item.question}</span>
+        <Button variant="icon" className="session-btw-close" aria-label={CONFIG.UI_LABELS.CODE_SESSION_BTW_CLOSE} title={CONFIG.UI_LABELS.CODE_SESSION_BTW_CLOSE} onClick={onClose}>
+          <X size={13} />
+        </Button>
+      </div>
+      {item.answer ? (
+        <div className="session-btw-answer">
+          <Markdown cwd={cwd}>{item.answer}</Markdown>
+        </div>
+      ) : (
+        <p className={item.failed ? 'session-btw-wait session-detail-failed' : 'session-btw-wait'}>
+          {item.failed ?? CONFIG.UI_LABELS.CODE_SESSION_BTW_WAIT}
+        </p>
+      )}
+    </div>
+  )
+}
+
 function FloatingRecap({ text, onSize }: { text: string; onSize: (px: number) => void }): React.JSX.Element {
   const [open, setOpen] = useState(true)
   const boxRef = useRef<HTMLDivElement>(null)
@@ -725,7 +750,18 @@ export function SessionThread(props: {
   )
   usePasteToComposer(inputRef, att.paste, appendDraft, canReply)
   useComposerInbox(inputRef, att.addPaths, canReply)
-  const slash = useSlashMenu({ draft, setDraft, inputRef, cwd: session.cwd, claude: agentVendor(session.agent) === 'claude' })
+  const isClaude = agentVendor(session.agent) === 'claude'
+  const slash = useSlashMenu({ draft, setDraft, inputRef, cwd: session.cwd, claude: isClaude })
+  const [asides, setAsides] = useState<Aside[]>([])
+  const askAside = (question: string): void => {
+    const at = Date.now()
+    setAsides((prev) => [...prev, { question, at }])
+    setDraft('')
+    void window.api
+      .agentRelaySessionBtw(sessionRef, question)
+      .catch(() => ({ ok: false as const, reason: 'No answer came back. Try again.' }))
+      .then((r) => setAsides((prev) => prev.map((x) => (x.at !== at ? x : r.ok ? { ...x, answer: r.answer } : { ...x, failed: r.reason }))))
+  }
 
   const sendingRef = useRef(false)
   const browserPage = useContext(BrowserPageContext)
@@ -733,6 +769,12 @@ export function SessionThread(props: {
   const submit = async (override?: string): Promise<boolean> => {
     const text = (override ?? draft).trim()
     const files = att.attachments
+    const aside = isClaude && !ended ? /^\/btw(?:\s+([\s\S]*))?$/i.exec(text) : null
+    if (aside) {
+      if (!aside[1]?.trim() || !canReply) return false
+      askAside(aside[1])
+      return true
+    }
     // An attachment on its own is a message: the agent opens the file and has
     // something to work on without a word of prose.
     if ((!text && files.length === 0) || !canReply || sendingRef.current) return false
@@ -985,6 +1027,14 @@ export function SessionThread(props: {
           }}
         />
       )}
+      {asides.map((item) => (
+        <SideQuestion
+          key={item.at}
+          item={item}
+          cwd={session.cwd}
+          onClose={() => setAsides((prev) => prev.filter((x) => x.at !== item.at))}
+        />
+      ))}
       {att.attachments.length > 0 && (
         <div className="session-detail-attachments">
           <AttachBar attachments={att.attachments} onRemove={att.remove} />
@@ -1010,9 +1060,11 @@ export function SessionThread(props: {
       {(!ended || onResume) && !fillTerminal && <div
         className="session-detail-composer"
         data-disabled={canReply ? undefined : ''}
+        data-command={canReply && slash.highlight ? '' : undefined}
       >
         {canReply && slash.menu}
         {canReply && <AttachButton onClick={() => void att.pick()} />}
+        {canReply && slash.highlight}
         <textarea
           ref={inputRef}
           className="session-detail-input"
@@ -1025,7 +1077,9 @@ export function SessionThread(props: {
             canReply
               ? att.attachments.length > 0
                 ? CONFIG.UI_LABELS.CODE_ATTACHED_PLACEHOLDER
-                : CONFIG.UI_LABELS.CODE_SESSION_REPLY_PLACEHOLDER
+                : thinking && isClaude
+                  ? CONFIG.UI_LABELS.CODE_SESSION_BUSY_PLACEHOLDER
+                  : CONFIG.UI_LABELS.CODE_SESSION_REPLY_PLACEHOLDER
               : booting || resumed
                 ? CONFIG.UI_LABELS.CODE_SESSION_REPLY_AFTER_START
                 : ''

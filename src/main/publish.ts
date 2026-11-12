@@ -185,11 +185,11 @@ async function putOnline(
   const total = files.length
   report(0, total, 'checking')
   const previous = await readSite(repoFolder)
-  if (previous && previous.name !== name) await call({ action: 'unpublish', name: previous.name })
   const grant = await call({ action: 'publish', name, projectName, fileCount: files.length, bytes })
   report(0, total, 'sending')
   await upload(grant.uploadUrl, grant.token, files, (sent) => report(sent, total, 'sending'))
   report(total, total, 'finishing')
+  if (previous && previous.name !== name) await call({ action: 'unpublish', name: previous.name })
   const site: PublishedSite = {
     name,
     url: grant.url,

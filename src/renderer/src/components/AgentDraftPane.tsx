@@ -157,6 +157,7 @@ export function AgentDraftPane({
             {att.attachments.length > 0 && (
               <AttachBar attachments={att.attachments} onRemove={att.remove} />
             )}
+            {slash.highlight}
             <textarea
               ref={inputRef}
               value={text}

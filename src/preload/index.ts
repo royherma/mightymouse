@@ -1201,6 +1201,8 @@ const api = {
     expected?: import('../shared/types').AgentTranscriptTurn,
     page?: { url: string; title: string }
   ) => ipcRenderer.invoke(CHANNELS.agentRelaySessionReply, label, text, paths, expected, page),
+  agentRelaySessionBtw: (label: string, question: string) =>
+    ipcRenderer.invoke(CHANNELS.agentRelaySessionBtw, label, question),
   agentRelaySessionSent: (label: string) =>
     ipcRenderer.invoke(CHANNELS.agentRelaySessionSent, label),
   repoGitState: (ref: string) => ipcRenderer.invoke(CHANNELS.repoGitState, ref),

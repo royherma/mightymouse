@@ -755,3 +755,45 @@
     transform: scaleX(1);
   }
 }
+
+.session-btw {
+  margin-bottom: var(--space2);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface2);
+  font-size: var(--thread-text);
+  line-height: 1.5;
+  color: var(--on-surface);
+}
+.session-btw-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.session-btw-question {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.session-btw-close {
+  flex: none;
+}
+.session-btw-answer,
+.session-btw-wait {
+  margin: 4px 0 0;
+}
+.session-btw-wait:not(.session-detail-failed) {
+  color: var(--muted);
+}
+.session-detail-thread .session-detail-composer[data-command],
+.session-detail-thread .session-detail-composer[data-command]:not([data-disabled]):focus-within {
+  box-shadow:
+    0 0 0 1.5px var(--accent),
+    0 2px 4px rgba(var(--shadow-rgb), 0.04),
+    0 18px 40px -18px rgba(var(--shadow-rgb), 0.22);
+}

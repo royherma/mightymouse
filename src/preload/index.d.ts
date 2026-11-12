@@ -859,6 +859,7 @@ interface CustomAPI {
     expected?: import('../shared/types').AgentTranscriptTurn,
     page?: { url: string; title: string }
   ) => Promise<{ ok: true; via: 'tmux' | 'tty' } | { ok: false }>
+  agentRelaySessionBtw: (label: string, question: string) => Promise<{ ok: true; answer: string } | { ok: false; reason: string }>
   repoGitState: (ref: string) => Promise<import('../shared/types').RepoGitState | null>
   pulseState: (ref: string) => Promise<import('../shared/session-pulse').PulseState>
   pulseFresh: (sessionIds: string[]) => Promise<Record<string, import('../shared/session-pulse').PulseRow>>

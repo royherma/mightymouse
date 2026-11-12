@@ -3,6 +3,7 @@ import { Button } from './components/Button'
 import { Spinner } from './components/Spinner'
 import { CONFIG } from '../../shared/config'
 import { LIFETIME_ERROR } from '../../shared/types'
+import { isLiveSubscription } from '../../shared/billing-math'
 import type { BillingItemKind, LifetimeOffer, SubscriptionStatus, UpgradeReason } from '../../shared/types'
 
 // The app's single paywall (?window=upgrade). Every upgrade CTA opens this with
@@ -155,7 +156,7 @@ export default function UpgradeApp(): JSX.Element {
     }
   }, [])
 
-  const subscribed = !!subscription && subscription.status === 'active'
+  const subscribed = isLiveSubscription(subscription?.status)
   const subscribedPlan = [...CONFIG.BILLING.PLANS, ...CONFIG.BILLING.YEARLY_PLANS].find((p) => p.id === subscription?.planId)
 
   return (

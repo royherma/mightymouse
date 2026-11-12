@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { spendableCents, shouldShowBucketBreakdown } from '../billing-math'
+import { spendableCents, shouldShowBucketBreakdown, isLiveSubscription } from '../billing-math'
 
 // spendableCents is the single sum every gate/display must use (packs +
 // subscription, migration 0016). The bug this design fixes — settings.ts's `ok:`
@@ -60,5 +60,19 @@ describe('shouldShowBucketBreakdown', () => {
 
   it('both zero (e.g. lifetime owner with no packs/sub) → hides the breakdown', () => {
     expect(shouldShowBucketBreakdown(0, 0)).toBe(false)
+  })
+})
+
+describe('isLiveSubscription', () => {
+  it('trialing and past-due subscribers already have a plan, so they are not offered a second one', () => {
+    expect(isLiveSubscription('active')).toBe(true)
+    expect(isLiveSubscription('trialing')).toBe(true)
+    expect(isLiveSubscription('past_due')).toBe(true)
+  })
+
+  it('ended or missing subscriptions see the plans', () => {
+    for (const s of ['canceled', 'incomplete', 'incomplete_expired', 'unpaid', '', null, undefined]) {
+      expect(isLiveSubscription(s)).toBe(false)
+    }
   })
 })

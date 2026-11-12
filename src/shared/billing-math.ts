@@ -106,3 +106,9 @@ export function usageResetText(resetsAt: string | null, now: Date = new Date()):
 export function shouldShowBucketBreakdown(packCents: number, subCents: number): boolean {
   return packCents > 0 && subCents > 0
 }
+
+const LIVE_SUBSCRIPTION_STATUSES = new Set(['active', 'trialing', 'past_due'])
+
+export function isLiveSubscription(status: string | null | undefined): boolean {
+  return !!status && LIVE_SUBSCRIPTION_STATUSES.has(status)
+}

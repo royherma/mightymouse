@@ -108,3 +108,23 @@
 .slash-search:focus {
   border-color: var(--accent);
 }
+
+.slash-highlight {
+  position: absolute;
+  overflow: hidden;
+  border-color: transparent;
+  border-style: solid;
+  border-right-width: 0;
+  border-bottom-width: 0;
+  box-sizing: border-box;
+  color: transparent;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  pointer-events: none;
+}
+.slash-highlight mark {
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+  color: transparent;
+}

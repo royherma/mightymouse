@@ -426,7 +426,7 @@ export function AgentSettingsChip({
 }: {
   models: ReturnType<typeof useAgentModels>
   agents?: { count: number; max: number; onChange: (n: number) => void; onOpenSideBySide?: (n: number) => void }
-}): JSX.Element {
+}): JSX.Element | null {
   const { options, selected, choose, needsSetup, setup, setUp, effort, efforts, setEffort, canPlan, plan, setPlan } = models
   const hasDial = selected !== null && efforts.length > 0
   const { open, setOpen, btnRef, menuRef, pos } = usePopover(WIDE_MENU_W + (hasDial ? SIDE_W : 0), WIDE_MENU_MAX_H, 'left', `${options.length}:${efforts.length}:${selected?.model}`)
@@ -435,7 +435,8 @@ export function AgentSettingsChip({
   const setupRows = needsSetup.map((h) => setupRowFor(h, setup[h], setUp))
   const hasModels = items.length > 0 || setupRows.length > 0
   const L = CONFIG.UI_LABELS
-  const label = selected ? triggerLabel(options, selected) : hasModels ? 'Set up a model' : L.CODE_DRAFT_AGENTS
+  if (!selected && !hasModels) return null
+  const label = selected ? triggerLabel(options, selected) : 'Set up a model'
   const agentCount = agents && agents.count > 1 ? L.CODE_DRAFT_AGENTS_COUNT.replace('{n}', String(agents.count)) : ''
 
   return (

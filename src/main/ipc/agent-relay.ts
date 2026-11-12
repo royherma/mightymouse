@@ -106,6 +106,7 @@ import {
   claudeTranscriptPaths
 } from '../agent-relay/session-transcript'
 import { affectsRecordAbove } from '../infra/scan'
+import { askSideQuestion } from '../agent-relay/side-question'
 import { pickedLoginEnv, planAccountFor } from '../backend/plan-logins'
 import { planTierLabel } from '../../shared/plan-logins'
 import { NO_AFFECTS, sessionAffects, type SessionAffects } from '../../shared/surfaces'
@@ -771,6 +772,11 @@ export function registerAgentRelayHandlers(): void {
     }
   )
 
+  ipcMain.handle(CHANNELS.agentRelaySessionBtw, (_e, ref: string, question: string) => {
+    const session = typeof ref === 'string' ? resolveSessionRef(ref) : undefined
+    if (!session || typeof question !== 'string') return { ok: false, reason: 'This session is gone.' }
+    return askSideQuestion(session, question)
+  })
   ipcMain.handle(CHANNELS.repoGitState, (_e, ref: string) => repoGitState(ref))
   ipcMain.handle(CHANNELS.repoGitPush, (_e, ref: string) => repoGitPush(ref))
   ipcMain.handle(CHANNELS.repoGitChanges, (_e, ref: string, scope?: ChangeScope) => repoGitChanges(ref, scope))

@@ -316,6 +316,7 @@ export const CHANNELS = Object.freeze({
   // the only way to say something to it.
   agentRelaySessionReply: 'agent-relay-session-reply',
   agentRelaySessionSent: 'agent-relay-session-sent',
+  agentRelaySessionBtw: 'agent-relay-session-btw',
   repoGitState: 'repo-git-state',
   pulseState: 'pulse-state',
   pulseFresh: 'pulse-fresh',

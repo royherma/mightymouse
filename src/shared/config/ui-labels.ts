@@ -282,6 +282,9 @@ export const buildUiLabels = (appName: string) => ({
   // line reads as a bug, and it IS connected either way.
   CODE_SESSION_UNNAMED: 'Unnamed session',
   CODE_SESSION_REPLY_PLACEHOLDER: 'Tell it what to do next.',
+  CODE_SESSION_BUSY_PLACEHOLDER: 'Type /btw to ask something without stopping it.',
+  CODE_SESSION_BTW_WAIT: 'Thinking…',
+  CODE_SESSION_BTW_CLOSE: 'Close',
   CODE_SESSION_RECAP: 'Recap',
   CODE_SESSION_RECAP_HIDE: 'Minimize recap',
   CODE_SESSION_RECAP_SHOW: 'Show recap',
@@ -508,6 +511,7 @@ export const buildUiLabels = (appName: string) => ({
   SLASH_CLEAR: 'Start over with a clean conversation',
   SLASH_INIT: 'Write a CLAUDE.md for this folder',
   SLASH_REVIEW: 'Review the current changes',
+  SLASH_BTW: 'Ask a quick question without stopping it',
   SLASH_EMPTY: 'No command matches',
   SLASH_SKILLS_TITLE: 'Skills',
   SLASH_SKILLS_SEARCH: 'Find a skill',

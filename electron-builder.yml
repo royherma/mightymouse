@@ -85,10 +85,7 @@ win:
   # whose signature doesn't match one — which, unsigned, is all of them.
   # Flip back to the default (and add certificateFile) the day a cert lands.
   verifyUpdateCodeSignature: false
-  # node-mac-permissions is optionalDependencies (darwin-only native module) —
-  # never ships in the Windows installer even if a lockfile mismatch installs it.
-  files:
-    - '!node_modules/node-mac-permissions/**'
+  # Never add a `files:` list here: it voids the top-level deny-list and ships the whole repo (v0.56.0).
   # native/** is deliberately absent (it lives under `mac:`): the 19 Swift
   # helpers are Mach-O and cannot run here. `native-win/` is the reserved name
   # for their eventual Windows counterparts — add it here, not at the top level.
