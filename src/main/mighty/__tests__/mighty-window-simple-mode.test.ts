@@ -12,6 +12,7 @@ vi.mock('electron', () => {
     webContents = {
       on: () => {},
       send: (...args: unknown[]) => h.sent.push(args),
+      isCrashed: () => false,
       setZoomLevel: () => {},
       getZoomLevel: () => 0
     }

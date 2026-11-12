@@ -25,6 +25,8 @@ export function takeAgentForCodeTab(): CodeTabHandoff | null {
 
 const MIN_WIDTH = 680
 const MIN_HEIGHT = 480
+// A renderer that dies again within this gap stays dead instead of reload-looping.
+const CRASH_RELOAD_MIN_GAP_MS = 10_000
 
 // Not maximize() — that hides every window behind it and takes a Space of its own.
 function defaultBounds(): WindowBounds {
@@ -79,6 +81,10 @@ export function showMightyWindow(
   focusSettings = false
 ): void {
   if (!focusSettings && focusCapture === undefined && !SETTINGS.advancedMode()) return showSettingsWindow('phoneRemote')
+  if (mightyWindow && !mightyWindow.isDestroyed() && mightyWindow.webContents.isCrashed()) {
+    mightyWindow.destroy()
+    mightyWindow = null
+  }
   if (mightyWindow && !mightyWindow.isDestroyed()) {
     // Already open: tell the live renderer which chat to land on before revealing.
     // undefined (not '') means "no library intent" — '' is a real request for the
@@ -189,6 +195,15 @@ export function showMightyWindow(
     refreshTrayZoom()
   })
 
+  let lastCrashReloadAt = 0
+  mightyWindow.webContents.on('render-process-gone', (_e, details) => {
+    const crashed = mightyWindow
+    if (!crashed || crashed.isDestroyed() || details.reason === 'clean-exit') return
+    if (Date.now() - lastCrashReloadAt < CRASH_RELOAD_MIN_GAP_MS) return
+    lastCrashReloadAt = Date.now()
+    crashed.webContents.reload()
+  })
+
   mightyWindow.on('ready-to-show', () => {
     mightyWindow?.show()
     mightyWindow?.focus()
@@ -211,7 +226,7 @@ export function showMightyWindow(
  * push live-activity phases to the renderer without re-opening the window.
  */
 export function getMightyWindow(): BrowserWindow | null {
-  return mightyWindow && !mightyWindow.isDestroyed() ? mightyWindow : null
+  return mightyWindow && !mightyWindow.isDestroyed() && !mightyWindow.webContents.isCrashed() ? mightyWindow : null
 }
 
 /** The window's current zoom level, or the persisted one when it's closed. */
