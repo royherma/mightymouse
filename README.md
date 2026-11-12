@@ -5,8 +5,8 @@
 <h1 align="center">MightyMouse - Make your computer 100x more useful</h1>
 
 <p align="center">
-  Talk and it types. Your coding agents keep working while you're out.<br>
-  Answer them, and drive the whole computer, from your phone.
+  Free voice typing, no word limit. Every AI agent, side by side.<br>
+  Reach your computer from anywhere.
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@
   <img src="https://img.shields.io/badge/platform-macOS-1f1f1f?style=flat-square&logo=apple" alt="Platform: macOS">
 </p>
 
-<p align="center"><b>The free, open-source alternative to</b></p>
+<p align="center"><b>The $0, open-source replacement for</b></p>
 
 <table align="center">
   <tr>
@@ -28,9 +28,17 @@
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/t3-code/"><img src=".github/assets/alt/t3code.png" width="48" alt="T3 Code"><br><sub>T3 Code</sub></a></td>
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/clicky/"><img src=".github/assets/alt/clicky.png" width="48" alt="Clicky"><br><sub>Clicky</sub></a></td>
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/t3-chat/"><img src=".github/assets/alt/t3chat.png" width="48" alt="T3 Chat"><br><sub>T3 Chat</sub></a></td>
-    <td align="center" width="96"><a href="https://getmightymouse.com/vs/chatgpt/"><img src=".github/assets/alt/chatgpt.png" width="48" alt="ChatGPT app"><br><sub>ChatGPT app</sub></a></td>
-    <td align="center" width="96"><a href="https://getmightymouse.com/vs/claude/"><img src=".github/assets/alt/claude.png" width="48" alt="Claude app"><br><sub>Claude app</sub></a></td>
     <td align="center" width="96"><a href="https://getmightymouse.com/vs/wispr-flow/"><img src=".github/assets/alt/wispr.png" width="48" alt="Wispr Flow"><br><sub>Wispr Flow</sub></a></td>
+  </tr>
+</table>
+
+<p align="center"><b>Works with the AI you already pay for</b></p>
+
+<table align="center">
+  <tr>
+    <td align="center" width="96"><img src=".github/assets/alt/chatgpt.png" width="48" alt="ChatGPT"><br><sub>ChatGPT</sub></td>
+    <td align="center" width="96"><img src=".github/assets/alt/claude.png" width="48" alt="Claude"><br><sub>Claude</sub></td>
+    <td align="center" width="96"><img src=".github/assets/alt/openrouter.png" width="48" alt="OpenRouter"><br><sub>OpenRouter</sub></td>
   </tr>
 </table>
 
