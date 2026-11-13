@@ -1,6 +1,6 @@
 import { Button } from './Button'
 import { JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Archive, ArchiveRestore, Bell, CircleDot, House, Pencil, Pin, PinOff, Plus, Search, Terminal } from 'lucide-react'
+import { Archive, ArchiveRestore, Bell, CircleDot, FolderPlus, House, Pencil, Pin, PinOff, Plus, Search, Terminal } from 'lucide-react'
 import { CONFIG } from '../../../shared/config'
 import { ProjectGroupHeader } from './ProjectIcon'
 import { matchesSession, sessionHaystack, sessionRow } from '../../../shared/relay-status'
@@ -211,7 +211,7 @@ export function AgentProjectList({
   onArchive,
   isPinned,
   onPin,
-  onNewChat,
+  onNewProject,
   searchRequest = 0,
   onConductorStarted,
   heading = CONFIG.UI_LABELS.CODE_AGENTS_SIDEBAR_TITLE
@@ -225,7 +225,7 @@ export function AgentProjectList({
   onArchive?: (session: AgentRelaySessionInfo) => void
   isPinned?: (session: AgentRelaySessionInfo) => boolean
   onPin?: (session: AgentRelaySessionInfo) => void
-  onNewChat?: () => void
+  onNewProject?: () => void
   searchRequest?: number
   selectedKey: string
   showSelected?: boolean
@@ -534,15 +534,15 @@ export function AgentProjectList({
               <Archive size={13} />
             </Button>
           )}
-          {onNewChat && !archived && (
+          {onNewProject && !archived && (
             <Button
               variant="bare"
-              onClick={onNewChat}
+              onClick={onNewProject}
               className="grid place-items-center rounded-md p-1 hover:text-on-surface"
-              title={CONFIG.UI_LABELS.CODE_AGENTS_NEW_CHAT}
-              aria-label={CONFIG.UI_LABELS.CODE_AGENTS_NEW_CHAT}
+              title={CONFIG.UI_LABELS.CODE_AGENTS_NEW_PROJECT}
+              aria-label={CONFIG.UI_LABELS.CODE_AGENTS_NEW_PROJECT}
             >
-              <Plus size={15} />
+              <FolderPlus size={15} />
             </Button>
           )}
         </div>

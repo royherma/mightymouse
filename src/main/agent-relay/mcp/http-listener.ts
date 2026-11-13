@@ -19,6 +19,7 @@ import { CoordinationService } from '../coordination/service'
 import { COORDINATION } from '../../../shared/coordination'
 import { PATHS } from '../../store/paths'
 import { handlePageReply } from '../page-reply'
+import { codexThreadIdForAgent } from '../codex-threads'
 
 export { TLDR_MAX }
 
@@ -214,12 +215,14 @@ const recentNames = new Map<
 
 /** ONE builder for both sides of the reclaim: formatting the key inline at each
  *  site let a stray NUL make them disagree on strings that printed identically. */
-function reclaimKeyFor(of: Pick<AgentSession, 'derived' | 'cwd' | 'sessionId'>): string {
+function reclaimKeyFor(of: Pick<AgentSession, 'derived' | 'cwd' | 'sessionId' | 'origin'>): string {
   const clean = (v: string | undefined): string => (v ?? '').replace(/\0/g, '').trim()
   // Identity CANNOT anchor this key: a rename changes it, and a rename is
   // exactly when a session reconnects wanting to be reclaimed. It stays the
   // fallback for an agent sending no session id, which can't rename anyway.
-  return `${clean(of.sessionId) || clean(of.derived)}${clean(of.cwd)}`
+  // Without an id, every pane in one checkout shares `derived`, so the pane tells them apart.
+  const pane = clean(of.origin?.tmuxPane)
+  return `${clean(of.sessionId) || (pane && `pane:${pane}:${clean(of.origin?.tmuxSocket)}`) || clean(of.derived)}${clean(of.cwd)}`
 }
 
 /** A shim outlives its agent when the terminal is killed rather than closed:
@@ -329,6 +332,25 @@ function decodeHeader(raw: string | string[] | undefined): string | undefined {
   return Buffer.from(value, 'latin1').toString('utf8')
 }
 
+const CODEX_ID_TRIES = 20
+const CODEX_ID_RETRY_MS = 1500
+
+// Shims before 0.2.8 send no id for a Codex launched through npx; Codex opens its chat file a moment after start.
+async function adoptCodexThreadId(key: IncomingMessage['socket'], agentPid: number): Promise<void> {
+  if (!(agentPid > 1)) return
+  for (let i = 0; i < CODEX_ID_TRIES; i++) {
+    if (!sessions.get(key) || sessions.get(key)?.staleSince !== undefined || sessions.get(key)?.sessionId) return
+    const id = await codexThreadIdForAgent(agentPid)
+    const now = sessions.get(key)
+    if (id && now && !now.sessionId) {
+      sessions.set(key, { ...now, sessionId: id })
+      onSessionsChanged?.()
+      return
+    }
+    await new Promise((done) => setTimeout(done, CODEX_ID_RETRY_MS))
+  }
+}
+
 /** Never ends the response: the open socket IS the registration, and the OS
  *  tears it down when the shim process dies. */
 function registerPresence(req: IncomingMessage, res: ServerResponse): void {
@@ -344,7 +366,7 @@ function registerPresence(req: IncomingMessage, res: ServerResponse): void {
   // A session that dropped moments ago and came straight back is the same
   // terminal: give it its name back rather than resetting it to the derived
   // label, which is what made a reconnect look like a brand-new agent.
-  const reclaimKey = reclaimKeyFor({ derived, cwd, sessionId })
+  const reclaimKey = reclaimKeyFor({ derived, cwd, sessionId, origin })
   const reclaimed = recentNames.get(reclaimKey)
   if (reclaimed) recentNames.delete(reclaimKey)
 
@@ -418,6 +440,7 @@ function registerPresence(req: IncomingMessage, res: ServerResponse): void {
   req.socket.once('close', drop)
   req.socket.once('error', drop)
   onSessionsChanged?.()
+  if (!sessionId && facts?.agent === 'codex' && origin?.tmuxPane) void adoptCodexThreadId(key, Number(facts.agentPid))
 }
 
 function isCaller(session: AgentSession, caller: { origin?: AgentOrigin; sessionId?: string }): boolean {

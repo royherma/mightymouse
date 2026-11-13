@@ -2255,9 +2255,6 @@ export interface ProjectFolderScan extends ProjectRepoLink {
   liveAgents: number
 }
 
-/** One tick in the "what to import" list. Absent key = the folder has none of that kind. */
-export type ProjectImportKey = 'instructions' | 'skills' | 'agents' | 'liveAgents'
-
 /** Dot-folders and scratch space are where agents ran, not projects to keep - import leaves them unticked. */
 export function isKeepableProject(name: string): boolean {
   return !/^(\.|tmp$|temp$|scratchpad$|node_modules$)/.test(name)

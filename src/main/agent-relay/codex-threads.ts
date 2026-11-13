@@ -1,3 +1,4 @@
+import { execFile } from 'child_process'
 import { closeSync, openSync, readdirSync, readFileSync, readSync, statSync, watch, type FSWatcher } from 'fs'
 import { homedir } from 'os'
 import { basename, dirname, join, relative } from 'path'
@@ -212,22 +213,71 @@ export function codexThreadFor(ref: string): AgentSession | undefined {
   return rows.find((r) => r.sessionId === ref || r.label === ref)
 }
 
+const PANE_RETRY_MS = 5000
+const paneThreads = new Map<string, { id: string; at: number }>()
+let rowsChanged: () => void = () => undefined
+
+function execText(cmd: string, args: string[]): Promise<string> {
+  return new Promise((resolve) =>
+    execFile(cmd, args, { encoding: 'utf8', timeout: 2000 }, (err, stdout) => resolve(err ? '' : stdout))
+  )
+}
+
+async function rolloutIdOpenBy(pid: number): Promise<string> {
+  const open = await execText('lsof', ['-nP', '-a', '-p', String(pid), '-Fn'])
+  const ids = new Set([...open.matchAll(/^n.*\/rollout-.*-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$/gim)].map((m) => m[1]))
+  return ids.size === 1 ? [...ids][0] : ''
+}
+
+// Shims before 0.2.8 report npm (from `npx -y mightymouse-code`) as the agent, so Codex is its parent.
+export async function codexThreadIdForAgent(agentPid: number): Promise<string> {
+  const id = await rolloutIdOpenBy(agentPid)
+  if (id !== '') return id
+  const parent = Number.parseInt(await execText('ps', ['-o', 'ppid=', '-p', String(agentPid)]), 10)
+  return parent > 1 ? rolloutIdOpenBy(parent) : ''
+}
+
+async function resolvePaneThread(key: string, agentPid: number): Promise<void> {
+  const id = await codexThreadIdForAgent(agentPid)
+  paneThreads.set(key, { id, at: Date.now() })
+  if (id !== '') rowsChanged()
+}
+
+function paneThreadId(s: AgentSession): string | undefined {
+  const pane = s.origin?.tmuxPane
+  const agentPid = Number(s.facts?.agentPid)
+  if (s.facts?.agent !== 'codex' || s.sessionId || !pane || !(agentPid > 1)) return undefined
+  const key = `${pane}:${agentPid}`
+  const known = paneThreads.get(key)
+  if (known?.id) return known.id
+  if (!known || Date.now() - known.at > PANE_RETRY_MS) {
+    paneThreads.set(key, { id: '', at: Date.now() })
+    void resolvePaneThread(key, agentPid)
+  }
+  return undefined
+}
+
 // The shared Desktop shim carries no chat id: it is the host process, never a chat, chats or not.
 export function withCodexThreads(listed: AgentSession[]): AgentSession[] {
   const chats = codexThreadRows()
-  const ids = new Set(listed.map((s) => s.sessionId).filter(Boolean))
+  const resolved = listed.map((s) => {
+    const id = paneThreadId(s)
+    return id ? { ...s, sessionId: id } : s
+  })
+  const ids = new Set(resolved.map((s) => s.sessionId).filter(Boolean))
   const byId = new Map(chats.map((s) => [s.sessionId, s]))
-  const kept = listed
+  const kept = resolved
     .filter((s) => !(s.facts?.agent === 'codex' && !s.sessionId && !s.origin?.tmuxPane))
     .map((s) => {
       const chat = s.origin?.tmuxPane && s.sessionId ? byId.get(s.sessionId) : undefined
-      return chat ? { ...s, ...chat, cwd: s.cwd, origin: s.origin, facts: { ...s.facts, ...chat.facts } } : s
+      return chat ? { ...s, ...chat, label: s.label, stated: s.stated ?? chat.stated, cwd: s.cwd, origin: s.origin, facts: { ...s.facts, ...chat.facts } } : s
     })
   return [...kept, ...chats.filter((c) => !ids.has(c.sessionId))]
 }
 
 export function watchCodexThreads(onChange: () => void, home = homedir()): void {
   const root = codexHome(home)
+  rowsChanged = onChange
   let timer: NodeJS.Timeout | null = null
   const fire = (): void => {
     if (timer) return

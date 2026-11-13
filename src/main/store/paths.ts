@@ -132,6 +132,7 @@ export const PATHS = {
   SELECTED_MODEL_FILE: join(ROOT_DIR, 'rewrite-selected-model.txt'),
   MODEL_CATALOG_FILE: join(ROOT_DIR, 'model-catalog.json'),
   CODE_AGENT_MODEL_FILE: join(ROOT_DIR, 'code-agent-model.txt'),
+  CODEX_CATALOG_FILE: join(ROOT_DIR, 'codex-model-catalog.json'),
   BROWSER_TASK_MODEL_FILE: join(ROOT_DIR, 'browser-task-model.txt'),
   CURSOR_PREF: join(ROOT_DIR, 'cursor-companion-toggle.txt'),
   // Email handed off from the landing-page download (mightymouse://onboard?email=)
@@ -450,6 +451,7 @@ export const PATHS = {
   MIGHTY_WORKSPACE: join(ROOT_DIR, 'mighty', 'workspace'),
   // Never the home folder: Claude Code does not save trust there, so every start would ask again.
   CODE_NO_PROJECT: join(ROOT_DIR, 'code', 'No project'),
+  CODE_NEW_PROJECTS: join(ROOT_DIR, 'Projects'),
   // Inside the workspace because that is the agent's only writable dir.
   MIGHTY_MEMORY: join(ROOT_DIR, 'mighty', 'workspace', 'MEMORY.md'),
   MIGHTY_RUNS: join(ROOT_DIR, 'mighty', 'runs'),

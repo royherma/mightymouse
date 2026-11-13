@@ -25,7 +25,7 @@ describe('Codex CLI session identity', () => {
     const execFileSync = vi.fn()
     expect(runInNewContext(identity + '\nsessionId()', {
       process: { env: { CODEX_THREAD_ID: id }, ppid: 123 },
-      claudeSessionId: () => '', execFileSync
+      claudeSessionId: () => '', agentPid: () => 123, execFileSync
     })).toBe(id)
     expect(execFileSync).not.toHaveBeenCalled()
   })
@@ -34,7 +34,7 @@ describe('Codex CLI session identity', () => {
     const execFileSync = vi.fn<(...args: unknown[]) => string>().mockReturnValue(`p123\nn/Users/me/.codex/sessions/2026/10/03/rollout-2026-10-03T16-39-46-${id}.jsonl\n`)
     expect(runInNewContext(identity + '\nsessionId()', {
       process: { env: { TMUX_PANE: '%97' }, ppid: 123 },
-      claudeSessionId: () => '', execFileSync
+      claudeSessionId: () => '', agentPid: () => 123, execFileSync
     })).toBe(id)
     expect(execFileSync.mock.calls[0][1]).toContain('123')
   })
@@ -42,7 +42,7 @@ describe('Codex CLI session identity', () => {
   it('leaves a shared desktop process without a terminal address alone', () => {
     const execFileSync = vi.fn()
     expect(runInNewContext(identity + '\nsessionId()', {
-      process: { env: {}, ppid: 123 }, claudeSessionId: () => '', execFileSync
+      process: { env: {}, ppid: 123 }, claudeSessionId: () => '', agentPid: () => 123, execFileSync
     })).toBe('')
     expect(execFileSync).not.toHaveBeenCalled()
   })
@@ -51,7 +51,7 @@ describe('Codex CLI session identity', () => {
     const open = `n/tmp/rollout-${id}.jsonl\nn/tmp/rollout-01a10122-4730-7432-8196-ff1b822c9a9d.jsonl\n`
     expect(runInNewContext(identity + '\nsessionId()', {
       process: { env: { TMUX_PANE: '%97' }, ppid: 123 },
-      claudeSessionId: () => '', execFileSync: () => open
+      claudeSessionId: () => '', agentPid: () => 123, execFileSync: () => open
     })).toBe('')
   })
 })

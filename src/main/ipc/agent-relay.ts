@@ -529,7 +529,9 @@ export async function startCodeSession(
     if (problem) return { ok: false as const, reason: problem }
     env = { ...env, ...OPENCODE_QUIET_ENV, ...opencodeRelayEnv() }
   }
-  if (row?.effort !== undefined && (!isReasoningEffort(row.effort) || !agentReasoningEfforts(local ? 'ollama' : harness, model).includes(row.effort))) {
+  const knownEfforts = agentReasoningEfforts(local ? 'ollama' : harness, model)
+  if (row?.effort !== undefined && (!isReasoningEffort(row.effort) || (knownEfforts.length > 0 && !knownEfforts.includes(row.effort)))) {
+    devLog.warn(`[code] effort refused harness=${harness} model=${model} effort=${String(row.effort)} known=${knownEfforts.join(',')}`)
     return { ok: false as const, reason: 'That reasoning level is not available for this model. Pick another level.' }
   }
   const started = await startNewAgent(sink, message, harness, {

@@ -727,6 +727,8 @@ const api = {
       known?: string
     ): Promise<import('../shared/types').ProjectFolderScan | null> =>
       ipcRenderer.invoke(CHANNELS.mightyScanProjectFolder, known),
+    makeProjectFolder: (name: string): Promise<import('../shared/types').ProjectRepoLink> =>
+      ipcRenderer.invoke(CHANNELS.mightyMakeProjectFolder, name),
     foundProjects: (): Promise<import('../shared/types').ProjectFolderScan[]> =>
       ipcRenderer.invoke(CHANNELS.mightyFoundProjects),
     importProjects: (scans: import('../shared/types').ProjectFolderScan[]): Promise<number> =>

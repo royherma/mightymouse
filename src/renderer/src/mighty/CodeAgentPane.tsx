@@ -16,6 +16,9 @@ import { previousList, senderMatchKey } from '../../../shared/relay-cards'
 import type { AgentModelChoice, AgentRelaySessionInfo, MightyProject } from '../../../shared/types'
 import type { ReasoningEffort } from '../../../shared/model-sources'
 
+// Startup asks (trust, hooks review) are minted before the agent registers, so they predate `since`.
+const CARD_BEFORE_START_MS = 10 * 60_000
+
 export type CodeAgentRelay = Pick<
   AgentRelayFeed,
   'status' | 'clients' | 'pending' | 'resolved' | 'dismissed' | 'respond'
@@ -72,10 +75,10 @@ export function CodeAgentPane({
     () =>
       label
         ? [...relay.pending, ...previousList(relay.resolved, relay.dismissed ?? [])]
-            .filter((r) => senderMatchKey(r.params.from) === key)
+            .filter((r) => senderMatchKey(r.params.from) === key && r.createdAt >= (live?.since ?? 0) - CARD_BEFORE_START_MS)
             .sort((a, b) => b.createdAt - a.createdAt)
         : [],
-    [label, relay.pending, relay.resolved, relay.dismissed, key]
+    [label, relay.pending, relay.resolved, relay.dismissed, key, live?.since]
   )
 
   const project = mightyProjectForCwd(live?.cwd ?? cwd, projects)

@@ -79,11 +79,45 @@ interface CodexCachedModel {
   supported_reasoning_levels?: unknown
 }
 
-function codexModels(): Array<{ model: string; label: string; reasoningEfforts: ReasoningEffort[] }> {
+type CodexModel = { model: string; label: string; reasoningEfforts: ReasoningEffort[] }
+type CodexCatalog = { version: number[]; models: CodexModel[] }
+let newestCodexCatalog: CodexCatalog | null = null
+
+function savedCodexCatalog(): CodexCatalog {
   try {
-    const raw = JSON.parse(readFileSync(CODEX_MODELS_CACHE, 'utf-8')) as { models?: unknown }
-    if (!Array.isArray(raw.models)) return []
-    return (raw.models as CodexCachedModel[])
+    const saved = JSON.parse(readFileSync(PATHS.CODEX_CATALOG_FILE, 'utf-8')) as CodexCatalog
+    return Array.isArray(saved.version) && Array.isArray(saved.models) ? saved : { version: [], models: [] }
+  } catch {
+    return { version: [], models: [] }
+  }
+}
+
+function isOlder(a: number[], b: number[]): boolean {
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    if ((a[i] ?? 0) !== (b[i] ?? 0)) return (a[i] ?? 0) < (b[i] ?? 0)
+  }
+  return false
+}
+
+// Every Codex on the computer (CLI, ChatGPT app) rewrites this one file with its own catalog, so keep the newest.
+function codexModels(): CodexModel[] {
+  newestCodexCatalog ??= savedCodexCatalog()
+  const read = readCodexModels()
+  if (read.models.length > 0 && !isOlder(read.version, newestCodexCatalog.version)) {
+    if (JSON.stringify(read) !== JSON.stringify(newestCodexCatalog)) {
+      try { writeFileSync(PATHS.CODEX_CATALOG_FILE, JSON.stringify(read), 'utf-8') } catch { /* read-only data dir keeps the in-memory copy */ }
+    }
+    newestCodexCatalog = read
+  }
+  return newestCodexCatalog.models
+}
+
+function readCodexModels(): CodexCatalog {
+  try {
+    const raw = JSON.parse(readFileSync(CODEX_MODELS_CACHE, 'utf-8')) as { models?: unknown; client_version?: unknown }
+    if (!Array.isArray(raw.models)) return { version: [], models: [] }
+    const version = String(raw.client_version ?? '').split(/[.-]/).slice(0, 3).map((n) => Number.parseInt(n, 10) || 0)
+    const models = (raw.models as CodexCachedModel[])
       .filter((m) => m.visibility === 'list' && typeof m.slug === 'string' && m.slug !== '')
       .sort((a, b) => Number(a.priority ?? 0) - Number(b.priority ?? 0))
       .map((m) => ({
@@ -95,8 +129,9 @@ function codexModels(): Array<{ model: string; label: string; reasoningEfforts: 
             )
           : []
       }))
+    return { version, models }
   } catch {
-    return []
+    return { version: [], models: [] }
   }
 }
 

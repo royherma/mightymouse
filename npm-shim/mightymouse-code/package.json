@@ -1,6 +1,6 @@
 {
   "name": "mightymouse-code",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Give your coding agents a channel to your phone -- notify, ask, approve, show, all through the MightyMouse Mac app.",
   "type": "module",
   "bin": {

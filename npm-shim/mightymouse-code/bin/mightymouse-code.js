@@ -264,9 +264,16 @@ function detectAgent() {
 /** Our ancestors' command lines, nearest first. Best-effort: a failed `ps`
  *  means one unlabelled session, never a crash. */
 function ancestorCommands() {
-  const lines = []
+  return ancestors().map((a) => a.line)
+}
+
+let ancestorList = null
+
+function ancestors() {
+  if (ancestorList) return ancestorList
+  const list = []
   let pid = process.ppid
-  for (let depth = 0; depth < 4 && pid > 1; depth += 1) {
+  for (let depth = 0; depth < 6 && pid > 1; depth += 1) {
     try {
       const out = execFileSync('ps', ['-o', 'ppid=,command=', '-p', String(pid)], {
         encoding: 'utf8',
@@ -274,14 +281,23 @@ function ancestorCommands() {
         timeout: 1000
       }).trim()
       if (!out) break
-      lines.push(out)
+      list.push({ pid, line: out })
       pid = Number.parseInt(out, 10)
       if (!Number.isFinite(pid)) break
     } catch {
       break
     }
   }
-  return lines
+  ancestorList = list
+  return list
+}
+
+// `npx -y mightymouse-code` (what the Mac installs) puts npm between the agent and this shim.
+const LAUNCHER = /^\s*\d+\s+(\S*\/)?(npm exec|npx|npm-cli\.js|npx-cli\.js|node \S*\/(npm|npx)(-cli\.js)?\b|(ba|z)?sh -c)/
+
+function agentPid() {
+  const agent = ancestors().find((a) => !LAUNCHER.test(a.line))
+  return agent ? agent.pid : process.ppid
 }
 
 function sessionFacts() {
@@ -298,7 +314,7 @@ function sessionFacts() {
     // and `pid` above is the shim, whose death would leave `claude` running
     // headless. The shim is spawned directly by the agent, the same assumption
     // detectAgent() already walks.
-    agentPid: process.ppid,
+    agentPid: agentPid(),
     // Set by the cmux wrapper rather than by Claude Code itself, so a plain
     // `claude` in a terminal simply has none of these three.
     agent,
@@ -361,7 +377,7 @@ function codexPaneSessionId() {
   if (!process.env.TMUX_PANE || Date.now() - codexPaneCheckedAt < 5000) return codexPaneId
   codexPaneCheckedAt = Date.now()
   try {
-    const open = execFileSync('lsof', ['-nP', '-a', '-p', String(process.ppid), '-Fn', '-d', '^mem'], {
+    const open = execFileSync('lsof', ['-nP', '-a', '-p', String(agentPid()), '-Fn', '-d', '^mem'], {
       encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000
     })
     const ids = [...new Set(open.split('\n').flatMap((line) => {
@@ -396,7 +412,7 @@ function recordConfigDir() {
 }
 
 function hostSessionPath() {
-  return join(claudeConfigDir(), 'sessions', `${process.ppid}.json`)
+  return join(claudeConfigDir(), 'sessions', `${agentPid()}.json`)
 }
 
 let paneSessionId = process.env.CLAUDE_CODE_SESSION_ID || ''

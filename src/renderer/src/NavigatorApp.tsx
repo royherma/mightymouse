@@ -100,6 +100,7 @@ const IDLE_SESSIONS = 10
 const SEARCH_DEBOUNCE_MS = 120
 const MARKER = 'bg-yellow/50 text-on-surface font-semibold rounded-[3px] px-0.5'
 const NEW_CHAT_ID = 'screen:newChat'
+const QUICK_PICKS = 9
 const NEW_CODE_SESSION: NavigatorTarget = {
   id: 'screen:newCodeSession',
   category: 'screen',
@@ -322,7 +323,13 @@ export default function NavigatorApp(): JSX.Element {
   }
 
   const onKeyDown = (e: React.KeyboardEvent): void => {
-    if (e.key === 'Tab' && !query && lastQuery) {
+    const pick = e.metaKey && !e.altKey && !e.ctrlKey && !e.shiftKey && /^[1-9]$/.test(e.key)
+      ? lists[1][Number(e.key) - 1]
+      : undefined
+    if (pick) {
+      e.preventDefault()
+      run(pick)
+    } else if (e.key === 'Tab' && !query && lastQuery) {
       e.preventDefault()
       type(lastQuery)
     } else if (e.key === 'ArrowDown') {
@@ -405,6 +412,7 @@ export default function NavigatorApp(): JSX.Element {
                   )}
                 </span>
                 {t.keys && <Kbd glyphs={t.keys} />}
+                {c === 1 && i < QUICK_PICKS && <Kbd glyphs={['Cmd', String(i + 1)]} />}
               </Button>
             )
           })}

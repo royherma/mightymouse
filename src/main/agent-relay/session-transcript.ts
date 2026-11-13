@@ -264,6 +264,7 @@ function stamp(value: unknown): number {
 function isInjected(text: string): boolean {
   return (
     text.startsWith('<user_instructions>') ||
+    text.startsWith('# AGENTS.md instructions for ') ||
     text.startsWith('<environment_context>') ||
     text.startsWith('<system-reminder>') ||
     text.startsWith('[Image:') ||

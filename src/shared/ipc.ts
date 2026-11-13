@@ -748,6 +748,7 @@ export const CHANNELS = Object.freeze({
   mightyAssignSessionProject: 'mighty-assign-session-project',
   mightyPickProjectFolder: 'mighty-pick-project-folder',
   mightyScanProjectFolder: 'mighty-scan-project-folder',
+  mightyMakeProjectFolder: 'mighty-make-project-folder',
   mightyFoundProjects: 'mighty-found-projects',
   mightyImportProjects: 'mighty-import-projects',
   mightyPickProjectImage: 'mighty-pick-project-image',

@@ -467,6 +467,7 @@ interface CustomAPI {
     assignSessionProject: (sessionId: string, projectId?: string) => Promise<boolean>
     pickProjectFolder: (known?: string) => Promise<ProjectRepoLink | null>
     scanProjectFolder: (known?: string) => Promise<ProjectFolderScan | null>
+    makeProjectFolder: (name: string) => Promise<ProjectRepoLink>
     foundProjects: () => Promise<ProjectFolderScan[]>
     importProjects: (scans: ProjectFolderScan[]) => Promise<number>
     pickProjectImage: (projectId: string) => Promise<MightyProject | null>

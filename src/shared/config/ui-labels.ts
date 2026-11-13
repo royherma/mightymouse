@@ -231,7 +231,7 @@ export const buildUiLabels = (appName: string) => ({
   CODE_AGENTS_NO_ALERTS_OR_RUNNING: 'No agent is running or waiting on you right now.',
   CODE_AGENTS_SIDEBAR_TITLE: 'Projects',
   CODE_AGENTS_SEARCH: 'Search agents',
-  CODE_AGENTS_NEW_CHAT: 'New chat',
+  CODE_AGENTS_NEW_PROJECT: 'New project',
   CODE_SIDEBAR_NEW_SESSION: 'New session',
   CODE_AGENTS_SEARCH_PLACEHOLDER: 'Search agents…',
   CODE_AGENTS_NO_MATCH: 'No agent matches what you typed.',

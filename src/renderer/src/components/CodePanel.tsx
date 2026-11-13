@@ -52,6 +52,7 @@ import { ProgressMeter, MAC_METER_CLASSES } from '../../../shared/progress-ring'
 import { sessionFaceId, AGENT_FACE_SIZE } from '../../../shared/agent-face'
 import { CodeDetail } from './code-detail'
 import { ProjectSettingsModal } from '../mighty/MightySessionNavigation'
+import { CreateProjectModal } from '../mighty/CreateProjectModal'
 import { CoordinationPanel } from './CoordinationPanel'
 import { FactoryPanel } from './FactoryPanel'
 import type { RosterAgent } from '../../../shared/coordination-roster'
@@ -347,6 +348,8 @@ export function CodePanel(props: {
   useEffect(() => loadProjects(), [loadProjects])
   useEffect(() => window.api.mighty.onProjectsChanged(loadProjects), [loadProjects])
   const [editingProject, setEditingProject] = useState<MightyProject | null>(null)
+  const [creatingProject, setCreatingProject] = useState(false)
+  const [openWhenListed, setOpenWhenListed] = useState<string | null>(null)
 
   const [sessionQuery, setSessionQuery] = useState('')
   // `now` is 0 on purpose: the haystack is built from the row's identity fields,
@@ -1048,6 +1051,14 @@ export function CodePanel(props: {
     if (group) prepareNewAgent(group)
     else startNewSession()
   })
+  useEffect(() => {
+    const group = openWhenListed && agentGroups.find((g) => g.id === openWhenListed)
+    if (!group) return
+    setOpenWhenListed(null)
+    onShow?.()
+    setTab('agents')
+    prepareNewAgent(group)
+  })
   const searchSessions = (): void => setSearchRequest((n) => n + 1)
   const shortcutsRef = useRef({ startNewSession, searchSessions })
   useLayoutEffect(() => {
@@ -1120,7 +1131,7 @@ export function CodePanel(props: {
         onShow?.()
         prepareNewAgent(group)
       }}
-      onNewChat={homeGroup ? () => { onShow?.(); prepareNewAgent(homeGroup) } : undefined}
+      onNewProject={() => setCreatingProject(true)}
       searchRequest={searchRequest}
       onConductorStarted={setFocusPane}
       onOpenTable={(id) => {
@@ -1423,9 +1434,7 @@ export function CodePanel(props: {
                       if (group) prepareNewAgent(group)
                     }}
                     onEditProject={(p) => setEditingProject(p)}
-                    onNewProject={() =>
-                      setEditingProject({ id: '', name: '', created: '', updated: '' })
-                    }
+                    onNewProject={() => setCreatingProject(true)}
                     onOpenSideBySide={onOpenSix && ((count) => onOpenSix(draft.cwd, count))}
                   />
                 ) : (
@@ -1439,9 +1448,7 @@ export function CodePanel(props: {
                             id === undefined && noProjectCwd ? openNoProject() : focusAgentsProject(id)
                           }
                           onEditProject={(p) => setEditingProject(p)}
-                          onNewProject={() =>
-                            setEditingProject({ id: '', name: '', created: '', updated: '' })
-                          }
+                          onNewProject={() => setCreatingProject(true)}
                         />
                       </div>
                     )}
@@ -2033,6 +2040,20 @@ export function CodePanel(props: {
           />
         )}
       </div>
+      {creatingProject && (
+        <CreateProjectModal
+          noFolderHint="Starts in a new empty folder"
+          onCancel={() => setCreatingProject(false)}
+          onCreate={async (p) => {
+            const link = p.repoFolder ? {} : await window.api.mighty.makeProjectFolder(p.name)
+            const saved = await window.api.mighty.upsertProject({ ...p, ...link })
+            if (!saved) throw new Error('project not saved')
+            setCreatingProject(false)
+            setOpenWhenListed(saved.id)
+            loadProjects()
+          }}
+        />
+      )}
       {editingProject && (
         <ProjectSettingsModal
           project={editingProject}

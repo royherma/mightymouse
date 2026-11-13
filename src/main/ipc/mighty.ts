@@ -4,7 +4,7 @@
  * `ipc.ts`.
  */
 import { ipcMain, shell, dialog } from 'electron'
-import { rmSync, existsSync, realpathSync, readdirSync, writeFileSync } from 'fs'
+import { rmSync, existsSync, realpathSync, readdirSync, writeFileSync, mkdirSync } from 'fs'
 import { execFileSync } from 'child_process'
 import { createHash } from 'crypto'
 import { dirname, join, basename } from 'path'
@@ -184,7 +184,7 @@ export function registerMightyHandlers(): void {
     async (_, known?: string): Promise<ProjectRepoLink | null> => {
       let folder = known
       if (!folder) {
-        const result = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+        const result = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] })
         folder = result.canceled ? undefined : result.filePaths[0]
       }
       return folder && existsSync(folder) ? repoLinkFor(folder) : null
@@ -195,14 +195,19 @@ export function registerMightyHandlers(): void {
     async (_, known?: string): Promise<ProjectFolderScan | null> => {
       let folder = known
       if (!folder) {
-        const result = await dialog.showOpenDialog({
-          properties: ['openDirectory', 'multiSelections']
-        })
+        const result = await dialog.showOpenDialog({ properties: ['openDirectory', 'createDirectory'] })
         folder = result.canceled ? undefined : result.filePaths[0]
       }
       return folder && existsSync(folder) ? scanFolder(folder) : null
     }
   )
+  ipcMain.handle(CHANNELS.mightyMakeProjectFolder, (_, name: string): ProjectRepoLink => {
+    const base = name.replace(/[/\\:]/g, '-').replace(/^\.+/, '').trim().slice(0, 80) || 'Project'
+    let folder = join(PATHS.CODE_NEW_PROJECTS, base)
+    for (let n = 2; existsSync(folder); n++) folder = join(PATHS.CODE_NEW_PROJECTS, `${base} ${n}`)
+    mkdirSync(folder, { recursive: true })
+    return repoLinkFor(folder)
+  })
 
   // Agent projects nobody has linked yet, so the import screen can offer them once.
   ipcMain.handle(CHANNELS.mightyFoundProjects, (): ProjectFolderScan[] => {
