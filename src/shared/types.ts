@@ -1102,6 +1102,8 @@ export interface StoredSettings {
   webAccess?: boolean
   codeOwnCopy?: boolean
   transcriptFormats?: Record<string, boolean>
+  replyWindowShowOver?: string[]
+  replyWindowAutoSwitch?: boolean
 }
 
 // ── Analytics ────────────────────────────────────────────────────────────────
@@ -2340,7 +2342,7 @@ export type LinkTarget = 'app' | 'browser'
 export type LinkMenuChoice = 'app' | null
 
 export type NativeMenuItem =
-  | { id: string; label: string; enabled?: boolean }
+  | { id: string; label: string; enabled?: boolean; checked?: boolean; sublabel?: string }
   | { type: 'separator' }
 
 /** User-editable Mighty settings (persona, behavior, output). Persisted via PREFS. */
@@ -3373,6 +3375,23 @@ export type SessionMarks = Record<string, SessionMark>
  *  Declared HERE rather than beside the listener that parses it because both
  *  the phone bundle and the renderer now read it off a session, and neither may
  *  import from `main/`. */
+export interface ReplyWindowApp {
+  bundleId: string
+  name: string
+  shows: boolean
+}
+
+export interface ReplyWindowSeeing {
+  page: string
+  url: string
+  ref?: string
+}
+
+export interface ReplyWindowAim {
+  ref?: string
+  order: string[]
+}
+
 export interface AgentOrigin {
   cmuxWorkspaceId?: string
   cmuxTabId?: string
@@ -3451,6 +3470,7 @@ export interface AgentHelper {
   task: string
   doing: string
   since: number
+  agent?: string
 }
 
 export interface AgentChecklistItem {

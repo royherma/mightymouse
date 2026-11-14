@@ -797,3 +797,48 @@
     0 2px 4px rgba(var(--shadow-rgb), 0.04),
     0 18px 40px -18px rgba(var(--shadow-rgb), 0.22);
 }
+
+[data-reply-window] .session-detail-suggest-row {
+  flex-wrap: wrap;
+  overflow: visible;
+}
+[data-reply-window] .session-detail-suggest .session-detail-suggest-chip:not(.session-detail-suggest-again, .session-detail-suggest-ghost) {
+  height: auto;
+  min-height: 30px;
+  max-width: 100%;
+  padding-block: 5px;
+  white-space: normal;
+}
+[data-reply-window] .session-detail-suggest-chip .hover-scroll {
+  white-space: normal;
+  mask-image: none;
+}
+[data-reply-window] .session-detail-suggest-chip .hover-scroll-inner {
+  display: inline;
+  transform: none;
+}
+[data-reply-window][data-floating] .code-detail-scroll {
+  padding-bottom: 16px;
+}
+[data-reply-window] .session-detail-input::placeholder {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+@media (max-height: 380px) {
+  [data-reply-window] .session-recap-anchor,
+  [data-reply-window] .session-detail-suggest {
+    display: none;
+  }
+  [data-reply-window] .session-detail-turns {
+    padding-bottom: 0 !important;
+  }
+}
+@media (max-height: 220px) {
+  [data-reply-window] .session-detail-thread > :not(.session-detail-composer, .session-detail-failed, [data-screen-toggle]) {
+    display: none;
+  }
+  [data-reply-window] [data-screen-toggle] {
+    margin-top: auto;
+  }
+}

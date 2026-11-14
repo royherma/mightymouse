@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronDown, Ellipsis, Maximize2, MessageSquare, Plus, X } from 'lucide-react'
+import { Check, ChevronDown, Ellipsis, LocateFixed, Maximize2, MessageSquare, Plus, X } from 'lucide-react'
 import { CONFIG } from '../../shared/config'
 import { previousList, senderMatchKey } from '../../shared/relay-cards'
 import { sessionIsWorking, sessionRow } from '../../shared/relay-status'
-import type { AgentRelaySessionInfo, AgentTranscriptTurn, MightyProject, MightySession } from '../../shared/types'
+import type { AgentRelaySessionInfo, AgentTranscriptTurn, MightyProject, MightySession, NativeMenuItem, ReplyWindowAim, ReplyWindowApp, ReplyWindowSeeing } from '../../shared/types'
 import { Button } from './components/Button'
+import { Tooltip, useTooltip } from './components/Tooltip'
 import { Row } from './components/Layout'
 import { ProjectAvatar } from './components/ProjectIcon'
-import { SessionThread } from './components/session-thread'
+import { ReplyScreenContext, SessionThread } from './components/session-thread'
 import { useAgentRelay } from './hooks/useAgentRelay'
 import { droppedImage } from './hooks/useAttachments'
 import { CodeAgentPane } from './mighty/CodeAgentPane'
@@ -123,6 +124,11 @@ const MENU_ROW = 'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-lef
 const MENU_BOX =
   'absolute top-full z-50 mt-1 rounded-lg border border-surface3 bg-[var(--window-bg)] p-1 shadow-[var(--shadow-popover)]'
 const MAX_NUMBERED = 9
+const MENU_FITS_HEIGHT = 440
+const AUTO_ON_TIP = 'Auto-switch is on: when you change browser tabs, this jumps to the agent working on that page. Click to turn it off.'
+const AUTO_OFF_TIP = 'Auto-switch is off: this stays on the agent you picked. Click to have it jump to the agent behind each browser tab.'
+const NATIVE_AGENTS = 8
+const NATIVE_CHATS = 3
 const TICK_BUSY_MS = 1_000
 const TICK_IDLE_MS = 15_000
 const MAX_RECENT = 50
@@ -147,6 +153,8 @@ export default function ReplyApp({
   onHide,
   onOpenBig,
   aim,
+  focusOrder,
+  seeing,
   embedded = false,
   minimized = false,
   onMinimize
@@ -155,6 +163,8 @@ export default function ReplyApp({
   onHide: () => void
   onOpenBig?: (ref: string) => void
   aim?: ReplyAim
+  focusOrder?: string[]
+  seeing?: ReplyWindowSeeing
   embedded?: boolean
   minimized?: boolean
   onMinimize?: (minimized: boolean) => void
@@ -194,7 +204,10 @@ export default function ReplyApp({
   }, [sessions])
   const [recent, setRecent] = useState(storedRecent)
   const [sort, setSortState] = useState<'recent' | 'active'>(() => (stored(REPLY_SORT_KEY) === 'active' ? 'active' : 'recent'))
-  const rank = useMemo(() => new Map(sort === 'recent' ? recent.map((r, i) => [r, i]) : []), [recent, sort])
+  const rank = useMemo(
+    () => new Map(sort === 'recent' ? [...new Set([...(focusOrder ?? []), ...recent])].map((r, i) => [r, i]) : []),
+    [focusOrder, recent, sort]
+  )
   const rankOf = (r: string): number => rank.get(r) ?? MAX_RECENT
   const inProject = useMemo(() => {
     const own = project ? sessions.filter((s) => projectOf(s) === project) : []
@@ -360,17 +373,92 @@ export default function ReplyApp({
     document.execCommand('insertText', false, `${text} `)
   }
 
-  const more: { label: string; keys: string; run: () => void; show: boolean }[] = [
+  const { tip, hoverProps } = useTooltip()
+  const [autoSwitch, setAutoSwitch] = useState<boolean | null>(null)
+  useEffect(() => {
+    if (!embedded) void window.api.replyWindowAuto().then(setAutoSwitch)
+  }, [embedded])
+  const [behind, setBehind] = useState<ReplyWindowApp | null>(null)
+  useEffect(() => {
+    if (menu !== 'more' || embedded) return
+    void window.api.replyWindowApp().then(setBehind)
+  }, [menu, embedded])
+  const toggleShowOver = (app: ReplyWindowApp | null): void => {
+    if (app) window.api.replyWindowShowOver(app.bundleId, !app.shows)
+    closeMenu()
+  }
+  const moreFor = (app: ReplyWindowApp | null): { label: string; keys: string; run: () => void; show: boolean }[] => [
     { label: 'Minimize', keys: '', run: minimize, show: Boolean(onMinimize) },
     { label: 'Pop out', keys: '', run: popOut, show: embedded && Boolean(ref || chatId) },
     { label: 'Open in the main window', keys: '⌘O', run: openBig, show: Boolean(ref ? onOpenBig : chatId) },
     { label: 'Open terminal', keys: '', run: openTerminal, show: Boolean(ref) && row?.health !== 'ended' },
+    {
+      label: app?.shows ? `Hide when I'm in ${app.name}` : `Show when I'm in ${app?.name ?? ''}`,
+      keys: '',
+      run: () => toggleShowOver(app),
+      show: Boolean(app)
+    },
     { label: embedded ? 'Close' : 'Hide', keys: embedded ? '' : '⌘W', run: onHide, show: true }
   ]
+  const more = moreFor(behind)
   const sorts: { id: typeof sort; label: string }[] = [
-    { id: 'recent', label: 'Recently opened' },
+    { id: 'recent', label: 'Last focused' },
     { id: 'active', label: 'Active first' }
   ]
+  const nativeMenu = async (kind: 'agents' | 'projects' | 'more'): Promise<void> => {
+    const picks = new Map<string, () => void>()
+    const item = (id: string, label: string, run: () => void, extra: Partial<Extract<NativeMenuItem, { id: string }>> = {}): NativeMenuItem => {
+      picks.set(id, run)
+      return { id, label, ...extra }
+    }
+    const line: NativeMenuItem = { type: 'separator' }
+    let items: NativeMenuItem[] = []
+    if (kind === 'agents') {
+      items = [
+        ...found.filter(({ s }) => !s.stale).slice(0, NATIVE_AGENTS).map(({ s }) =>
+          item(`a:${refOf(s)}`, nameOf(s, now), () => switchTo(refOf(s)), {
+            sublabel: `${projectOf(s)} · ${sessionRow(s, now).state_text}`,
+            checked: refOf(s) === ref
+          })
+        ),
+        ...foundChats.slice(0, NATIVE_CHATS).map((c) =>
+          item(`c:${c.id}`, c.title || 'New chat', () => switchTo(`${CHAT}${c.id}`), { sublabel: 'Chat', checked: c.id === chatId })
+        ),
+        line,
+        item('all', 'All agents…', () => {
+          window.api.replyWindowExpand()
+          setMenu('agents')
+        }),
+        ...(chat
+          ? [
+              item('new-chat', 'New chat', () => show(undefined, 'chat')),
+              item('new-agent', `New agent${agentFolder && agentFolder !== homeCwd ? ` in ${folderName(agentFolder)}` : ''}`, () => agentFolder && show(undefined, { cwd: agentFolder }), { enabled: Boolean(agentFolder) })
+            ]
+          : [])
+      ]
+    } else if (kind === 'projects') {
+      items = [
+        item('p:', `All projects (${sessions.length})`, () => chooseProject(undefined), { checked: !project }),
+        ...projects.map((p) => item(`p:${p.name}`, `${p.name} (${p.count})`, () => chooseProject(p.name), { checked: project === p.name }))
+      ]
+    } else {
+      const app = await window.api.replyWindowApp()
+      items = [
+        ...moreFor(app).filter((m) => m.show).map((m, i) => item(`m:${i}`, m.label, m.run)),
+        line,
+        { id: 'sort-title', label: 'Sort the list by', enabled: false },
+        ...sorts.map((o) => item(`s:${o.id}`, o.label, () => chooseSort(o.id), { checked: sort === o.id }))
+      ]
+    }
+    const picked = await window.api.nativeMenu(items)
+    if (picked) picks.get(picked)?.()
+  }
+  const openMenu = (kind: 'agents' | 'projects' | 'more'): void => {
+    if (menu === kind) return closeMenu()
+    if (embedded || window.innerHeight >= MENU_FITS_HEIGHT) return setMenu(kind)
+    closeMenu()
+    void nativeMenu(kind)
+  }
   const chooseSort = (id: typeof sort): void => {
     store(REPLY_SORT_KEY, id)
     setSortState(id)
@@ -382,15 +470,17 @@ export default function ReplyApp({
       ref={rootRef}
       className={`code-detail session-detail ${embedded ? 'h-full min-h-0' : 'h-screen'} bg-surface1 text-fg`}
       data-reply-window
+      data-floating={embedded ? undefined : ''}
       onDragOver={(e) => e.preventDefault()}
       onDrop={dropText}
     >
       {menu && <div className="fixed inset-0 z-40" onClick={closeMenu} />}
+      <Tooltip tip={tip} />
       <Row className={`relative shrink-0 px-3 py-2 border-b border-surface2 ${embedded ? '' : '[-webkit-app-region:drag]'}`}>
         <Button
           variant="bare"
           disabled={projects.length < 2}
-          onClick={() => (menu === 'projects' ? closeMenu() : setMenu('projects'))}
+          onClick={() => openMenu('projects')}
           aria-haspopup="menu"
           aria-expanded={menu === 'projects'}
           title="Choose a project"
@@ -403,7 +493,7 @@ export default function ReplyApp({
           <Button
             variant="bare"
             disabled={sessions.length === 0 && !chat}
-            onClick={() => (minimized ? onMinimize?.(false) : menu === 'agents' ? closeMenu() : setMenu('agents'))}
+            onClick={() => (minimized ? onMinimize?.(false) : openMenu('agents'))}
             aria-haspopup="menu"
             aria-expanded={menu === 'agents'}
             aria-label="Which agent gets this"
@@ -450,11 +540,23 @@ export default function ReplyApp({
             <Maximize2 size={14} strokeWidth={2} />
           </Button>
         )}
+        {!embedded && !minimized && autoSwitch !== null && (
+          <Button
+            variant="icon"
+            className={`[-webkit-app-region:no-drag] ${autoSwitch ? '!border-accent !bg-accent-wash !text-accent-text' : ''}`}
+            onClick={() => void window.api.replyWindowAuto(!autoSwitch).then(setAutoSwitch)}
+            aria-pressed={autoSwitch}
+            aria-label="Auto-switch agent"
+            {...hoverProps(autoSwitch ? AUTO_ON_TIP : AUTO_OFF_TIP)}
+          >
+            <LocateFixed size={14} strokeWidth={2} />
+          </Button>
+        )}
         {(session || chatting || draft) && !minimized && (
           <Button
             variant="icon"
             className="[-webkit-app-region:no-drag]"
-            onClick={() => (menu === 'more' ? closeMenu() : setMenu('more'))}
+            onClick={() => openMenu('more')}
             aria-haspopup="menu"
             aria-expanded={menu === 'more'}
             title="More"
@@ -608,6 +710,21 @@ export default function ReplyApp({
           </div>
         )}
       </Row>
+      {!embedded && !minimized && autoSwitch && seeing && (!seeing.ref || seeing.ref === ref) && (
+        <p className="flex shrink-0 items-center gap-1.5 truncate border-b border-surface2 px-4 py-1 text-[11px] text-muted">
+          <LocateFixed size={11} className="shrink-0 text-accent-text" />
+          {seeing.ref ? (
+            <span className="truncate">
+              Opened from{' '}
+              <Button variant="bare" className="underline-offset-2 hover:underline" onClick={() => void window.api.openExternal(seeing.url)}>
+                {seeing.page}
+              </Button>
+            </span>
+          ) : (
+            <span className="truncate">No agent for this tab</span>
+          )}
+        </p>
+      )}
       {minimized ? null : session ? (
         <div className="code-detail-scroll px-3 py-2">
           <SessionThread
@@ -742,15 +859,24 @@ const openBigAndHide = (id: string): void => {
 
 export function ReplyWindowApp(): React.JSX.Element {
   const chat = useReplyChats(openBigAndHide, true)
-  const [aimed, setAimed] = useState<{ ref: string; n: number } | null>(null)
-  useEffect(() => window.api.onReplyWindowAim((ref) => setAimed((prev) => ({ ref, n: (prev?.n ?? 0) + 1 }))), [])
+  const [aimed, setAimed] = useState<(ReplyWindowAim & { n: number }) | null>(null)
+  const [shot, setShot] = useState<{ path?: string; on: boolean }>({ on: true })
+  const [seeing, setSeeing] = useState<ReplyWindowSeeing>()
+  useEffect(() => window.api.onReplyWindowSeeing(setSeeing), [])
+  useEffect(() => window.api.onReplyWindowAim((aim) => setAimed((prev) => ({ ...aim, n: (prev?.n ?? 0) + 1 }))), [])
+  useEffect(() => window.api.onReplyWindowScreen((path) => setShot({ path, on: true })), [])
+  const screen = useMemo(() => ({ ...shot, setOn: (on: boolean) => setShot((prev) => ({ ...prev, on })) }), [shot])
   return (
-    <ReplyApp
-      key={aimed?.n}
-      aim={aimed?.ref}
-      chat={chat}
-      onHide={() => window.api.replyWindowHide()}
-      onOpenBig={(ref) => window.api.replyWindowOpenBig(ref)}
-    />
+    <ReplyScreenContext.Provider value={screen}>
+      <ReplyApp
+        key={aimed?.n}
+        aim={aimed?.ref}
+        focusOrder={aimed?.order}
+        seeing={seeing}
+        chat={chat}
+        onHide={() => window.api.replyWindowHide()}
+        onOpenBig={(ref) => window.api.replyWindowOpenBig(ref)}
+      />
+    </ReplyScreenContext.Provider>
   )
 }

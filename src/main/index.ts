@@ -67,6 +67,7 @@ import { setBugReportWindowOpener } from './crash'
 import { showBugReportWindow } from './bug-report-window'
 import { showSpecialistWindow } from './specialist'
 import { replyWindowFocused, toggleReplyWindow } from './reply-window'
+import { startReplyFocusTracking } from './reply-focus'
 import { registerMediaScheme, registerMediaProtocol } from './media-protocol'
 import { installDevServerGuard } from './dev-server-guard'
 import { showAuthWindow, closeAuthWindow, getAuthWindow } from './auth-window'
@@ -348,11 +349,13 @@ function startAppTail(welcome?: WelcomeVariant): void {
       toggleNavigatorWindow()
     },
     onToggleVoice: toggleVoiceMode,
-    onReply: toggleReplyWindow,
+    onReply: () => void toggleReplyWindow(),
     onCanvas: () => {
       void isCurrentUserAdmin().then((admin) => admin && toggleCanvasWindow())
     }
   })
+
+  startReplyFocusTracking()
 
   // Every row the navigator can run routes back through these same handlers,
   // so a chord and its navigator row are never two code paths.

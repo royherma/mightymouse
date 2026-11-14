@@ -19,7 +19,10 @@
       body[data-hidden] #root { visibility: hidden; }
       #show { position: fixed; right: 24px; bottom: 24px; display: none; padding: 8px 12px; border-radius: 8px; background: #222; color: #fff; font-size: 12px; text-decoration: none; }
       body[data-hidden] #show { display: block; }
+      html.fill .page { display: none; }
+      html.fill #root { inset: 0; width: 100%; height: 100%; border-radius: 0; box-shadow: none; }
     </style>
+    <script>if (new URLSearchParams(location.search).has('fill')) document.documentElement.classList.add('fill')</script>
   </head>
   <body>
     <div class="page">

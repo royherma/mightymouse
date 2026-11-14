@@ -83,7 +83,10 @@ import {
   BrowserTaskControl,
   BrowserTaskModel,
   BrowserTaskModelsState,
-  ZoomKey
+  ZoomKey,
+  ReplyWindowAim,
+  ReplyWindowApp,
+  ReplyWindowSeeing
 } from '../shared/types'
 import type {
   KeyPatch,
@@ -291,7 +294,13 @@ interface CustomAPI {
   replyWindowHide: () => void
   replyWindowOpenBig: (ref: string) => void
   replyWindowShow: (ref: string) => void
-  onReplyWindowAim: (callback: (ref: string) => void) => () => void
+  onReplyWindowAim: (callback: (aim: ReplyWindowAim) => void) => () => void
+  onReplyWindowScreen: (callback: (path: string) => void) => () => void
+  replyWindowApp: () => Promise<ReplyWindowApp | null>
+  replyWindowExpand: () => void
+  onReplyWindowSeeing: (callback: (seeing: ReplyWindowSeeing) => void) => () => void
+  replyWindowAuto: (on?: boolean) => Promise<boolean>
+  replyWindowShowOver: (bundleId: string, on: boolean) => void
   hudDismiss: (runId: string) => void
   hudStopCapture: (runId: string) => void
   hudCancelCapture: (runId: string) => void

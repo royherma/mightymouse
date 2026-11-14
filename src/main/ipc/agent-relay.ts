@@ -5,6 +5,7 @@
  * just the glue Settings talks to, mirroring registerPhoneRemoteHandlers()'s
  * toggle shape one level down in complexity (no QR, no pairing).
  */
+import { runningDelegates } from '../agent-relay/mcp/delegate-tools'
 import { app, ipcMain } from 'electron'
 import { computeSessionPriority, claimSuggestedReply } from '../agent-relay/coordination/session-priority'
 import { priorityKey, type SuggestedReply } from '../../shared/session-priority'
@@ -875,7 +876,7 @@ export function registerAgentRelayHandlers(): void {
   ipcMain.handle(CHANNELS.agentRelaySessionHelpers, (_e, ref: string) => {
     if (typeof ref !== 'string' || ref === '') return []
     const session = resolveSessionRef(ref)
-    return session ? readRunningHelpers(session) : []
+    return session ? [...readRunningHelpers(session), ...runningDelegates(session)] : []
   })
 
   ipcMain.handle(CHANNELS.agentRelaySessionTools, (_e, ref: string) => {

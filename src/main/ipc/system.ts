@@ -46,7 +46,7 @@ import { getPanelState } from './panel-state'
 import { FEEDBACK } from '../store/feedback'
 import { getBugReportContext, submitBugReport } from '../bug-report'
 import { closeBugReportWindow } from '../bug-report-window'
-import { hideReplyWindow, showReplyWindow } from '../reply-window'
+import { expandReplyWindow, hideReplyWindow, showReplyWindow } from '../reply-window'
 import { resolveSessionRef } from '../agent-relay/session-control'
 import { showAgentInCodeTab } from '../mighty/mighty-window'
 import type {
@@ -101,6 +101,16 @@ export function registerSystemHandlers(): void {
   ipcMain.on(CHANNELS.transcriptOpen, (_, runId: string) => openTranscript(runId))
   ipcMain.on(CHANNELS.transcriptClose, () => closeTranscript())
   ipcMain.on(CHANNELS.replyWindowHide, () => hideReplyWindow())
+  ipcMain.on(CHANNELS.replyWindowExpand, () => expandReplyWindow())
+  ipcMain.handle(CHANNELS.replyWindowAuto, async (_e, on: unknown) => {
+    const focus = await import('../reply-focus')
+    if (typeof on === 'boolean') focus.setAutoSwitch(on)
+    return focus.autoSwitchOn()
+  })
+  ipcMain.handle(CHANNELS.replyWindowApp, () => import('../reply-focus').then((m) => m.appBehindReply()))
+  ipcMain.on(CHANNELS.replyWindowShowOver, (_e, bundleId: unknown, on: unknown) => {
+    if (typeof bundleId === 'string' && bundleId) void import('../reply-focus').then((m) => m.setShowOver(bundleId, on === true))
+  })
   ipcMain.on(CHANNELS.replyWindowShow, (_e, ref: unknown) => {
     if (typeof ref === 'string' && ref) showReplyWindow(ref)
   })
@@ -303,6 +313,9 @@ export function registerSystemHandlers(): void {
             ? { type: 'separator' as const }
             : {
                 label: item.label,
+                sublabel: item.sublabel,
+                type: item.checked === undefined ? ('normal' as const) : ('checkbox' as const),
+                checked: item.checked,
                 enabled: item.enabled !== false,
                 click: () => resolve(item.id)
               }

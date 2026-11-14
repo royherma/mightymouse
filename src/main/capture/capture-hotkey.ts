@@ -19,7 +19,6 @@
 //   Esc (during a live capture)   -> arm cancel: reveal the "Esc again to cancel" hint
 //   Esc again within 1.5s          -> discard the in-progress recording/listen
 import { CONFIG } from '../../shared/config'
-import { IS_DEV } from '../../shared/env'
 import { getShortcut, VC } from '../../shared/shortcuts'
 import { acquire, isAvailable, on, AnyEvent } from './uiohook-manager'
 import {
@@ -632,7 +631,7 @@ export function startCaptureHotkey(h: Handlers): boolean {
         h.onToggleVoice()
         return
       }
-      if (IS_DEV && e.keycode === VC_REPLY) {
+      if (e.keycode === VC_REPLY) {
         h.onReply()
         return
       }

@@ -149,6 +149,12 @@ export const CHANNELS = Object.freeze({
   replyWindowOpenBig: 'reply-window-open-big',
   replyWindowShow: 'reply-window-show',
   replyWindowAim: 'reply-window-aim',
+  replyWindowScreen: 'reply-window-screen',
+  replyWindowApp: 'reply-window-app',
+  replyWindowSeeing: 'reply-window-seeing',
+  replyWindowExpand: 'reply-window-expand',
+  replyWindowAuto: 'reply-window-auto',
+  replyWindowShowOver: 'reply-window-show-over',
   // main → panel broadcast after a save so the panel reloads its chip row.
   actionsChanged: 'actions-changed',
   skillsList: 'skills-list',

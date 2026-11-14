@@ -5,6 +5,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { CONFIG } from '../../../shared/config'
 import { VERB_HANDLERS, SESSION_HANDLERS, TOOLING_HANDLERS, PHOTO_VERBS, askWithoutDecisions, askArgsWithoutDecisions } from './verbs'
 import { BROWSER_HANDLERS } from './browser-tools'
+import { DELEGATE_HANDLERS } from './delegate-tools'
 import { PUBLISH_HANDLERS } from '../../publish'
 import { PREFS } from '../../store/prefs'
 import { setAgentSessionProgress } from './http-listener'
@@ -27,6 +28,7 @@ export function buildAgentRelayMcpServer(
     ...SESSION_HANDLERS,
     ...TOOLING_HANDLERS,
     ...BROWSER_HANDLERS,
+    ...DELEGATE_HANDLERS,
     ...PUBLISH_HANDLERS
   })) {
     if (!handler) continue
@@ -44,7 +46,7 @@ export function buildAgentRelayMcpServer(
     // cannot mean a neighbouring pane in the same checkout. The card verbs need
     // it too now that `progress` writes to the session: a number keyed on `from`
     // is keyed on a label two panes in one checkout can share.
-    const carriesSessionId = verb in SESSION_HANDLERS || verb in BROWSER_HANDLERS || carriesFrom
+    const carriesSessionId = verb in SESSION_HANDLERS || verb in BROWSER_HANDLERS || verb in DELEGATE_HANDLERS || carriesFrom
     server.registerTool(
       verb,
       (verb === 'ask' && plainAsk ? plainAsk : handler) as { description: string; inputSchema: typeof handler.inputSchema },
@@ -71,7 +73,8 @@ export function buildAgentRelayMcpServer(
         return handler.run({
           ...args,
           ...(carriesSessionId ? { sessionId } : {}),
-          ...(carriesFrom ? { from: args.from ?? derivedFrom, cwd, origin } : {})
+          ...(carriesFrom ? { from: args.from ?? derivedFrom, cwd, origin } : {}),
+          ...(verb in DELEGATE_HANDLERS ? { cwd, origin } : {})
         })
       }
     )

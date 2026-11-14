@@ -71,7 +71,10 @@ import type {
   SideBrowserImportSource,
   SideBrowserImportResult,
   SideBrowserSuggestion,
-  ZoomKey
+  ZoomKey,
+  ReplyWindowAim,
+  ReplyWindowApp,
+  ReplyWindowSeeing
 } from '../shared/types'
 import type {
   AnalyticsEventName,
@@ -328,10 +331,24 @@ const api = {
   replyWindowHide: () => ipcRenderer.send(CHANNELS.replyWindowHide),
   replyWindowOpenBig: (ref: string) => ipcRenderer.send(CHANNELS.replyWindowOpenBig, ref),
   replyWindowShow: (ref: string) => ipcRenderer.send(CHANNELS.replyWindowShow, ref),
-  onReplyWindowAim: (callback: (ref: string) => void) => {
-    const handler = (_: unknown, ref: string): void => callback(ref)
+  onReplyWindowAim: (callback: (aim: ReplyWindowAim) => void) => {
+    const handler = (_: unknown, aim: ReplyWindowAim): void => callback(aim)
     ipcRenderer.on(CHANNELS.replyWindowAim, handler)
     return () => ipcRenderer.removeListener(CHANNELS.replyWindowAim, handler)
+  },
+  replyWindowExpand: () => ipcRenderer.send(CHANNELS.replyWindowExpand),
+  onReplyWindowSeeing: (callback: (seeing: ReplyWindowSeeing) => void) => {
+    const handler = (_: unknown, seeing: ReplyWindowSeeing): void => callback(seeing)
+    ipcRenderer.on(CHANNELS.replyWindowSeeing, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.replyWindowSeeing, handler)
+  },
+  replyWindowAuto: (on?: boolean): Promise<boolean> => ipcRenderer.invoke(CHANNELS.replyWindowAuto, on),
+  replyWindowApp: (): Promise<ReplyWindowApp | null> => ipcRenderer.invoke(CHANNELS.replyWindowApp),
+  replyWindowShowOver: (bundleId: string, on: boolean) => ipcRenderer.send(CHANNELS.replyWindowShowOver, bundleId, on),
+  onReplyWindowScreen: (callback: (path: string) => void) => {
+    const handler = (_: unknown, path: string): void => callback(path)
+    ipcRenderer.on(CHANNELS.replyWindowScreen, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.replyWindowScreen, handler)
   },
   hudDismiss: (runId: string) => ipcRenderer.send(CHANNELS.hudDismiss, { runId }),
   hudStopCapture: (runId: string) => ipcRenderer.send(CHANNELS.hudStopCapture, { runId }),

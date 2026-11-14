@@ -2,6 +2,7 @@ import { closeSync, existsSync, openSync, readdirSync, readFileSync, readSync, s
 import { homedir } from 'os'
 import { dirname, join } from 'path'
 import { splitAgentMessage } from '../../shared/attachments'
+import { agentLabel } from '../../shared/relay-status'
 import {
   askedEnvs,
   commandPaths,
@@ -240,6 +241,11 @@ function toolDetail(name: string, rawInput: unknown): string {
   return body.trim().slice(0, DETAIL_MAX)
 }
 
+function stepName(name: string, rawInput: unknown): string {
+  const agent = /(^|_|\.)delegate$/.test(name) ? str(asRecord(rawInput), 'agent') : ''
+  return agent ? `Asked ${agentLabel(agent) ?? agent}` : name
+}
+
 // What it DID between messages, so a long tool stretch is not a silent gap.
 // `name` then the detail after a middot: the thread splits on it to show one
 // readable line collapsed and the whole argument when opened.
@@ -249,7 +255,8 @@ function toolOf(content: unknown): string {
     const b = block as { type?: string; name?: string; input?: unknown }
     if (b?.type !== 'tool_use' || !b.name) continue
     const detail = toolDetail(b.name, b.input)
-    return detail ? `${b.name} \u00b7 ${detail}` : b.name
+    const name = stepName(b.name, b.input)
+    return detail ? `${name} \u00b7 ${detail}` : name
   }
   return ''
 }
@@ -468,7 +475,8 @@ function parseCodex(blob: string, turns: AgentTranscriptTurn[], seen: Seen): voi
       if (!name) continue
       countTool(seen, at, name, p.arguments ?? p.action, p.namespace)
       const detail = toolDetail(name, p.arguments ?? p.action)
-      push(turns, { role: 'tool', at, text: detail ? `${name} \u00b7 ${detail}` : name })
+      const shown = stepName(name, p.arguments ?? p.action)
+      push(turns, { role: 'tool', at, text: detail ? `${shown} \u00b7 ${detail}` : shown })
     }
   }
 }

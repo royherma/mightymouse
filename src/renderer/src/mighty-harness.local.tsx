@@ -104,6 +104,85 @@ const trailSessions = trailTitles.map((label, i) => ({
   ...(i === 0 && new URLSearchParams(location.search).has('busy') ? { busySince: Date.now() - 30_000, pid: 4242 } : {})
 }))
 
+const delegating = state === 'delegate'
+const delegateDone = delegating && new URLSearchParams(location.search).has('done')
+const delegateSessions = [
+  { label: 'Build the checkout page', agent: 'claude', model: 'Opus 5', busy: !delegateDone },
+  { label: 'Helping Claude Code: review the checkout page for bugs', agent: 'codex', model: 'GPT-6.1', busy: !delegateDone },
+  { label: 'Write release notes', agent: 'claude', model: 'Opus 5', busy: false }
+].map((row, i) => ({
+  label: row.label,
+  stated: row.label,
+  tldr: row.label,
+  sessionId: `trail-${i + 1}`,
+  cwd: '/Users/me/shop',
+  since: Date.now() - (3 - i) * 300_000,
+  lastActivityAt: Date.now() - 5_000,
+  agent: row.agent,
+  model: row.model,
+  ...(row.busy ? { busySince: Date.now() - 40_000, pid: 4242 + i } : {})
+}))
+const delegateTurns = [
+  { role: 'you', at: Date.now() - 600_000, text: 'Build the new checkout page. When it works, get Codex to double-check it before we ship.' },
+  { role: 'tool', at: Date.now() - 400_000, text: 'Edit · src/checkout/CheckoutPage.tsx' },
+  { role: 'tool', at: Date.now() - 300_000, text: 'Bash · npm test checkout' },
+  { role: 'agent', at: Date.now() - 60_000, text: 'The checkout page is built and all 14 checkout tests pass.\n\nHanding it to **Codex** for a second look before you ship it.' },
+  { role: 'tool', at: Date.now() - 40_000, text: 'Asked Codex · Review the checkout page for bugs and send back what you find' },
+  ...(delegateDone
+    ? [
+        { role: 'agent', at: Date.now() - 20_000, text: 'Codex found 2 bugs I missed:\n\n1. The discount code was applied twice when the page reloaded\n2. The Pay button stayed clickable while the card was still loading' },
+        { role: 'tool', at: Date.now() - 15_000, text: 'Edit · src/checkout/cart.ts' },
+        { role: 'tool', at: Date.now() - 10_000, text: 'Bash · npm test checkout' },
+        { role: 'agent', at: Date.now() - 5_000, text: 'Fixed both and added a test for each. **16 checkout tests pass.** Ready to ship.' }
+      ]
+    : [])
+]
+const delegateScreens: Record<string, string> = {
+  'trail-1': [
+    ' ▐▛███▜▌   Claude Code',
+    '▝▜█████▛▘  Opus 5 · ~/shop',
+    '',
+    '> Build the new checkout page. When it works, get Codex to double-check it.',
+    '',
+    '● Write(src/checkout/CheckoutPage.tsx)',
+    '  ⎿  Wrote 186 lines',
+    '● Bash(npm test checkout)',
+    '  ⎿  14 passed',
+    '',
+    '● The checkout page is built and all 14 checkout tests pass.',
+    '',
+    '● mightymouse-code - delegate (agent: "codex")',
+    '  ⎿  Codex is reviewing the checkout page…',
+    '',
+    '✻ Waiting for Codex… (41s)'
+  ].join('\n'),
+  'trail-2': [
+    '>_ OpenAI Codex',
+    '   model: GPT-6.1 · ~/shop',
+    '',
+    '› Review the checkout page for bugs and send back what you find',
+    '',
+    '• Read src/checkout/CheckoutPage.tsx',
+    '• Read src/checkout/cart.ts',
+    '• Ran npm test checkout',
+    '  └ 14 passed',
+    '',
+    '• Found 2 issues:',
+    '  1. Discount code is applied twice when the page reloads',
+    '  2. Pay button stays enabled while the card is still loading',
+    '',
+    '◦ Working (38s • esc to interrupt)'
+  ].join('\n')
+}
+const helperTurns = [
+  { role: 'you', at: Date.now() - 40_000, text: 'Review the checkout page for bugs and send back what you find' },
+  { role: 'tool', at: Date.now() - 35_000, text: 'Read · src/checkout/CheckoutPage.tsx' },
+  { role: 'tool', at: Date.now() - 30_000, text: 'Read · src/checkout/cart.ts' },
+  { role: 'tool', at: Date.now() - 25_000, text: 'Bash · npm test checkout' },
+  { role: 'agent', at: Date.now() - 20_000, text: 'Found 2 bugs:\n\n1. The discount code is applied twice when the page reloads (`cart.ts:42`)\n2. The Pay button stays clickable while the card is still loading (`CheckoutPage.tsx:118`)' }
+]
+const delegateHelpers = delegateDone ? [] : [{ task: 'Codex', doing: 'Review the checkout page for bugs and send back what you find', since: Date.now() - 40_000, agent: 'codex' }]
+
 const explicit: Record<string, unknown> = {
   settingsGetPrefs: async () => prefs,
   getRecoveredRecordings: async () => ({ working: false, items: [] }),
@@ -115,7 +194,9 @@ const explicit: Record<string, unknown> = {
   update: { getState: async () => (updateReady ? { state: 'downloaded', version: '0.50.0' } : { state: 'idle' }) },
   auth: { getSession: async () => ({ email: 'dev2@example.com' }) },
   agentRelayGetStatus: async () =>
-    state === 'trail' || state === 'home'
+    delegating
+      ? { enabled: true, running: true, agentSessions: delegateSessions }
+      : state === 'trail' || state === 'home'
       ? { enabled: true, running: true, agentSessions: trailSessions }
       : { enabled: false, running: false, agentSessions: [] },
   agentRelayListClients: async () => [],
@@ -129,12 +210,12 @@ const explicit: Record<string, unknown> = {
   agentRelaySessionBtw: (_ref: string, question: string) =>
     new Promise((done) => setTimeout(() => done({ ok: true, answer: /url/i.test(question) ? 'The shop runs at http://shop.localhost:4821 - open it now, the login fix is not in yet.' : 'Still on the login fix.' }), 900)),
   skillsList: async () => [],
-  agentRelaySessionTranscript: async () => [],
+  agentRelaySessionTranscript: async (ref: string) => (delegating && ref === 'trail-1' ? delegateTurns : delegating && ref === 'trail-2' ? helperTurns : []),
   agentRelaySessionChecklist: async () => null,
   agentRelaySessionKeys: async () => true,
-  agentRelaySessionHelpers: async () => [],
+  agentRelaySessionHelpers: async (ref: string) => (delegating && ref === 'trail-1' ? delegateHelpers : []),
   agentRelaySessionSent: async () => [],
-  agentRelaySessionScreen: async () => ({ text: '', cols: 96, rows: 40, history: 0, alt: false, streamed: true }),
+  agentRelaySessionScreen: async (ref: string) => ({ text: delegating ? delegateScreens[ref] ?? '' : '', cols: 96, rows: 40, history: 0, alt: false, streamed: true }),
   agentRelaySessionWatch: async () => true,
   agentRelaySessionFit: async () => true,
   agentRelaySessionUsage: async () => ({ output: 0, context: 0, contextWindow: 200_000 }),
@@ -190,6 +271,6 @@ const layer = (base: unknown, over: unknown): unknown =>
   })
 
 Object.assign(window, { api: layer(undefined, explicit) })
-history.replaceState(null, '', `?window=mighty&state=${state}${modelPreview ? `&models${['copy', 'open'].filter((k) => new URLSearchParams(location.search).has(k)).map((k) => `&${k}`).join('')}` : ''}${updateReady ? '&update=ready' : ''}${state === 'trail' || state === 'home' ? '&tab=code' : ''}`)
+history.replaceState(null, '', `?window=mighty&state=${state}${modelPreview ? `&models${['copy', 'open'].filter((k) => new URLSearchParams(location.search).has(k)).map((k) => `&${k}`).join('')}` : ''}${updateReady ? '&update=ready' : ''}${state === 'trail' || state === 'home' || delegating ? '&tab=code' : ''}${delegateDone ? '&done' : ''}`)
 if (modelPreview) await import('./project-scope-harness.local')
 else await import('./main')

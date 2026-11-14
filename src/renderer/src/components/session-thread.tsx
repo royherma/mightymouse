@@ -29,6 +29,7 @@ import { useSlashMenu } from './composer-slash-menu'
 import { ProjectIdeas } from './ProjectIdeas'
 import { AGENT_QUICK_START_PROMPTS } from '../mighty/mighty-shared'
 import { droppedText } from './agent-screen'
+import { AgentMark } from './AgentMark'
 import './AgentProjects.css'
 import './session-thread.css'
 
@@ -516,8 +517,26 @@ function useRunningHelpers(sessionRef: string, active: boolean): AgentHelper[] {
   return helpers
 }
 
-function RunningHelpers(props: { helpers: AgentHelper[] }): React.JSX.Element {
+function HandedOff(props: { helper: AgentHelper; now: number }): React.JSX.Element {
+  const { helper } = props
+  return (
+    <div className="session-detail-thinking max-w-full" title={helper.doing}>
+      <AgentMark vendor={helper.agent} size={13} />
+      <b className="shrink-0 font-medium text-fg">{helper.task}</b>
+      <span className="min-w-0 truncate">{helper.doing}</span>
+      <span className="shrink-0 tabular-nums">{formatDuration(Math.max(0, props.now - helper.since))}</span>
+      <span className="session-detail-thinking-dots" aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+    </div>
+  )
+}
+
+function RunningHelpers(props: { helpers: AgentHelper[] }): React.JSX.Element | null {
   const count = props.helpers.length
+  if (count === 0) return null
   return (
     <div className="flex max-w-full flex-col gap-1 self-start text-xs text-muted">
       <span>
@@ -541,6 +560,27 @@ function RunningHelpers(props: { helpers: AgentHelper[] }): React.JSX.Element {
 
 export type BrowserPage = { url: string; title: string }
 export const BrowserPageContext = createContext<(() => BrowserPage | undefined) | null>(null)
+
+export type ReplyScreen = { path?: string; on: boolean; setOn: (on: boolean) => void }
+export const ReplyScreenContext = createContext<ReplyScreen | undefined>(undefined)
+
+function ScreenToggle({ screen }: { screen: ReplyScreen }): React.JSX.Element {
+  return (
+    <label
+      data-screen-toggle
+      title="Sends a picture of what was on your screen right before you came here"
+      className="flex w-fit flex-none cursor-pointer items-center gap-2 px-1 text-[12px] text-muted"
+    >
+      <input
+        type="checkbox"
+        checked={screen.on}
+        onChange={(e) => screen.setOn(e.target.checked)}
+        className="h-3.5 w-3.5 shrink-0 accent-accent"
+      />
+      Send my screen
+    </label>
+  )
+}
 
 export function SessionThread(props: {
   session: AgentRelaySessionInfo
@@ -765,10 +805,12 @@ export function SessionThread(props: {
 
   const sendingRef = useRef(false)
   const browserPage = useContext(BrowserPageContext)
+  const replyScreen = useContext(ReplyScreenContext)
   // Clears only once main confirms delivery: `ok:false` would silently eat the text.
   const submit = async (override?: string): Promise<boolean> => {
     const text = (override ?? draft).trim()
     const files = att.attachments
+    const paths = [...files.map((a) => a.path), ...(replyScreen?.on && replyScreen.path ? [replyScreen.path] : [])]
     const aside = isClaude && !ended ? /^\/btw(?:\s+([\s\S]*))?$/i.exec(text) : null
     if (aside) {
       if (!aside[1]?.trim() || !canReply) return false
@@ -777,13 +819,13 @@ export function SessionThread(props: {
     }
     // An attachment on its own is a message: the agent opens the file and has
     // something to work on without a word of prose.
-    if ((!text && files.length === 0) || !canReply || sendingRef.current) return false
+    if ((!text && paths.length === 0) || !canReply || sendingRef.current) return false
     sendingRef.current = true
     setSendFailed(false)
     setResumeFailed(undefined)
     const sentAt = Date.now()
     if (ended && onResume) {
-      const reason = await onResume(text, files.map((a) => a.path)).finally(() => { sendingRef.current = false })
+      const reason = await onResume(text, paths).finally(() => { sendingRef.current = false })
       if (reason !== null) {
         setResumeFailed(reason)
         return false
@@ -793,7 +835,7 @@ export function SessionThread(props: {
     const result = ended ? { ok: true } : await window.api.agentRelaySessionReply(
       sessionRef,
       text,
-      files.map((a) => a.path),
+      paths,
       draftEvidence,
       browserPage?.()
     ).finally(() => { sendingRef.current = false })
@@ -804,9 +846,10 @@ export function SessionThread(props: {
     setDraft('')
     setDraftEvidence(undefined)
     att.clear()
+    replyScreen?.setOn(false)
     // Painted here rather than waiting for the poll: a message that takes two
     // seconds to appear reads as one that was swallowed.
-    setSent((prev) => [...prev, { text, at: sentAt, files: files.map((a) => a.path) }])
+    setSent((prev) => [...prev, { text, at: sentAt, files: paths }])
     return true
   }
   const sendWithDraft = (prompt: string): Promise<boolean> => {
@@ -984,7 +1027,8 @@ export function SessionThread(props: {
               </div>
             </AgentQuestion>
           )}
-          {thinking && !booting && helpers.length > 0 && <RunningHelpers helpers={helpers} />}
+          {thinking && !booting && helpers.filter((h) => h.agent).map((h) => <HandedOff key={`${h.since}-${h.task}`} helper={h} now={now} />)}
+          {thinking && !booting && <RunningHelpers helpers={helpers.filter((h) => !h.agent)} />}
         </div>
       )}
       {recap && (
@@ -1040,6 +1084,7 @@ export function SessionThread(props: {
           <AttachBar attachments={att.attachments} onRemove={att.remove} />
         </div>
       )}
+      {replyScreen && canReply && <ScreenToggle screen={replyScreen} />}
 
       {sendFailed && (
         <p className="session-detail-empty session-detail-failed">

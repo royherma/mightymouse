@@ -256,7 +256,6 @@ export const SHORTCUTS: Shortcut[] = [
     key: VC.Y,
     glyph: 'Y',
     mnemonic: 'Yes',
-    hidden: true,
     title: 'Reply to an agent',
     desc: 'Pop a small window over whatever you are looking at, already on the agent that made it, so you can read it and answer.',
     tips: 'Press again to send it away. Pin it to stay on one agent.'

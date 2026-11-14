@@ -64,6 +64,7 @@ describe('agent-relay local tooling tools', () => {
     const client = await connectedClient()
     const names = (await client.listTools()).tools.map((t) => t.name).sort()
     expect(names).toEqual([
+      'agents',
       'approve',
       'ask',
       'browser_attach',
@@ -74,6 +75,7 @@ describe('agent-relay local tooling tools', () => {
       'browser_type',
       // Hook-driven, not agent-driven: the mid-turn flag behind "Responding…".
       'busy',
+      'delegate',
       'notify',
       'publish_site',
       // Neither a request nor local tooling: it writes one line onto the
@@ -84,6 +86,7 @@ describe('agent-relay local tooling tools', () => {
       'relay_pending',
       'relay_resolve',
       'show',
+      'task',
       // Addresses the session, like recap and busy -- the only one that ENDS it.
       'wrap_up'
     ])

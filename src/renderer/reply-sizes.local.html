@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Reply window sizes</title>
+    <style>
+      body { margin: 0; padding: 20px 24px; background: #e9e6e1; font: 13px -apple-system, sans-serif; color: #333; }
+      h1 { margin: 0 0 14px; font-size: 17px; }
+      .row { display: flex; gap: 22px; align-items: flex-end; }
+      figure { margin: 0; }
+      figcaption { margin-bottom: 6px; color: #666; }
+      iframe { display: block; width: 330px; border: 0; border-radius: 12px; box-shadow: 0 12px 34px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.1); background: #fff; }
+    </style>
+  </head>
+  <body>
+    <h1>Reply window at four heights - reply box and screen box stay at the bottom</h1>
+    <div class="row" id="row"></div>
+    <script>
+      const sizes = [170, 220, 300, 520]
+      const state = new URLSearchParams(location.search).get('state') || 'aim=s1'
+      document.getElementById('row').innerHTML = sizes
+        .map((h) => `<figure><figcaption>${h}px tall</figcaption><iframe style="height:${h}px" src="/reply-harness.local.html?${state}&fill=1"></iframe></figure>`)
+        .join('')
+    </script>
+  </body>
+</html>
