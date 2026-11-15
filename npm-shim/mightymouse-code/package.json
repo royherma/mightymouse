@@ -1,6 +1,6 @@
 {
   "name": "mightymouse-code",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "Give your coding agents a channel to your phone -- notify, ask, approve, show, all through the MightyMouse Mac app.",
   "type": "module",
   "bin": {
@@ -16,7 +16,7 @@
     "@modelcontextprotocol/sdk": "^1.30.0"
   },
   "license": "MIT",
-  "homepage": "https://getmightymouse.com/code",
+  "homepage": "https://getmightymouse.com/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/royherma/mightymouse.git",
