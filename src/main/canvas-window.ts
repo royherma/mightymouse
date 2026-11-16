@@ -1,5 +1,6 @@
 import { BrowserWindow, screen } from 'electron'
 import { chrome } from './platform'
+import { hideHandingBack } from './panel-window'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 
@@ -35,7 +36,7 @@ function buildWindow(): BrowserWindow {
     if (input.type !== 'keyDown' || !input.meta || input.key.toLowerCase() !== 'w') return
     // must stop here: the default Window menu's Cmd+W would destroy the window, not hide it
     e.preventDefault()
-    win.hide()
+    hideHandingBack(win)
   })
   win.on('blur', () => {
     if (!win.isDestroyed()) win.setAlwaysOnTop(false)
@@ -58,7 +59,7 @@ export function canvasWindowShown(): boolean {
 }
 
 export function hideCanvasWindow(): void {
-  if (canvasWindow && !canvasWindow.isDestroyed()) canvasWindow.hide()
+  if (canvasWindow) hideHandingBack(canvasWindow)
 }
 
 export function showCanvasWindow(): void {

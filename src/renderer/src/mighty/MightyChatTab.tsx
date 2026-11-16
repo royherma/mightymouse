@@ -152,6 +152,7 @@ export function ChatTab({
   // Inline conversation filter (⌘F). Empty = show everything.
   const [filter, setFilter] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
+  const [sessionShortcutsOpen, setSessionShortcutsOpen] = useState(false)
   const filterInputRef = useRef<HTMLInputElement>(null)
   // Source filter (the funnel next to ⌘F): hidden group keys, and whether to list
   // conversations nothing was ever sent in. Both seeded from PREFS on mount; the
@@ -650,6 +651,7 @@ export function ChatTab({
           setFilter('')
           return
         }
+        if (sessionShortcutsOpen) return setSessionShortcutsOpen(false)
         // Nothing left to close, so Esc escalates: stop every live run first, and
         // only hide the window once a later press finds nothing still running.
         // Two presses when busy is deliberate — hiding mid-run would look like the
@@ -671,6 +673,16 @@ export function ChatTab({
       if (k === 'f' && !e.shiftKey) {
         e.preventDefault()
         openFilter()
+      } else if (k === 'k' && !e.shiftKey) {
+        e.preventDefault()
+        setSessionShortcutsOpen((open) => !open)
+      } else if (sessionShortcutsOpen && /^[1-9]$/.test(e.key)) {
+        const session = orderedSessions[Number(e.key) - 1]
+        if (!session) return
+        e.preventDefault()
+        e.stopImmediatePropagation()
+        openSessionInActivePane(session.id)
+        setSessionShortcutsOpen(false)
       } else if (k === '\\') {
         e.preventDefault()
         toggleSidebar()
@@ -695,10 +707,13 @@ export function ChatTab({
     editingProject,
     moveMenuFor,
     filterOpen,
+    sessionShortcutsOpen,
     openFilter,
     toggleSidebar,
     newChatInActivePane,
     cycleSession,
+    orderedSessions,
+    openSessionInActivePane,
     nerdMode,
     activeTab,
     focusMode,
@@ -806,6 +821,11 @@ export function ChatTab({
       key={s.id}
       s={s}
       leading={place === 'pinned' ? <MessageSquare size={14} /> : undefined}
+      shortcut={
+        sessionShortcutsOpen && orderedSessions.findIndex((session) => session.id === s.id) < 9
+          ? orderedSessions.findIndex((session) => session.id === s.id) + 1
+          : undefined
+      }
       nested={place === 'project'}
       openState={visible ? chatOpenState(s.id, activePane, openElsewhere) : 'closed'}
       openColor={openColors?.get(s.id) ?? null}

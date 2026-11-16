@@ -101,6 +101,7 @@ export interface ContextApi {
   listSwitchableApps: typeof import('./macos/app-switcher-list').listSwitchableApps
   activateApp: typeof import('./macos/activate-app').activateApp
   axPress: typeof import('./macos/ax-control').axPress
+  frontPageUrl: typeof import('./macos/ax-control').frontPageUrl
 
   quickSwitchApps: typeof import('./macos/quick-switch').quickSwitchApps
   resetQuickSwitchAnchor: typeof import('./macos/quick-switch').resetQuickSwitchAnchor

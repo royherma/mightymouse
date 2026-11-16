@@ -32,7 +32,7 @@ import {
 import { onFrontmostAppChange, onRunningAppsChange, pinFrontmostWatch, stopFrontmostWatch } from './frontmost-watch'
 import { listSwitchableApps } from './app-switcher-list'
 import { activateApp } from './activate-app'
-import { axPress } from './ax-control'
+import { axPress, frontPageUrl } from './ax-control'
 import {
   quickSwitchApps,
   resetQuickSwitchAnchor,
@@ -121,6 +121,7 @@ export const macos: PlatformImpl = {
     listSwitchableApps,
     activateApp,
     axPress,
+    frontPageUrl,
     quickSwitchApps,
     resetQuickSwitchAnchor,
     getQuickSwitchAnchor,

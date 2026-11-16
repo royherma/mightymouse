@@ -1370,6 +1370,7 @@ export default function TouchpadLayout(props: {
       data-img-skin={imageSkin ? '' : undefined}
       data-hand={handedness}
       data-orient={isLandscape ? 'landscape' : 'portrait'}
+      data-first-talk={firstSteps?.show && firstSteps.move && firstSteps.tap && !firstSteps.talk ? '' : undefined}
       /* Vertical twin of data-hand. Landscape-only: portrait deliberately gets
          no choice (DESIGN.md -- one way to do a thing). */
       data-vpos={keysPosition}

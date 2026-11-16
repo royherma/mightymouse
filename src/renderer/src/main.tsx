@@ -33,6 +33,7 @@ import AuthApp from './AuthApp'
 import BugReportApp from './BugReportApp'
 import SpecialistApp from './SpecialistApp'
 import { ReplyWindowApp } from './ReplyApp'
+import PopoverMenuApp from './PopoverMenuApp'
 import OnboardingOneScreen from './OnboardingOneScreen'
 import FirstRunApp from './FirstRunApp'
 import DragCoachApp from './DragCoachApp'
@@ -192,6 +193,8 @@ createRoot(rootElement).render(
         <SpecialistApp />
       ) : windowType === 'reply' ? (
         <ReplyWindowApp />
+      ) : windowType === 'popover-menu' ? (
+        <PopoverMenuApp />
       ) : windowType === 'onboarding1' ? (
         <OnboardingOneScreen />
       ) : windowType === 'first-run' ? (

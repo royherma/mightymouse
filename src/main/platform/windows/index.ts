@@ -106,6 +106,7 @@ export const windows: PlatformImpl = {
     listSwitchableApps: () => [],
     activateApp: () => unsupported('context.activateApp'),
     axPress: () => unsupported('context.axPress'),
+    frontPageUrl: async (_bundleId: string) => '',
     quickSwitchApps: () => unsupported('context.quickSwitchApps'),
     resetQuickSwitchAnchor: () => {},
     getQuickSwitchAnchor: () => null,

@@ -461,8 +461,25 @@ function SideQuestion({ item, cwd, onClose }: { item: Aside; cwd?: string; onClo
   )
 }
 
+const RECAP_OPEN_KEY = 'recap-open'
+const readRecapOpen = (): boolean => {
+  try {
+    return localStorage.getItem(RECAP_OPEN_KEY) !== '0'
+  } catch {
+    return true
+  }
+}
+
 function FloatingRecap({ text, onSize }: { text: string; onSize: (px: number) => void }): React.JSX.Element {
-  const [open, setOpen] = useState(true)
+  const [open, setOpenState] = useState(readRecapOpen)
+  const setOpen = (next: boolean): void => {
+    setOpenState(next)
+    try {
+      localStorage.setItem(RECAP_OPEN_KEY, next ? '1' : '0')
+    } catch {
+      return
+    }
+  }
   const boxRef = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
     const el = boxRef.current
@@ -481,7 +498,7 @@ function FloatingRecap({ text, onSize }: { text: string; onSize: (px: number) =>
         className="session-recap-toggle"
         title={open ? CONFIG.UI_LABELS.CODE_SESSION_RECAP_HIDE : CONFIG.UI_LABELS.CODE_SESSION_RECAP_SHOW}
         aria-expanded={open}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => setOpen(!open)}
       >
         <ListChecks size={13} />
         {CONFIG.UI_LABELS.CODE_SESSION_RECAP}
@@ -561,23 +578,25 @@ function RunningHelpers(props: { helpers: AgentHelper[] }): React.JSX.Element | 
 export type BrowserPage = { url: string; title: string }
 export const BrowserPageContext = createContext<(() => BrowserPage | undefined) | null>(null)
 
-export type ReplyScreen = { path?: string; on: boolean; setOn: (on: boolean) => void }
+export type ReplyScreen = { path?: string; on: boolean; setOn: (on: boolean) => void; clear: () => void }
 export const ReplyScreenContext = createContext<ReplyScreen | undefined>(undefined)
 
-function ScreenToggle({ screen }: { screen: ReplyScreen }): React.JSX.Element {
+const SUBAGENT_PREFIX = 'Do this in a subagent so you stay free for my next message:\n\n'
+
+function ReplyToggle(props: { label: string; title: string; on: boolean; setOn: (on: boolean) => void }): React.JSX.Element {
   return (
     <label
       data-screen-toggle
-      title="Sends a picture of what was on your screen right before you came here"
+      title={props.title}
       className="flex w-fit flex-none cursor-pointer items-center gap-2 px-1 text-[12px] text-muted"
     >
       <input
         type="checkbox"
-        checked={screen.on}
-        onChange={(e) => screen.setOn(e.target.checked)}
+        checked={props.on}
+        onChange={(e) => props.setOn(e.target.checked)}
         className="h-3.5 w-3.5 shrink-0 accent-accent"
       />
-      Send my screen
+      {props.label}
     </label>
   )
 }
@@ -603,6 +622,7 @@ export function SessionThread(props: {
   /** Set in terminal view: there is no composer, so a picked suggestion is typed at the terminal prompt instead. */
   fillTerminal?: (text: string) => void
   pasteTerminal?: (text: string) => void
+  hidePulse?: boolean
 }): React.JSX.Element {
   const {
     session,
@@ -619,7 +639,8 @@ export function SessionThread(props: {
     onRespond,
     onResume,
     fillTerminal,
-    pasteTerminal
+    pasteTerminal,
+    hidePulse
   } = props
   const booting = starting !== undefined && session.sessionId === undefined
   const replyWhyId = useId()
@@ -807,11 +828,13 @@ export function SessionThread(props: {
   const browserPage = useContext(BrowserPageContext)
   const replyScreen = useContext(ReplyScreenContext)
   // Clears only once main confirms delivery: `ok:false` would silently eat the text.
+  const [asSubagent, setAsSubagent] = useState(false)
   const submit = async (override?: string): Promise<boolean> => {
-    const text = (override ?? draft).trim()
+    const typed = (override ?? draft).trim()
+    const text = asSubagent && typed && !typed.startsWith('/') ? `${SUBAGENT_PREFIX}${typed}` : typed
     const files = att.attachments
     const paths = [...files.map((a) => a.path), ...(replyScreen?.on && replyScreen.path ? [replyScreen.path] : [])]
-    const aside = isClaude && !ended ? /^\/btw(?:\s+([\s\S]*))?$/i.exec(text) : null
+    const aside = isClaude && !ended ? /^\/btw(?:\s+([\s\S]*))?$/i.exec(typed) : null
     if (aside) {
       if (!aside[1]?.trim() || !canReply) return false
       askAside(aside[1])
@@ -846,7 +869,8 @@ export function SessionThread(props: {
     setDraft('')
     setDraftEvidence(undefined)
     att.clear()
-    replyScreen?.setOn(false)
+    replyScreen?.clear()
+    setAsSubagent(false)
     // Painted here rather than waiting for the poll: a message that takes two
     // seconds to appear reads as one that was swallowed.
     setSent((prev) => [...prev, { text, at: sentAt, files: paths }])
@@ -901,11 +925,13 @@ export function SessionThread(props: {
         } else if (canReply) att.drop(e)
       }}
     >
-      <SessionPulse
-        sessionRef={sessionRef}
-        onAnswer={waiting ? () => openWaiting(waiting.id) : undefined}
-        onAxisSend={canReply ? sendWithDraft : undefined}
-      />
+      {hidePulse ? null : (
+        <SessionPulse
+          sessionRef={sessionRef}
+          onAnswer={waiting ? () => openWaiting(waiting.id) : undefined}
+          onAxisSend={canReply ? sendWithDraft : undefined}
+        />
+      )}
       {turns.length === 0 && !thinking && transcriptStatus === 'ready' && canReply ? (
         <div className="session-detail-last session-detail-fresh">
           <h2 className="session-detail-fresh-title">{CONFIG.UI_LABELS.CODE_SESSION_FRESH_TITLE}</h2>
@@ -1084,7 +1110,22 @@ export function SessionThread(props: {
           <AttachBar attachments={att.attachments} onRemove={att.remove} />
         </div>
       )}
-      {replyScreen && canReply && <ScreenToggle screen={replyScreen} />}
+      {replyScreen && canReply && (
+        <div className="flex flex-none flex-wrap items-center gap-x-4">
+          <ReplyToggle
+            label="Send my screen"
+            title="Sends a picture of what was on your screen right before you came here"
+            on={replyScreen.on}
+            setOn={replyScreen.setOn}
+          />
+          <ReplyToggle
+            label="Send as a subagent"
+            title="The agent hands this to a helper and stays free for your next message"
+            on={asSubagent}
+            setOn={setAsSubagent}
+          />
+        </div>
+      )}
 
       {sendFailed && (
         <p className="session-detail-empty session-detail-failed">

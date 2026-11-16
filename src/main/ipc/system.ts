@@ -46,7 +46,7 @@ import { getPanelState } from './panel-state'
 import { FEEDBACK } from '../store/feedback'
 import { getBugReportContext, submitBugReport } from '../bug-report'
 import { closeBugReportWindow } from '../bug-report-window'
-import { expandReplyWindow, hideReplyWindow, showReplyWindow } from '../reply-window'
+import { hideReplyWindow, showReplyWindow } from '../reply-window'
 import { resolveSessionRef } from '../agent-relay/session-control'
 import { showAgentInCodeTab } from '../mighty/mighty-window'
 import type {
@@ -101,7 +101,6 @@ export function registerSystemHandlers(): void {
   ipcMain.on(CHANNELS.transcriptOpen, (_, runId: string) => openTranscript(runId))
   ipcMain.on(CHANNELS.transcriptClose, () => closeTranscript())
   ipcMain.on(CHANNELS.replyWindowHide, () => hideReplyWindow())
-  ipcMain.on(CHANNELS.replyWindowExpand, () => expandReplyWindow())
   ipcMain.handle(CHANNELS.replyWindowAuto, async (_e, on: unknown) => {
     const focus = await import('../reply-focus')
     if (typeof on === 'boolean') focus.setAutoSwitch(on)

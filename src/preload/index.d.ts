@@ -297,7 +297,6 @@ interface CustomAPI {
   onReplyWindowAim: (callback: (aim: ReplyWindowAim) => void) => () => void
   onReplyWindowScreen: (callback: (path: string) => void) => () => void
   replyWindowApp: () => Promise<ReplyWindowApp | null>
-  replyWindowExpand: () => void
   onReplyWindowSeeing: (callback: (seeing: ReplyWindowSeeing) => void) => () => void
   replyWindowAuto: (on?: boolean) => Promise<boolean>
   replyWindowShowOver: (bundleId: string, on: boolean) => void
@@ -559,6 +558,10 @@ interface CustomAPI {
   openExternal: (url: string) => Promise<void>
   linkMenu: (url: string, canOpenHere: boolean) => Promise<import('../shared/types').LinkMenuChoice>
   nativeMenu: (items: import('../shared/types').NativeMenuItem[]) => Promise<string | null>
+  popoverMenu: (request: import('../shared/types').PopoverMenuRequest) => Promise<string | null>
+  onPopoverMenuShow: (callback: (request: import('../shared/types').PopoverMenuRequest) => void) => () => void
+  popoverMenuSize: (height: number) => void
+  popoverMenuPick: (id: string | null) => void
   settingsSave: (patch: SettingsPatch) => Promise<SettingsState>
   settingsDownloadModel: (modelName?: string) => Promise<{
     result: { ok: boolean; path: string; error?: string }

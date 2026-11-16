@@ -16,6 +16,7 @@ import { registerBuiltHandlers } from './built'
 import { registerFirstRunCodeHandlers } from './first-run-code'
 import { registerFirstRunHandlers } from './first-run'
 import { registerSystemHandlers } from './system'
+import { registerPopoverMenu } from '../popover-menu'
 import { registerSelectionBarHandlers } from './selection-bar'
 import { registerVoiceRoutingHandlers } from './voice-routing'
 import { registerActionsIpc } from './actions'
@@ -82,6 +83,7 @@ export function registerIpcHandlers(): void {
   registerFirstRunHandlers()
 
   registerSystemHandlers()
+  registerPopoverMenu()
 
   registerSelectionBarHandlers()
 

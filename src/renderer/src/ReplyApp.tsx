@@ -3,7 +3,7 @@ import { Check, ChevronDown, Ellipsis, LocateFixed, Maximize2, MessageSquare, Pl
 import { CONFIG } from '../../shared/config'
 import { previousList, senderMatchKey } from '../../shared/relay-cards'
 import { sessionIsWorking, sessionRow } from '../../shared/relay-status'
-import type { AgentRelaySessionInfo, AgentTranscriptTurn, MightyProject, MightySession, NativeMenuItem, ReplyWindowAim, ReplyWindowApp, ReplyWindowSeeing } from '../../shared/types'
+import type { AgentRelaySessionInfo, AgentTranscriptTurn, MightyProject, MightySession, PopoverMenuItem, ReplyMatch, ReplyWindowAim, ReplyWindowApp, ReplyWindowSeeing } from '../../shared/types'
 import { Button } from './components/Button'
 import { Tooltip, useTooltip } from './components/Tooltip'
 import { Row } from './components/Layout'
@@ -50,7 +50,7 @@ const refOf = (s: AgentRelaySessionInfo): string => s.sessionId ?? s.label
 const nameOf = (s: AgentRelaySessionInfo, now: number): string => s.tldr || sessionRow(s, now).name || 'Unnamed agent'
 const projectOf = (s: AgentRelaySessionInfo): string => s.project?.name ?? s.label.split('/')[0]
 
-function ProjectPicture({ project, size }: { project: AgentRelaySessionInfo['project']; size: number }): React.JSX.Element {
+export function ProjectPicture({ project, size }: { project: AgentRelaySessionInfo['project']; size: number }): React.JSX.Element {
   if (!project?.imageBase64) return <ProjectAvatar icon={project?.icon} size={size} />
   return (
     <img
@@ -125,10 +125,12 @@ const MENU_BOX =
   'absolute top-full z-50 mt-1 rounded-lg border border-surface3 bg-[var(--window-bg)] p-1 shadow-[var(--shadow-popover)]'
 const MAX_NUMBERED = 9
 const MENU_FITS_HEIGHT = 440
+const MATCH_WHY: Record<ReplyMatch, string> = { made: 'it made this page', folder: "it works in this page's folder", chat: 'it talked about this page' }
 const AUTO_ON_TIP = 'Auto-switch is on: when you change browser tabs, this jumps to the agent working on that page. Click to turn it off.'
 const AUTO_OFF_TIP = 'Auto-switch is off: this stays on the agent you picked. Click to have it jump to the agent behind each browser tab.'
-const NATIVE_AGENTS = 8
-const NATIVE_CHATS = 3
+const MENU_INSET = 12
+// a click on the button that opened the menu first blurs it closed; without this the same click reopens it
+const REOPEN_GUARD_MS = 300
 const TICK_BUSY_MS = 1_000
 const TICK_IDLE_MS = 15_000
 const MAX_RECENT = 50
@@ -319,12 +321,13 @@ export default function ReplyApp({
   }, [chat, project, query, rank])
   const firstFound = found[0] ? refOf(found[0].s) : foundChats[0] ? `${CHAT}${foundChats[0].id}` : undefined
 
+  const openMenuRef = useRef<(kind: 'agents') => void>(() => undefined)
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (embedded && !rootRef.current?.contains(document.activeElement)) return
       const letter = e.key.toLowerCase()
       const numbered = e.metaKey && /^[1-9]$/.test(e.key) ? inProject[Number(e.key) - 1] : undefined
-      const toggleAgents = (): void => (menu === 'agents' ? closeMenu() : setMenu('agents'))
+      const toggleAgents = (): void => openMenuRef.current('agents')
       const run = numbered
         ? refOf(numbered) === ref
           ? toggleAgents
@@ -405,60 +408,78 @@ export default function ReplyApp({
     { id: 'recent', label: 'Last focused' },
     { id: 'active', label: 'Active first' }
   ]
-  const nativeMenu = async (kind: 'agents' | 'projects' | 'more'): Promise<void> => {
+  const popoverClosed = useRef<{ kind: string; at: number } | null>(null)
+  const popoverMenu = async (kind: 'agents' | 'projects' | 'more'): Promise<void> => {
     const picks = new Map<string, () => void>()
-    const item = (id: string, label: string, run: () => void, extra: Partial<Extract<NativeMenuItem, { id: string }>> = {}): NativeMenuItem => {
+    const item = (id: string, label: string, run: () => void, extra: Partial<Extract<PopoverMenuItem, { id: string }>> = {}): PopoverMenuItem => {
       picks.set(id, run)
       return { id, label, ...extra }
     }
-    const line: NativeMenuItem = { type: 'separator' }
-    let items: NativeMenuItem[] = []
+    const line: PopoverMenuItem = { type: 'separator' }
+    let items: PopoverMenuItem[] = []
     if (kind === 'agents') {
       items = [
-        ...found.filter(({ s }) => !s.stale).slice(0, NATIVE_AGENTS).map(({ s }) =>
+        { type: 'heading', label: `Sorted by ${sorts.find((o) => o.id === sort)?.label.toLowerCase()} · change in ⋯` },
+        ...found.map(({ s, number }) =>
           item(`a:${refOf(s)}`, nameOf(s, now), () => switchTo(refOf(s)), {
             sublabel: `${projectOf(s)} · ${sessionRow(s, now).state_text}`,
-            checked: refOf(s) === ref
+            checked: refOf(s) === ref,
+            icon: 'project',
+            project: s.project,
+            keys: number === undefined ? undefined : `⌘${number}`
           })
         ),
-        ...foundChats.slice(0, NATIVE_CHATS).map((c) =>
-          item(`c:${c.id}`, c.title || 'New chat', () => switchTo(`${CHAT}${c.id}`), { sublabel: 'Chat', checked: c.id === chatId })
+        ...foundChats.map((c) =>
+          item(`c:${c.id}`, c.title || 'New chat', () => switchTo(`${CHAT}${c.id}`), {
+            sublabel: [chatProject(c), 'Chat'].filter(Boolean).join(' · '),
+            checked: c.id === chatId,
+            icon: 'chat'
+          })
         ),
-        line,
-        item('all', 'All agents…', () => {
-          window.api.replyWindowExpand()
-          setMenu('agents')
-        }),
         ...(chat
           ? [
-              item('new-chat', 'New chat', () => show(undefined, 'chat')),
-              item('new-agent', `New agent${agentFolder && agentFolder !== homeCwd ? ` in ${folderName(agentFolder)}` : ''}`, () => agentFolder && show(undefined, { cwd: agentFolder }), { enabled: Boolean(agentFolder) })
+              line,
+              item('new-chat', 'New chat', () => show(undefined, 'chat'), { icon: 'plus' }),
+              item('new-agent', `New agent${agentFolder && agentFolder !== homeCwd ? ` in ${folderName(agentFolder)}` : ''}`, () => agentFolder && show(undefined, { cwd: agentFolder }), { icon: 'plus', enabled: Boolean(agentFolder) })
             ]
           : [])
       ]
     } else if (kind === 'projects') {
       items = [
-        item('p:', `All projects (${sessions.length})`, () => chooseProject(undefined), { checked: !project }),
-        ...projects.map((p) => item(`p:${p.name}`, `${p.name} (${p.count})`, () => chooseProject(p.name), { checked: project === p.name }))
+        item('p:', 'All projects', () => chooseProject(undefined), { checked: !project, keys: String(sessions.length) }),
+        ...projects.map((p) => item(`p:${p.name}`, p.name, () => chooseProject(p.name), { checked: project === p.name, icon: 'project', project: p.picture, keys: String(p.count) }))
       ]
     } else {
       const app = await window.api.replyWindowApp()
       items = [
-        ...moreFor(app).filter((m) => m.show).map((m, i) => item(`m:${i}`, m.label, m.run)),
+        ...moreFor(app).filter((m) => m.show).map((m, i) => item(`m:${i}`, m.label, m.run, { keys: m.keys || undefined })),
         line,
-        { id: 'sort-title', label: 'Sort the list by', enabled: false },
+        { type: 'heading', label: 'Sort the list by' },
         ...sorts.map((o) => item(`s:${o.id}`, o.label, () => chooseSort(o.id), { checked: sort === o.id }))
       ]
     }
-    const picked = await window.api.nativeMenu(items)
+    const trigger = rootRef.current?.querySelector(`[data-menu="${kind}"]`)?.getBoundingClientRect()
+    if (!trigger) return
+    const width = kind === 'agents' ? window.innerWidth - 2 * MENU_INSET : kind === 'projects' ? 240 : 224
+    const x = kind === 'more' ? window.innerWidth - MENU_INSET - width : MENU_INSET
+    const picked = await window.api.popoverMenu({
+      items,
+      width,
+      anchor: { x, y: trigger.top, width, height: trigger.height },
+      search: kind === 'agents' ? 'Find an agent' : undefined
+    })
+    popoverClosed.current = { kind, at: Date.now() }
     if (picked) picks.get(picked)?.()
   }
   const openMenu = (kind: 'agents' | 'projects' | 'more'): void => {
     if (menu === kind) return closeMenu()
     if (embedded || window.innerHeight >= MENU_FITS_HEIGHT) return setMenu(kind)
+    const last = popoverClosed.current
+    if (last?.kind === kind && Date.now() - last.at < REOPEN_GUARD_MS) return
     closeMenu()
-    void nativeMenu(kind)
+    void popoverMenu(kind)
   }
+  openMenuRef.current = openMenu
   const chooseSort = (id: typeof sort): void => {
     store(REPLY_SORT_KEY, id)
     setSortState(id)
@@ -481,6 +502,7 @@ export default function ReplyApp({
           variant="bare"
           disabled={projects.length < 2}
           onClick={() => openMenu('projects')}
+          data-menu="projects"
           aria-haspopup="menu"
           aria-expanded={menu === 'projects'}
           title="Choose a project"
@@ -494,6 +516,7 @@ export default function ReplyApp({
             variant="bare"
             disabled={sessions.length === 0 && !chat}
             onClick={() => (minimized ? onMinimize?.(false) : openMenu('agents'))}
+            data-menu="agents"
             aria-haspopup="menu"
             aria-expanded={menu === 'agents'}
             aria-label="Which agent gets this"
@@ -557,6 +580,7 @@ export default function ReplyApp({
             variant="icon"
             className="[-webkit-app-region:no-drag]"
             onClick={() => openMenu('more')}
+            data-menu="more"
             aria-haspopup="menu"
             aria-expanded={menu === 'more'}
             title="More"
@@ -719,6 +743,7 @@ export default function ReplyApp({
               <Button variant="bare" className="underline-offset-2 hover:underline" onClick={() => void window.api.openExternal(seeing.url)}>
                 {seeing.page}
               </Button>
+              {seeing.why && ` · ${MATCH_WHY[seeing.why]}`}
             </span>
           ) : (
             <span className="truncate">No agent for this tab</span>
@@ -738,6 +763,7 @@ export default function ReplyApp({
             transcriptStatus={transcript.status}
             working={working}
             showSteps={false}
+            hidePulse={!embedded}
             opening={opened?.ref === ref ? opened : undefined}
             onRespond={relay.respond}
           />
@@ -852,6 +878,22 @@ export function useReplyChats(openBig: (id: string) => void, refocus = false): R
   return useMemo(() => ({ sessions, projects, name, reload, openBig }), [sessions, projects, name, reload, openBig])
 }
 
+const SCREEN_PREF_KEY = 'reply-send-screen'
+const readScreenPref = (): boolean => {
+  try {
+    return localStorage.getItem(SCREEN_PREF_KEY) !== '0'
+  } catch {
+    return true
+  }
+}
+const writeScreenPref = (on: boolean): void => {
+  try {
+    localStorage.setItem(SCREEN_PREF_KEY, on ? '1' : '0')
+  } catch {
+    /* private storage: the default stays on */
+  }
+}
+
 const openBigAndHide = (id: string): void => {
   void window.api.mighty.open(false, id)
   window.api.replyWindowHide()
@@ -860,12 +902,22 @@ const openBigAndHide = (id: string): void => {
 export function ReplyWindowApp(): React.JSX.Element {
   const chat = useReplyChats(openBigAndHide, true)
   const [aimed, setAimed] = useState<(ReplyWindowAim & { n: number }) | null>(null)
-  const [shot, setShot] = useState<{ path?: string; on: boolean }>({ on: true })
+  const [shot, setShot] = useState<{ path?: string; on: boolean }>(() => ({ on: readScreenPref() }))
   const [seeing, setSeeing] = useState<ReplyWindowSeeing>()
   useEffect(() => window.api.onReplyWindowSeeing(setSeeing), [])
   useEffect(() => window.api.onReplyWindowAim((aim) => setAimed((prev) => ({ ...aim, n: (prev?.n ?? 0) + 1 }))), [])
-  useEffect(() => window.api.onReplyWindowScreen((path) => setShot({ path, on: true })), [])
-  const screen = useMemo(() => ({ ...shot, setOn: (on: boolean) => setShot((prev) => ({ ...prev, on })) }), [shot])
+  useEffect(() => window.api.onReplyWindowScreen((path) => setShot({ path, on: readScreenPref() })), [])
+  const screen = useMemo(
+    () => ({
+      ...shot,
+      setOn: (on: boolean) => {
+        writeScreenPref(on)
+        setShot((prev) => ({ ...prev, on }))
+      },
+      clear: () => setShot((prev) => ({ ...prev, on: false }))
+    }),
+    [shot]
+  )
   return (
     <ReplyScreenContext.Provider value={screen}>
       <ReplyApp

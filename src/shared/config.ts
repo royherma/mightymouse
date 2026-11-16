@@ -88,7 +88,7 @@ export const CONFIG = {
   RELEASE_PAGE_URL: `https://github.com/${RELEASES_REPO}/releases/latest`,
   RELEASE_LATEST_API: `https://api.github.com/repos/${RELEASES_REPO}/releases/latest`,
   // Keep in sync with package.json "version". Shown in Settings footer.
-  APP_VERSION: '0.56.0',
+  APP_VERSION: '0.57.0',
 
   // mightymouse:// in prod/dev; mightymouse-staging:// in a staging packaged build
   // (registered in main/index.ts, matched in deeplink.ts — read PROTOCOL_SCHEME
@@ -467,7 +467,7 @@ export const CONFIG = {
   // The phone-pairing step's own unlock window. ~3x the hotkey one because the
   // action is 3x longer: pick up a phone, open the camera, aim, tap the banner.
   // 8s would unlock while a genuinely-succeeding user is still raising their arm.
-  TOUR_PHONE_UNLOCK_MS: 25_000,
+  TOUR_PHONE_UNLOCK_MS: 120_000,
   TOUR_ADVANCE_MS: 900,
   TOUR_DEMO_ADVANCE_MS: 2_600,
   // How long the `wrong` shake+flash holds before reverting to idle (§4.4 table).

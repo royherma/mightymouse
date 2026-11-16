@@ -437,7 +437,7 @@ export async function handlePhoneAudio(
     fell_back: result.fellBack
   })
   phoneSession.voiceRuns += 1
-  notePhoneFirstStep('talk')
+  notePhoneFirstStep('talk', text)
   sendToFirstRunRenderer(CHANNELS.firstRunTranscript, text)
 
   doneHud(runId, true, text, loggedFolder, durationS, {

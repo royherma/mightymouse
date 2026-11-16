@@ -63,8 +63,9 @@ func emit(_ status: String, exit code: Int32, detail: [String: Any] = [:]) -> Ne
 // MARK: - Argument parsing
 
 var args = Array(CommandLine.arguments.dropFirst())
+if args.first == "url" { pageURL(args.dropFirst().first ?? "") }
 guard let verb = args.first, verb == "press" || verb == "dump" else {
-    emit("usage", exit: 2, detail: ["hint": "mm-ax press|dump <bundleId> …"])
+    emit("usage", exit: 2, detail: ["hint": "mm-ax press|dump|url <bundleId> …"])
 }
 args.removeFirst()
 
@@ -410,3 +411,50 @@ if let (_, confirmed) = waitFor(verifyLabels, pressable: false, ms: timeoutMs) {
 }
 
 emit("unverified", exit: 3, detail: ["pressed": pressed, "expected": verifyLabels])
+
+// MARK: - url
+
+// The frontmost copy first: a second, windowless copy of the same browser (a test run's) can be running too.
+func pageURL(_ bundle: String) -> Never {
+    let front = NSWorkspace.shared.frontmostApplication
+    let copies = ([front].compactMap { $0 }.filter { $0.bundleIdentifier == bundle })
+        + NSRunningApplication.runningApplications(withBundleIdentifier: bundle)
+    for copy in copies {
+        if let url = pageURL(of: copy) { emit("ok", exit: 0, detail: ["bundleId": bundle, "url": url]) }
+    }
+    emit(copies.isEmpty ? "not-running" : "no-url", exit: 0, detail: ["bundleId": bundle, "url": ""])
+}
+
+func pageURL(of app: NSRunningApplication) -> String? {
+    let appEl = AXUIElementCreateApplication(app.processIdentifier)
+    AXUIElementSetMessagingTimeout(appEl, 0.3)
+    func value(_ el: AXUIElement, _ name: String) -> AnyObject? {
+        var v: CFTypeRef?
+        return AXUIElementCopyAttributeValue(el, name as CFString, &v) == .success ? v : nil
+    }
+    func link(_ v: AnyObject?) -> String? {
+        if let s = v as? String, !s.isEmpty { return s }
+        return (v as? URL)?.absoluteString
+    }
+    func webArea(_ el: AXUIElement, _ depth: Int, _ budget: inout Int) -> String? {
+        budget -= 1
+        if budget < 0 || depth > 14 { return nil }
+        if (value(el, kAXRoleAttribute) as? String) == "AXWebArea" { return link(value(el, "AXURL")) }
+        for child in (value(el, kAXChildrenAttribute) as? [AXUIElement]) ?? [] {
+            if let found = webArea(child, depth + 1, &budget) { return found }
+        }
+        return nil
+    }
+    func read() -> String? {
+        let win = value(appEl, kAXFocusedWindowAttribute).map { $0 as! AXUIElement }
+            ?? (value(appEl, kAXWindowsAttribute) as? [AXUIElement])?.first
+        guard let win else { return nil }
+        if let doc = link(value(win, "AXDocument")) { return doc }
+        var budget = 400
+        return webArea(win, 0, &budget)
+    }
+    // Firefox builds no web tree until asked; never set this on Chromium, it slows its window animations.
+    if let url = read() { return url }
+    AXUIElementSetAttributeValue(appEl, "AXEnhancedUserInterface" as CFString, kCFBooleanTrue)
+    return read()
+}

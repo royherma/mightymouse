@@ -16,6 +16,10 @@ type FirstSteps = Record<PhoneFirstStep, number | null> & {
 }
 
 const SHOW_FOR_MS = 7 * 24 * 60 * 60 * 1000
+const HEARD_FOR_MS = 8_000
+
+let heard: string | null = null
+let heardTimer: ReturnType<typeof setTimeout> | null = null
 
 let cached: FirstSteps | null = null
 
@@ -79,10 +83,11 @@ export function sendFirstStepsToPhone(): void {
   }
   sendToPhone({
     type: 'firstSteps',
-    show: !allDone(state) && !state.expired,
+    show: (!allDone(state) && !state.expired) || heard !== null,
     welcome: state.welcomed === null && !state.expired,
     advanced: SETTINGS.advancedMode(),
     micBlocked: state.micBlocked,
+    heard,
     move: state.move !== null,
     tap: state.tap !== null,
     talk: state.talk !== null
@@ -90,8 +95,9 @@ export function sendFirstStepsToPhone(): void {
 }
 
 // Called on every pointer move the phone sends: the early return must stay a cached compare.
-export function notePhoneFirstStep(step: PhoneFirstStep): void {
+export function notePhoneFirstStep(step: PhoneFirstStep, text?: string): void {
   const state = load()
+  if (step === 'talk' && state.talk === null && text?.trim()) showHeard(text.trim())
   if (state[step] !== null) return
   if (step !== 'talk' && !PERMISSIONS.hasAccessibility(false)) return
   state[step] = Date.now()
@@ -99,6 +105,16 @@ export function notePhoneFirstStep(step: PhoneFirstStep): void {
   save(state)
   track(ANALYTICS_EVENT.phone_first_step, { step, s_since_shown: secondsSinceShown(state) })
   sendFirstStepsToPhone()
+}
+
+function showHeard(text: string): void {
+  heard = text.length > 140 ? `${text.slice(0, 140)}...` : text
+  if (heardTimer) clearTimeout(heardTimer)
+  heardTimer = setTimeout(() => {
+    heard = null
+    heardTimer = null
+    sendFirstStepsToPhone()
+  }, HEARD_FOR_MS)
 }
 
 export function notePhoneWelcomePick(pick: unknown): void {

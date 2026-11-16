@@ -931,7 +931,7 @@ export type PhoneRemoteEvent =
   // The phone cannot infer this: a Mac silently refusing every input looks
   // exactly like a healthy idle socket. Stated, never derived.
   | { type: 'permissionState'; permission: 'accessibility'; granted: boolean }
-  | ({ type: 'firstSteps'; show: boolean; welcome: boolean; advanced: boolean; micBlocked: boolean } & Record<PhoneFirstStep, boolean>)
+  | ({ type: 'firstSteps'; show: boolean; welcome: boolean; advanced: boolean; micBlocked: boolean; heard: string | null } & Record<PhoneFirstStep, boolean>)
 
 export const PHONE_FIRST_STEPS = ['move', 'tap', 'talk'] as const
 export type PhoneFirstStep = (typeof PHONE_FIRST_STEPS)[number]

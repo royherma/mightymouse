@@ -50,6 +50,23 @@ export function useFirstSteps(
 export function FirstSteps({ state }: { state: FirstStepsState }): JSX.Element {
   const current = PHONE_FIRST_STEPS.find((step) => !state[step])
   const doneCount = PHONE_FIRST_STEPS.filter((step) => state[step]).length
+  if (state.heard) {
+    return (
+      <div className="firstTalk" data-state="heard">
+        <b>It is typing on your computer</b>
+        <q>{state.heard}</q>
+      </div>
+    )
+  }
+  if (current === 'talk' && !state.micBlocked) {
+    return (
+      <div className="firstTalk">
+        <b>Hold the mic and say hello</b>
+        <span>Watch your words appear on your computer</span>
+        <small>Your phone will ask to use the mic. Tap Allow.</small>
+      </div>
+    )
+  }
   return (
     <ol
       className="firstSteps"

@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { context, resolveBinary } from './platform'
 import { CONFIG } from '../shared/config'
-import type { ReplyWindowApp } from '../shared/types'
+import type { ReplyMatch, ReplyWindowApp } from '../shared/types'
 import { liveAgentSessions, type AgentSession } from './agent-relay/mcp/http-listener'
 import { claudeTranscriptPaths, codexTranscriptPath } from './agent-relay/session-transcript'
 import { cmuxPath } from './agent-relay/origin-resolver'
@@ -16,7 +16,8 @@ import { followFrontApp, switchReplyWindow, tellReplyWindow } from './reply-wind
 import { devLog } from '../shared/env'
 import { cachedBuilt } from './built/scan'
 
-const POLL_MS = 2000
+const POLL_MS = 700
+const CMUX_POLL_MS = 2000
 const READ_MS = 2000
 const SHOT_MS = 1500
 const MAX_ORDER = 30
@@ -25,14 +26,32 @@ const LOCAL_PAGE = /^https?:\/\/(localhost|127\.0\.0\.1|[\w-]+\.localhost)(:\d+)
 const CMUX_APP = 'com.cmuxterm.app'
 const BROWSERS = [
   'com.google.Chrome',
+  'com.google.Chrome.beta',
+  'com.google.Chrome.dev',
+  'com.google.Chrome.canary',
+  'org.chromium.Chromium',
   'com.apple.Safari',
+  'com.apple.SafariTechnologyPreview',
   'company.thebrowser.Browser',
+  'company.thebrowser.dia',
   'com.brave.Browser',
+  'com.microsoft.edgemac',
+  'com.operasoftware.Opera',
+  'com.vivaldi.Vivaldi',
+  'ai.perplexity.comet',
+  'com.openai.atlas',
+  'com.kagi.kagimacOS',
   'org.mozilla.firefox',
-  'com.microsoft.edgemac'
+  'org.mozilla.firefoxdeveloperedition',
+  'org.mozilla.nightly',
+  'app.zen-browser.zen'
 ]
 const WATCHED_APPS = new Set([CMUX_APP, ...BROWSERS])
-const PAGE_MATCH_MS = 60_000
+// the chat search reads every live transcript (~9s over 850MB), so a page's answer is kept for a while
+const PAGE_MATCH_MS = 10 * 60_000
+// a tools list or port table names many pages once or twice; an agent working on one names it far more
+const MIN_STRAY_MENTIONS = 3
+const LSOF = '/usr/sbin/lsof'
 
 let order: string[] = []
 let frontBundle = ''
@@ -42,8 +61,12 @@ let seenPage = ''
 let seenUrl = ''
 let toldPage: string | undefined
 const pageOwners = new Map<string, { ref?: string; at: number }>()
+const chatSearches = new Map<string, Promise<string | undefined>>()
 let poll: NodeJS.Timeout | null = null
 let polling = false
+let lastCmuxRead = 0
+let matchedBy: ReplyMatch | undefined
+const servingFolders = new Map<string, { folder: string; at: number }>()
 
 function pageFile(url: string): string {
   if (!url.startsWith('file://')) return ''
@@ -69,16 +92,27 @@ function fromBuilt(url: string, live: AgentSession[]): string | undefined {
   })?.sessionId
 }
 
-function fromFolder(url: string, live: AgentSession[]): string | undefined {
+async function servingFolder(port: string): Promise<string> {
+  const known = servingFolders.get(port)
+  if (known && Date.now() - known.at < PAGE_MATCH_MS) return known.folder
+  const pid = (await output(LSOF, ['-nP', `-iTCP:${port}`, '-sTCP:LISTEN', '-t'])).split('\n')[0]?.trim()
+  const listed = pid ? await output(LSOF, ['-a', '-p', pid, '-d', 'cwd', '-Fn']) : ''
+  const folder = listed.split('\n').find((line) => line.startsWith('n/'))?.slice(1) ?? ''
+  servingFolders.set(port, { folder, at: Date.now() })
+  return folder
+}
+
+async function folderAgents(url: string, live: AgentSession[]): Promise<AgentSession[]> {
   const file = pageFile(url)
   const port = portOf(url)
   const served = cachedBuilt().find((item) => (file ? item.file === file : Boolean(port) && String(item.port ?? '') === port))
-  const folder = served?.cwd ?? (file ? dirname(file) : '')
-  if (!folder) return undefined
+  const folder = served?.cwd ?? (file ? dirname(file) : port ? await servingFolder(port) : '')
+  if (!folder) return []
+  const home = homedir()
   const rank = (id = ''): number => (order.includes(id) ? order.indexOf(id) : MAX_ORDER)
   return live
-    .filter((s) => s.cwd && (folder === s.cwd || folder.startsWith(`${s.cwd}/`)))
-    .sort((a, b) => rank(a.sessionId) - rank(b.sessionId))[0]?.sessionId
+    .filter((s) => s.cwd && s.cwd !== home && (folder === s.cwd || folder.startsWith(`${s.cwd}/`) || s.cwd.startsWith(`${folder}/`)))
+    .sort((a, b) => rank(a.sessionId) - rank(b.sessionId))
 }
 
 function fromStamp(url: string, live: AgentSession[]): string | undefined {
@@ -152,13 +186,7 @@ function mentionCounts(needle: string, files: string[]): Promise<Map<string, num
   })
 }
 
-// by process, not app name: a second copy of the browser (a test run's) answers app-name AppleScript instead
-async function frontWindowUrl(): Promise<string> {
-  const read = `tell application "System Events" to return value of attribute "AXDocument" of window 1 of (first process whose frontmost is true)`
-  return (await output('osascript', ['-e', read])).trim()
-}
-
-async function fromMentions(url: string, live: AgentSession[]): Promise<string | undefined> {
+async function fromMentions(url: string, live: AgentSession[], least: number): Promise<string | undefined> {
   const needle = pageName(url)
   if (!needle) return undefined
   const owner = new Map<string, string>()
@@ -167,18 +195,37 @@ async function fromMentions(url: string, live: AgentSession[]): Promise<string |
   let best: { id: string; count: number } | undefined
   for (const [path, count] of await mentionCounts(needle, [...owner.keys()])) {
     const id = owner.get(path)
-    if (id && count > 0 && count >= (best?.count ?? 0)) best = { id, count }
+    if (id && count >= least && count >= (best?.count ?? 0)) best = { id, count }
   }
   return best?.id
 }
 
-async function agentInFront(searchConversations: boolean): Promise<string | undefined> {
+function pageKey(url: string): string {
+  return url.split(/[?#]/)[0]
+}
+
+function searchChats(url: string, pool: AgentSession[], least: number): Promise<string | undefined> {
+  const page = pageKey(url)
+  const running = chatSearches.get(page)
+  if (running) return running
+  const search = fromMentions(url, pool, least).then((ref) => {
+    pageOwners.set(page, { ref, at: Date.now() })
+    chatSearches.delete(page)
+    void tick()
+    return ref
+  })
+  chatSearches.set(page, search)
+  return search
+}
+
+async function agentInFront(searchConversations: boolean, waitForChats: boolean): Promise<string | undefined> {
   const live = liveAgentSessions().filter((s) => s.sessionId)
   if (live.length === 0) return undefined
   const bundleId = context.userFacingFrontmostBundleId()
   if (!bundleId) return undefined
-  const front = { bundleId, url: BROWSERS.includes(bundleId) ? await frontWindowUrl() : '' }
+  const front = { bundleId, url: BROWSERS.includes(bundleId) ? await context.frontPageUrl(bundleId) : '' }
   seenUrl = front.url
+  matchedBy = undefined
   seenPage = front.url ? pageName(front.url) || front.url.split(/[?#]/)[0] : ''
   if (front.bundleId === CMUX_APP) {
     const pane = await frontPane()
@@ -186,14 +233,21 @@ async function agentInFront(searchConversations: boolean): Promise<string | unde
   }
   if (!front.url) return undefined
   const made = fromBuilt(front.url, live) ?? fromStamp(front.url, live)
-  if (made) return made
-  if (!searchConversations) return fromFolder(front.url, live)
-  const page = front.url.split(/[?#]/)[0]
-  const known = pageOwners.get(page)
-  if (known && Date.now() - known.at < PAGE_MATCH_MS) return known.ref ?? fromFolder(front.url, live)
-  const ref = await fromMentions(front.url, live)
-  pageOwners.set(page, { ref, at: Date.now() })
-  return ref ?? fromFolder(front.url, live)
+  if (made) return matched('made', made)
+  const nearby = await folderAgents(front.url, live)
+  if (!searchConversations || nearby.length === 1) return matched('folder', nearby[0]?.sessionId)
+  const known = pageOwners.get(pageKey(front.url))
+  const search =
+    known && Date.now() - known.at < PAGE_MATCH_MS
+      ? Promise.resolve(known.ref)
+      : searchChats(front.url, nearby.length ? nearby : live, nearby.length ? 1 : MIN_STRAY_MENTIONS)
+  const ref = known || waitForChats ? await search : undefined
+  return ref ? matched('chat', ref) : matched('folder', nearby.length === 1 ? nearby[0].sessionId : undefined)
+}
+
+function matched(why: ReplyMatch, ref: string | undefined): string | undefined {
+  matchedBy = ref ? why : undefined
+  return ref
 }
 
 function noteFocus(ref: string | undefined): void {
@@ -203,18 +257,24 @@ function noteFocus(ref: string | undefined): void {
 
 async function tick(): Promise<void> {
   if (polling || !WATCHED_APPS.has(frontBundle)) return
+  if (frontBundle === CMUX_APP) {
+    if (Date.now() - lastCmuxRead < CMUX_POLL_MS) return
+    lastCmuxRead = Date.now()
+  }
   polling = true
   const auto = autoSwitchOn()
-  const found = await agentInFront(auto).finally(() => (polling = false))
+  const found = await agentInFront(auto, false).finally(() => (polling = false))
   noteFocus(found)
+  // a folder guess now and the chat answer a few seconds later would flip the window twice
+  const settling = seenUrl !== '' && chatSearches.has(pageKey(seenUrl))
+  if (settling) return
   if (auto && seenPage && seenPage !== toldPage) {
     toldPage = seenPage
-    devLog.log(`[reply-follow] page=${seenPage} agent=${found ?? 'none'}`)
-    tellReplyWindow({ page: seenPage, url: seenUrl, ref: found })
+    devLog.log(`[reply-follow] page=${seenPage} agent=${found ?? "none"} why=${matchedBy ?? "none"}`)
+    tellReplyWindow({ page: seenPage, url: seenUrl, ref: found, why: matchedBy })
   }
   if (!auto || !found || found === autoSwitched) return
-  autoSwitched = found
-  switchReplyWindow({ ref: found, order: focusOrder() })
+  if (switchReplyWindow({ ref: found, order: focusOrder() })) autoSwitched = found
 }
 
 export function autoSwitchOn(): boolean {
@@ -233,7 +293,8 @@ export function startReplyFocusTracking(): void {
     frontBundle = bundleId
     if (!isOwnBundleId(bundleId)) {
       appBehind = bundleId
-      followFrontApp(showsOver(bundleId), () => ({ ref: focusOrder()[0], order: focusOrder() }))
+      const anyAgent = liveAgentSessions().length > 0
+      followFrontApp(showsOver(bundleId) && anyAgent, () => ({ ref: focusOrder()[0], order: focusOrder() }))
     }
     void tick()
   })
@@ -262,7 +323,7 @@ export function focusOrder(): string[] {
 }
 
 export async function aimAtFront(waitMs: number): Promise<string | undefined> {
-  const found = await Promise.race([agentInFront(true), new Promise<undefined>((done) => setTimeout(done, waitMs))])
+  const found = await Promise.race([agentInFront(true, true), new Promise<undefined>((done) => setTimeout(done, waitMs))])
   noteFocus(found)
   return found ?? focusOrder()[0]
 }

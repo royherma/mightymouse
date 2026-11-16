@@ -152,7 +152,6 @@ export const CHANNELS = Object.freeze({
   replyWindowScreen: 'reply-window-screen',
   replyWindowApp: 'reply-window-app',
   replyWindowSeeing: 'reply-window-seeing',
-  replyWindowExpand: 'reply-window-expand',
   replyWindowAuto: 'reply-window-auto',
   replyWindowShowOver: 'reply-window-show-over',
   // main → panel broadcast after a save so the panel reloads its chip row.
@@ -673,6 +672,10 @@ export const CHANNELS = Object.freeze({
   openExternal: 'open-external',
   linkMenu: 'link-menu',
   nativeMenu: 'native-menu',
+  popoverMenu: 'popover-menu',
+  popoverMenuShow: 'popover-menu-show',
+  popoverMenuSize: 'popover-menu-size',
+  popoverMenuPick: 'popover-menu-pick',
 
   // ── Mighty (standing personal agent, ?window=mighty) ───────────────────────
   openMightyWindow: 'open-mighty-window',

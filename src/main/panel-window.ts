@@ -411,6 +411,13 @@ export function yieldToForeignApp(): boolean {
   return true
 }
 
+// Hand focus back BEFORE hiding: macOS otherwise promotes our next window and the main app jumps forward.
+export function hideHandingBack(win: BrowserWindow): void {
+  if (win.isDestroyed()) return
+  if (process.platform === 'darwin' && win.isFocused()) yieldToForeignApp()
+  win.hide()
+}
+
 /** Resign so dismiss is not a Dock click. Restore click-through overlays after. */
 export function yieldIfLastRestorable(except?: BrowserWindow | null): void {
   if (process.platform !== 'darwin') return

@@ -2,6 +2,7 @@ import { BrowserWindow, screen } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { chrome } from './platform'
+import { hideHandingBack } from './panel-window'
 import { CONFIG } from '../shared/config'
 import { CHANNELS } from '../shared/ipc'
 import type { ReplyWindowAim, ReplyWindowSeeing } from '../shared/types'
@@ -82,17 +83,8 @@ export function replyWindowFocused(): boolean {
 
 export function hideReplyWindow(): void {
   dismissed = true
-  getReplyWindow()?.hide()
-}
-
-export function expandReplyWindow(): void {
   const win = getReplyWindow()
-  if (!win) return
-  const bounds = win.getBounds()
-  const area = screen.getDisplayMatching(bounds).workArea
-  const height = Math.min(HEIGHT, area.height)
-  if (bounds.height >= height) return
-  win.setBounds({ ...bounds, y: Math.max(area.y, bounds.y + bounds.height - height), height })
+  if (win) hideHandingBack(win)
 }
 
 export function tellReplyWindow(seeing: ReplyWindowSeeing): void {
@@ -100,9 +92,11 @@ export function tellReplyWindow(seeing: ReplyWindowSeeing): void {
   if (win && !win.isDestroyed()) win.webContents.send(CHANNELS.replyWindowSeeing, seeing)
 }
 
-export function switchReplyWindow(aim: ReplyWindowAim): void {
+export function switchReplyWindow(aim: ReplyWindowAim): boolean {
   const win = getReplyWindow()
-  if (win?.isVisible()) win.webContents.send(CHANNELS.replyWindowAim, aim)
+  if (!win?.isVisible()) return false
+  win.webContents.send(CHANNELS.replyWindowAim, aim)
+  return true
 }
 
 export function followFrontApp(showHere: boolean, firstAim: () => ReplyWindowAim): void {

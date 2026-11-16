@@ -90,3 +90,25 @@ export function axPress(req: AxPressRequest): Promise<AxPressResult> {
     })
   })
 }
+
+const PAGE_URL_TIMEOUT_MS = 1500
+
+export function frontPageUrl(bundleId: string): Promise<string> {
+  return new Promise((resolve) => {
+    const bin = resolveHelper(AX_BIN)
+    if (!existsSync(bin)) return resolve('')
+    const proc = spawn(bin, ['url', bundleId])
+    let stdout = ''
+    const timer = setTimeout(() => proc.kill('SIGKILL'), PAGE_URL_TIMEOUT_MS)
+    proc.stdout.on('data', (chunk) => (stdout += String(chunk)))
+    proc.on('error', () => resolve(''))
+    proc.on('close', () => {
+      clearTimeout(timer)
+      try {
+        resolve(String((JSON.parse(stdout.trim()) as { url?: string }).url ?? ''))
+      } catch {
+        resolve('')
+      }
+    })
+  })
+}

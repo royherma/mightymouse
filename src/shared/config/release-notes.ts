@@ -4,6 +4,42 @@
 
 export const RELEASE_NOTES = [
   {
+    version: '0.57.0',
+    date: '2026-11-16',
+    changes: [
+      {
+        icon: '🌐',
+        title: "Talk to the page you're building.",
+        detail:
+          'A small box sits over your browser, already on the agent that BUILT the page. Type or talk, and your words and screen go straight to it.'
+      },
+      {
+        icon: '🤝',
+        title: 'Your agents can hand work to EACH OTHER.',
+        detail:
+          'Ask Claude to pass a task to Codex, Cursor or a local model. It runs beside it, and the answer comes back to the one who asked.'
+      },
+      {
+        icon: '💬',
+        title: 'Ask a running agent a quick question.',
+        detail:
+          'Type /btw and your question in a working Claude session. It answers on the side WITHOUT stopping what it was doing.'
+      },
+      {
+        icon: '⚡',
+        title: 'Jump to any session with ONE key.',
+        detail:
+          'Press Cmd+K and your sessions get numbers, then press 1 to 9 to open one. A new project is now just a name and a folder.'
+      },
+      {
+        icon: '✨',
+        title: 'Fable 5.2 is in your model list.',
+        detail:
+          'Pick it anywhere you pick a model. Codex sessions also keep their repo name, and the newest Codex models stay listed after a restart.'
+      }
+    ]
+  },
+  {
     version: '0.56.0',
     date: '2026-11-09',
     changes: [

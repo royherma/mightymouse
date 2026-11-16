@@ -1443,6 +1443,8 @@ export interface AdminStats {
       /** They minted a phone-remote credential at least once (`phone_device_paired`).
        *  A marker, not a rung — reconnect storms do not change this. */
       phonePaired?: boolean
+      /** ISO alpha-2 from their newest pageview; null when never seen on the web. */
+      country?: string | null
       nudges?: LifecycleNudge[]
       digest?: DigestFlag
       journey?: UserJourney
@@ -2344,6 +2346,27 @@ export type LinkMenuChoice = 'app' | null
 export type NativeMenuItem =
   | { id: string; label: string; enabled?: boolean; checked?: boolean; sublabel?: string }
   | { type: 'separator' }
+
+export type PopoverMenuItem =
+  | {
+      id: string
+      label: string
+      sublabel?: string
+      checked?: boolean
+      enabled?: boolean
+      keys?: string
+      project?: AgentRelaySessionInfo['project']
+      icon?: 'project' | 'chat' | 'plus'
+    }
+  | { type: 'separator' }
+  | { type: 'heading'; label: string }
+
+export interface PopoverMenuRequest {
+  items: PopoverMenuItem[]
+  anchor: { x: number; y: number; width: number; height: number }
+  width: number
+  search?: string
+}
 
 /** User-editable Mighty settings (persona, behavior, output). Persisted via PREFS. */
 export interface MightySettings {
@@ -3381,10 +3404,13 @@ export interface ReplyWindowApp {
   shows: boolean
 }
 
+export type ReplyMatch = 'made' | 'folder' | 'chat'
+
 export interface ReplyWindowSeeing {
   page: string
   url: string
   ref?: string
+  why?: ReplyMatch
 }
 
 export interface ReplyWindowAim {

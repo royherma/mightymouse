@@ -59,6 +59,7 @@ export function SessionRow({
   onMove,
   onNewProject,
   leading,
+  shortcut,
   nested = false
 }: {
   s: MightySession
@@ -77,6 +78,7 @@ export function SessionRow({
   onMove: (projectId: string | undefined) => void
   onNewProject: () => void
   leading?: ReactNode
+  shortcut?: number
   nested?: boolean
 }): JSX.Element {
   const menuRef = useRef<HTMLDivElement>(null)
@@ -145,6 +147,9 @@ export function SessionRow({
       <span className={`shrink-0 h-6 items-center text-xs text-muted tabular-nums ${moveMenuOpen ? 'hidden' : 'inline-flex group-hover:hidden'}`}>
         {s.runId ? <Loader2 size={13} className="animate-spin" /> : timeAgo(s.updated)}
       </span>
+      {shortcut !== undefined && (
+        <span className="shrink-0 text-[11px] text-muted tabular-nums">⌘{shortcut}</span>
+      )}
       <div className={`shrink-0 h-6 items-center gap-1 ${moveMenuOpen ? 'flex' : 'hidden group-hover:flex'}`}>
         <Button
           variant="icon"
@@ -587,4 +592,3 @@ export function ProjectSettingsModal({
 // its timestamp and a copy button; clicking copy puts the bubble text on the clipboard.
 // Exported: ConversationPane (the multi-pane-chat per-pane component) reuses this
 // verbatim instead of forking a copy — it's fully prop-driven, no ChatTab coupling.
-

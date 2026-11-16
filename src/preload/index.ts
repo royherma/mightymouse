@@ -336,7 +336,6 @@ const api = {
     ipcRenderer.on(CHANNELS.replyWindowAim, handler)
     return () => ipcRenderer.removeListener(CHANNELS.replyWindowAim, handler)
   },
-  replyWindowExpand: () => ipcRenderer.send(CHANNELS.replyWindowExpand),
   onReplyWindowSeeing: (callback: (seeing: ReplyWindowSeeing) => void) => {
     const handler = (_: unknown, seeing: ReplyWindowSeeing): void => callback(seeing)
     ipcRenderer.on(CHANNELS.replyWindowSeeing, handler)
@@ -914,6 +913,14 @@ const api = {
   linkMenu: (url: string, canOpenHere: boolean) =>
     ipcRenderer.invoke(CHANNELS.linkMenu, url, canOpenHere),
   nativeMenu: (items: NativeMenuItem[]) => ipcRenderer.invoke(CHANNELS.nativeMenu, items),
+  popoverMenu: (request: import('../shared/types').PopoverMenuRequest) => ipcRenderer.invoke(CHANNELS.popoverMenu, request),
+  onPopoverMenuShow: (callback: (request: import('../shared/types').PopoverMenuRequest) => void) => {
+    const handler = (_: unknown, request: import('../shared/types').PopoverMenuRequest): void => callback(request)
+    ipcRenderer.on(CHANNELS.popoverMenuShow, handler)
+    return () => ipcRenderer.removeListener(CHANNELS.popoverMenuShow, handler)
+  },
+  popoverMenuSize: (height: number) => ipcRenderer.send(CHANNELS.popoverMenuSize, height),
+  popoverMenuPick: (id: string | null) => ipcRenderer.send(CHANNELS.popoverMenuPick, id),
   settingsSave: (patch: SettingsPatch) => ipcRenderer.invoke(CHANNELS.settingsSave, patch),
   settingsDownloadModel: (modelName?: string) =>
     ipcRenderer.invoke(CHANNELS.settingsDownloadModel, modelName),
