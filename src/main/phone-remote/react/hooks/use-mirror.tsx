@@ -883,6 +883,12 @@ export function useMirror({ onReady }: AppProps = {}) {
       // forget it and silently ship the glasses a 1280x800 stream again.
       // isCursorless() is read live (not the hook) because the verdict can flip
       // after mount and this runs at click time, not render time.
+      if (typeof RTCPeerConnection === 'undefined') {
+        remoteLog('mirror unavailable: no RTCPeerConnection')
+        showToast("Screen mirror can't run in this browser. Lockdown Mode turns it off.")
+        setMirrorOn(false)
+        return
+      }
       const quality = qualityForHost(picked, isCursorless())
       if (mirrorPcRef.current) send({ type: 'mirrorStop', cause: 'restart' })
       stopMirror('restart')

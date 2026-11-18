@@ -133,7 +133,8 @@ export async function checkForUpdates(): Promise<void> {
     return
   }
   try {
-    await autoUpdater.checkForUpdates()
+    const result = await autoUpdater.checkForUpdates()
+    result?.downloadPromise?.catch(() => {})
   } catch (err) {
     devLog.error('[updater] check failed:', err)
   }
@@ -159,7 +160,7 @@ function trackVersionChange(): void {
  */
 const OFFLINE_NET_ERROR =
   /net::ERR_(INTERNET_DISCONNECTED|NETWORK_CHANGED|NETWORK_IO_SUSPENDED|NAME_NOT_RESOLVED|TIMED_OUT|ADDRESS_UNREACHABLE|HTTP2_PROTOCOL_ERROR|CONNECTION_(RESET|CLOSED|TIMED_OUT|REFUSED|ABORTED))/
-const SERVER_HICCUP = /HttpError: 5\d\d|^5\d\d\b/
+const SERVER_HICCUP = /HttpError: (5\d\d|618)|^(5\d\d|618)\b/
 
 export function isOfflineOrServerHiccup(message: string): boolean {
   return OFFLINE_NET_ERROR.test(message) || SERVER_HICCUP.test(message)

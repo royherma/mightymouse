@@ -181,6 +181,7 @@ export function installCrashHandlers(): void {
   // A utility / GPU child process died.
   app.on('child-process-gone', (_e, details) => {
     devLog.error('[crash] child-process-gone:', details)
+    if (details.reason === 'killed' && details.exitCode === 15) return
     const message = `${details.type} ${details.reason} (exit ${details.exitCode})`
     trackError({
       kind: 'child-process-gone',
