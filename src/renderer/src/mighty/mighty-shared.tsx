@@ -48,7 +48,7 @@ export const SIDEBAR_SOURCE_GROUPS: ReadonlyArray<{
   sources: readonly MightyRunSource[]
 }> = [
   { key: 'chat', label: 'Chats', sources: ['chat', 'phone'] },
-  { key: 'capture', label: 'Voice notes & captures', sources: ['listen', 'voice', 'capture'] },
+  { key: 'capture', label: 'Voice notes & captures', sources: ['listen', 'voice', 'capture', 'talk'] },
   { key: 'job', label: 'Scheduled jobs', sources: ['job'] }
 ]
 

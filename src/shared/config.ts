@@ -1785,7 +1785,8 @@ export const CONFIG = {
       chat: 300_000, // 5 min
       job: 3_600_000, // 1 hour
       phone: 900_000, // 15 min
-      voice: 20_000
+      voice: 20_000,
+      talk: 300_000
     } as Record<MightyRunSource, number>,
     // The window's fallback fuse must lose to main's, or the reply is dropped and the chat unbinds.
     RUN_TIMEOUT_GRACE_MS: 30_000,

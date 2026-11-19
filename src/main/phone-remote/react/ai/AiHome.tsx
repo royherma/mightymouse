@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, ArrowUp, Check, ChevronDown, CircleOff, FolderPlus, MessageCircle, Mic, Monitor, Mouse, RefreshCw, Settings, Square } from 'lucide-react'
+import { ArrowLeft, ArrowUp, AudioLines, Check, ChevronDown, CircleOff, FolderPlus, MessageCircle, Mic, Monitor, Mouse, RefreshCw, Settings, Square } from 'lucide-react'
 import { THOUGHT_MIC_CLASS } from '../mic-nodes'
 import { CONFIG } from '@shared/config'
 import type { AgentRelaySessionInfo } from '@shared/types'
@@ -18,6 +18,7 @@ import { nativeBridge } from '../native-bridge'
 import { PREVIEW_MODE } from '../hooks/use-mirror'
 import { useRecordingElapsed } from '../use-recording-elapsed'
 import { Button } from '@shared/ui/Button'
+import { TALK_LABELS } from '@shared/talk'
 
 const IN_IOS_APP = capabilities.shell === 'native' || PREVIEW_MODE
 const CAN_GO_BACK = nativeBridge.canHideDeck() || PREVIEW_MODE
@@ -417,6 +418,7 @@ export function AiHome(props: {
   thoughtRecording?: boolean
   onOpenNotes?: () => void
   onWatch?: () => void
+  onTalk?: () => void
   onOpenSettings: () => void
   linkOk: boolean
 }): React.JSX.Element {
@@ -487,6 +489,11 @@ export function AiHome(props: {
           </Button>
         </div>
         <div className="aiHeadSide" data-end="">
+          {props.onTalk && (
+            <Button variant="bare" type="button" className="aiIconBtn" aria-label={TALK_LABELS.title} title={TALK_LABELS.title} data-label={TALK_LABELS.button} onClick={props.onTalk}>
+              <AudioLines size={19} />
+            </Button>
+          )}
           {props.onWatch && (
             <Button variant="bare" type="button" className="aiIconBtn" aria-label="See your Mac screen" title="See your Mac screen" data-label="Screen" onClick={props.onWatch}>
               <Monitor size={19} />

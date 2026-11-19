@@ -28,6 +28,7 @@ vi.mock('../../phone-remote/server', () => ({
 }))
 vi.mock('../phone-remote-context', () => ({ sendClipboardState: () => {} }))
 vi.mock('../phone-first-steps', () => ({ notePhoneFirstStep: () => {} }))
+vi.mock('../phone-remote-talk', () => ({ handleTalkText: () => {} }))
 vi.mock('../../first-run-window', () => ({ sendToFirstRunRenderer: () => {} }))
 
 import { bumpPhoneMessage, bumpPhoneMoves, flushPhoneSession, resetPhoneSession } from '../phone-remote-audio'

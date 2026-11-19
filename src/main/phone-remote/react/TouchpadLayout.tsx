@@ -6,7 +6,7 @@ import {
   useState,
   type CSSProperties
 } from 'react'
-import { History } from 'lucide-react'
+import { AudioLines, History } from 'lucide-react'
 import MirrorAudioBadge from './MirrorAudioBadge'
 import { MirrorFullScreenBadge, MirrorPane, MirrorTouchModeBadge } from './MirrorPane'
 import { VoiceCallPane } from './VoiceCallPane'
@@ -62,6 +62,9 @@ import type { KeyPillId, IconBtnId } from './TouchpadControls'
 import type { HandsFreeDisplay } from './hands-free-rules'
 import SettingsBody, { type EnvSwitcherState } from './SettingsBody'
 import HistorySheet, { type DictationEntry } from './HistorySheet'
+import TalkSheet from './TalkSheet'
+import type { TalkState } from './hooks/use-talk'
+import { TALK_LABELS } from '@shared/talk'
 import PhoneRemoteTitleBar from './PhoneRemoteTitleBar'
 import { getHiddenKinds } from './history-kinds'
 import type { ChatSessionSummary, ChatStep, OpenChatThread } from './chat-steps'
@@ -294,6 +297,10 @@ export default function TouchpadLayout(props: {
   referralError: string | null
   inviteState: string | null
   onSendInvite: (email: string) => void
+  talkOpen: boolean
+  openTalk: () => void
+  closeTalk: () => void
+  talk: TalkState
   // Chat sheet. All state lives in App.tsx; this component just renders it.
   chatOpen: boolean
   chatSessions: ChatSessionSummary[]
@@ -599,6 +606,10 @@ export default function TouchpadLayout(props: {
     inviteState,
     onSendInvite,
     ai,
+    talkOpen,
+    openTalk,
+    closeTalk,
+    talk,
     chatOpen,
     chatSessions,
     chatThread,
@@ -1485,6 +1496,25 @@ export default function TouchpadLayout(props: {
         {historyFiltering && <span className="historyBtnDot" />}
       </Button>
 
+      <Button
+        variant="bare"
+        className={`chatBtn talkBtn${talkOpen ? ' open' : ''}`}
+        data-nav-order="2"
+        data-nav-group="chrome"
+        aria-label={TALK_LABELS.title}
+        aria-pressed={talkOpen}
+        onClick={() => {
+          hapticTick()
+          setSettingsOpen(() => false)
+          setHistoryOpen(() => false)
+          if (talkOpen) closeTalk()
+          else openTalk()
+        }}
+      >
+        <AudioLines size={19} strokeWidth={2.25} />
+        <span className="proBtnLabel">{TALK_LABELS.button}</span>
+      </Button>
+
       {advanced && (
         <AiRoot
           code={codeProps}
@@ -1492,6 +1522,7 @@ export default function TouchpadLayout(props: {
           onOpenCode={onToggleCode}
           alertsAsk={alertsAsk}
           onOpenNotes={() => setHistoryOpen(() => true)}
+          onTalk={openTalk}
           onOpenSettings={() => {
             setHistoryOpen(() => false)
             setSettingsOpen(() => true)
@@ -1581,6 +1612,21 @@ export default function TouchpadLayout(props: {
         onAct={onActDictation}
         highlightId={highlightHistoryId}
         onFilterChange={setHistoryFiltering}
+      />
+
+      <TalkSheet
+        open={talkOpen}
+        talk={talk}
+        micStreamRef={micStreamRef}
+        onClose={closeTalk}
+        onOpenCode={
+          advanced
+            ? () => {
+                closeTalk()
+                onToggleCode()
+              }
+            : undefined
+        }
       />
 
       <ActProgressSheet
@@ -2194,7 +2240,7 @@ export default function TouchpadLayout(props: {
       {/* islandRecOwns: the island docks its OWN Cancel/Stop/waveform to the
           plate, so this fixed row would be a second, duplicate recording HUD
           at the screen bottom while the island holds the live one. */}
-      {recording && !chatOpen && !codeOpen && !islandRecOwns && (
+      {recording && !chatOpen && !codeOpen && !talkOpen && !islandRecOwns && (
         <>
           {/* micLatched, not `recording`: these mount at the mic's own position,
               and `recording` flips the moment the mic opens -- which on a fast
@@ -2236,7 +2282,7 @@ export default function TouchpadLayout(props: {
       {/* Stop DISARMS the mode, it does not end the clip: the VAD closes each
           utterance on silence by itself. !recording keeps this HUD out of the
           band the press-and-hold one above owns. */}
-      {handsFreeSpeaking && !recording && !chatOpen && (
+      {handsFreeSpeaking && !recording && !chatOpen && !talkOpen && (
         <>
           <Button
             variant="bare"

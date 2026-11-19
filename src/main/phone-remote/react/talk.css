@@ -1,0 +1,396 @@
+.talkScrim {
+  z-index: calc(var(--z-sheet-popover) + 5);
+}
+.historySheet.talkSheet {
+  z-index: calc(var(--z-sheet-popover) + 10);
+  gap: 0;
+}
+.talkList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 0 16px;
+}
+
+.talkTurn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  animation: talkIn 0.22s ease-out;
+}
+.talkSaid {
+  align-self: flex-end;
+  max-width: 85%;
+  margin: 0;
+  padding: 9px 13px;
+  border-radius: 18px 18px 4px 18px;
+  background: var(--accent-bg-subtle);
+  color: var(--on-surface);
+  font-size: 15px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.talkCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--surface3);
+  background: var(--surface2);
+  color: var(--on-surface);
+}
+.talkTurn[data-phase='counting'] .talkCard,
+.talkTurn[data-phase='choosing'] .talkCard {
+  border-color: var(--accent-border-subtle);
+}
+.talkHeadline {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.3;
+}
+.talkStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text-muted-medium);
+}
+
+.talkCountdown {
+  display: block;
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: var(--surface3);
+}
+.talkCountdownFill {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  animation-name: talkCount;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+.talkActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.talkOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.talkOption {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--surface3);
+  background: var(--surface1);
+  color: var(--on-surface);
+  text-align: left;
+  transition: transform 0.08s ease-out;
+}
+.talkOption.lead {
+  border-color: var(--accent-border-subtle);
+  background: var(--accent-bg-subtle);
+}
+.talkOption:active {
+  transform: scale(0.98);
+}
+.talkOptionAv {
+  position: relative;
+  flex: none;
+  display: grid;
+}
+.talkOptionBadge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 17px;
+  height: 17px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 2px solid var(--surface1);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.talkOptionText {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.talkOptionName,
+.talkOptionDetail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.talkOptionName {
+  font-size: 15px;
+  font-weight: 600;
+}
+.talkOptionDetail {
+  font-size: 12.5px;
+  color: var(--text-muted-medium);
+}
+.talkOptionPct {
+  flex: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted-medium);
+}
+.talkCancelLink {
+  align-self: center;
+}
+
+.talkStreamed {
+  max-height: 7.5em;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  color: var(--text-muted-medium);
+}
+.talkReply {
+  font-size: 15.5px;
+  line-height: 1.42;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.talkReply.failed {
+  color: var(--red);
+}
+.talkFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 24px;
+}
+.talkTarget {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--text-muted-medium);
+}
+.talkTarget svg {
+  color: var(--green);
+}
+.talkFooterBtn {
+  margin-left: auto;
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.talkEmpty {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 24px 8px;
+  text-align: center;
+}
+.talkEmptyMark {
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-bg-subtle);
+  color: var(--accent);
+}
+.talkEmptyLead {
+  margin: 8px 0 0;
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+.talkEmptySub {
+  margin: 0;
+  max-width: 280px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-muted-medium);
+}
+.talkIdeas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(100%, 320px);
+  margin-top: 16px;
+}
+.talkIdea {
+  padding: 11px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--surface3);
+  background: var(--surface2);
+  color: var(--on-surface);
+  font-size: 14px;
+  text-align: left;
+}
+.talkIdea:active {
+  background: var(--surface3);
+}
+
+.talkDock {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--surface3);
+}
+.talkOrb {
+  position: relative;
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: 0 8px 22px rgba(var(--accent-rgb), 0.32);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transition:
+    transform 0.1s ease-out,
+    background-color 0.15s;
+}
+.talkOrb:active {
+  transform: scale(0.94);
+}
+.talkOrb[data-state='listening'] {
+  background: var(--red);
+  box-shadow: 0 8px 22px rgba(var(--red-rgb), 0.35);
+  animation: talkPulse 1.4s ease-out infinite;
+}
+.talkOrb[data-state='hearing'] {
+  opacity: 0.8;
+}
+.talkOrb .micWaveform {
+  position: static;
+  transform: none;
+  width: 48px;
+  height: 34px;
+  z-index: auto;
+}
+.talkOrb .micWaveformBars {
+  width: 48px;
+  height: 34px;
+  gap: 4px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+}
+.talkOrb .micWaveformBars i {
+  width: 5px;
+  background: var(--on-accent);
+  box-shadow: none;
+}
+.talkHint {
+  margin: 0;
+  min-height: 1.3em;
+  font-size: 13px;
+  color: var(--text-muted-medium);
+  text-align: center;
+}
+.talkHint.error {
+  color: var(--red);
+}
+.talkTypeToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+.talkType {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.talkTypeInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
+  border: 1px solid var(--surface3);
+  background: var(--surface2);
+  color: var(--on-surface);
+  font: inherit;
+  font-size: 16px;
+  outline: none;
+}
+.talkTypeInput:focus {
+  border-color: var(--accent-border-subtle);
+}
+.talkTypeSend {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+
+.proRoot[data-orient='landscape'] .talkOrb {
+  width: 64px;
+  height: 64px;
+}
+
+@keyframes talkCount {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+@keyframes talkPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(var(--red-rgb), 0.4);
+  }
+  100% {
+    box-shadow: 0 0 0 18px rgba(var(--red-rgb), 0);
+  }
+}
+@keyframes talkIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .talkTurn,
+  .talkOrb[data-state='listening'] {
+    animation: none;
+  }
+}
