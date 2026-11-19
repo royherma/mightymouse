@@ -103,13 +103,13 @@ function TurnBody({
         <div className="talkHeadline">{talkHeadline(turn)}</div>
         <Countdown key={turn.goAt} />
         <div className="talkActions">
-          <Button size="lg" onClick={() => talk.go(turn.id, turn.pick)}>
+          <Button variant="bare" className="talkPill" onClick={() => talk.go(turn.id, turn.pick)}>
             {TALK_LABELS.goNow}
           </Button>
-          <Button size="lg" variant="secondary" onClick={() => talk.change(turn.id)}>
+          <Button variant="bare" className="talkPill quiet" onClick={() => talk.change(turn.id)}>
             {TALK_LABELS.change}
           </Button>
-          <Button size="lg" variant="text" onClick={() => talk.cancel(turn.id)}>
+          <Button variant="bare" className="talkLink" onClick={() => talk.cancel(turn.id)}>
             {TALK_LABELS.cancel}
           </Button>
         </div>
@@ -133,7 +133,11 @@ function TurnBody({
             />
           ))}
         </div>
-        <Button variant="text" className="talkCancelLink" onClick={() => talk.cancel(turn.id)}>
+        <Button
+          variant="bare"
+          className="talkLink talkCancelLink"
+          onClick={() => talk.cancel(turn.id)}
+        >
           {TALK_LABELS.cancel}
         </Button>
       </>
@@ -157,7 +161,7 @@ function TurnBody({
         )}
         {turn.streamed !== '' && <div className="talkStreamed">{turn.streamed}</div>}
         <div className="talkActions">
-          <Button size="lg" variant="ghost" onClick={() => talk.cancel(turn.id)}>
+          <Button variant="bare" className="chatStopBtn" onClick={() => talk.cancel(turn.id)}>
             <Square size={13} strokeWidth={2.5} />
             {TALK_LABELS.stop}
           </Button>
@@ -179,12 +183,16 @@ function TurnBody({
           </span>
         )}
         {ok && turn.openLabel && onOpenCode && (
-          <Button variant="text" className="talkFooterBtn" onClick={onOpenCode}>
+          <Button variant="bare" className="talkLink talkFooterBtn" onClick={onOpenCode}>
             {TALK_LABELS.open}
           </Button>
         )}
         {!ok && (
-          <Button variant="text" className="talkFooterBtn" onClick={() => talk.say(turn.text)}>
+          <Button
+            variant="bare"
+            className="talkLink talkFooterBtn"
+            onClick={() => talk.say(turn.text)}
+          >
             {TALK_LABELS.tryAgain}
           </Button>
         )}
@@ -299,7 +307,12 @@ function TalkTyping({ talk, onDone }: { talk: TalkState; onDone: () => void }): 
         submit()
       }}
     >
-      <Button variant="quiet" aria-label={TALK_LABELS.talkInstead} onClick={onDone}>
+      <Button
+        variant="bare"
+        className="talkIconBtn"
+        aria-label={TALK_LABELS.talkInstead}
+        onClick={onDone}
+      >
         <Mic size={18} strokeWidth={2.25} />
       </Button>
       <input
@@ -312,6 +325,7 @@ function TalkTyping({ talk, onDone }: { talk: TalkState; onDone: () => void }): 
         onChange={(e) => setText(e.target.value)}
       />
       <Button
+        variant="bare"
         type="submit"
         className="talkTypeSend"
         aria-label={TALK_LABELS.send}
@@ -403,8 +417,8 @@ export default function TalkSheet({
                 {hint}
               </p>
               <Button
-                variant="text"
-                className="talkTypeToggle"
+                variant="bare"
+                className="talkLink talkTypeToggle"
                 onClick={() => setTyping(true)}
                 disabled={talk.listening}
               >

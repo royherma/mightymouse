@@ -197,7 +197,6 @@
 .talkFooterBtn {
   margin-left: auto;
   color: var(--accent);
-  font-size: 13px;
 }
 
 .talkEmpty {
@@ -263,6 +262,7 @@
 }
 .talkOrb {
   position: relative;
+  border: 0;
   width: 84px;
   height: 84px;
   display: grid;
@@ -393,4 +393,69 @@
   .talkOrb[data-state='listening'] {
     animation: none;
   }
+}
+
+.talkPill,
+.talkLink,
+.talkIconBtn,
+.talkTypeSend,
+.talkOption,
+.talkIdea,
+.talkOrb {
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.talkPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 14px;
+  font-weight: 650;
+  transition: transform 0.08s ease-out;
+}
+.talkPill.quiet {
+  background: var(--surface3);
+  color: var(--on-surface);
+}
+.talkPill:active {
+  transform: scale(0.96);
+}
+.talkLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 6px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted-medium);
+  font-size: 13px;
+  font-weight: 600;
+}
+.talkIconBtn {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted-medium);
+}
+.talkTypeSend {
+  border: 0;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.talkTypeSend:disabled {
+  opacity: 0.4;
+  cursor: default;
 }

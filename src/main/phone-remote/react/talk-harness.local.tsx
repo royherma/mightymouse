@@ -1,4 +1,5 @@
-import { StrictMode, useRef, useState } from 'react'
+import { StrictMode, useEffect, useRef, useState } from 'react'
+import { AudioLines, History } from 'lucide-react'
 import { createRoot } from 'react-dom/client'
 import { CONFIG } from '@shared/config'
 import { COMPUTER_OPTION, TALK, TALK_LABELS } from '@shared/talk'
@@ -9,8 +10,10 @@ import type { TalkState, TalkTurnView } from './hooks/use-talk'
 import './theme.css'
 import './ai/ai.css'
 
-// ?state=empty|listening|hearing|deciding|counting|choosing|running|done|failed|heard-error|all
-const state = new URLSearchParams(location.search).get('state') ?? 'all'
+// ?state= or #state= one of: button|empty|listening|hearing|deciding|counting|choosing|running|done|failed|heard-error|all
+function stateFromUrl(): string {
+  return location.hash.slice(1) || new URLSearchParams(location.search).get('state') || 'all'
+}
 
 for (const [key, val] of Object.entries(CONFIG.THEME_TOKENS)) {
   document.documentElement.style.setProperty(
@@ -102,7 +105,17 @@ function turnsFor(name: string): TalkTurnView[] {
 }
 
 export function Harness(): React.JSX.Element {
-  const [open, setOpen] = useState(true)
+  const [state, setState] = useState(stateFromUrl)
+  const [open, setOpen] = useState(state !== 'button')
+  useEffect(() => {
+    const onHash = (): void => {
+      const next = stateFromUrl()
+      setState(next)
+      setOpen(next !== 'button')
+    }
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
   const micStreamRef = useRef<MediaStream | null>(null)
   const log =
     (what: string) =>
@@ -125,7 +138,19 @@ export function Harness(): React.JSX.Element {
   }
   return (
     <div className="proRoot" data-orient={innerWidth > innerHeight ? 'landscape' : 'portrait'}>
-      {!open && <Button onClick={() => setOpen(true)}>Open Talk</Button>}
+      <Button variant="bare" className="historyBtn" aria-label="History">
+        <History size={19} strokeWidth={2.25} />
+        <span className="proBtnLabel">History</span>
+      </Button>
+      <Button
+        variant="bare"
+        className={`chatBtn talkBtn${open ? ' open' : ''}`}
+        aria-label={TALK_LABELS.title}
+        onClick={() => setOpen(true)}
+      >
+        <AudioLines size={19} strokeWidth={2.25} />
+        <span className="proBtnLabel">{TALK_LABELS.button}</span>
+      </Button>
       <TalkSheet
         open={open}
         talk={talk}
