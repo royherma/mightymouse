@@ -24,6 +24,7 @@ import { talkHeadline, type TalkState, type TalkTurnView } from './hooks/use-tal
 import './talk.css'
 
 const VISIBLE_STEPS = 3
+const TALK_LIST_PAD_PX = 8
 
 function OptionIcon({ option }: { option: TalkOptionWire }): React.JSX.Element {
   if (option.kind === 'computer') {
@@ -359,7 +360,9 @@ export default function TalkSheet({
 
   useEffect(() => {
     const list = listRef.current
-    if (open && list) list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' })
+    const newest = list?.lastElementChild
+    if (open && list && newest instanceof HTMLElement)
+      list.scrollTo({ top: newest.offsetTop - TALK_LIST_PAD_PX, behavior: 'smooth' })
   }, [open, lastKey])
 
   const hint = talk.heardError
