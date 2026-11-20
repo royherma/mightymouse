@@ -238,6 +238,7 @@ export default function AiRoot(props: {
   onOpenCode: () => void
   alertsAsk?: number
   onOpenNotes?: () => void
+  onTalk?: () => void
   onOpenSettings: () => void
   macName: string | null
   firstSteps: FirstStepsState | null
@@ -764,6 +765,7 @@ export default function AiRoot(props: {
         mic={mode === 'chat' ? chat.mic : mic}
         thoughtRecording={chat.thoughtRecording}
         onOpenNotes={props.onOpenNotes}
+        onTalk={props.onTalk}
         onOpenSettings={props.onOpenSettings}
         onWatch={onWatch}
         linkOk={code.linkOk !== false}

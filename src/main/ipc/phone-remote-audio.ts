@@ -50,6 +50,7 @@ import { sendClipboardState } from './phone-remote-context'
 import { notePhoneFirstStep } from './phone-first-steps'
 import { CHANNELS } from '../../shared/ipc'
 import { sendToFirstRunRenderer } from '../first-run-window'
+import { handleTalkText } from './phone-remote-talk'
 
 type Msg<T extends PhoneRemoteMessage['type']> = Extract<PhoneRemoteMessage, { type: T }>
 
@@ -267,7 +268,7 @@ export async function handlePhoneAudio(
     if (clipId !== '') cancelledClips.delete(clipId)
     cleanupTmp(paths)
   }
-  const isChat = to === PHONE_AUDIO_TO.chat
+  const isChat = to === PHONE_AUDIO_TO.chat || (to === PHONE_AUDIO_TO.talk && !queued)
   const historyOnly = queued || to === PHONE_AUDIO_TO.note
   const silent = isChat || historyOnly
   const hudStart = (subtitle: string): void => {
@@ -366,6 +367,11 @@ export async function handlePhoneAudio(
 
   const text = result.text.trim()
   stage('done')
+
+  if (to === PHONE_AUDIO_TO.talk && !queued) {
+    void handleTalkText(clipId, text)
+    return
+  }
 
   if (isChat) {
     // No doneHud either: it pushes a 'runDone' back to the phone (see

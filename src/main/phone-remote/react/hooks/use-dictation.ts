@@ -177,9 +177,10 @@ export function useDictation({
       setInFlightClipId(clip.id)
       setRetryableClip(false)
       setTranscribeStage(null)
-      if (clip.to === PHONE_AUDIO_TO.chat) setChatDictating(true)
+      const quiet = clip.to === PHONE_AUDIO_TO.chat || clip.to === PHONE_AUDIO_TO.talk
+      if (quiet) setChatDictating(true)
       else setDictating(true)
-      setStatus(clip.to === PHONE_AUDIO_TO.chat ? 'Transcribing…' : 'Running…')
+      setStatus(quiet ? 'Transcribing…' : 'Running…')
       if (transcribeTimerRef.current !== null) window.clearTimeout(transcribeTimerRef.current)
       transcribeTimerRef.current = window.setTimeout(() => {
         if (inFlightClipRef.current?.id !== clip.id) return
@@ -279,8 +280,9 @@ export function useDictation({
         // The blob is retained ONLY when retrying could plausibly work --
         // otherwise the Retry affordance would offer a second identical
         // failure. See the Mac's `retryable` for which is which.
-        settleClip({ keepBlob: msg.retryable })
-        showToast(msg.retryable ? `${msg.reason} - tap Retry` : msg.reason)
+        const talking = inFlightClipRef.current.to === PHONE_AUDIO_TO.talk
+        settleClip({ keepBlob: msg.retryable && !talking })
+        if (!talking) showToast(msg.retryable ? `${msg.reason} - tap Retry` : msg.reason)
       }),
       bus.subscribe('dictationHistory', (msg) => {
         setDictations((prev) => {
@@ -295,8 +297,8 @@ export function useDictation({
     return () => unsubscribes.forEach((unsubscribe) => unsubscribe())
   }, [bus, onRunDone, settleClip, showToast])
 
-  // Shipped iOS builds only know paste/chat, so a note records as paste and is relabelled on the way out.
-  const nativeNoteRef = useRef(false)
+  // Shipped iOS builds only know paste/chat, so a note or a talk records as paste and is relabelled on the way out.
+  const nativeAsRef = useRef<PhoneAudioDestination | null>(null)
   // Same wire contract as sendClip: meta frame, then the blob, never
   // interleaved -- server.ts:1240 resets pending meta before onAudio runs.
   const sendQueuedClip = useCallback(
@@ -314,8 +316,8 @@ export function useDictation({
         return
       }
       const audio = bytes.buffer as ArrayBuffer
-      const to = nativeNoteRef.current && clip.to === PHONE_AUDIO_TO.paste ? PHONE_AUDIO_TO.note : clip.to
-      if (clip.macAway !== true) nativeNoteRef.current = false
+      const to = nativeAsRef.current !== null && clip.to === PHONE_AUDIO_TO.paste ? nativeAsRef.current : clip.to
+      if (clip.macAway !== true) nativeAsRef.current = null
       // Late drains are history, not a live wait -- no pill, no Retry blob.
       if (clip.macAway !== true) {
         armClipInFlight({
@@ -483,8 +485,8 @@ export function useDictation({
       // Swift still had <300ms (HFP spin-up), which surfaced as "Hold longer".
       recordStartedAtRef.current = 0
       const gen = ++micOpenGenRef.current
-      nativeNoteRef.current = to === PHONE_AUDIO_TO.note
-      nativeBridge.nativeMicStart(nativeNoteRef.current ? PHONE_AUDIO_TO.paste : to, !connectedRef.current)
+      nativeAsRef.current = to === PHONE_AUDIO_TO.note || to === PHONE_AUDIO_TO.talk ? to : null
+      nativeBridge.nativeMicStart(nativeAsRef.current !== null ? PHONE_AUDIO_TO.paste : to, !connectedRef.current)
       window.setTimeout(() => {
         if (gen !== micOpenGenRef.current) return
         if (!micOpenTimedOut(micStateRef.current)) return

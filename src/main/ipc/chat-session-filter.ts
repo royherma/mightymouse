@@ -24,6 +24,7 @@ import type { MightySession } from '../../shared/types'
  *     one, and it is exactly what a phone-started ask looks like.
  */
 export function isPhoneChatSession(session: MightySession): boolean {
+  if (session.turns[0]?.source === 'talk') return false
   // A live run's trailing turn is unanswered by definition — judge it by the mark,
   // not by the bubble count it happens to have mid-flight.
   if (session.runId !== undefined) return true

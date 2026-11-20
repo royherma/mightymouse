@@ -7405,7 +7405,8 @@ html[data-debug-layout='on'] .skinCorner::after {
 }
 .proKeyPillIcon,
 .proIconBtn,
-.historyBtn {
+.historyBtn,
+.chatBtn {
   flex-direction: column;
   gap: 1px;
 }

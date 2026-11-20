@@ -441,6 +441,9 @@ export type PhoneRemoteMessage =
   | { type: 'sessionMark'; session: AgentRelaySessionInfo; change: SessionMark }
   | { type: 'sessionArchiveImport'; entries: unknown }
   | { type: 'chatStop'; sessionId: string }
+  | { type: 'talkSend'; id: string; text: string }
+  | { type: 'talkGo'; id: string; target: string }
+  | { type: 'talkCancel'; id: string }
   | { type: 'modelsGet'; scope: ModelScope }
   | { type: 'modelsSet'; scope: ModelScope; id: string }
   // Code agent relay: answer a pending
@@ -569,6 +572,17 @@ export interface DictationEntry {
 }
 
 export type ChatProjectWire = { name: string; icon?: string; imageBase64?: string }
+
+export type TalkOptionKind = 'computer' | 'agent' | 'new-agent'
+
+export type TalkOptionWire = {
+  id: string
+  kind: TalkOptionKind
+  label: string
+  detail: string
+  percent: number
+  project?: ChatProjectWire
+}
 
 export type RelayProjectWire = ChatProjectWire & { id: string; pinned?: boolean; folderName: string }
 
@@ -821,6 +835,10 @@ export type PhoneRemoteEvent =
    *  reply text for the same reason. */
   | { type: 'chatSessionPhase'; sessionId: string; phase: string; detail?: string }
   | { type: 'chatTranscript'; ok: boolean; text: string; reason?: string }
+  | { type: 'talkHeard'; id: string; text: string }
+  | { type: 'talkRoute'; id: string; auto: boolean; pick: string; options: TalkOptionWire[] }
+  | { type: 'talkStep'; id: string; phase?: string; detail?: string; chunk?: string }
+  | { type: 'talkDone'; id: string; ok: boolean; reply: string; target: string; openLabel?: string }
   // Code agent relay: full snapshot of pending cards plus a short resolved
   // tail (§6b: "plus the last few resolved ones, grayed out"). Pushed on
   // connect and on every store change -- the sheet never polls.

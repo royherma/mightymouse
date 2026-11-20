@@ -28,6 +28,7 @@ import { nativeBridge, nativeMicClaimed, subscribeNativeIntent, subscribeNativeM
 import { useConnection } from '../hooks/use-connection'
 import { useDictation } from '../hooks/use-dictation'
 import { useChat } from '../hooks/use-chat'
+import { useTalk } from '../hooks/use-talk'
 import { useRelay } from '../hooks/use-relay'
 import { usePhotos } from './use-photos'
 import { useActProgress } from '../hooks/use-act-progress'
@@ -161,6 +162,7 @@ export function useMirror({ onReady }: AppProps = {}) {
   // whatever thread you left open, since closing it is pocketing the phone,
   // not leaving the conversation.
   const [chatOpen, setChatOpen] = useState(false)
+  const [talkOpen, setTalkOpen] = useState(false)
   // True from "composer mic released" until the transcript (or a failure) comes
   // back. Distinct from `recording`: the mic is already closed here, and what
   // the composer shows is a wait, not a live level meter.
@@ -1751,7 +1753,7 @@ export function useMirror({ onReady }: AppProps = {}) {
     setStatus,
     connectedRef,
     connState,
-    chatOpen,
+    chatOpen: chatOpen || talkOpen,
     remoteLog,
     closeAppSwitcher,
     setChatDictating,
@@ -1796,6 +1798,20 @@ export function useMirror({ onReady }: AppProps = {}) {
     connState,
     chatDictating,
     setChatDictating
+  })
+
+  const { openTalk, closeTalk, talk } = useTalk({
+    bus,
+    send,
+    micDown,
+    micUp,
+    cancelRecording: () => micSidePress('cancel'),
+    settleClip,
+    inFlightClipRef,
+    recording,
+    recordingTo,
+    hearing: chatDictating && talkOpen,
+    setTalkOpen
   })
 
   const {
@@ -2179,6 +2195,10 @@ export function useMirror({ onReady }: AppProps = {}) {
     referralError,
     inviteState,
     onSendInvite,
+    talkOpen,
+    openTalk,
+    closeTalk,
+    talk,
     chatOpen,
     chatSessions,
     chatThread,

@@ -2095,7 +2095,7 @@ export interface MediaChatPayload {
   question: string
 }
 
-export type MightyRunSource = 'chat' | 'job' | 'phone' | 'listen' | 'capture' | 'voice'
+export type MightyRunSource = 'chat' | 'job' | 'phone' | 'listen' | 'capture' | 'voice' | 'talk'
 
 /** One exchange in a Mighty session: the user's (or job's) message and Mighty's reply. */
 export interface MightyTurn {
@@ -3237,9 +3237,13 @@ export type UserInputSource = 'input' | 'switch' | 'cursor'
 export const PHONE_AUDIO_TO = {
   paste: 'paste',
   chat: 'chat',
-  note: 'note'
+  note: 'note',
+  talk: 'talk'
 } as const
 export type PhoneAudioDestination = (typeof PHONE_AUDIO_TO)[keyof typeof PHONE_AUDIO_TO]
+export function isAudioDestination(value: unknown): value is PhoneAudioDestination {
+  return Object.values(PHONE_AUDIO_TO).includes(value as PhoneAudioDestination)
+}
 
 /** Image types the phone may put on the Mac's clipboard. HEIC is absent on
  *  purpose: the phone re-encodes to JPEG before sending, and macOS clipboard

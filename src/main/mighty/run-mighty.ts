@@ -12,6 +12,7 @@ import { transcribeAttachments } from '../backend/audio-transcribe'
 import { parseActResult } from '../backend/parse'
 import { buildMemoryBlob } from '../backend/context-memory'
 import { screenControlBlock } from '../backend/prompts'
+import { TALK_SYSTEM_PROMPT } from '../../shared/talk'
 import { fireScreenshot } from '../capture/screenshot'
 import { resolveClaude, captureContext } from '../platform'
 import { toBackendId, canRunUnattended, getCapabilities, BACKENDS, type PriorMessage } from '../backend/adapters'
@@ -169,6 +170,7 @@ function buildMightySystemPrompt(
   // Spoken turns get the ear-shaped brevity rules LAST, so they win over the
   // format/instruction blocks above — a "use markdown headers" custom
   // instruction must not survive into something being read aloud.
+  if (source === 'talk') return `${withScreen}\n${TALK_SYSTEM_PROMPT}`
   return source === 'voice' ? `${withScreen}\n${CONFIG.SYSTEM_PROMPT_VOICE_BREVITY}` : withScreen
 }
 

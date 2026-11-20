@@ -1,7 +1,7 @@
 import { WebSocket } from 'ws'
 import { CONFIG } from '../../shared/config'
 import { devLog } from '../../shared/env'
-import { PHONE_AUDIO_TO, PHONE_IMAGE_MIMES } from '../../shared/types'
+import { PHONE_AUDIO_TO, PHONE_IMAGE_MIMES, isAudioDestination } from '../../shared/types'
 import type { PhoneAudioDestination } from '../../shared/types'
 import type { PhoneRemoteMessage, PhoneRemoteEvent } from '../../shared/phone-remote-protocol'
 import { isInkSendTarget, type InkSendTarget } from '../../shared/ink'
@@ -156,7 +156,7 @@ export function handleSocketMessage(
         )
       }
       pending.audioDurationMs = msg.durationMs
-      pending.audioTo = msg.to ?? PHONE_AUDIO_TO.paste
+      pending.audioTo = isAudioDestination(msg.to) ? msg.to : PHONE_AUDIO_TO.paste
       pending.audioId = typeof msg.id === 'string' ? msg.id.slice(0, 64) : ''
       pending.audioPhoneText =
         typeof msg.phoneText === 'string' ? msg.phoneText.slice(0, 4096) : ''

@@ -16,7 +16,8 @@ export type RunSource =
   | 'phone'
   | 'chat'
   | 'job'
-  | 'voice';
+  | 'voice'
+  | 'talk';
 
 export type { RunFailReason };
 

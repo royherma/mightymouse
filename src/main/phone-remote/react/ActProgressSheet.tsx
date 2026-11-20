@@ -3,7 +3,7 @@ import type { ChatStep } from './chat-steps'
 import { Button } from '@shared/ui/Button'
 
 /** `detail` is monospaced: it is a filename or a shell command. */
-function StepRow({ step, active }: { step: ChatStep; active: boolean }): React.JSX.Element {
+export function StepRow({ step, active }: { step: ChatStep; active: boolean }): React.JSX.Element {
   return (
     <div className={`chatStep${active ? ' chatStepActive' : ''}`}>
       <span className="chatStepDot" />

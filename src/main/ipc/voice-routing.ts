@@ -188,7 +188,7 @@ const HARNESS_NAME: Record<AgentHarness, string> = { claude: 'Claude', codex: 'C
 
 /** The failure in words the user can act on. Never the raw cause: "cli-missing"
  *  names our enum, not the thing they need to install. */
-function reasonText(result: { reason: NewAgentFailure; detail: string }, harness: string): string {
+export function reasonText(result: { reason: NewAgentFailure; detail: string }, harness: string): string {
   if (result.reason === 'cli-missing') return `${result.detail || harness} isn't installed`
   if (result.reason === 'no-terminal') return 'no terminal to open it in'
   return "the terminal didn't start"

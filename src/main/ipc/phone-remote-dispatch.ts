@@ -130,6 +130,7 @@ import {
 } from './phone-remote-ai'
 import { phoneMayControlMac, sendPermissionState, getConnectedLabel } from './phone-remote'
 import { notePhoneMicDenied, notePhoneWelcomePick } from './phone-first-steps'
+import { handleTalkCancel, handleTalkGo, handleTalkSend } from './phone-remote-talk'
 
 type Handler<T extends PhoneRemoteMessage['type']> = (
   msg: Extract<PhoneRemoteMessage, { type: T }>
@@ -254,6 +255,9 @@ export const PHONE_MESSAGE_HANDLERS: { [T in PhoneRemoteMessage['type']]: Handle
   pulseScore: handlePulseScore,
   pulseSetScope: handlePulseSetScope,
   chatStop: handleChatStop,
+  talkSend: handleTalkSend,
+  talkGo: (msg) => void handleTalkGo(msg),
+  talkCancel: handleTalkCancel,
   modelsGet: (msg) => (msg.scope === 'code' ? void handleCodeGetModels() : handleChatGetModels()),
   modelsSet: (msg) => void (msg.scope === 'code' ? handleCodeSetModel(msg.id) : handleChatSetModel(msg.id)),
   // Both consumed in server.ts, which returns before calling onMessage: the
