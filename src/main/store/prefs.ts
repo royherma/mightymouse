@@ -200,13 +200,14 @@ function writeRelayPushFile(fields: Record<string, unknown>): void {
   )
 }
 
-export type ChatModelBackend = 'opencode' | 'openrouter' | 'claude' | 'codex'
+export type ChatModelBackend = 'opencode' | 'openrouter' | 'claude' | 'codex' | 'antigravity'
 
 const CHAT_MODEL_FILES: Record<ChatModelBackend, string> = {
   opencode: PATHS.OPENCODE_MODEL_FILE,
   openrouter: PATHS.OPENROUTER_MODEL_FILE,
   claude: PATHS.CLAUDE_CHAT_MODEL_FILE,
-  codex: PATHS.CODEX_CHAT_MODEL_FILE
+  codex: PATHS.CODEX_CHAT_MODEL_FILE,
+  antigravity: PATHS.ANTIGRAVITY_CHAT_MODEL_FILE
 }
 
 const chatModelFile = (backend: ChatModelBackend): string => CHAT_MODEL_FILES[backend]

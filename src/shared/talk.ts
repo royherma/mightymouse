@@ -8,7 +8,9 @@ export const TALK = {
   MAX_OPTIONS: 3,
   TEXT_MAX_CHARS: 4000,
   HISTORY_MAX: 12,
-  ID_MAX_CHARS: 64
+  ID_MAX_CHARS: 64,
+  ATTACH_PREFIX: 'talk:',
+  IDEAS_MAX: 3
 } as const
 
 export const TALK_MODE = { computer: 'computer', agent: 'agent' } as const
@@ -28,26 +30,26 @@ export const TALK_MODE_CRITERIA: Record<keyof typeof TALK_MODE, string> = {
 
 export const TALK_SYSTEM_PROMPT = `
 THE USER IS TALKING TO YOU FROM THEIR PHONE. They may be away from the computer, so do the task here instead of telling them how.
-- When you are done, reply in one to three short sentences: what you did, or the answer. Lead with it.
-- Plain text only: no markdown, lists, code blocks or emoji. It is read on a small screen and may be read aloud.
+- Reply for a phone screen, easy to scan. First line: the answer or what you did, in one short sentence, with the key name or number in **bold**.
+- Then, only if it adds something, up to 4 short bullet points ("- "), one fact each. No headings, tables, code blocks or emoji. Under 70 words total.
+- Show the result when a picture says it better than words: a page you opened, a chart, a document, what is now on screen. Save each picture as a .png or .jpg in the current folder (for the whole screen: screencapture -x result.png). Every image you save there is sent to their phone, so send as many as help and no throwaway ones.
 - If something needs their decision or would delete or send anything, stop and ask in one sentence instead of guessing.`
 
 export const TALK_LABELS = {
   title: 'Computer chat',
   button: 'Chat',
   emptyLead: 'Say or type what you want done.',
-  emptySub: 'Your computer does it, or hands it to the right agent.',
   newAgentIn: 'New agent in',
-  close: 'Close',
+  or: 'Or',
   deciding: 'Working out who should do this…',
   typePlaceholder: 'Message your computer',
+  photoOnly: 'Here is a photo.',
+  yourPhoto: 'Your photo',
+  yourComputer: 'Your computer',
   goNow: 'Go now',
   change: 'Change',
   cancel: 'Cancel',
   pickOne: 'Who should do this?',
-  stop: 'Stop',
-  tryAgain: 'Try again',
-  open: 'Open',
   done: 'Done',
   notConnected: "Your computer isn't connected",
   failed: "That didn't work",
@@ -57,11 +59,19 @@ export const TALK_LABELS = {
   cantStart: "Couldn't start it:",
   agentStarted: 'A new agent is on it.',
   agentHasIt: 'It has your message.',
-  ideas: [
-    'Open Spotify and play something calm',
-    "What's taking up space on my disk?",
-    'Tell my agent the tests pass now'
-  ],
+  ideas: ["What's taking up space on my disk?", "Close the apps I'm not using", "What's on my screen right now?"],
+  appIdeas: {
+    'com.spotify.client': 'Play something calm on Spotify',
+    'com.apple.Music': 'Play something calm in Music',
+    'com.apple.mail': 'Any important emails I missed?',
+    'com.apple.iCal': "What's on my calendar today?",
+    'com.tinyspeck.slackmacgap': 'Any Slack messages I need to answer?',
+    'com.apple.MobileSMS': 'Read me my latest messages',
+    'com.google.Chrome': 'Sum up the page I have open',
+    'com.apple.Safari': 'Sum up the page I have open',
+    'company.thebrowser.Browser': 'Sum up the page I have open'
+  } as Record<string, string>,
+  agentIdea: 'How is my {project} agent doing?',
   doing: {
     computer: 'Doing it on your computer',
     agent: 'Sending it to',
@@ -101,6 +111,23 @@ export const COMPUTER_OPTION: Omit<TalkOptionWire, 'percent'> = {
   kind: 'computer',
   label: 'Your computer',
   detail: 'Does it right here'
+}
+
+export interface TalkRoutePush extends TalkDecision {
+  clientRunId: string
+}
+
+export function talkOptionName(option: TalkOptionWire): string {
+  return option.kind === 'new-agent'
+    ? `${TALK_LABELS.newAgentIn} ${option.project?.name ?? option.label}`
+    : option.label
+}
+
+export function talkHeadline(options: readonly TalkOptionWire[], pick: string): string {
+  const option = options.find((o) => o.id === pick) ?? { ...COMPUTER_OPTION, percent: 100 }
+  if (option.kind === 'computer') return TALK_LABELS.doing.computer
+  const name = option.kind === 'new-agent' ? (option.project?.name ?? option.label) : option.label
+  return `${TALK_LABELS.doing[option.kind]} ${name}`
 }
 
 function percent(value: number): number {

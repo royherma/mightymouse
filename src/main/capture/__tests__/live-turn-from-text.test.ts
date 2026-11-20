@@ -18,6 +18,12 @@ vi.mock('../../actions/capabilities/system', () => ({ quickOpenApp: vi.fn(async 
 vi.mock('../../sound-window', () => ({ playSound: vi.fn() }))
 vi.mock('../../hideout', () => ({ isHideoutOpen: () => false, isHideoutPaused: () => false, recordHideoutTurn: vi.fn(), runHideoutTurn: async () => null, setHideoutWords: vi.fn(), showHideoutTurn: vi.fn() }))
 vi.mock('../../audio/tts', () => ({ speak: async () => ({ audio: null, mimeType: '' }) }))
+vi.mock('../../talk/talk-turn', () => ({
+  runTalk: async (_id: string, text: string, start: { events: { runOnComputer: (t: string, s: string) => Promise<unknown> } }) => {
+    await start.events.runOnComputer(text, 'computer-chat')
+    return { kind: 'computer', ok: true, reply: '', target: '', sessionId: 'computer-chat' }
+  }
+}))
 vi.mock('../../companion-orchestrator', () => ({
   runCompanionAskTurn: async (text: string, sessionId: string) => ({ answeredBy: { backend: 'claude', model: 'm', label: 'm' }, ...(await askTurn(text, sessionId)) }),
   speakCompanionReply: (text: string) => speak(text),

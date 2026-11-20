@@ -10,7 +10,7 @@ import type { TalkState, TalkTurnView } from './hooks/use-talk'
 import './theme.css'
 import './ai/ai.css'
 
-// ?state= or #state= one of: button|empty|listening|deciding|counting|choosing|running|done|failed|all
+// ?state= or #state= one of: button|empty|listening|deciding|counting|choosing|running|done|photo|failed|all
 function stateFromUrl(): string {
   return location.hash.slice(1) || new URLSearchParams(location.search).get('state') || 'all'
 }
@@ -81,8 +81,15 @@ const FIXTURES: Record<string, TalkTurnView> = {
   }),
   done: turn('dn', "What's taking up space on my disk?", {
     phase: 'done',
-    reply: 'Your Downloads folder is 38 GB, mostly old installers. Movies is 21 GB.',
-    target: TALK_LABELS.done_.computer
+    reply: 'Your **Downloads** folder is the biggest at **38 GB**.\n\n- Mostly old installers (.dmg)\n- Movies is next at 21 GB\n- Trash is empty',
+    target: TALK_LABELS.done_.computer,
+    media: { sessionId: 's1', turn: 0, items: [{ item: 0, kind: 'image', name: 'downloads.png' }, { item: 1, kind: 'image', name: 'movies.png' }] }
+  }),
+  photo: turn('p', 'What plant is this?', {
+    phase: 'done',
+    reply: 'A monstera. Water it once a week and keep it out of direct sun.',
+    target: TALK_LABELS.done_.computer,
+    photo: '/harness-photo.jpg'
   }),
   sent: turn('s', 'Tell the api agent the tests pass now', {
     phase: 'done',
@@ -123,6 +130,7 @@ export function Harness(): React.JSX.Element {
       console.log(`[talk] ${what}`, ...args)
   const talk: TalkState = {
     turns: turnsFor(state),
+    ideas: ['Play something calm on Spotify', 'How is my ShowAndTell agent doing?', 'Sum up the page I have open'],
     say: (text) => {
       log('say')(text)
       return true
@@ -158,8 +166,9 @@ export function Harness(): React.JSX.Element {
           draftPatch: null,
           onDraftConsumed: log('draftConsumed')
         }}
+        macName="MacBook Pro (8)"
+        onWatch={log('watch')}
         onClose={() => setOpen(false)}
-        onOpenCode={log('openCode')}
       />
     </div>
   )

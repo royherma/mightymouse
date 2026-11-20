@@ -184,7 +184,7 @@ function startNewAgentFor(
 
 const IN_APP_WHERE = `It's open in ${CONFIG.APP_NAME}, under Code.`
 
-const HARNESS_NAME: Record<AgentHarness, string> = { claude: 'Claude', codex: 'Codex', opencode: 'OpenCode', cursor: 'Cursor', tmux: 'shell' }
+const HARNESS_NAME: Record<AgentHarness, string> = { claude: 'Claude', codex: 'Codex', opencode: 'OpenCode', cursor: 'Cursor', antigravity: 'Antigravity', tmux: 'shell' }
 
 /** The failure in words the user can act on. Never the raw cause: "cli-missing"
  *  names our enum, not the thing they need to install. */

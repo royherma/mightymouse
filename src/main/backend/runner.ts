@@ -576,7 +576,7 @@ export async function runBackend(opts: RunOptions): Promise<void> {
   const modelAttempt = opts.modelAttempt ?? 0
   // local has no static modelName/fallback chain, so it always needs an explicit override.
   const chatPick =
-    backend === 'opencode' || ((backend === 'claude' || backend === 'codex') && !opts.fast && modelAttempt === 0)
+    backend === 'opencode' || ((backend === 'claude' || backend === 'codex' || backend === 'antigravity') && !opts.fast && modelAttempt === 0)
       ? PREFS.getChatModel(backend)
       : ''
   const modelOverride =

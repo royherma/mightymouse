@@ -88,6 +88,22 @@ export function matchWakePhrase(transcript: string): WakeMatch {
   return { addressed: false, request: '' }
 }
 
+const HEARD_NAME_SOUNDS = new Set(['might', 'mite', 'mighties', 'mightys'])
+
+// Text after the misheard name, for when the wake model has already confirmed it was said.
+export function matchHeardWake(transcript: string): WakeMatch {
+  const words = transcript.trim().split(/\s+/).filter(Boolean)
+  const isName = (w: string): boolean => {
+    const n = normalizeWord(w)
+    return WAKE_NAMES.has(n) || WAKE_MISHEARD.has(n) || HEARD_NAME_SOUNDS.has(n)
+  }
+  const at = words.slice(0, WAKE_SEARCH_WORDS).findIndex(isName)
+  let rest = at + 1
+  if (at >= 0 && normalizeWord(words[rest] ?? '') === 'mouse') rest++
+  const request = words.slice(at >= 0 ? rest : 0).join(' ').replace(/^[\s,.!?-]+/, '').trim()
+  return { addressed: true, request }
+}
+
 // Split only when every later part starts with a command, so "salt and pepper" stays whole.
 export function splitCommands(said: string): string[] {
   const parts = said.split(/\s*,?\s+(?:and then|and|then)\s+/i).map((p) => p.trim()).filter(Boolean)

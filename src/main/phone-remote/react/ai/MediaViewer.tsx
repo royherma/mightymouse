@@ -329,3 +329,17 @@ export function MediaViewer(props: { media: MediaRef[]; index: number; onClose: 
     </div>
   )
 }
+
+export function useMediaViewer(media: MediaRef[]): {
+  open: (ref: MediaRef) => void
+  isOpen: boolean
+  viewer: React.JSX.Element | null
+} {
+  const [key, setKey] = useState<string | null>(null)
+  const index = key === null ? -1 : media.findIndex((m) => m.key === key)
+  return {
+    open: (ref) => setKey(ref.key),
+    isOpen: index >= 0,
+    viewer: index >= 0 ? <MediaViewer media={media} index={index} onClose={() => setKey(null)} /> : null
+  }
+}

@@ -11,7 +11,15 @@ if (agent) localStorage.setItem(REPLY_AGENT_KEY, agent)
 else localStorage.removeItem(REPLY_AGENT_KEY)
 createRoot(document.getElementById('root') as HTMLElement).render(
   <ReplyScreenContext.Provider value={{ on: true, setOn: () => {}, clear: () => {} }}>
-    <ReplyApp onHide={() => document.body.setAttribute('data-hidden', '')} />
+    <ReplyApp
+      onHide={() => document.body.setAttribute('data-hidden', '')}
+      aim={params.get('new') ? { cwd: params.get('new')! } : undefined}
+      seeing={
+        params.get('page')
+          ? { page: params.get('page')!, url: `https://${params.get('page')}`, icon: params.get('icon') ?? undefined }
+          : undefined
+      }
+    />
   </ReplyScreenContext.Provider>
 )
 if (params.get('menu')) setTimeout(() => document.querySelector<HTMLElement>('[aria-haspopup="menu"]')?.click(), 600)

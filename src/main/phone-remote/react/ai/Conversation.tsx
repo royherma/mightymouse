@@ -8,7 +8,7 @@ import { attachEdgeSwipe } from '@shared/edge-swipe'
 import { hapticTick } from '../haptics'
 import { Avatar } from './AiHome'
 import { Composer, type ComposerFill, type ComposerMic } from './Composer'
-import { MediaViewer } from './MediaViewer'
+import { useMediaViewer } from './MediaViewer'
 import type { MediaRef, ThreadItem } from './use-ai-session'
 import { Button } from '@shared/ui/Button'
 
@@ -196,6 +196,7 @@ export function Conversation(props: {
   title: string
   spotKey?: string
   subtitle?: string
+  icon?: React.ReactNode
   project?: AgentRelaySessionInfo['project'] | null
   health?: string
   items: ThreadItem[]
@@ -228,10 +229,10 @@ export function Conversation(props: {
   const seenRef = useRef(0)
   const [atBottom, setAtBottom] = useState(true)
   const [unseen, setUnseen] = useState(0)
-  const [viewerAt, setViewerAt] = useState<number | null>(null)
+  const viewer = useMediaViewer(props.items.flatMap((i) => (i.kind === 'steps' ? [] : i.media)))
   const [fill, setFill] = useState<ComposerFill | null>(null)
   const [actionsFor, setActionsFor] = useState<string | null>(null)
-  useSwipeBack(scrollRef, props.onBack, viewerAt === null)
+  useSwipeBack(scrollRef, props.onBack, !viewer.isOpen)
   const lastRecap = [...props.items].reverse().find((i) => i.kind === 'agent' && i.recap)
   const count = props.items.length
   const spotKey = props.spotKey ?? props.title
@@ -297,8 +298,6 @@ export function Conversation(props: {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }
 
-  const allMedia = props.items.flatMap((i) => (i.kind === 'steps' ? [] : i.media))
-  const open = (media: MediaRef[], index: number): void => setViewerAt(Math.max(0, allMedia.indexOf(media[index])))
 
   const send = (text: string, file: File | null): boolean | void => {
     stickRef.current = true
@@ -318,7 +317,7 @@ export function Conversation(props: {
         </Button>
         <div className="aiHeadTitle">
           <Avatar project={props.project} size={32}>
-            {props.project === null ? <MessageCircle size={17} /> : undefined}
+            {props.project === null ? (props.icon ?? <MessageCircle size={17} />) : undefined}
           </Avatar>
           <div className="aiRowText">
             <b>{props.title}</b>
@@ -365,7 +364,7 @@ export function Conversation(props: {
                     {item.text}
                   </div>
                 )}
-                <MediaGrid media={item.media} onOpen={(i) => open(item.media, i)} mine />
+                <MediaGrid media={item.media} onOpen={(i) => viewer.open(item.media[i])} mine />
                 {props.onUndo && item.undo === 'undo' && !props.busy && actionsFor === item.key && (
                   <Button variant="bare" type="button" className="aiUndo" onClick={() => { setActionsFor(null); props.onUndo?.(item.at) }}>
                     <Undo2 size={14} />
@@ -391,7 +390,7 @@ export function Conversation(props: {
                     <Markdown text={item.text} />
                   </div>
                 )}
-                <MediaGrid media={item.media} onOpen={(i) => open(item.media, i)} />
+                <MediaGrid media={item.media} onOpen={(i) => viewer.open(item.media[i])} />
                 {canRetry && item === last && (
                   <Button
                     variant="ghost"
@@ -445,7 +444,7 @@ export function Conversation(props: {
           error={props.sendError}
         />
       )}
-      {viewerAt !== null && <MediaViewer media={allMedia} index={viewerAt} onClose={() => setViewerAt(null)} />}
+      {viewer.viewer}
     </>
   )
 }

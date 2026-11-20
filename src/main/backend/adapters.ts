@@ -18,7 +18,7 @@ import { CONFIG } from '../../shared/config'
 import type { AppMode, MediaAttachment, RunEvent } from '../../shared/types'
 import { RUN_EVENT } from '../../shared/types'
 import { parseClaudeJsonOutput } from './parse'
-import { resolveClaude, resolveCodex, resolveOpencode, resolveGemini } from '../platform'
+import { resolveClaude, resolveCodex, resolveOpencode, resolveGemini, resolveBinary } from '../platform'
 import { loadImagesForVision, isImagePath } from './image-vision'
 import { splitAttachments, inlineFilesForPrompt, loadDocumentsForHttp } from './attachments'
 import { getLocalModelCapabilities, getOllamaContextLength } from './local-models'
@@ -892,6 +892,101 @@ const gemini: BackendAdapter = {
   loginAdvice: 'Not logged in. Run `gemini` interactively once to log in, or set GEMINI_API_KEY.'
 }
 
+interface AgyEvent {
+  event?: string
+  step_update?: {
+    step_index?: number
+    state?: string
+    step_type?: string
+    tool_name?: string
+    text_delta?: string
+    tool_info?: { parameters?: { CommandLine?: string; Path?: string }; error?: unknown }
+  }
+  result?: { status?: string; response?: string; error?: string }
+}
+
+function agyEvent(line: string): AgyEvent | null {
+  try {
+    return JSON.parse(line) as AgyEvent
+  } catch {
+    return null
+  }
+}
+
+const antigravity: BackendAdapter = {
+  id: 'antigravity',
+  label: CONFIG.BACKEND_META.antigravity.label,
+  capabilities: { vision: false, fileAttachments: false, toolCalls: true, deniableTools: false, thinking: false },
+  transport: 'shell',
+  get binPath() {
+    return resolveBinary('agy') ?? ''
+  },
+  modelName: CONFIG.ANTIGRAVITY_MODEL,
+  fastModelName: CONFIG.ANTIGRAVITY_FAST_MODEL || undefined,
+  hasEnvelope: false,
+
+  buildCommand({ promptFile, shellQuote, shellFileText, fast, modelOverride }) {
+    const bin = resolveBinary('agy')
+    if (!bin) throw new BinaryNotFoundError('agy')
+    const model = modelOverride || (fast && CONFIG.ANTIGRAVITY_FAST_MODEL !== '' ? CONFIG.ANTIGRAVITY_FAST_MODEL : CONFIG.ANTIGRAVITY_MODEL)
+    return `${shellQuote(bin)} -p ${shellFileText(promptFile)} --output-format stream-json --model ${shellQuote(model)} --dangerously-skip-permissions --disable-slash-commands`
+  },
+
+  parseOutput(stdout) {
+    let streamed = ''
+    for (const line of stdout.split('\n')) {
+      const e = agyEvent(line.trim())
+      if (e?.event === 'result' && typeof e.result?.response === 'string' && e.result.response !== '') return e.result.response.trim()
+      if (e?.step_update?.step_type === 'agent_response') streamed += e.step_update.text_delta ?? ''
+    }
+    return streamed.trim() || stdout
+  },
+
+  explainFailure(stdout) {
+    for (const line of stdout.split('\n')) {
+      const e = agyEvent(line.trim())
+      if (e?.event === 'result' && e.result?.status !== 'SUCCESS' && e.result?.error) return e.result.error
+    }
+    return null
+  },
+
+  parsePhase(line) {
+    const e = agyEvent(line)
+    if (!e) return null
+    if (e.event === 'init') return { phase: 'Starting', detail: '' }
+    const step = e.step_update
+    if (step?.step_type === 'agent_response') return { phase: 'Writing', detail: '' }
+    if (step?.step_type === 'tool') {
+      if (step.tool_name === 'run_command') {
+        const cmd = shortCmd(step.tool_info?.parameters?.CommandLine, 48)
+        return { phase: 'Running command', detail: cmd }
+      }
+      if (/^(view_file|list_dir|grep_search|find_by_name)$/.test(step.tool_name ?? '')) return { phase: 'Reading', detail: '' }
+      return { phase: step.tool_name ? `Running ${step.tool_name}` : 'Working', detail: '' }
+    }
+    return null
+  },
+
+  parseStep(line) {
+    const step = agyEvent(line)?.step_update
+    if (step?.step_type !== 'tool') return null
+    const id = String(step.step_index ?? '')
+    const cmd = shortCmd(step.tool_info?.parameters?.CommandLine ?? step.tool_info?.parameters?.Path)
+    if (step.state === 'ACTIVE') return { id, edge: 'start', kind: step.tool_name ?? 'tool', cmd }
+    return { id, edge: 'end', kind: 'tool', cmd: '', exit: step.tool_info?.error ? 1 : 0 }
+  },
+
+  versionArgs: ['--version'],
+  authArgs: ['models'],
+
+  parseAuth(out, ok) {
+    const loggedIn = ok && /^gemini-\S+\t/m.test(out)
+    return { loggedIn, detail: loggedIn ? 'Logged in' : 'Not logged in' }
+  },
+
+  loginAdvice: 'Not logged in. Run `agy` in a terminal once to sign in with Google.'
+}
+
 const mightymouse: BackendAdapter = {
   id: 'mightymouse',
   label: CONFIG.BACKEND_META.mightymouse.label,
@@ -1513,7 +1608,7 @@ const mlx: BackendAdapter = {
 }
 
 /** The registry. Add a provider by appending its adapter here — nothing else changes. */
-export const BACKENDS = { claude, codex, mightymouse, opencode, gemini, local, mlx, openrouter } as const
+export const BACKENDS = { claude, codex, mightymouse, opencode, gemini, antigravity, local, mlx, openrouter } as const
 
 /** The provider id union, derived from the registry keys. Single source of truth. */
 export type BackendId = keyof typeof BACKENDS

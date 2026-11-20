@@ -1,5 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload'
-import type { PlanBackend, PlanLogin, PlanLoginPicks, PlanLoginsResult } from '../shared/plan-logins'
+import type { AntigravityPlan, PlanBackend, PlanLogin, PlanLoginPicks, PlanLoginsResult } from '../shared/plan-logins'
 import type { ReasoningEffort } from '../shared/model-sources'
 import {
   HistoryItem,
@@ -531,6 +531,9 @@ interface CustomAPI {
     onPhase: (callback: (payload: MightyPhasePayload) => void) => () => void
     // Rich transcript events (tool calls, thinking, text chunks) during a chat run.
     onEvent: (callback: (payload: MightyEventPayload) => void) => () => void
+    onTalkRoute: (callback: (payload: import('../shared/talk').TalkRoutePush) => void) => () => void
+    talkPick: (clientRunId: string, target: string) => Promise<void>
+    talkSession: () => Promise<import('../shared/types').MightySession>
     // Fired when the user expands an empty panel into an already-open Mighty window:
     // the window should clear to a new empty chat. Returns an unsubscribe fn.
     onStartFresh: (callback: (projectId?: string) => void) => () => void
@@ -656,7 +659,7 @@ interface CustomAPI {
   // Phase 1: one finished VAD segment (WAV bytes) up to main; the transcript +
   // mocked reply come back async via onLiveTurnResult (see CHANNELS.liveTurnSubmit
   // / liveTurnResult in ipc.ts for why this isn't a single invoke/return pair).
-  liveTurnSubmit: (wavBytes: Uint8Array, echoTail?: string) => void
+  liveTurnSubmit: (wavBytes: Uint8Array, echoTail?: string, wakeHeard?: boolean) => void
   liveTurnDraft: (wavBytes: Uint8Array, echoTail?: string) => Promise<LiveDraft>
   onLiveTurnResult: (callback: (result: LiveTurnResult) => void) => () => void
   hideoutControl: (control: HideoutControl) => Promise<HideoutState>
@@ -940,7 +943,7 @@ interface CustomAPI {
   codeStartAgent: (input: {
     project: string
     cwd: string
-    harness?: 'claude' | 'codex' | 'opencode' | 'cursor' | 'ollama' | 'tmux'
+    harness?: 'claude' | 'codex' | 'opencode' | 'cursor' | 'antigravity' | 'ollama' | 'tmux'
     inApp?: boolean
     message?: string
     paths?: string[]
@@ -968,8 +971,8 @@ interface CustomAPI {
   codeAgentModels: () => Promise<AgentModelsState>
   codeSetAgentModel: (choice: AgentModelChoice) => Promise<boolean>
   codeSetUpAgentProvider: (harness: AgentModelChoice['harness']) => Promise<{ ok: boolean }>
-  chatModelPicks: () => Promise<{ opencode: string; openrouter: string; claude: string; codex: string }>
-  chatSetModelPick: (backend: 'opencode' | 'openrouter' | 'claude' | 'codex', model: string) => Promise<void>
+  chatModelPicks: () => Promise<{ opencode: string; openrouter: string; claude: string; codex: string; antigravity: string }>
+  chatSetModelPick: (backend: 'opencode' | 'openrouter' | 'claude' | 'codex' | 'antigravity', model: string) => Promise<void>
   chatSourceModels: () => Promise<import('../shared/model-sources').SourceModel[]>
   onAgentSetupProgress: (callback: (payload: AgentSetupProgress) => void) => () => void
   onAgentRelayRequestsChanged: (callback: (snapshot: RelaySnapshotWire) => void) => () => void
@@ -1053,6 +1056,11 @@ interface CustomAPI {
   planLoginsAdd: (backend: PlanBackend) => Promise<PlanLoginsResult>
   planLoginsCancel: () => Promise<void>
   planLoginsRemove: (id: string) => Promise<PlanLogin[]>
+  planAntigravity: () => Promise<AntigravityPlan[]>
+  planAntigravityAdd: () => Promise<{ plans: AntigravityPlan[]; error: string | null; signingIn: boolean }>
+  planAntigravityRemove: (id: string) => Promise<AntigravityPlan[]>
+  planAntigravityReconnect: (id: string) => Promise<AntigravityPlan[]>
+  planLoginsReconnect: (id: string) => Promise<PlanLoginsResult>
   planLoginPicks: () => Promise<PlanLoginPicks>
   planLoginSetPick: (backend: PlanBackend, id: string) => Promise<PlanLoginPicks>
   /** Probe the currently-selected backend (panel-open pre-flight). null if the

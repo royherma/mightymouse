@@ -50,10 +50,11 @@ export const HARNESS_NAME: Record<Harness, string> = {
   codex: 'Codex',
   opencode: 'OpenCode',
   cursor: 'Cursor',
+  antigravity: 'Antigravity',
   ollama: 'Local (Ollama)'
 }
 
-const harnessIcon = (h: Harness): ProviderIconId => (h === 'ollama' || h === 'cursor' ? MODEL_SOURCES[h].icon : h)
+const harnessIcon = (h: Harness): ProviderIconId => (h === 'ollama' || h === 'cursor' || h === 'antigravity' ? MODEL_SOURCES[h].icon : h)
 
 const CODE_THINK_KEY = 'mm.code.think'
 const CODE_EFFORT_KEY = 'mm.code.efforts'
@@ -277,7 +278,7 @@ function AccountSwitch({ backend, accounts }: { backend: PlanBackend; accounts: 
   const [open, setOpen] = useState(false)
   const [now] = useState(() => Date.now())
   const L = CONFIG.UI_LABELS
-  const mine = accounts.logins.filter((l) => l.backend === backend && l.email !== '')
+  const mine = accounts.logins.filter((l) => l.backend === backend && l.email !== '' && !l.paused)
   const current = mine.find((l) => l.id === accounts.picks?.[backend]) ?? mine[0]
   if (!current) return null
   return (

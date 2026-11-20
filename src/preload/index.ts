@@ -868,6 +868,15 @@ const api = {
       ipcRenderer.on(CHANNELS.mightyEvent, handler)
       return () => ipcRenderer.removeListener(CHANNELS.mightyEvent, handler)
     },
+    onTalkRoute: (callback: (payload: import('../shared/talk').TalkRoutePush) => void): (() => void) => {
+      const handler = (_: unknown, payload: import('../shared/talk').TalkRoutePush): void => callback(payload)
+      ipcRenderer.on(CHANNELS.mightyTalkRoute, handler)
+      return () => ipcRenderer.removeListener(CHANNELS.mightyTalkRoute, handler)
+    },
+    talkPick: (clientRunId: string, target: string): Promise<void> =>
+      ipcRenderer.invoke(CHANNELS.mightyTalkPick, clientRunId, target),
+    talkSession: (): Promise<import('../shared/types').MightySession> =>
+      ipcRenderer.invoke(CHANNELS.mightyTalkSession),
     // Expand-from-empty-panel into an already-open Mighty window → start a new chat.
     onStartFresh: (callback: (projectId?: string) => void): (() => void) => {
       const handler = (_: unknown, projectId?: string): void => callback(projectId)
@@ -976,8 +985,8 @@ const api = {
   // Phase 1: one finished VAD segment (WAV bytes) up to main; the transcript +
   // mocked reply come back async via onLiveTurnResult, not a return value here
   // (see CHANNELS.liveTurnSubmit / liveTurnResult in ipc.ts for why).
-  liveTurnSubmit: (wavBytes: Uint8Array, echoTail = '') =>
-    ipcRenderer.send(CHANNELS.liveTurnSubmit, wavBytes, echoTail),
+  liveTurnSubmit: (wavBytes: Uint8Array, echoTail = '', wakeHeard = false) =>
+    ipcRenderer.send(CHANNELS.liveTurnSubmit, wavBytes, echoTail, wakeHeard),
   liveTurnDraft: (wavBytes: Uint8Array, echoTail = ''): Promise<LiveDraft> =>
     ipcRenderer.invoke(CHANNELS.liveTurnDraft, wavBytes, echoTail),
   // Barge-in: kill the in-flight live run outright — see CHANNELS.companionAbortTurn.
@@ -1284,7 +1293,7 @@ const api = {
   codeStartAgent: (input: {
     project: string
     cwd: string
-    harness?: 'claude' | 'codex' | 'opencode' | 'cursor' | 'ollama' | 'tmux'
+    harness?: 'claude' | 'codex' | 'opencode' | 'cursor' | 'antigravity' | 'ollama' | 'tmux'
     inApp?: boolean
     message?: string
     paths?: string[]
@@ -1314,7 +1323,7 @@ const api = {
   codeSetAgentModel: (choice: AgentModelChoice) =>
     ipcRenderer.invoke(CHANNELS.codeSetAgentModel, choice),
   chatModelPicks: () => ipcRenderer.invoke(CHANNELS.chatModelPicks),
-  chatSetModelPick: (backend: 'opencode' | 'openrouter' | 'claude' | 'codex', model: string) =>
+  chatSetModelPick: (backend: 'opencode' | 'openrouter' | 'claude' | 'codex' | 'antigravity', model: string) =>
     ipcRenderer.invoke(CHANNELS.chatSetModelPick, backend, model),
   chatSourceModels: () => ipcRenderer.invoke(CHANNELS.chatSourceModels),
   codeSetUpAgentProvider: (harness: AgentModelChoice['harness']) =>
@@ -1400,6 +1409,11 @@ const api = {
   planLoginsAdd: (backend: PlanBackend) => ipcRenderer.invoke(CHANNELS.planLoginsAdd, backend),
   planLoginsCancel: () => ipcRenderer.invoke(CHANNELS.planLoginsCancel),
   planLoginsRemove: (id: string) => ipcRenderer.invoke(CHANNELS.planLoginsRemove, id),
+  planAntigravity: () => ipcRenderer.invoke(CHANNELS.planAntigravity),
+  planAntigravityAdd: () => ipcRenderer.invoke(CHANNELS.planAntigravityAdd),
+  planAntigravityRemove: (id: string) => ipcRenderer.invoke(CHANNELS.planAntigravityRemove, id),
+  planAntigravityReconnect: (id: string) => ipcRenderer.invoke(CHANNELS.planAntigravityReconnect, id),
+  planLoginsReconnect: (id: string) => ipcRenderer.invoke(CHANNELS.planLoginsReconnect, id),
   planLoginPicks: () => ipcRenderer.invoke(CHANNELS.planLoginPicks),
   planLoginSetPick: (backend: PlanBackend, id: string) => ipcRenderer.invoke(CHANNELS.planLoginSetPick, backend, id),
   panelProbeBackend: () => ipcRenderer.invoke(CHANNELS.panelProbeBackend),

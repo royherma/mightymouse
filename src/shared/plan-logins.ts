@@ -5,6 +5,16 @@ export interface PlanWindow {
   name: PlanWindowName
   usedPct: number
   resetsAt: number
+  label?: string
+}
+
+export interface AntigravityPlan {
+  id: string
+  main: boolean
+  email: string
+  windows: PlanWindow[]
+  credits: number | null
+  upgradeUrl: string
 }
 
 export interface PlanLogin {
@@ -16,6 +26,7 @@ export interface PlanLogin {
   windows: PlanWindow[]
   checkedAt: number | null
   limitedUntil: number | null
+  paused?: boolean
 }
 
 export type PlanLoginPicks = Record<PlanBackend, string>
@@ -41,5 +52,5 @@ const PLAN_TIER_LABEL: Record<string, string> = { prolite: 'Pro Lite' }
 export const planTierLabel = (plan: string): string =>
   plan === '' ? '' : PLAN_TIER_LABEL[plan] ?? plan[0].toUpperCase() + plan.slice(1)
 
-export const isPlanLoginOpen = (l: PlanLogin, now: number): boolean =>
+export const isPlanLoginOpen = (l: Pick<PlanLogin, 'limitedUntil' | 'windows'>, now: number): boolean =>
   (l.limitedUntil ?? 0) <= now && !l.windows.some((w) => w.usedPct >= PLAN_LOGINS.FULL_PCT && w.resetsAt > now)

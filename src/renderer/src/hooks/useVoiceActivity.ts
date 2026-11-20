@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MicVAD, utils as vadUtils } from '@ricky0123/vad-web'
+import * as ort from 'onnxruntime-web'
+import { WakeWordDetector } from '../lib/wake-word'
 import { CONFIG } from '../../../shared/config'
 // Resolve onnxruntime-web's wasm backend files straight from the installed
 // package as Vite-served module URLs (`?url`). This is the ONLY reliable way in
@@ -49,6 +51,10 @@ const STAGE_PROVIDER = 'vad-web'
 
 /** Where the bundled VAD assets live, relative to the renderer's served root. */
 const VAD_ASSET_PATH = '/vad/'
+const WAKE_ASSET_PATH = '/wake/'
+const WAKE_LOAD_LOG_MS = 60_000
+// Well under VAD's 0.5 speech threshold, so a soft "hey" still wakes the detector.
+const WAKE_VOICE_PROB = 0.15
 
 /**
  * Segment-boundary tuning. vad-web's defaults (positive 0.3 / negative 0.25 /
@@ -84,6 +90,8 @@ export interface VoiceActivitySegment {
   audio: Float32Array
   /** Wall-clock ms the segment took from speech-start to speech-end. */
   durationMs: number
+  /** Highest wake-model score since the previous segment; undefined when no wake model is loaded. */
+  wakePeak?: number
 }
 
 export interface UseVoiceActivityResult {
@@ -95,6 +103,7 @@ export interface UseVoiceActivityResult {
   /** Set once if mic permission is denied or the model fails to load; the
    *  caller degrades to "no live mode" rather than crashing. */
   error: string | null
+  wakeReady: boolean
 }
 
 /**
@@ -107,11 +116,15 @@ export interface UseVoiceActivityResult {
 export function useVoiceActivity(
   enabled: boolean,
   onSegment: (segment: VoiceActivitySegment) => void,
-  onDraft?: (audio: Float32Array) => void
+  onDraft?: (audio: Float32Array) => void,
+  onWake?: () => void
 ): UseVoiceActivityResult {
   const [active, setActive] = useState(false)
   const [speaking, setSpeaking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [wakeReady, setWakeReady] = useState(false)
+  const onWakeRef = useRef(onWake)
+  onWakeRef.current = onWake
   // Latest onSegment without re-creating the VAD session on every render —
   // MicVAD.new() spins up a mic stream + AudioWorklet, too heavy to redo per keystroke.
   const onSegmentRef = useRef(onSegment)
@@ -130,6 +143,31 @@ export function useVoiceActivity(
 
     let vad: MicVAD | null = null
     let disposed = false
+    let wake: WakeWordDetector | null = null
+    const wakeModel = CONFIG.COMPANION.WAKE_MODEL
+    if (wakeModel) {
+      ort.env.wasm.numThreads = 1
+      ort.env.wasm.wasmPaths = { wasm: ortWasmUrl, mjs: ortMjsUrl }
+      const load = async (name: string): Promise<Uint8Array> =>
+        new Uint8Array(await (await fetch(`${WAKE_ASSET_PATH}${name}.onnx`)).arrayBuffer())
+      WakeWordDetector.create(ort, load, wakeModel, (score, fired) => {
+        if (!fired || disposed) return
+        console.log(`[wake] ${wakeModel} score=${score.toFixed(3)}`)
+        onWakeRef.current?.()
+      })
+        .then((detector) => {
+          if (disposed) return void detector.release()
+          wake = detector
+          setWakeReady(true)
+        })
+        .catch((err) => console.error('[useVoiceActivity] wake model failed, every sentence goes to Parakeet:', err))
+    }
+    const loadTimer = setInterval(() => {
+      if (!wake) return
+      const { chunks, msPerChunk } = wake.takeLoad()
+      const corePct = ((chunks * msPerChunk) / WAKE_LOAD_LOG_MS) * 100
+      console.log(`[wake] load chunks=${chunks} ms/chunk=${msPerChunk.toFixed(1)} core=${corePct.toFixed(1)}%`)
+    }, WAKE_LOAD_LOG_MS)
     const startedAt = Date.now()
     const padFrames: Float32Array[] = []
     let spoken: Float32Array[] | null = null
@@ -163,8 +201,10 @@ export function useVoiceActivity(
         // the .wasm and .mjs files individually with absolute served URLs.
         ort.env.wasm.wasmPaths = { wasm: ortWasmUrl, mjs: ortMjsUrl }
       },
-      onFrameProcessed: (_probs, frame) => {
-        if (disposed || !onDraftRef.current) return
+      onFrameProcessed: (probs, frame) => {
+        if (disposed) return
+        wake?.feed(frame, probs.isSpeech >= WAKE_VOICE_PROB)
+        if (!onDraftRef.current) return
         if (!spoken) {
           padFrames.push(frame)
           if (padFrames.length * frame.length > (VAD_TUNING.preSpeechPadMs / 1000) * 16000) padFrames.shift()
@@ -220,7 +260,7 @@ export function useVoiceActivity(
           detail: `segment ${durationMs}ms`,
           ts: Date.now()
         })
-        onSegmentRef.current({ audio, durationMs })
+        onSegmentRef.current({ audio, durationMs, wakePeak: wake?.takePeak() })
       }
     })
       .then((instance) => {
@@ -258,13 +298,16 @@ export function useVoiceActivity(
 
     return () => {
       disposed = true
+      clearInterval(loadTimer)
       setActive(false)
       setSpeaking(false)
+      setWakeReady(false)
       vad?.destroy().catch(() => {})
+      wake?.release().catch(() => {})
     }
   }, [enabled])
 
-  return { active, speaking, error }
+  return { active, speaking, error, wakeReady }
 }
 
 /** Re-exported so callers can encode a segment to WAV bytes for IPC transfer

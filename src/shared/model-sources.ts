@@ -3,7 +3,7 @@ import type { ProviderIconId } from './provider-icon'
 
 export type PickerSurface = 'chat' | 'code'
 
-export type ModelSourceId = 'claude' | 'codex' | 'opencode' | 'cursor' | 'openrouter' | 'ollama'
+export type ModelSourceId = 'claude' | 'codex' | 'opencode' | 'cursor' | 'antigravity' | 'openrouter' | 'ollama'
 
 export interface ModelSource {
   name: string
@@ -20,6 +20,7 @@ export const MODEL_SOURCES: Record<ModelSourceId, ModelSource> = {
   openrouter: { name: 'OpenRouter (your key)', icon: 'openrouter', runs: 'api', chat: true, code: false },
   opencode: { name: 'OpenCode', icon: 'opencode', runs: 'harness', chat: true, code: true },
   cursor: { name: 'Cursor', icon: 'letter:C', runs: 'harness', chat: false, code: true },
+  antigravity: { name: 'Antigravity', icon: 'letter:A', runs: 'harness', chat: false, code: true },
   ollama: { name: 'Local (Ollama)', icon: 'local', runs: 'harness', chat: true, code: true }
 }
 
@@ -33,7 +34,8 @@ export const THINK_ARGS: Partial<Record<ModelSourceId, Record<'fast' | 'think', 
 export const PLAN_ARGS: Partial<Record<ModelSourceId, string[]>> = {
   claude: ['--permission-mode', 'plan'],
   opencode: ['--agent', 'plan'],
-  cursor: ['--plan']
+  cursor: ['--plan'],
+  antigravity: ['--mode', 'plan']
 }
 
 export const REASONING_EFFORTS = ['none', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max', 'ultra'] as const

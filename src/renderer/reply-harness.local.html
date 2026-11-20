@@ -83,6 +83,10 @@
         agentRelaySessionSent: () => Promise.resolve(sent),
         agentRelaySessionHelpers: () => Promise.resolve([]),
         agentRelaySuggest: () => Promise.resolve([{ text: 'Looks good, ship it' }, { text: 'Shorten the emails' }]),
+        replyWindowAuto: () => Promise.resolve(true),
+        codeNoProjectFolder: () => Promise.resolve('/Users/roy'),
+        codeStartAgent: () =>
+          q.get('fail') ? Promise.resolve({ ok: false, reason: 'Claude Code is not installed on this computer.' }) : Promise.resolve({ ok: true }),
         agentRelaySessionReply: (_ref, text, paths) => {
           if (q.get('fail')) return Promise.resolve({ ok: false })
           sent.push({ text, at: Date.now(), files: paths })

@@ -11,10 +11,10 @@ import { claudeTranscriptPaths, codexTranscriptPath, readSessionTranscript } fro
 import { liveAgentSessions, setAgentSessionTldr, type AgentSession } from './http-listener'
 import type { VerbHandler, VerbToolResult } from './verbs'
 
-const HELPERS = ['claude', 'codex', 'ollama', 'opencode', 'cursor'] as const
+const HELPERS = ['claude', 'codex', 'ollama', 'opencode', 'cursor', 'antigravity'] as const
 type Helper = (typeof HELPERS)[number]
-const HELPER_NAMES: Record<Helper, string> = { claude: 'Claude Code', codex: 'Codex', ollama: 'Local model', opencode: 'OpenCode', cursor: 'Cursor' }
-const HELPER_ICONS: Record<Helper, string> = { claude: 'claude', codex: 'codex', ollama: 'local', opencode: 'opencode', cursor: '' }
+const HELPER_NAMES: Record<Helper, string> = { claude: 'Claude Code', codex: 'Codex', ollama: 'Local model', opencode: 'OpenCode', cursor: 'Cursor', antigravity: 'Antigravity' }
+const HELPER_ICONS: Record<Helper, string> = { claude: 'claude', codex: 'codex', ollama: 'local', opencode: 'opencode', cursor: '', antigravity: '' }
 // Claude Code and Codex both end an MCP call at ~60s, so a longer wait comes back as an error.
 const WAIT_DEFAULT_S = 50
 const WAIT_MAX_S = 55
@@ -114,7 +114,7 @@ async function screenSettled(task: HelperTask, origin: AgentOrigin): Promise<str
 async function check(task: HelperTask): Promise<void> {
   if (task.doneAt || !task.pane) return
   const session = childSession(task)
-  if (task.agent === 'opencode' || task.agent === 'cursor') {
+  if (task.agent === 'opencode' || task.agent === 'cursor' || task.agent === 'antigravity') {
     const reply = await screenSettled(task, session?.origin ?? { tmuxPane: task.pane })
     if (reply !== undefined) finish(task, reply)
     return
@@ -164,7 +164,7 @@ function report(task: HelperTask): string {
     return `${name} is still working on task ${task.id} (${seconds}s so far). Its pane is open beside yours. Call \`task\` with this id to check again.`
   }
   if (!task.answer) return `${name} finished task ${task.id} in ${seconds}s, but its reply could not be read. Ask the user to look at its pane.`
-  const what = task.agent === 'opencode' || task.agent === 'cursor' ? 'The end of its window' : 'Its reply'
+  const what = task.agent === 'opencode' || task.agent === 'cursor' || task.agent === 'antigravity' ? 'The end of its window' : 'Its reply'
   return `${name} finished task ${task.id} in ${seconds}s. ${what}:\n\n${task.answer}`
 }
 
@@ -239,7 +239,7 @@ const delegateHandler: VerbHandler<{
   wait: z.ZodOptional<z.ZodNumber>
 }> = {
   description:
-    'Hand a task to another AI coding agent (Claude Code, Codex, a local model, OpenCode or Cursor; ' +
+    'Hand a task to another AI coding agent (Claude Code, Codex, a local model, OpenCode, Cursor or Antigravity; ' +
     '`agents` lists what is set up), which opens in its own pane ' +
     'beside yours in this project and works on it. Use it for a second opinion, a review, ' +
     'research, or work that suits another model. The helper sees ONLY the `task` text, never this ' +

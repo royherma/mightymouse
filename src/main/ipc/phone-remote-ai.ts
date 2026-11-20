@@ -63,8 +63,8 @@ export function handleRelayStartSession(msg: Msg<'relayStartSession'>): void {
   })
 }
 
-const HARNESS_NAMES: Record<string, string> = { claude: 'Claude Code', codex: 'Codex', opencode: 'OpenCode', cursor: 'Cursor', ollama: 'Local' }
-const HARNESS_ICONS: Record<string, string> = { claude: 'claude', codex: 'codex', opencode: 'opencode', cursor: 'letter:C', ollama: 'local' }
+const HARNESS_NAMES: Record<string, string> = { claude: 'Claude Code', codex: 'Codex', opencode: 'OpenCode', cursor: 'Cursor', antigravity: 'Antigravity', ollama: 'Local' }
+const HARNESS_ICONS: Record<string, string> = { claude: 'claude', codex: 'codex', opencode: 'opencode', cursor: 'letter:C', antigravity: 'letter:A', ollama: 'local' }
 
 export async function handleCodeGetModels(): Promise<void> {
   const options = await listAgentModels().catch(() => [])

@@ -188,8 +188,29 @@ function cursorModels(): Promise<Array<{ model: string; label: string }>> {
   return cursorCache
 }
 
+const AGY_LIST_TIMEOUT_MS = 20000
+let agyCache: Promise<Array<{ model: string; label: string }>> | null = null
+
+function antigravityModels(): Promise<Array<{ model: string; label: string }>> {
+  const bin = resolveBinary('agy')
+  if (!bin) return Promise.resolve([])
+  agyCache ??= new Promise((resolve) => {
+    execFile(bin, ['models'], { timeout: AGY_LIST_TIMEOUT_MS, maxBuffer: 1024 * 1024 }, (err, stdout) => {
+      const models = err
+        ? []
+        : stdout.split('\n').flatMap((line) => {
+            const m = /^([\w.-]+)\t(.+?)\s*$/.exec(line)
+            return m ? [{ model: m[1], label: m[2] }] : []
+          })
+      if (models.length === 0) agyCache = null
+      resolve(models)
+    })
+  })
+  return agyCache
+}
+
 export function isModelHarness(value: unknown): value is AgentModelChoice['harness'] {
-  return value === 'claude' || value === 'codex' || value === 'opencode' || value === 'cursor' || value === 'ollama'
+  return value === 'claude' || value === 'codex' || value === 'opencode' || value === 'cursor' || value === 'antigravity' || value === 'ollama'
 }
 
 export async function listAgentModels(): Promise<AgentModelOption[]> {
@@ -213,6 +234,10 @@ export async function listAgentModels(): Promise<AgentModelOption[]> {
   if (installed.includes('cursor') && showsOn('cursor', 'code')) {
     options.push({ harness: 'cursor', model: '', label: 'Default' })
     for (const m of await cursorModels()) options.push({ harness: 'cursor', ...m })
+  }
+  if (installed.includes('antigravity') && showsOn('antigravity', 'code')) {
+    options.push({ harness: 'antigravity', model: '', label: 'Default' })
+    for (const m of await antigravityModels()) options.push({ harness: 'antigravity', ...m })
   }
   if (installed.includes('claude') && showsOn('ollama', 'code')) {
     for (const model of await listCodingModels()) options.push({ harness: 'ollama', model, label: prettyOllamaModel(model) })
@@ -250,7 +275,7 @@ export async function setUpAgentProvider(
     onProgress({ harness, message, percent })
   const cli = harness === 'ollama' ? 'claude' : harness
   if (!availableHarnesses().includes(cli)) {
-    if (cli === 'cursor') return { ok: false }
+    if (cli === 'cursor' || cli === 'antigravity') return { ok: false }
     tell(copy.installing)
     const res = await installCliPackage(CONFIG.CODE_PROVIDER_NPM[cli])
     clearBinaryCache()

@@ -475,6 +475,11 @@ export const CHANNELS = Object.freeze({
   planLoginsAdd: 'plan-logins-add',
   planLoginsCancel: 'plan-logins-cancel',
   planLoginsRemove: 'plan-logins-remove',
+  planAntigravity: 'plan-antigravity',
+  planAntigravityAdd: 'plan-antigravity-add',
+  planAntigravityRemove: 'plan-antigravity-remove',
+  planAntigravityReconnect: 'plan-antigravity-reconnect',
+  planLoginsReconnect: 'plan-logins-reconnect',
   planLoginPicks: 'plan-login-picks',
   planLoginSetPick: 'plan-login-set-pick',
   panelProbeBackend: 'panel-probe-backend',
@@ -773,11 +778,14 @@ export const CHANNELS = Object.freeze({
   mightyTruncateLastTurn: 'mighty-truncate-last-turn',
   // Save a session to a file the user picks, as Markdown or the design's flat JSON shape.
   mightyExportSession: 'mighty-export-session',
+  mightyTalkPick: 'mighty-talk-pick',
+  mightyTalkSession: 'mighty-talk-session',
 
   // ── main → renderer (webContents.send) ─────────────────────────────────────
   busyPhase: 'busy-phase',
   mightyPhase: 'mighty-phase',
   mightyEvent: 'mighty-event',
+  mightyTalkRoute: 'mighty-talk-route',
   // main → Mighty window: start a new empty chat now. Sent when the user expands an
   // EMPTY panel into an already-open Mighty window, so it clears to a fresh chat.
   mightyStartFresh: 'mighty-start-fresh',

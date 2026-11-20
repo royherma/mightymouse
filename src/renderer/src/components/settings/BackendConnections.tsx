@@ -1,11 +1,13 @@
 import { JSX, useCallback, useEffect, useState } from 'react'
-import { RefreshCw } from 'lucide-react'
+import { Ellipsis, RefreshCw } from 'lucide-react'
 import type { BackendId, BackendProbeRecord } from '../../../../shared/types'
+import { PLAN_BACKENDS } from '../../../../shared/plan-logins'
 import { Button } from '../Button'
 import { GlowDot } from '../GlowDot'
 import { ProviderIcon, type ProviderIconId } from '../ProviderIcon'
 import { useInterval } from '../../hooks/useInterval'
 import { timeAgo } from '../../mighty/mighty-shared'
+import { pickFromMenu } from './PlanLogins'
 
 type Probes = Partial<Record<BackendId, BackendProbeRecord>>
 
@@ -27,7 +29,8 @@ function disconnectQuestion(id: BackendId, label: string): string {
   return `Sign out of ${label}? This also signs you out of ${label} in your terminal.`
 }
 
-export function BackendConnections({ rows }: { rows: ConnectionRow[] }): JSX.Element {
+export function BackendConnections({ rows: allRows }: { rows: ConnectionRow[] }): JSX.Element {
+  const rows = allRows.filter((r) => !(PLAN_BACKENDS as readonly string[]).includes(r.value))
   const [probes, setProbes] = useState<Probes>({})
   const [checking, setChecking] = useState<Set<BackendId>>(new Set())
   const [, setTick] = useState(0)
@@ -85,7 +88,7 @@ export function BackendConnections({ rows }: { rows: ConnectionRow[] }): JSX.Ele
     <div className="mt-4 pt-4 border-t border-surface3 first:mt-0 first:pt-0 first:border-t-0">
       <div className="flex items-center justify-between mb-2">
         <div className="text-md font-semibold">Connections</div>
-        <Button variant="ghost" disabled={busy} onClick={() => check(rows.map((r) => r.value))}>
+        <Button variant="text" disabled={busy} onClick={() => check(rows.map((r) => r.value))}>
           <RefreshCw size={14} className={busy ? 'animate-spin' : undefined} />
           {busy ? 'Checking…' : 'Check all'}
         </Button>
@@ -105,25 +108,29 @@ export function BackendConnections({ rows }: { rows: ConnectionRow[] }): JSX.Ele
               <ProviderIcon id={r.icon} size={18} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-md font-semibold">{r.label}</span>
+                  <span className="text-sm font-semibold">{r.label}</span>
                   <GlowDot color={color} size="w-2 h-2" />
                 </div>
-                <div className="text-muted text-sm truncate">
+                <div className="text-muted text-xs truncate">
                   {running ? 'Checking…' : record ? statusLine(record) : 'Not checked yet'}
                 </div>
               </div>
-              <span className="text-muted text-sm shrink-0">
+              <span className="text-muted text-xs shrink-0">
                 {record ? `Checked ${timeAgo(new Date(record.at).toISOString())}` : ''}
               </span>
-              {record?.result.ok && record.canDisconnect && (
+              {record?.result.ok && record.canDisconnect ? (
                 <Button
-                  variant="ghost"
-                  className="shrink-0"
+                  variant="quiet"
+                  aria-label="More"
                   disabled={running}
-                  onClick={() => void disconnect(r)}
+                  onClick={async (e) => {
+                    if ((await pickFromMenu(e, [{ id: 'disconnect', label: 'Disconnect' }])) === 'disconnect') void disconnect(r)
+                  }}
                 >
-                  Disconnect
+                  <Ellipsis size={16} />
                 </Button>
+              ) : (
+                <span className="w-8 shrink-0" />
               )}
             </div>
           )

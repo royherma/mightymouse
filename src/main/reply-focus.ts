@@ -52,6 +52,9 @@ const PAGE_MATCH_MS = 10 * 60_000
 // a tools list or port table names many pages once or twice; an agent working on one names it far more
 const MIN_STRAY_MENTIONS = 3
 const LSOF = '/usr/sbin/lsof'
+const ICON_MS = 1500
+const MAX_ICON_BYTES = 64_000
+const ICON_LINK = /<link[^>]+rel=["'][^"']*icon[^"']*["'][^>]*>/i
 
 let order: string[] = []
 let frontBundle = ''
@@ -59,6 +62,7 @@ let appBehind = ''
 let autoSwitched: string | undefined
 let seenPage = ''
 let seenUrl = ''
+let seenFolder = ''
 let toldPage: string | undefined
 const pageOwners = new Map<string, { ref?: string; at: number }>()
 const chatSearches = new Map<string, Promise<string | undefined>>()
@@ -67,6 +71,35 @@ let polling = false
 let lastCmuxRead = 0
 let matchedBy: ReplyMatch | undefined
 const servingFolders = new Map<string, { folder: string; at: number }>()
+const pageIcons = new Map<string, Promise<string>>()
+
+async function iconData(res: Response | undefined): Promise<string> {
+  const type = res?.ok ? (res.headers.get('content-type') ?? '').split(';')[0] : ''
+  if (!res || !type.startsWith('image/')) return ''
+  const bytes = Buffer.from(await res.arrayBuffer())
+  return bytes.length > 0 && bytes.length <= MAX_ICON_BYTES ? `data:${type};base64,${bytes.toString('base64')}` : ''
+}
+
+// only the site's own root is fetched, never the page itself: a GET on an arbitrary tab URL can have side effects
+async function fetchIcon(origin: string): Promise<string> {
+  const base = origin.replace(/\/\/[\w-]+\.localhost(?=:|$)/, '//127.0.0.1')
+  const get = (href: string): Promise<Response | undefined> =>
+    fetch(new URL(href, base), { signal: AbortSignal.timeout(ICON_MS) }).catch(() => undefined)
+  const plain = await iconData(await get('/favicon.ico')).catch(() => '')
+  if (plain) return plain
+  const home = await get('/')
+  const html = home?.ok ? (await home.text().catch(() => '')).slice(0, 200_000) : ''
+  const href = ICON_LINK.exec(html)?.[0].match(/href=["']([^"']+)/i)?.[1]
+  return href ? iconData(await get(href)).catch(() => '') : ''
+}
+
+function pageIcon(url: string): Promise<string> {
+  if (!/^https?:\/\//.test(url)) return Promise.resolve('')
+  const origin = new URL(url).origin
+  const known = pageIcons.get(origin) ?? fetchIcon(origin)
+  pageIcons.set(origin, known)
+  return known
+}
 
 function pageFile(url: string): string {
   if (!url.startsWith('file://')) return ''
@@ -108,6 +141,7 @@ async function folderAgents(url: string, live: AgentSession[]): Promise<AgentSes
   const served = cachedBuilt().find((item) => (file ? item.file === file : Boolean(port) && String(item.port ?? '') === port))
   const folder = served?.cwd ?? (file ? dirname(file) : port ? await servingFolder(port) : '')
   if (!folder) return []
+  seenFolder = (await output('git', ['-C', folder, 'rev-parse', '--show-toplevel'])).trim() || folder
   const home = homedir()
   const rank = (id = ''): number => (order.includes(id) ? order.indexOf(id) : MAX_ORDER)
   return live
@@ -225,6 +259,7 @@ async function agentInFront(searchConversations: boolean, waitForChats: boolean)
   if (!bundleId) return undefined
   const front = { bundleId, url: BROWSERS.includes(bundleId) ? await context.frontPageUrl(bundleId) : '' }
   seenUrl = front.url
+  seenFolder = ''
   matchedBy = undefined
   seenPage = front.url ? pageName(front.url) || front.url.split(/[?#]/)[0] : ''
   if (front.bundleId === CMUX_APP) {
@@ -271,7 +306,10 @@ async function tick(): Promise<void> {
   if (auto && seenPage && seenPage !== toldPage) {
     toldPage = seenPage
     devLog.log(`[reply-follow] page=${seenPage} agent=${found ?? "none"} why=${matchedBy ?? "none"}`)
-    tellReplyWindow({ page: seenPage, url: seenUrl, ref: found, why: matchedBy })
+    const told = { page: seenPage, url: seenUrl, ref: found, why: matchedBy, folder: found ? undefined : seenFolder }
+    tellReplyWindow(told)
+    void pageIcon(seenUrl).then((icon) => icon && toldPage === told.page && tellReplyWindow({ ...told, icon }))
+    if (!found) autoSwitched = undefined
   }
   if (!auto || !found || found === autoSwitched) return
   if (switchReplyWindow({ ref: found, order: focusOrder() })) autoSwitched = found

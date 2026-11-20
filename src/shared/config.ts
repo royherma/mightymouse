@@ -166,6 +166,9 @@ export const CONFIG = {
   GEMINI_PATH: '',
   GEMINI_MODEL: 'gemini-3.1-pro',
   GEMINI_FAST_MODEL: 'gemini-3-flash',
+  ANTIGRAVITY_MODEL: 'gemini-3.8-flash-high',
+  ANTIGRAVITY_FAST_MODEL: 'gemini-3.8-flash-low',
+  ANTIGRAVITY_INSTALL_URL: 'https://antigravity.google/cli/install.sh',
   // Ollama has no CLI binary to resolve — it's a background HTTP service. Base
   // URL is fixed (Ollama always binds 11434 locally, no auth); OLLAMA_MODEL is
   // the user's chosen pulled model, empty until they pick one in Settings.
@@ -185,6 +188,7 @@ export const CONFIG = {
     codex: 'OpenAI’s coding agent',
     opencode: 'Use almost any model',
     cursor: 'Use your Cursor plan',
+    antigravity: 'Gemini and Claude on your Google plan',
     ollama: 'Free and private, runs on this Mac',
     installing: 'Installing',
     starting: 'Starting',
@@ -240,6 +244,7 @@ export const CONFIG = {
       tip: 'You’re using your own OpenCode. The AI behind your answers.'
     },
     gemini: { label: 'Gemini', tip: 'You’re using your own Gemini. The AI behind your answers.' },
+    antigravity: { label: 'Antigravity', tip: 'You’re using your own Google AI plan through Antigravity. The AI behind your answers.' },
     local: {
       label: 'Local',
       tip: 'Runs fully offline on your machine via Ollama. Nothing leaves your computer.'
@@ -1435,6 +1440,8 @@ export const CONFIG = {
     TALKING_MS_PER_CHAR: 45,
     TALKING_HOLD_MAX_MS: 12_000,
     WAKE_ARM_MS: 8_000,
+    // File in public/wake/; null sends every sentence to Parakeet.
+    WAKE_MODEL: 'hey_mighty' as string | null,
     FOLLOW_UP_MS: 8_000,
     ACK_AFTER_MS: 1_200,
     DRAFT_EVERY_MS: 600,

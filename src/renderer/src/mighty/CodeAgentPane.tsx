@@ -47,6 +47,7 @@ export function CodeAgentPane({
   onFirstSendTaken,
   onProjectChange,
   onStart,
+  renderDraft,
   bare = false
 }: {
   label?: string
@@ -62,6 +63,7 @@ export function CodeAgentPane({
   onFirstSendTaken?: () => void
   onProjectChange?: (projectId: string | undefined) => void
   onStart?: (opening: { text: string; files: string[] }) => void
+  renderDraft?: (send: (message: string, paths: string[]) => Promise<void>, failure?: string) => JSX.Element
   bare?: boolean
 }): JSX.Element {
   const names = useMemo(
@@ -157,6 +159,7 @@ export function CodeAgentPane({
           onClose={() => setStarting(null)}
         />
       )
+    if (!label && cwd && renderDraft) return renderDraft((message, paths) => start(message, paths, null), failure?.reason)
     if (!label && cwd)
       return (
         <AgentDraftPane

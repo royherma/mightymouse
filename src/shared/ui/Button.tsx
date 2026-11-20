@@ -34,7 +34,7 @@ const VARIANT: Record<ButtonVariant, string> = {
   secondary:
     'bg-surface2 text-on-surface border-0 transition-colors hover:bg-surface3 disabled:opacity-50',
   ghost:
-    'bg-transparent border border-surface3 text-muted transition-colors hover:bg-surface3 hover:text-on-surface active:brightness-95 disabled:opacity-50',
+    'bg-[var(--surface-solid)] border-0 shadow-card text-on-surface transition-colors hover:bg-surface2 active:bg-surface3 disabled:opacity-50',
   text: 'bg-transparent border-0 text-muted transition-colors hover:text-on-surface disabled:opacity-50',
   icon:
     'border border-surface3 bg-transparent text-muted transition-colors hover:bg-surface3 hover:text-on-surface',

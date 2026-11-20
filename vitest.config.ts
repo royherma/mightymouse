@@ -1,6 +1,19 @@
 import { resolve } from 'node:path'
 import { defineConfig } from 'vitest/config'
 
+// macOS-only paths (pointer control, zsh, `say`, a tmpdir outside /tmp); they run on the Mac pre-push and nightly release.
+const MAC_ONLY_TESTS = process.platform === 'darwin' ? [] : [
+  'src/main/__tests__/files-ipc.test.ts',
+  'src/main/audio/__tests__/tts-kokoro.test.ts',
+  'src/main/backend/__tests__/process-group-kill.test.ts',
+  'src/main/built/__tests__/scan.test.ts',
+  'src/main/phone-remote/__tests__/*-live.test.ts',
+  'src/main/phone-remote/__tests__/viewer-reconnect-keeps-ring.test.ts',
+  'src/main/phone-remote/__tests__/ws-auth-gate.test.ts',
+  'src/main/phone-remote/__tests__/queued-clip-flush.test.ts',
+  'src/main/phone-remote/__tests__/glasses-first-order.test.ts'
+]
+
 export default defineConfig({
   // Mirrors the phone-remote and web builds' alias. Without it, any module
   // importing shared types is untestable here — which is most of them, so tests
@@ -47,6 +60,7 @@ export default defineConfig({
             'src/main/phone-remote/__tests__/glasses-first-order.test.ts',
             'src/main/agent-relay/mcp/__tests__/chat-browser-door-live.test.ts'
           ],
+          exclude: MAC_ONLY_TESTS,
           fileParallelism: false
         }
       },
@@ -73,7 +87,8 @@ export default defineConfig({
             'src/main/phone-remote/__tests__/queued-clip-flush.test.ts',
             'src/main/phone-remote/__tests__/viewer-zoom-live.test.ts',
             'src/main/phone-remote/__tests__/glasses-first-order.test.ts',
-            'src/main/agent-relay/mcp/__tests__/chat-browser-door-live.test.ts'
+            'src/main/agent-relay/mcp/__tests__/chat-browser-door-live.test.ts',
+            ...MAC_ONLY_TESTS
           ]
         }
       }

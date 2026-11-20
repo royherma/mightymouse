@@ -1,16 +1,19 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronDown, Ellipsis, LocateFixed, Maximize2, MessageSquare, Plus, X } from 'lucide-react'
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import { ArrowUp, Check, ChevronDown, Ellipsis, LocateFixed, Maximize2, MessageSquare, Plus, X } from 'lucide-react'
 import { CONFIG } from '../../shared/config'
 import { previousList, senderMatchKey } from '../../shared/relay-cards'
+import { mightyProjectForCwd } from '../../shared/relay-sessions'
 import { sessionIsWorking, sessionRow } from '../../shared/relay-status'
 import type { AgentRelaySessionInfo, AgentTranscriptTurn, MightyProject, MightySession, PopoverMenuItem, ReplyMatch, ReplyWindowAim, ReplyWindowApp, ReplyWindowSeeing } from '../../shared/types'
 import { Button } from './components/Button'
 import { Tooltip, useTooltip } from './components/Tooltip'
 import { Row } from './components/Layout'
 import { ProjectAvatar } from './components/ProjectIcon'
-import { ReplyScreenContext, SessionThread } from './components/session-thread'
+import { ReplyScreenContext, ReplyToggle, SessionThread } from './components/session-thread'
+import { AttachBar, AttachButton } from './components/AttachBar'
+import { TalkButton, TalkSendButton } from './components/TalkButton'
 import { useAgentRelay } from './hooks/useAgentRelay'
-import { droppedImage } from './hooks/useAttachments'
+import { droppedImage, useAttachments } from './hooks/useAttachments'
 import { CodeAgentPane } from './mighty/CodeAgentPane'
 import { ConversationPane } from './mighty/ConversationPane'
 import { hasRealExchange, sourceGroupOf } from './mighty/mighty-shared'
@@ -148,6 +151,88 @@ function storedRecent(): string[] {
 
 export type ReplyAim = string | { cwd: string }
 
+function siteOf(seeing: ReplyWindowSeeing): { host: string; path: string } {
+  try {
+    const { protocol, host, pathname } = new URL(seeing.url)
+    if (protocol.startsWith('http')) return { host: host.replace(/^www\./, ''), path: pathname.replace(/\/$/, '') }
+  } catch {
+    /* not a URL: show the page name as is */
+  }
+  return { host: seeing.page, path: '' }
+}
+
+function NewAgentForPage({
+  page,
+  failure,
+  onSend
+}: {
+  page?: ReplyWindowSeeing
+  failure?: string
+  onSend: (message: string, paths: string[]) => Promise<void>
+}): React.JSX.Element {
+  const screen = useContext(ReplyScreenContext)
+  const att = useAttachments('reply:new-agent')
+  const [text, setText] = useState('')
+  const [talkLive, setTalkLive] = useState(false)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  useEffect(() => inputRef.current?.focus(), [])
+  const empty = !text.trim() && att.attachments.length === 0
+  const send = (): void => {
+    if (empty) return
+    const paths = [...att.attachments.map((a) => a.path), ...(screen?.on && screen.path ? [screen.path] : [])]
+    void onSend(`${page && !page.ref ? `[about this page in my browser: ${page.url}]\n` : ''}${text.trim()}`, paths)
+    setText('')
+    att.clear()
+  }
+  return (
+    <div className="code-detail-scroll px-3 py-2">
+      <div className="session-detail-thread justify-end">
+      {failure && <p className="session-detail-empty session-detail-failed">{failure}</p>}
+      {att.attachments.length > 0 && (
+        <div className="session-detail-attachments">
+          <AttachBar attachments={att.attachments} onRemove={att.remove} />
+        </div>
+      )}
+      {screen && (
+        <div data-screen-toggle className="flex flex-none">
+          <ReplyToggle
+            label="Send my screen"
+            title="Sends a picture of what was on your screen right before you came here"
+            on={screen.on}
+            setOn={screen.setOn}
+          />
+        </div>
+      )}
+      <div className="session-detail-composer">
+        <AttachButton onClick={() => void att.pick()} />
+        <textarea
+          ref={inputRef}
+          className="session-detail-input"
+          value={text}
+          rows={1}
+          placeholder={page && !page.ref ? 'What should it do here?' : 'Tell it what to do first…'}
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              send()
+            }
+          }}
+        />
+        <TalkButton inputRef={inputRef} label onLiveChange={setTalkLive} />
+        {talkLive ? (
+          <TalkSendButton className="session-detail-send" />
+        ) : (
+          <Button variant="bare" className="session-detail-send" disabled={empty} aria-label="Start the agent" onClick={send}>
+            <ArrowUp size={14} />
+          </Button>
+        )}
+      </div>
+      </div>
+    </div>
+  )
+}
+
 let seenHomeCwd = ''
 
 export default function ReplyApp({
@@ -235,6 +320,9 @@ export default function ReplyApp({
     (sessions.find((s) => refOf(s) === picked) ?? inProject[0])?.cwd ??
     chat?.projects.find((p) => p.repoFolder)?.repoFolder ??
     (homeCwd || undefined)
+  const newIn = draft && draft !== 'chat' ? draft.cwd : undefined
+  const repoProjects = (chat?.projects ?? []).filter((p) => p.repoFolder)
+  const newInProject = newIn ? mightyProjectForCwd(newIn, repoProjects) : null
   const folderName = (cwd: string): string =>
     cwd === homeCwd ? CONFIG.UI_LABELS.CODE_NO_PROJECT : (cwd.split('/').pop() ?? cwd)
 
@@ -266,7 +354,7 @@ export default function ReplyApp({
     followedAim.current = aimKey
     if (leftAim.current || !aim) return
     if (typeof aim === 'string') show(aim)
-    else show(undefined, { cwd: aim.cwd })
+    else if (aim.cwd || agentFolder) show(undefined, { cwd: aim.cwd || agentFolder! })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aimKey])
   const chooseProject = (name: string | undefined): void => {
@@ -500,7 +588,7 @@ export default function ReplyApp({
       <Row className={`relative shrink-0 px-3 py-2 border-b border-surface2 ${embedded ? '' : '[-webkit-app-region:drag]'}`}>
         <Button
           variant="bare"
-          disabled={projects.length < 2}
+          disabled={(newIn ? repoProjects : projects).length < 2}
           onClick={() => openMenu('projects')}
           data-menu="projects"
           aria-haspopup="menu"
@@ -509,7 +597,11 @@ export default function ReplyApp({
           aria-label="Choose a project"
           className="shrink-0 rounded-md p-1 hover:bg-surface2 [-webkit-app-region:no-drag]"
         >
-          <ProjectPicture project={session?.project} size={18} />
+          {newIn ? (
+            <ProjectAvatar icon={newInProject?.icon} imagePath={newInProject?.imagePath} size={18} />
+          ) : (
+            <ProjectPicture project={session?.project} size={18} />
+          )}
         </Button>
         <div className="flex-1 min-w-0 [-webkit-app-region:no-drag]">
           <Button
@@ -677,7 +769,25 @@ export default function ReplyApp({
             )}
           </div>
         )}
-        {menu === 'projects' && (
+        {menu === 'projects' && newIn && (
+          <div role="menu" className={`${MENU_BOX} left-3 max-h-64 w-60 overflow-y-auto [-webkit-app-region:no-drag]`}>
+            {repoProjects.map((p) => (
+              <Button
+                key={p.id}
+                variant="bare"
+                role="menuitemradio"
+                aria-checked={newInProject?.id === p.id}
+                onClick={() => show(undefined, { cwd: p.repoFolder! })}
+                className={MENU_ROW}
+              >
+                <ProjectAvatar icon={p.icon} imagePath={p.imagePath} size={16} />
+                <span className="flex-1 truncate text-[13px] text-on-surface">{p.name}</span>
+                {newInProject?.id === p.id && <Check size={13} className="shrink-0 text-accent-text" />}
+              </Button>
+            ))}
+          </div>
+        )}
+        {menu === 'projects' && !newIn && (
           <div role="menu" className={`${MENU_BOX} left-3 w-60 [-webkit-app-region:no-drag]`}>
             <Button
               variant="bare"
@@ -735,8 +845,12 @@ export default function ReplyApp({
         )}
       </Row>
       {!embedded && !minimized && autoSwitch && seeing && (!seeing.ref || seeing.ref === ref) && (
-        <p className="flex shrink-0 items-center gap-1.5 truncate border-b border-surface2 px-4 py-1 text-[11px] text-muted">
-          <LocateFixed size={11} className="shrink-0 text-accent-text" />
+        <p className="flex shrink-0 items-center gap-2 border-b border-surface2 px-4 py-1.5 text-[12px] text-muted">
+          {seeing.icon ? (
+            <img src={seeing.icon} alt="" aria-hidden className="h-3.5 w-3.5 shrink-0 rounded-[3px] object-contain" />
+          ) : (
+            <LocateFixed size={12} className="shrink-0 text-accent-text" />
+          )}
           {seeing.ref ? (
             <span className="truncate">
               Opened from{' '}
@@ -746,7 +860,15 @@ export default function ReplyApp({
               {seeing.why && ` · ${MATCH_WHY[seeing.why]}`}
             </span>
           ) : (
-            <span className="truncate">No agent for this tab</span>
+            <Button
+              variant="bare"
+              className="flex min-w-0 items-baseline hover:underline underline-offset-2"
+              title={`The new agent gets this page's address: ${seeing.url}`}
+              onClick={() => void window.api.openExternal(seeing.url)}
+            >
+              <span className="shrink-0 font-medium text-on-surface">{siteOf(seeing).host}</span>
+              <span className="truncate">{siteOf(seeing).path}</span>
+            </Button>
           )}
         </p>
       )}
@@ -801,6 +923,11 @@ export default function ReplyApp({
               show(label)
             }}
             onClose={() => setDraft(null)}
+            renderDraft={
+              embedded
+                ? undefined
+                : (send, failure) => <NewAgentForPage page={autoSwitch ? seeing : undefined} failure={failure} onSend={send} />
+            }
             onProjectChange={(id) => {
               const cwd = id ? chat?.projects.find((p) => p.id === id)?.repoFolder : homeCwd
               if (cwd) show(undefined, { cwd })
@@ -901,10 +1028,19 @@ const openBigAndHide = (id: string): void => {
 
 export function ReplyWindowApp(): React.JSX.Element {
   const chat = useReplyChats(openBigAndHide, true)
-  const [aimed, setAimed] = useState<(ReplyWindowAim & { n: number }) | null>(null)
+  const [aimed, setAimed] = useState<(ReplyWindowAim & { n: number; newIn?: string }) | null>(null)
   const [shot, setShot] = useState<{ path?: string; on: boolean }>(() => ({ on: readScreenPref() }))
   const [seeing, setSeeing] = useState<ReplyWindowSeeing>()
-  useEffect(() => window.api.onReplyWindowSeeing(setSeeing), [])
+  useEffect(
+    () =>
+      window.api.onReplyWindowSeeing((next) => {
+        setSeeing(next)
+        const folder = next.folder ?? ''
+        if (!next.ref)
+          setAimed((prev) => (prev?.newIn === folder ? prev : { order: prev?.order ?? [], newIn: folder, n: (prev?.n ?? 0) + 1 }))
+      }),
+    []
+  )
   useEffect(() => window.api.onReplyWindowAim((aim) => setAimed((prev) => ({ ...aim, n: (prev?.n ?? 0) + 1 }))), [])
   useEffect(() => window.api.onReplyWindowScreen((path) => setShot({ path, on: readScreenPref() })), [])
   const screen = useMemo(
@@ -922,7 +1058,7 @@ export function ReplyWindowApp(): React.JSX.Element {
     <ReplyScreenContext.Provider value={screen}>
       <ReplyApp
         key={aimed?.n}
-        aim={aimed?.ref}
+        aim={aimed?.newIn !== undefined ? { cwd: aimed.newIn } : aimed?.ref}
         focusOrder={aimed?.order}
         seeing={seeing}
         chat={chat}

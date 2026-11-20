@@ -9,7 +9,7 @@ import {
 import { ThinkingDial } from '../../../shared/model-picker/ThinkingDial'
 import { useModelCatalog } from '../components/ModelPicker'
 import { MODELS } from '../SettingsApp'
-import { ProviderIcon, providerIconFor } from '../components/ProviderIcon'
+import { ProviderIcon, providerIconFor, type ProviderIconId } from '../components/ProviderIcon'
 import { LOCAL_BACKEND, MLX_BACKEND, localModelLabel, prettyOllamaModel } from '../backend-chip'
 import { CONFIG } from '../../../shared/config'
 import { opencodeAccountName, opencodeModelLabel } from '../../../shared/model-label'
@@ -21,9 +21,10 @@ import type { AgentModelOption, AgentSetupProgress, BackendId } from '../../../s
 const ACCOUNTS = 'accounts'
 const OPENCODE = 'opencode' satisfies BackendId
 const OPENROUTER = 'openrouter' satisfies BackendId
-const PLANS = ['claude', 'codex'] as const satisfies readonly BackendId[]
+const PLANS = ['claude', 'codex', 'antigravity'] as const satisfies readonly BackendId[]
 type Plan = (typeof PLANS)[number]
 const isPlan = (b: string): b is Plan => PLANS.some((p) => p === b)
+const planIcon = (p: Plan): ProviderIconId => (p === 'antigravity' ? 'gemini' : p)
 
 interface Prefs {
   ollamaModel: string
@@ -59,7 +60,7 @@ export function ChatModelPicker({
     selectedModel: '',
     opencodeModel: '',
     openrouterModel: '',
-    planModels: { claude: '', codex: '' },
+    planModels: { claude: '', codex: '', antigravity: '' },
     think: false
   })
   const [planOptions, setPlanOptions] = useState<AgentModelOption[]>([])
@@ -73,7 +74,7 @@ export function ChatModelPicker({
       window.api.settingsGetPrefs(),
       window.api.settingsListLocalModels(),
       window.api.settingsListMlxModels().catch(() => []),
-      window.api.chatModelPicks().catch(() => ({ opencode: '', openrouter: '', claude: '', codex: '' })),
+      window.api.chatModelPicks().catch(() => ({ opencode: '', openrouter: '', claude: '', codex: '', antigravity: '' })),
       window.api.chatSourceModels().catch(() => [])
     ])
     const names = l.filter((x) => x.tools).map((x) => x.name)
@@ -83,7 +84,7 @@ export function ChatModelPicker({
       selectedModel: p.selectedModel,
       opencodeModel: picks.opencode,
       openrouterModel: picks.openrouter,
-      planModels: { claude: picks.claude, codex: picks.codex },
+      planModels: { claude: picks.claude, codex: picks.codex, antigravity: picks.antigravity },
       think: p.thinkingEnabled
     })
     void window.api.codeAgentModels().then((r) => setPlanOptions(r.options.filter((o) => isPlan(o.harness)))).catch(() => undefined)
@@ -149,7 +150,7 @@ export function ChatModelPicker({
     ...PLANS.filter((h) => planOptions.some((o) => o.harness === h)).map((h) => ({
       key: `plan:${h}`,
       name: L.MODEL_PICK_PLAN_GROUP.replace('{name}', CONFIG.BACKEND_META[h]?.label ?? h),
-      icon: h
+      icon: planIcon(h)
     })),
     { key: ACCOUNTS, name: 'Your subscriptions' },
     ...(showsOn('ollama', 'chat') ? [{ key: LOCAL_BACKEND, name: MODEL_SOURCES.ollama.name, icon: MODEL_SOURCES.ollama.icon }] : []),
@@ -181,7 +182,7 @@ export function ChatModelPicker({
       id: `${o.harness}:${o.model}`,
       group: `plan:${o.harness}`,
       label: o.label,
-      icon: o.harness === 'codex' ? ('codex' as const) : ('claude' as const),
+      icon: isPlan(o.harness) ? planIcon(o.harness) : ('claude' as const),
       sub: o.model === '' ? L.MODEL_PICK_CLI_DEFAULT : undefined
     })),
     ...accounts.map((m) => ({ id: `${m.value}:`, group: ACCOUNTS, label: m.label, icon: m.icon })),

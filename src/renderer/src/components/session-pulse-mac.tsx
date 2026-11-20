@@ -34,10 +34,7 @@ export function PulseSetting(): React.JSX.Element {
     void window.api.pulseSetEnabled(next)
   }
   return (
-    <SettingRow
-      title={<div className="font-semibold text-lg">Score every agent reply</div>}
-      control={<Switch on={on} onChange={toggle} />}
-    >
+    <SettingRow title="Score every agent reply" control={<Switch on={on} onChange={toggle} />}>
       <div className="text-muted text-sm">
         After each reply in Code, check if the agent is on goal, making progress, showing proof,
         stuck, or doing something risky. Shows at the top of the session.

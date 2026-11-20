@@ -3414,6 +3414,8 @@ export interface ReplyWindowSeeing {
   url: string
   ref?: string
   why?: ReplyMatch
+  folder?: string
+  icon?: string
 }
 
 export interface ReplyWindowAim {
@@ -3782,11 +3784,11 @@ export interface VoiceRoutePickPayload {
 
 /** Where a new agent can be started. A preference about the user's own setup,
  *  which is why they pick it on the row rather than the model choosing. */
-export type AgentHarness = 'claude' | 'codex' | 'opencode' | 'cursor' | 'tmux'
+export type AgentHarness = 'claude' | 'codex' | 'opencode' | 'cursor' | 'antigravity' | 'tmux'
 
 /** model '' = the CLI's own default. */
 export interface AgentModelChoice {
-  harness: 'claude' | 'codex' | 'opencode' | 'cursor' | 'ollama'
+  harness: 'claude' | 'codex' | 'opencode' | 'cursor' | 'antigravity' | 'ollama'
   model: string
 }
 

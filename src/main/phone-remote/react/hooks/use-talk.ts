@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { CONFIG } from '@shared/config'
-import type { TalkOptionWire } from '@shared/phone-remote-protocol'
-import { TALK, TALK_LABELS, COMPUTER_OPTION } from '@shared/talk'
+import type { TalkMediaWire, TalkOptionWire } from '@shared/phone-remote-protocol'
+import { TALK, TALK_LABELS, COMPUTER_OPTION, talkHeadline as talkHeadlineOf } from '@shared/talk'
 import { appendStep, type ChatStep } from '../chat-steps'
 import { hapticTick } from '../haptics'
 import type { SocketBus } from '../socket-bus'
@@ -22,11 +22,14 @@ export interface TalkTurnView {
   reply: string
   target: string
   openLabel?: string
+  media?: TalkMediaWire
+  photo?: string
 }
 
 interface UseTalkArgs {
   bus: SocketBus
   send: UseConnectionResult['send']
+  sendBinary: UseConnectionResult['sendBinary']
   setTalkOpen: Dispatch<SetStateAction<boolean>>
 }
 
@@ -35,10 +38,7 @@ function optionFor(turn: TalkTurnView, id: string): TalkOptionWire {
 }
 
 export function talkHeadline(turn: TalkTurnView): string {
-  const option = optionFor(turn, turn.pick)
-  if (option.kind === 'computer') return TALK_LABELS.doing.computer
-  const name = option.kind === 'new-agent' ? (option.project?.name ?? option.label) : option.label
-  return `${TALK_LABELS.doing[option.kind]} ${name}`
+  return talkHeadlineOf(turn.options, turn.pick)
 }
 
 function newTalkId(): string {
@@ -47,7 +47,8 @@ function newTalkId(): string {
 
 export interface TalkState {
   turns: TalkTurnView[]
-  say: (text: string) => boolean
+  ideas: readonly string[]
+  say: (text: string, file?: File | null) => boolean
   go: (id: string, target: string) => void
   change: (id: string) => void
   cancel: (id: string) => void
@@ -56,15 +57,17 @@ export interface TalkState {
 export function useTalk({
   bus,
   send,
+  sendBinary,
   setTalkOpen
 }: UseTalkArgs): { openTalk: () => void; closeTalk: () => void; talk: TalkState } {
   const [turns, setTurns] = useState<TalkTurnView[]>([])
+  const [ideas, setIdeas] = useState<readonly string[]>(TALK_LABELS.ideas)
 
   const patch = useCallback((id: string, change: (turn: TalkTurnView) => TalkTurnView) => {
     setTurns((prev) => prev.map((t) => (t.id === id ? change(t) : t)))
   }, [])
 
-  const addTurn = useCallback((id: string, text: string) => {
+  const addTurn = useCallback((id: string, text: string, photo?: string) => {
     setTurns((prev) => {
       if (prev.some((t) => t.id === id)) return prev.map((t) => (t.id === id ? { ...t, text } : t))
       const turn: TalkTurnView = {
@@ -77,7 +80,8 @@ export function useTalk({
         steps: [],
         streamed: '',
         reply: '',
-        target: ''
+        target: '',
+        photo
       }
       return [...prev, turn].slice(-TALK.HISTORY_MAX)
     })
@@ -85,6 +89,9 @@ export function useTalk({
 
   useEffect(() => {
     const unsubscribers = [
+      bus.subscribe('talkIdeas', (msg) => {
+        if (msg.ideas.length > 0) setIdeas(msg.ideas)
+      }),
       bus.subscribe('talkRoute', (msg) => {
         hapticTick()
         patch(msg.id, (t) =>
@@ -120,7 +127,8 @@ export function useTalk({
           phase: msg.ok ? 'done' : 'failed',
           reply: msg.reply,
           target: msg.target || t.target,
-          openLabel: msg.openLabel
+          openLabel: msg.openLabel,
+          media: msg.media
         }))
       })
     ]
@@ -165,18 +173,33 @@ export function useTalk({
   )
 
   const say = useCallback(
-    (raw: string) => {
+    (raw: string, file?: File | null) => {
       const text = raw.trim().slice(0, TALK.TEXT_MAX_CHARS)
-      if (text === '') return false
+      if (text === '' && !file) return false
       const id = newTalkId()
-      if (!send({ type: 'talkSend', id, text })) return false
-      addTurn(id, text)
+      if (!file) {
+        if (!send({ type: 'talkSend', id, text })) return false
+        addTurn(id, text)
+        return true
+      }
+      const attachLabel = `${TALK.ATTACH_PREFIX}${id}`
+      addTurn(id, text, URL.createObjectURL(file))
+      void file.arrayBuffer().then((buf) => {
+        const sent =
+          send({ type: 'imageMeta', mime: file.type, byteLength: buf.byteLength, name: file.name, replyToLabel: attachLabel }) &&
+          sendBinary(buf) &&
+          send({ type: 'talkSend', id, text, attachLabel })
+        if (!sent) patch(id, (t) => ({ ...t, phase: 'failed', reply: TALK_LABELS.notConnected }))
+      })
       return true
     },
-    [send, addTurn]
+    [send, sendBinary, addTurn, patch]
   )
 
-  const openTalk = useCallback(() => setTalkOpen(true), [setTalkOpen])
+  const openTalk = useCallback(() => {
+    send({ type: 'talkIdeasGet' })
+    setTalkOpen(true)
+  }, [send, setTalkOpen])
   const closeTalk = useCallback(() => setTalkOpen(false), [setTalkOpen])
 
   return {
@@ -184,6 +207,7 @@ export function useTalk({
     closeTalk,
     talk: {
       turns,
+      ideas,
       say,
       go,
       change,

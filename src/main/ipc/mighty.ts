@@ -46,6 +46,8 @@ import type {
   ChatWorkspaceTab
 } from '../../shared/types'
 import { isMightyMode } from '../../shared/types'
+import { TALK, type TalkRoutePush } from '../../shared/talk'
+import { cancelTalk, isTalkSession, pickTalk, runTalk, talkSession } from '../talk/talk-turn'
 
 // Mirrors project() in bin/mm-coord byte for byte: a different root or hash and agents file under a project nobody linked.
 function repoLinkFor(folder: string): ProjectRepoLink {
@@ -107,16 +109,41 @@ function syncAgentProject(project: MightyProject): void {
   service.archiveProject(project.agentProjectId, project.archived === true)
 }
 
+type LivePush = (channel: string, body: MightyPhasePayload | MightyEventPayload | TalkRoutePush) => void
+
+async function desktopTalk(payload: MightyChatPayload, clientRunId: string, live: LivePush): Promise<MightyChatResult> {
+  const outcome = await runTalk(clientRunId, payload.message.trim(), {
+    source: 'chat',
+    attachments: payload.attachments,
+    waitMs: TALK.AUTO_GO_MS,
+    events: {
+      offered: (decision) => live(CHANNELS.mightyTalkRoute, { ...decision, clientRunId }),
+      onRunId: (runId) => runIdByClient.set(clientRunId, runId),
+      onPhase: (phase, detail, sessionId) => live(CHANNELS.mightyPhase, { sessionId, clientRunId, phase, detail }),
+      onEvent: (event, sessionId) => live(CHANNELS.mightyEvent, { sessionId, clientRunId, event })
+    }
+  })
+  return {
+    answer: outcome.reply,
+    sessionId: outcome.sessionId,
+    artifacts: [],
+    error: outcome.error
+  }
+}
+
 export function registerMightyHandlers(): void {
   // ── Mighty (standing personal agent) ────────────────────────────────────────
   // One chat turn. Awaits the full run (runMighty resolves on completion) so the
   // renderer gets the reply + the session it landed in + any files Mighty created.
   ipcMain.handle(CHANNELS.mightyChat, (e, payload: MightyChatPayload): Promise<MightyChatResult> => {
     const clientRunId = payload.clientRunId
-    const live = (channel: string, body: MightyPhasePayload | MightyEventPayload): void => {
+    const live: LivePush = (channel, body) => {
       const main = getMightyWindow()?.webContents
       main?.send(channel, body)
       if (e.sender !== main && !e.sender.isDestroyed()) e.sender.send(channel, body)
+    }
+    if (clientRunId && payload.message.trim() !== '' && isTalkSession(payload.sessionId)) {
+      return desktopTalk(payload, clientRunId, live).finally(() => runIdByClient.delete(clientRunId))
     }
     return runMighty({
       message: payload.message,
@@ -143,6 +170,12 @@ export function registerMightyHandlers(): void {
     }).finally(() => clientRunId && runIdByClient.delete(clientRunId))
   })
 
+  ipcMain.handle(CHANNELS.mightyTalkPick, (_, clientRunId: string, target: string) => pickTalk(clientRunId, target))
+  ipcMain.handle(CHANNELS.mightyTalkSession, () => {
+    const session = talkSession()
+    getMightyWindow()?.webContents.send(CHANNELS.mightyOpenSession, session.id)
+    return session
+  })
   ipcMain.handle(CHANNELS.mightyListSessions, () => MIGHTY.listSessions())
   ipcMain.handle(CHANNELS.mightyGetSession, (_, id: string) => MIGHTY.getSession(id))
   ipcMain.handle(CHANNELS.mightyRunTerminal, (_, sessionId: string) => {
@@ -476,6 +509,7 @@ export function registerMightyHandlers(): void {
   // Esc step 1. Kills only this pane's run; the child's `close` runs the normal
   // failure path, so the pane settles into its stopped state on its own.
   ipcMain.handle(CHANNELS.mightyStopRun, (_, id: string) => {
+    if (!runIdByClient.has(id) && cancelTalk(id)) return true
     const runId = runIdByClient.get(id) ?? id
     const killed = abortRun(runId)
     // Nothing alive to kill: the run died with a previous app lifetime, so no close

@@ -1617,6 +1617,14 @@ export default function TouchpadLayout(props: {
       <TalkSheet
         open={talkOpen}
         talk={talk}
+        macName={macName}
+        onWatch={() => {
+          closeTalk()
+          if (mirrorOn) return
+          writeIslandOpen(true)
+          setIslandOpen(true)
+          toggleMirror(true)
+        }}
         mic={{
           onMicDown: onChatMicDown,
           onMicUp: onChatMicUp,
@@ -1627,14 +1635,6 @@ export default function TouchpadLayout(props: {
           onDraftConsumed: onChatDraftConsumed
         }}
         onClose={closeTalk}
-        onOpenCode={
-          advanced
-            ? () => {
-                closeTalk()
-                onToggleCode()
-              }
-            : undefined
-        }
       />
 
       <ActProgressSheet

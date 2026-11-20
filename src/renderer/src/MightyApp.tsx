@@ -22,6 +22,7 @@ import { ProjectAvatar } from './components/ProjectIcon'
 import {
   type Tab,
   TABS,
+  BUBBA_ON,
   visibleTabs,
   isTypingTarget,
   readAllMode,
@@ -251,7 +252,7 @@ export default function MightyApp(): JSX.Element {
         setNerdMode(!nerdMode)
         return
       }
-      if (e.metaKey && !e.altKey && !e.shiftKey && !e.ctrlKey && e.code === 'KeyB' && isAdmin) {
+      if (e.metaKey && !e.altKey && !e.shiftKey && !e.ctrlKey && e.code === 'KeyB' && isAdmin && BUBBA_ON) {
         e.preventDefault()
         setTab(tab === 'bubba' ? mode : 'bubba')
         return
@@ -264,6 +265,11 @@ export default function MightyApp(): JSX.Element {
         return
       }
       if (!e.metaKey || e.shiftKey || e.altKey || e.ctrlKey) return
+      if (e.key === ',') {
+        e.preventDefault()
+        setTab('settings')
+        return
+      }
       if (e.code === 'BracketLeft' || e.code === 'BracketRight') {
         if (e.defaultPrevented) return
         e.preventDefault()

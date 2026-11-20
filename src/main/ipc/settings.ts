@@ -11,13 +11,18 @@ import { homedir } from 'os'
 import { spawn } from 'child_process'
 import { CHANNELS } from '../../shared/ipc'
 import {
+  addAntigravityAccount,
   addPlanLogin,
+  antigravityPlans,
   cancelPlanSignIn,
   checkPlanUsage,
   isPlanBackend,
   listPlanLogins,
   planLoginPicks,
   removePlanLogin,
+  reconnectAntigravityAccount,
+  reconnectPlanLogin,
+  removeAntigravityAccount,
   setPlanLoginPick
 } from '../backend/plan-logins'
 import {
@@ -971,6 +976,11 @@ export function registerSettingsHandlers(): void {
   )
   ipcMain.handle(CHANNELS.planLoginsCancel, () => cancelPlanSignIn())
   ipcMain.handle(CHANNELS.planLoginsRemove, (_, id: string) => removePlanLogin(id))
+  ipcMain.handle(CHANNELS.planAntigravity, () => antigravityPlans())
+  ipcMain.handle(CHANNELS.planAntigravityAdd, () => addAntigravityAccount())
+  ipcMain.handle(CHANNELS.planAntigravityRemove, (_, id: string) => removeAntigravityAccount(String(id)))
+  ipcMain.handle(CHANNELS.planAntigravityReconnect, (_, id: string) => reconnectAntigravityAccount(String(id)))
+  ipcMain.handle(CHANNELS.planLoginsReconnect, (_, id: string) => reconnectPlanLogin(String(id)))
   ipcMain.handle(CHANNELS.planLoginPicks, () => planLoginPicks())
   ipcMain.handle(CHANNELS.planLoginSetPick, (_, backend: string, id: unknown) =>
     isPlanBackend(backend) && typeof id === 'string' ? setPlanLoginPick(backend, id) : planLoginPicks()

@@ -123,6 +123,7 @@ export const PATHS = {
   OPENROUTER_MODEL_FILE: join(ROOT_DIR, 'rewrite-openrouter-model.txt'),
   CLAUDE_CHAT_MODEL_FILE: join(ROOT_DIR, 'chat-claude-model.txt'),
   CODEX_CHAT_MODEL_FILE: join(ROOT_DIR, 'chat-codex-model.txt'),
+  ANTIGRAVITY_CHAT_MODEL_FILE: join(ROOT_DIR, 'chat-antigravity-model.txt'),
   // Whether a thinking-capable Ollama model reasons before answering. Default OFF
   // (file-absent = off): measured 6.4x slower and scoring worse on short tasks.
   THINKING_FILE: join(ROOT_DIR, 'rewrite-thinking.txt'),

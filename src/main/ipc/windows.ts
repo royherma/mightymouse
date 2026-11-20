@@ -123,8 +123,8 @@ export function registerWindowHandlers(): void {
     runLiveDraft(wavBytes, typeof echoTail === 'string' ? echoTail : '')
   )
 
-  ipcMain.on(CHANNELS.liveTurnSubmit, (_: IpcMainEvent, wavBytes: Uint8Array, echoTail: unknown) => {
-    runLiveTurn(wavBytes, typeof echoTail === 'string' ? echoTail : '')
+  ipcMain.on(CHANNELS.liveTurnSubmit, (_: IpcMainEvent, wavBytes: Uint8Array, echoTail: unknown, wakeHeard: unknown) => {
+    runLiveTurn(wavBytes, typeof echoTail === 'string' ? echoTail : '', wakeHeard === true)
       .then((result) => sendLiveTurnResult(result))
       .catch((err) => {
         sendLiveTurnResult({

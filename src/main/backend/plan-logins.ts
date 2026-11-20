@@ -1,14 +1,16 @@
 import { spawn, type ChildProcess } from 'child_process'
-import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'fs'
 import { homedir, tmpdir } from 'os'
 import { join, sep } from 'path'
+import { CONFIG } from '../../shared/config'
 import { PATHS } from '../store/paths'
-import { shell } from '../platform'
+import { clearBinaryCache, resolveBinary, shell } from '../platform'
 import { BACKENDS } from './adapters'
 import {
   PLAN_BACKENDS,
   PLAN_LOGINS,
   isPlanLoginOpen,
+  type AntigravityPlan,
   type PlanBackend,
   type PlanLogin,
   type PlanLoginPicks,
@@ -249,9 +251,14 @@ export async function addPlanLogin(backend: PlanBackend): Promise<PlanLoginsResu
     removeDir(dir)
     return fail('Sign-in did not finish. Try again.')
   }
-  if (load().some((l) => l.backend === backend && l.email === account.email)) {
+  const existing = load().find((l) => l.backend === backend && l.email === account.email)
+  if (existing) {
     await runCli(login, BACKENDS[backend].logoutArgs ?? [], PLAN_LOGINS.CHECK_TIMEOUT_MS)
     removeDir(dir)
+    if (existing.paused) {
+      patch(existing.id, { paused: false })
+      return { logins: load(), error: null }
+    }
     return fail(`${account.email} is already added. Sign in with a different account.`)
   }
   save([...load(), { ...login, email: account.email, plan: account.plan }])
@@ -263,9 +270,25 @@ export function cancelPlanSignIn(): void {
   signingIn?.kill()
 }
 
+export async function reconnectPlanLogin(id: string): Promise<PlanLoginsResult> {
+  const login = load().find((l) => l.id === id)
+  if (!login) return { logins: load(), error: null }
+  if (signingIn) return { logins: load(), error: 'A sign-in is already open in your browser.' }
+  await signIn(login)
+  const account = await readAccount(login)
+  if (!account) return { logins: load(), error: 'Sign-in did not finish. Try again.' }
+  patch(id, { email: account.email, plan: account.plan, limitedUntil: null, paused: false })
+  await refreshLogin(load().find((l) => l.id === id)!, true)
+  return { logins: load(), error: null }
+}
+
 export async function removePlanLogin(id: string): Promise<PlanLogin[]> {
   const login = load().find((l) => l.id === id)
-  if (!login?.dir) return load()
+  if (!login) return load()
+  if (!login.dir) {
+    patch(id, { paused: true })
+    return load()
+  }
   await runCli(login, BACKENDS[login.backend].logoutArgs ?? [], PLAN_LOGINS.CHECK_TIMEOUT_MS)
   removeDir(login.dir)
   save(load().filter((l) => l.id !== id))
@@ -284,7 +307,7 @@ export function planLoginPicks(): PlanLoginPicks {
   const saved = readPicks()
   const logins = load()
   const pickFor = (b: PlanBackend): string => {
-    const mine = logins.filter((l) => l.backend === b)
+    const mine = logins.filter((l) => l.backend === b && !l.paused)
     return (mine.find((l) => l.id === saved[b]) ?? mine.find((l) => l.dir === null) ?? mine[0])?.id ?? ''
   }
   return { claude: pickFor('claude'), codex: pickFor('codex') }
@@ -305,13 +328,13 @@ export function pickedLoginEnv(backend: string): Record<string, string> {
 
 export function pickPlanLogin(backend: string): { id: string; env: Record<string, string> } | null {
   if (!isPlanBackend(backend)) return null
-  const mine = load().filter((l) => l.backend === backend)
+  const mine = load().filter((l) => l.backend === backend && !l.paused)
   const pick = mine.find((l) => isPlanLoginOpen(l, Date.now())) ?? mine[0]
   return pick ? { id: pick.id, env: envFor(pick) } : null
 }
 
 export function planLoginHasRoom(backend: string): boolean {
-  return load().some((l) => l.backend === backend && isPlanLoginOpen(l, Date.now()))
+  return load().some((l) => l.backend === backend && !l.paused && isPlanLoginOpen(l, Date.now()))
 }
 
 // Returns true when this run failed because the login hit its plan limit.
@@ -348,4 +371,134 @@ export async function planAccountFor(backend: PlanBackend, dir: string): Promise
   if (!outsideAccounts.has(key)) outsideAccounts.set(key, readAccount(blankLogin(backend, key, dir)))
   const account = await outsideAccounts.get(key)
   return account ? { email: account.email, plan: account.plan } : null
+}
+
+const AGY_USAGE_TIMEOUT_MS = 20_000
+
+export function parseAgyUsage(stdout: string): PlanWindow[] {
+  const windows = stdout.split('\n').flatMap((line) => {
+    const [group, limit, pct, resets] = line.split('\t').map((s) => s.trim())
+    const left = Number.parseFloat(pct ?? '')
+    const resetsAt = Date.parse(resets ?? '')
+    if (!/ models$/i.test(group ?? '') || Number.isNaN(left) || Number.isNaN(resetsAt)) return []
+    const name: PlanWindowName = /five hour/i.test(limit) ? 'five_hour' : 'week'
+    return [{ name, usedPct: Math.round(100 - left), resetsAt, label: group.replace(/ models$/i, '') }]
+  })
+  const groups = [...new Set(windows.map((w) => w.label ?? ''))]
+  const rank = (w: PlanWindow): number => groups.indexOf(w.label ?? '') * 2 + (w.name === 'five_hour' ? 0 : 1)
+  return windows.sort((a, b) => rank(a) - rank(b))
+}
+
+const AGY_ACCOUNTS_DIR = join(PATHS.ROOT, 'antigravity-accounts')
+const AGY_HIDDEN_FILE = join(PATHS.ROOT, 'antigravity-main-hidden')
+const AGY_DEFAULT_ID = 'default'
+
+function googleEmail(home: string): string {
+  try {
+    const j = JSON.parse(readFileSync(join(home, '.gemini', 'google_accounts.json'), 'utf-8')) as { active?: unknown }
+    return typeof j.active === 'string' ? j.active : ''
+  } catch {
+    return ''
+  }
+}
+
+const AGY_INSTALL_TIMEOUT_MS = 5 * 60_000
+
+function runAgy(bin: string, home: string, args: string[]): Promise<string> {
+  return new Promise((resolve) => {
+    const child = spawn(bin, args, { env: { ...shell.env(), HOME: home }, cwd: tmpdir(), stdio: ['ignore', 'pipe', 'ignore'] })
+    let out = ''
+    child.stdout?.on('data', (d: Buffer) => (out += d.toString()))
+    const timer = setTimeout(() => child.kill(), AGY_USAGE_TIMEOUT_MS)
+    child.on('error', () => resolve(''))
+    child.on('close', () => {
+      clearTimeout(timer)
+      resolve(out)
+    })
+  })
+}
+
+function agyHomes(): Array<{ id: string; home: string }> {
+  const extra = existsSync(AGY_ACCOUNTS_DIR)
+    ? readdirSync(AGY_ACCOUNTS_DIR).sort().map((id) => ({ id, home: join(AGY_ACCOUNTS_DIR, id) }))
+    : []
+  return [...(existsSync(AGY_HIDDEN_FILE) ? [] : [{ id: AGY_DEFAULT_ID, home: homedir() }]), ...extra]
+}
+
+async function readAgyAccount(bin: string, id: string, home: string): Promise<AntigravityPlan> {
+  const [usage, credits] = await Promise.all([runAgy(bin, home, ['-p', '/usage']), runAgy(bin, home, ['-p', '/credits'])])
+  const left = /^Remaining credits\t(\d+)/m.exec(credits)?.[1]
+  return {
+    id,
+    main: id === AGY_DEFAULT_ID,
+    email: googleEmail(home),
+    windows: parseAgyUsage(usage),
+    credits: left === undefined ? null : Number(left),
+    upgradeUrl: /^Upgrade\t(https:\/\/\S+)/m.exec(credits)?.[1] ?? ''
+  }
+}
+
+export async function antigravityPlans(): Promise<AntigravityPlan[]> {
+  const bin = resolveBinary('agy')
+  if (!bin) return []
+  return Promise.all(agyHomes().map((h) => readAgyAccount(bin, h.id, h.home)))
+}
+
+function installAgy(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const child = spawn('/bin/bash', ['-c', `curl -fsSL ${CONFIG.ANTIGRAVITY_INSTALL_URL} | bash`], { env: shell.env(), cwd: homedir(), stdio: 'ignore' })
+    const timer = setTimeout(() => child.kill(), AGY_INSTALL_TIMEOUT_MS)
+    child.on('error', () => resolve(false))
+    child.on('close', (code) => {
+      clearTimeout(timer)
+      resolve(code === 0)
+    })
+  })
+}
+
+const q = (v: string): string => `'${v.replace(/'/g, `'\\''`)}'`
+
+function openAgyInTerminal(bin: string, home: string | null): void {
+  const command = home ? `HOME=${q(home)} ${q(bin)}` : q(bin)
+  const script = `tell application "Terminal" to do script ${JSON.stringify(command)}\ntell application "Terminal" to activate`
+  spawn('osascript', ['-e', script], { stdio: 'ignore' }).on('error', () => {})
+}
+
+export async function addAntigravityAccount(): Promise<{ plans: AntigravityPlan[]; error: string | null; signingIn: boolean }> {
+  if (!resolveBinary('agy')) {
+    const ok = await installAgy()
+    clearBinaryCache()
+    if (!ok || !resolveBinary('agy')) return { plans: [], error: "Couldn't install Antigravity. Check your internet and try again.", signingIn: false }
+  }
+  const bin = resolveBinary('agy') ?? ''
+  if (existsSync(AGY_HIDDEN_FILE)) {
+    rmSync(AGY_HIDDEN_FILE, { force: true })
+    const back = await antigravityPlans()
+    if (back.find((p) => p.main)?.windows.length) return { plans: back, error: null, signingIn: false }
+  }
+  const plans = await antigravityPlans()
+  const unsigned = plans.find((p) => p.windows.length === 0)
+  if (unsigned?.id === AGY_DEFAULT_ID) {
+    openAgyInTerminal(bin, null)
+  } else {
+    const id = unsigned?.id ?? Date.now().toString(36)
+    const home = join(AGY_ACCOUNTS_DIR, id)
+    mkdirSync(home, { recursive: true })
+    openAgyInTerminal(bin, home)
+  }
+  return { plans, error: null, signingIn: true }
+}
+
+export async function reconnectAntigravityAccount(id: string): Promise<AntigravityPlan[]> {
+  const bin = resolveBinary('agy')
+  const home = id === AGY_DEFAULT_ID ? null : join(AGY_ACCOUNTS_DIR, id)
+  if (bin && (home === null || (/^[a-z0-9]+$/.test(id) && existsSync(home)))) openAgyInTerminal(bin, home)
+  return antigravityPlans()
+}
+
+export async function removeAntigravityAccount(id: string): Promise<AntigravityPlan[]> {
+  if (id === AGY_DEFAULT_ID) writeFileSync(AGY_HIDDEN_FILE, '', 'utf-8')
+  const home = join(AGY_ACCOUNTS_DIR, id)
+  if (id !== AGY_DEFAULT_ID && /^[a-z0-9]+$/.test(id) && existsSync(home)) rmSync(home, { recursive: true, force: true })
+  return antigravityPlans()
 }

@@ -9,7 +9,7 @@ import { actStepLabel } from '../shared/act-step-label'
 import { runLabel } from '../shared/model-label'
 import { fireScreenshot } from './capture/screenshot'
 import { looksLikeScreenReference } from '../shared/companion-vision-trigger'
-import type { MediaAttachment, SpokenWord, TurnUsage } from '../shared/types'
+import type { MediaAttachment, RunFailReason, SpokenWord, TurnUsage } from '../shared/types'
 
 /**
  * Live Voice Companion — the LLM half of a spoken turn.
@@ -33,7 +33,7 @@ import type { MediaAttachment, SpokenWord, TurnUsage } from '../shared/types'
 export interface CompanionAskResult {
   ok: boolean
   reply: string
-  error?: string
+  error?: RunFailReason
   /**
    * Session this turn landed in — the SAME id on every following turn, which is
    * what gives voice its memory. Callers hold it and pass it back in.

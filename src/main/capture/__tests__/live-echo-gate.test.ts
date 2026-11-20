@@ -16,6 +16,12 @@ vi.mock('../../companion-window', () => ({
   sendToCompanion: vi.fn(),
   isCompanionMicPaused: () => h.paused
 }))
+vi.mock('../../talk/talk-turn', () => ({
+  runTalk: async (_id: string, text: string, start: { events: { runOnComputer: (t: string, s: string) => Promise<unknown> } }) => {
+    await start.events.runOnComputer(text, 'computer-chat')
+    return { kind: 'computer', ok: true, reply: '', target: '', sessionId: 'computer-chat' }
+  }
+}))
 vi.mock('../../companion-orchestrator', () => ({
   runCompanionAskTurn: async (text: string, sessionId: string) => ({ answeredBy: { backend: 'claude', model: 'm', label: 'm' }, ...(await h.ask(text, sessionId)) }),
   speakCompanionReply: async () => ({ audio: null, mimeType: '' }),
@@ -76,7 +82,7 @@ describe('the companion does not answer its own voice', () => {
 
   it('the wake word is never stripped as echo', async () => {
     await say('Hey Mighty, passed on main')
-    expect(h.ask).toHaveBeenCalledWith('passed on main', undefined)
+    expect(h.ask).toHaveBeenCalledWith('passed on main', 'computer-chat')
   })
 
   it('"stop" still stops even when the reply was saying it', async () => {

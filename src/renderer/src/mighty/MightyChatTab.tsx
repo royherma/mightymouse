@@ -572,6 +572,7 @@ export function ChatTab({
   // reloading the window (see showMightyWindow's mightyWindow.webContents.send branch).
   useEffect(() => {
     const offOpen = window.api.mighty.onOpenSession((id) => {
+      if (!sessions.some((s) => s.id === id)) void loadSessions()
       openSessionInActivePane(id)
       onShowChat()
     })
@@ -583,7 +584,7 @@ export function ChatTab({
       offOpen()
       offFresh()
     }
-  }, [openSessionInActivePane, newChatInActivePane, onShowChat])
+  }, [openSessionInActivePane, newChatInActivePane, onShowChat, sessions, loadSessions])
 
   useEffect(() => {
     if (visible || !chatMode) return

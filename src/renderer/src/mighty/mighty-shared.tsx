@@ -18,6 +18,7 @@ import type { MightySession, MightyRunSource, MightySchedule, MightyOutputFormat
 //   Settings — persona name, custom instructions, default output format, workspace.
 // All data flows through window.api.mighty.* (preload bridge); no logic lives here.
 
+export const BUBBA_ON = false // archived for now, even for admins; flip to bring it back
 export type Tab = 'chat' | 'code' | 'jobs' | 'made' | 'library' | 'bubba' | 'settings'
 
 /** One conversation's search result. `snippet` is null for a title hit — the

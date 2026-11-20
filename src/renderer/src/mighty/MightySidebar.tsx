@@ -1,13 +1,14 @@
 import { JSX, ReactNode, RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { BarChart3, Check, ChevronDown, ChevronRight, Ellipsis, Orbit, Factory, Headset, Inbox, KeyRound, Layers, LayoutGrid, Rows3, Server, type LucideIcon } from 'lucide-react'
+import { BarChart3, Check, ChevronDown, ChevronRight, Ellipsis, Orbit, Factory, Headset, Inbox, KeyRound, Laptop, Layers, LayoutGrid, Rows3, Server, type LucideIcon } from 'lucide-react'
 import { Button } from '../components/Button'
 import { usePostUpdateNotice } from '../components/UpdateNudge'
 import { SidebarNotices } from '../components/SidebarNotices'
 import { CONFIG } from '../../../shared/config'
+import { TALK } from '../../../shared/talk'
 import type { CodeTab } from '../../../shared/types'
 import { useIsAdmin } from '../hooks/useIsAdmin'
-import { TABS, type Tab } from './mighty-shared'
+import { BUBBA_ON, TABS, type Tab } from './mighty-shared'
 import appIcon from '../assets/app-icon.png'
 
 export type SidebarMode = 'all' | 'chat' | 'code'
@@ -300,13 +301,20 @@ export function MightySidebar({
       />
     )
   }
-  const bubbaRow = isAdmin && (
+  const bubbaRow = BUBBA_ON && isAdmin && (
     <SidebarRow
       icon={<Orbit size={16} />}
       label={L.BUBBA}
       active={tab === 'bubba'}
       trailing={<span className="text-xs text-muted">⌘B</span>}
       onClick={() => onSelect('bubba')}
+    />
+  )
+  const talkRow = (
+    <SidebarRow
+      icon={<Laptop size={16} />}
+      label={TALK.SESSION_TITLE}
+      onClick={() => void window.api.mighty.talkSession()}
     />
   )
   const moreRow = (
@@ -400,6 +408,7 @@ export function MightySidebar({
             {CODE_MAIN.map(codeRow)}
             {bubbaRow}
             {moreRow}
+            {talkRow}
             <SidebarSection nested label={L.SIDEBAR_SETUP} />
             {CODE_SETUP.map(codeRow)}
           </>
@@ -407,6 +416,7 @@ export function MightySidebar({
         {mode !== 'code' && CHAT_NAV.map(tabRow)}
         {mode !== 'code' && bubbaRow}
         {mode !== 'code' && moreRow}
+        {mode !== 'code' && talkRow}
         {morePos &&
           createPortal(
             <div

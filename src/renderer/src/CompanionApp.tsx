@@ -12,6 +12,7 @@ import {
 } from '../../shared/companion-debug'
 import { decideBargeIn, echoTail, loudMs } from '../../shared/companion-barge-in'
 import { useVoiceActivity, encodeVoiceSegmentToWav, type VoiceActivitySegment } from './hooks/useVoiceActivity'
+import { WAKE_THRESHOLD } from './lib/wake-word'
 import { useAudioPlayback } from './hooks/useAudioPlayback'
 import { useMicLevel } from './hooks/useMicLevel'
 import CompanionDebugPanel from './components/CompanionDebugPanel'
@@ -101,13 +102,15 @@ function CaptionBubble({ caption }: { caption: Caption }): JSX.Element {
 }
 
 const PUCK_WORD: Record<CompanionState, string> = {
-  idle: 'Say "Hey M" or "Mighty"',
+  idle: 'Say "Hey Mighty"',
   listening: 'Listening',
   thinking: 'Working',
   talking: 'Talking',
-  reacting: 'Say "Hey M" or "Mighty"'
+  reacting: 'Say "Hey Mighty"'
 }
 const PUCK_WORD_PAUSED = 'Paused while recording'
+// Bars still move for nearby voices before the name, at a third of the height, so the mic visibly works.
+const IDLE_BARS_SCALE = 0.35
 
 const BAR_WEIGHTS = [0.55, 0.85, 1, 0.85, 0.55]
 
@@ -198,6 +201,24 @@ export default function CompanionApp(): JSX.Element {
   // itself as it transitions into `listening`.
   const stateRef = useRef(state)
   stateRef.current = state
+  const hideoutOpenRef = useRef(false)
+  hideoutOpenRef.current = !!hideout?.open
+  const wakeReadyRef = useRef(false)
+  const wakeHeardAtRef = useRef(0)
+  const handleWakeHeard = useCallback(() => {
+    wakeHeardAtRef.current = Date.now()
+    if (stateRef.current === 'idle') setState('listening')
+  }, [])
+  const mayTranscribe = useCallback(
+    () =>
+      !wakeReadyRef.current ||
+      wakeArmedRef.current ||
+      hideoutOpenRef.current ||
+      stateRef.current === 'thinking' ||
+      stateRef.current === 'talking' ||
+      Date.now() - wakeHeardAtRef.current < CONFIG.COMPANION.WAKE_ARM_MS,
+    []
+  )
   // Settle-to-idle timer for the `talking` hold — cleared/replaced on every
   // new turn so overlapping turns can't race each other back to idle early.
   const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -281,16 +302,21 @@ export default function CompanionApp(): JSX.Element {
   const handleSegment = useCallback((segment: VoiceActivitySegment) => {
     if (!liveEnabledRef.current) return
     draftSeqRef.current += 1
+    const wakeHeard = segment.wakePeak !== undefined && segment.wakePeak >= WAKE_THRESHOLD
+    const send = mayTranscribe()
+    if (segment.wakePeak !== undefined)
+      console.log(`[wake] sentence ms=${segment.durationMs} peak=${segment.wakePeak.toFixed(3)} -> ${send ? 'parakeet' : 'skipped'}`)
+    if (!send) return
     if (ownVoiceOnly(segment.audio)) {
       console.log(`[companion] dropped own voice loudMs=${loudMs(segment.audio, ECHO_GATE_RMS)}`)
       return
     }
-    window.api.liveTurnSubmit(new Uint8Array(encodeVoiceSegmentToWav(segment.audio)), echoTailRef.current)
-  }, [])
+    window.api.liveTurnSubmit(new Uint8Array(encodeVoiceSegmentToWav(segment.audio)), echoTailRef.current, wakeHeard)
+  }, [mayTranscribe])
 
   const handleDraft = useCallback(
     (audio: Float32Array) => {
-      if (!liveEnabledRef.current || draftBusyRef.current || ownVoiceOnly(audio)) return
+      if (!liveEnabledRef.current || draftBusyRef.current || !mayTranscribe() || ownVoiceOnly(audio)) return
       draftBusyRef.current = true
       const seq = draftSeqRef.current
       window.api
@@ -305,7 +331,7 @@ export default function CompanionApp(): JSX.Element {
           draftBusyRef.current = false
         })
     },
-    [showCaption]
+    [showCaption, mayTranscribe]
   )
 
   // Typed instruction from Stage's input bar. Deliberately the SAME bookkeeping
@@ -328,7 +354,12 @@ export default function CompanionApp(): JSX.Element {
   }, [])
 
   const micWanted = (liveEnabled || !!hideout?.open) && !micPaused
-  const { speaking, error: vadError } = useVoiceActivity(micWanted && !typing, handleSegment, handleDraft)
+  const {
+    speaking,
+    error: vadError,
+    wakeReady
+  } = useVoiceActivity(micWanted && !typing, handleSegment, handleDraft, handleWakeHeard)
+  wakeReadyRef.current = wakeReady
 
   // Live 0..1 mic loudness from the USER's voice — the "clearly hearing you"
   // signal. Feeds the character's ear-perk/head-lean AND the ring's live swell
@@ -478,8 +509,8 @@ export default function CompanionApp(): JSX.Element {
   // Drive `listening` the instant VAD detects speech — independent of the
   // segment callback, which only fires once the segment is FINISHED.
   useEffect(() => {
-    if (speaking && stateRef.current === 'idle') setState('listening')
-  }, [speaking])
+    if (speaking && stateRef.current === 'idle' && mayTranscribe()) setState('listening')
+  }, [speaking, mayTranscribe])
 
   useEffect(() => {
     if (!vadError) return
@@ -647,7 +678,15 @@ export default function CompanionApp(): JSX.Element {
     const debugOpen = size === COMPANION_SIZE_DEBUG
     const paused = micPaused && !working
     const word = paused ? PUCK_WORD_PAUSED : PUCK_WORD[state]
-    const barsLevel = listening ? Math.sqrt(micLevel) : ttsPlaying ? Math.sqrt(mouthOpen) : null
+    const barsLevel = listening
+      ? Math.sqrt(micLevel)
+      : ttsPlaying
+        ? Math.sqrt(mouthOpen)
+        : state === 'idle'
+          ? speaking
+            ? Math.sqrt(micLevel) * IDLE_BARS_SCALE
+            : 0
+          : null
     return (
       <>
         <style>{companionCss()}</style>
@@ -682,7 +721,7 @@ export default function CompanionApp(): JSX.Element {
               {state === 'thinking' && <kbd>esc</kbd>}
             </Button>
           )}
-          {(listening || state === 'talking') && <VoiceBars level={barsLevel} />}
+          {(listening || state === 'talking' || (state === 'idle' && !paused)) && <VoiceBars level={barsLevel} />}
           {state === 'thinking' && (
             <span className="companion-dots" aria-hidden>
               <span />

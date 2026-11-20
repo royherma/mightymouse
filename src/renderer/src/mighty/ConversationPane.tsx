@@ -30,6 +30,7 @@ import { Message } from './MightyConversationView'
 import { QUICK_START_PROMPTS, EMPTY_TIMELINE, routeFor, type SendRoute } from './mighty-shared'
 import { ChatModelPicker } from './ChatModelPicker'
 import { RUN_EVENT } from '../../../shared/types'
+import { TALK, TALK_LABELS, talkHeadline, talkOptionName, type TalkRoutePush } from '../../../shared/talk'
 import { foldRunEvent } from '../lib/run-events'
 import { splitPendingDraft } from './pending-draft'
 import { titleUnderlineTone, type PaneOpenColorId } from './pane-colors'
@@ -152,6 +153,7 @@ export function ConversationPane({
   useComposerInbox(inputRef, att.addPaths)
   const [busy, setBusy] = useState(false)
   const [phase, setPhase] = useState('')
+  const [talkOffer, setTalkOffer] = useState<(TalkRoutePush & { locked: boolean }) | null>(null)
   const [liveTimeline, setLiveTimeline] = useState<TimelineItem[]>([])
   const liveSeq = useRef(0)
   const [backend, setBackend] = useState<BackendId | null>(null)
@@ -461,6 +463,20 @@ export function ConversationPane({
     []
   )
 
+  useEffect(
+    () =>
+      window.api.mighty.onTalkRoute((p) => {
+        if (p.clientRunId === clientRunIdRef.current) setTalkOffer({ ...p, locked: p.options.length < 2 })
+      }),
+    []
+  )
+
+  useEffect(() => {
+    if (!talkOffer || talkOffer.locked) return
+    const timer = setTimeout(() => setTalkOffer((o) => o && { ...o, locked: true }), TALK.AUTO_GO_MS)
+    return () => clearTimeout(timer)
+  }, [talkOffer])
+
   // A turn on this pane's session started or finished elsewhere (e.g. the panel
   // asked into the same session). Already correctly filtered in ChatTab — copied
   // verbatim, this is the template the two subscriptions above now match.
@@ -531,6 +547,7 @@ export function ConversationPane({
       setBusy(true)
       setPhase('')
       setLiveTimeline([])
+      setTalkOffer(null)
       setSession((prev) => {
         const now = new Date().toISOString()
         const base: MightySession = prev ?? {
@@ -591,6 +608,7 @@ export function ConversationPane({
           onDraftTitle?.(null)
           setBusy(false)
           setPhase('')
+          setTalkOffer(null)
         }
       }
     },
@@ -1013,6 +1031,28 @@ export function ConversationPane({
               }
             />
           ))}
+          {inFlight && talkOffer && (
+            <Row gap={1.5} className="flex-wrap text-xs text-muted">
+              <span>{talkHeadline(talkOffer.options, talkOffer.pick)}</span>
+              {!talkOffer.locked && <span>{TALK_LABELS.or}</span>}
+              {!talkOffer.locked &&
+                talkOffer.options
+                  .filter((o) => o.id !== talkOffer.pick)
+                  .map((o) => (
+                    <Button
+                      key={o.id}
+                      variant="ghost"
+                      className="px-2 text-xs"
+                      onClick={() => {
+                        void window.api.mighty.talkPick(talkOffer.clientRunId, o.id)
+                        setTalkOffer({ ...talkOffer, pick: o.id, locked: true })
+                      }}
+                    >
+                      {talkOptionName(o)}
+                    </Button>
+                  ))}
+            </Row>
+          )}
         </div>
       </div>
 

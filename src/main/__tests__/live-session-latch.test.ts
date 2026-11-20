@@ -11,6 +11,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const runCompanionAskTurn = vi.hoisted(() => vi.fn())
 const transcribe = vi.hoisted(() => vi.fn())
 
+vi.mock('../talk/talk-turn', () => ({
+  runTalk: async (_id: string, text: string, start: { events: { runOnComputer: (t: string, s: string) => Promise<unknown> } }) => {
+    await start.events.runOnComputer(text, 'computer-chat')
+    return { kind: 'computer', ok: true, reply: '', target: '', sessionId: 'computer-chat' }
+  }
+}))
 vi.mock('../companion-orchestrator', () => ({
   runCompanionAskTurn: async (...a: unknown[]) => ({ answeredBy: { backend: 'claude', model: 'm', label: 'm' }, ...(await runCompanionAskTurn(...a)) }),
   speakCompanionReply: vi.fn(async () => ({ audio: null, mimeType: 'audio/mpeg', tookMs: 0 })),
@@ -55,12 +61,12 @@ describe('live mode holds one session across spoken turns', () => {
     expect(runCompanionAskTurn.mock.calls[1][1]).toBe('sess-1')
   })
 
-  it('starts the first turn with NO session (a fresh conversation)', async () => {
+  it('starts the first turn in the Computer chat session', async () => {
     runCompanionAskTurn.mockResolvedValue({ ok: true, reply: 'Hi.', sessionId: 'sess-1', tookMs: 10 })
 
     await runLiveTurn(WAV)
 
-    expect(runCompanionAskTurn.mock.calls[0][1]).toBeUndefined()
+    expect(runCompanionAskTurn.mock.calls[0][1]).toBe('computer-chat')
   })
 
   it('keeps the session after a FAILED turn so the retry continues it', async () => {

@@ -583,10 +583,9 @@ export const ReplyScreenContext = createContext<ReplyScreen | undefined>(undefin
 
 const SUBAGENT_PREFIX = 'Do this in a subagent so you stay free for my next message:\n\n'
 
-function ReplyToggle(props: { label: string; title: string; on: boolean; setOn: (on: boolean) => void }): React.JSX.Element {
+export function ReplyToggle(props: { label: string; title: string; on: boolean; setOn: (on: boolean) => void }): React.JSX.Element {
   return (
     <label
-      data-screen-toggle
       title={props.title}
       className="flex w-fit flex-none cursor-pointer items-center gap-2 px-1 text-[12px] text-muted"
     >
@@ -1111,7 +1110,7 @@ export function SessionThread(props: {
         </div>
       )}
       {replyScreen && canReply && (
-        <div className="flex flex-none flex-wrap items-center gap-x-4">
+        <div data-screen-toggle className="flex flex-none flex-wrap items-center gap-x-4">
           <ReplyToggle
             label="Send my screen"
             title="Sends a picture of what was on your screen right before you came here"

@@ -14,6 +14,12 @@ const h = vi.hoisted(() => ({
 }))
 
 vi.mock('../../companion-window', () => ({ sendCompanionStageEvent: vi.fn(), sendToCompanion: vi.fn(), isCompanionMicPaused: () => false }))
+vi.mock('../../talk/talk-turn', () => ({
+  runTalk: async (_id: string, text: string, start: { events: { runOnComputer: (t: string, s: string) => Promise<unknown> } }) => {
+    await start.events.runOnComputer(text, 'computer-chat')
+    return { kind: 'computer', ok: true, reply: '', target: '', sessionId: 'computer-chat' }
+  }
+}))
 vi.mock('../../companion-orchestrator', () => ({
   runCompanionAskTurn: async (text: string, sessionId: string) => ({ answeredBy: { backend: 'claude', model: 'm', label: 'm' }, ...(await h.ask(text, sessionId)) }),
   speakCompanionReply: async () => ({ audio: null, mimeType: '' }),
@@ -72,7 +78,7 @@ describe('voice mode only acts when addressed', () => {
   it('strips the name, stops the old run, and asks with the rest', async () => {
     await say('Hey Mighty, what is on my calendar?')
     expect(h.abort).toHaveBeenCalledTimes(1)
-    expect(h.ask).toHaveBeenCalledWith('what is on my calendar?', undefined)
+    expect(h.ask).toHaveBeenCalledWith('what is on my calendar?', 'computer-chat')
   })
 
   it('"stop" stops the run even without the name', async () => {
@@ -86,7 +92,7 @@ describe('voice mode only acts when addressed', () => {
     expect(await say('Hey Mighty.')).toMatchObject({ ignored: true, error: 'armed' })
     later(CONFIG.COMPANION.WAKE_ARM_MS - 1000)
     await say('what is the weather tomorrow')
-    expect(h.ask).toHaveBeenCalledWith('what is the weather tomorrow', undefined)
+    expect(h.ask).toHaveBeenCalledWith('what is the weather tomorrow', 'computer-chat')
   })
 
   it('the arm runs out after the window', async () => {
@@ -128,7 +134,7 @@ describe('fast actions run before the agent', () => {
   it('a clause the fast path cannot do goes to the agent with what was already done', async () => {
     h.quick.mockImplementation(async (s: string) => (s === 'open Safari' ? opened('Safari') : null))
     await say('Hey Mighty, open Safari and go to example.com')
-    expect(h.ask).toHaveBeenCalledWith('open Safari and go to example.com (already done: Opened Safari)', undefined)
+    expect(h.ask).toHaveBeenCalledWith('open Safari and go to example.com (already done: Opened Safari)', 'computer-chat')
   })
 
   it('runs a preselected matched action, and expires a card nobody preselected', async () => {
@@ -142,7 +148,7 @@ describe('fast actions run before the agent', () => {
     await say('Hey Mighty, tidy my desktop')
     const runId = h.propose.mock.calls[1][0]
     expect(h.expire).toHaveBeenCalledWith(runId)
-    expect(h.ask).toHaveBeenCalledWith('tidy my desktop', undefined)
+    expect(h.ask).toHaveBeenCalledWith('tidy my desktop', 'computer-chat')
   })
 })
 

@@ -1,5 +1,5 @@
-import { ArrowLeft, PanelLeft } from 'lucide-react'
-import { useEffect, useMemo, useState, type JSX } from 'react'
+import { PanelLeft } from 'lucide-react'
+import { useEffect, useMemo, useState, type JSX, type ReactNode } from 'react'
 import { Button } from '../Button'
 import {
   BUCKETS,
@@ -49,7 +49,7 @@ export function SettingsSidebar({
   phoneRemoteSupported,
   simple,
   onJump,
-  onBack
+  footer
 }: {
   query: string
   page: BucketKey | null
@@ -60,7 +60,7 @@ export function SettingsSidebar({
   phoneRemoteSupported: boolean
   simple: boolean
   onJump: (key: SectionKey) => void
-  onBack?: () => void
+  footer?: ReactNode
 }): JSX.Element {
   const [activeKey, setActiveKey] = useState<SectionKey | null>(null)
 
@@ -114,17 +114,6 @@ export function SettingsSidebar({
       }}
       className="fixed top-11 bottom-0 z-[4] overflow-y-auto bg-bg py-5 pl-4 pr-1"
     >
-      {onBack && (
-        <Button
-          variant="bare"
-          onClick={onBack}
-          title="Back (Esc)"
-          className="w-full flex items-center gap-1.5 rounded-sm px-2 py-1.5 mb-3 text-sm font-semibold text-muted transition-colors hover:bg-surface2 hover:text-on-surface"
-        >
-          <ArrowLeft size={14} strokeWidth={2.25} className="shrink-0" />
-          Back
-        </Button>
-      )}
       {visibleBuckets.map(({ bucket, keys }) => {
         const current = page === bucket
         const showKeys = (page === null || current) && keys.length > 1
@@ -163,6 +152,7 @@ export function SettingsSidebar({
           </div>
         )
       })}
+      {footer && <div className="mt-4 pt-3 border-t border-surface2">{footer}</div>}
     </nav>
   )
 }

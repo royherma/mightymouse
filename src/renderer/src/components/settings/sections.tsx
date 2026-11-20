@@ -54,7 +54,9 @@ export function Section({
   if (collapse.page)
     return (
       <div id={anchorId ?? sectionDomId(sectionKey)}>
-        <h2 className="text-lg font-semibold text-on-surface mt-8 mb-3">{title}</h2>
+        {collapse.page.length > 1 && (
+          <h2 className="text-lg font-semibold text-on-surface mt-8 mb-3">{title}</h2>
+        )}
         {children}
       </div>
     )
@@ -94,18 +96,18 @@ export function Section({
 export function SettingRow({
   title,
   control,
+  className,
   children
 }: {
   title: React.ReactNode
-  // The switch/input/button this row is for. Rendered top-aligned so it stays
-  // put next to the title when the description wraps to a second line.
   control?: React.ReactNode
+  className?: string
   children?: React.ReactNode
 }): JSX.Element {
   return (
-    <div className="flex justify-between items-start gap-3">
+    <div className={`flex justify-between items-start gap-3 ${className ?? ''}`}>
       <div className="max-w-[380px]">
-        {title}
+        <div className="font-semibold text-lg">{title}</div>
         {children && <div className="mt-1">{children}</div>}
       </div>
       {control && <div className="shrink-0">{control}</div>}

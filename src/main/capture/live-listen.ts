@@ -2,9 +2,11 @@ import { isCompanionMicPaused, sendCompanionStageEvent, sendToCompanion } from '
 import {
   runCompanionAskTurn,
   speakCompanionReply,
-  abortCompanionTurn
+  abortCompanionTurn,
+  type CompanionAskResult
 } from '../companion-orchestrator'
-import { isStopUtterance, matchWakePhrase, splitCommands, stripEcho } from '../../shared/companion-barge-in'
+import { recordTalkTurn, runTalk } from '../talk/talk-turn'
+import { isStopUtterance, matchHeardWake, matchWakePhrase, splitCommands, stripEcho } from '../../shared/companion-barge-in'
 import { CONFIG } from '../../shared/config'
 import { WAKE_EVENT, type WakeEventKind } from '../../shared/companion-debug'
 import { transcribeSegment, transcribeDraftSegment } from './segmented-listen'
@@ -89,7 +91,11 @@ export function getLiveSession(): string | undefined {
  * (network/HTTP) does NOT fail the whole turn — the reply still ships back
  * `ok: true` with no `audio`, so the companion falls back to caption-only.
  */
-export async function runLiveTurn(wavBytes: Uint8Array, echoTail = ''): Promise<LiveTurnResult> {
+export async function runLiveTurn(
+  wavBytes: Uint8Array,
+  echoTail = '',
+  wakeHeard = false
+): Promise<LiveTurnResult> {
   if (isCompanionMicPaused()) return { ok: false, ignored: true, transcript: '', reply: '', error: 'paused' }
   const startedAt = Date.now()
   turnRoute = ''
@@ -99,13 +105,17 @@ export async function runLiveTurn(wavBytes: Uint8Array, echoTail = ''): Promise<
   turnStartedAt = startedAt
   turnFirstSound = null
   takeJevInputTokens()
-  const result = await handleLiveTurn(wavBytes, echoTail)
+  const result = await handleLiveTurn(wavBytes, echoTail, wakeHeard)
   if (result.audio) markFirstSound()
   logTurn(result.transcript, result, startedAt)
   return result
 }
 
-async function handleLiveTurn(wavBytes: Uint8Array, echoTail: string): Promise<LiveTurnResult> {
+async function handleLiveTurn(
+  wavBytes: Uint8Array,
+  echoTail: string,
+  wakeHeard: boolean
+): Promise<LiveTurnResult> {
   const transcribeStart = Date.now()
   sendCompanionStageEvent({
     stage: 'transcript',
@@ -146,7 +156,10 @@ async function handleLiveTurn(wavBytes: Uint8Array, echoTail: string): Promise<L
     return { ok: false, transcript: '', reply: '', error: 'empty transcript' }
   }
 
-  const wake = matchWakePhrase(transcribed.text)
+  const textWake = matchWakePhrase(transcribed.text)
+  // The wake model already heard the name; a misheard "They might…" must not throw the turn away.
+  const wake = wakeHeard && !textWake.addressed ? matchHeardWake(transcribed.text) : textWake
+  if (wake !== textWake) console.log(`[voice-turn] wake model vouched for heard=${JSON.stringify(transcribed.text)}`)
   const heard = wake.addressed || isStopUtterance(transcribed.text) ? transcribed.text : stripEcho(transcribed.text, echoTail)
   if (!heard) {
     console.log(`[voice-turn] dropped own voice heard=${JSON.stringify(transcribed.text)}`)
@@ -268,6 +281,7 @@ async function answerTurn(said: string, ack: Ack): Promise<LiveTurnResult> {
   const lines = done.map((d) => d.line)
   if (done.length === clauses.length) {
     turnRoute = `fast×${done.length}`
+    recordTalkTurn('voice', said, lines.join(' · '))
     if (done.some((d) => d.answer)) return voicedReply(said, lines.join(' '), undefined, SPOKEN_SENTENCES)
     showHideoutTurn(said, lines.join(' · '), [])
     return actionDone(said, lines.join(' · '))
@@ -276,7 +290,31 @@ async function answerTurn(said: string, ack: Ack): Promise<LiveTurnResult> {
   turnRoute = done.length ? `fast×${done.length}+agent` : 'agent'
   const ask = done.length ? `${said} (already done: ${lines.join('; ')})` : said
   ack.now('check')
-  const askResult = await runCompanionAskTurn(ask, liveSessionId)
+  const asked: { result?: CompanionAskResult } = {}
+  const outcome = await runTalk(randomUUID(), ask, {
+    source: 'voice',
+    waitMs: 0,
+    events: {
+      runOnComputer: async (text, sessionId) => {
+        const result = await runCompanionAskTurn(text, liveSessionId ?? sessionId)
+        asked.result = result
+        return { answer: result.reply, sessionId: result.sessionId, error: result.error }
+      }
+    }
+  })
+  const askResult = asked.result
+  if (!askResult) {
+    turnRoute = `handoff:${outcome.kind}`
+    if (outcome.ok) return voicedReply(said, outcome.target, outcome.sessionId || undefined)
+    showHideoutTurn(said, outcome.reply, [])
+    return {
+      ok: false,
+      transcript: said,
+      reply: '',
+      error: outcome.reply,
+      sessionId: outcome.sessionId || undefined
+    }
+  }
   turnUsage = askResult.usage
   const by = askResult.answeredBy
   turnHops.push({

@@ -160,7 +160,7 @@ function reasonText(result: { reason: NewAgentFailure; detail: string }, harness
 }
 
 function isAgentHarness(value: unknown): value is AgentHarness {
-  return value === 'claude' || value === 'codex' || value === 'opencode' || value === 'cursor' || value === 'tmux'
+  return value === 'claude' || value === 'codex' || value === 'opencode' || value === 'cursor' || value === 'antigravity' || value === 'tmux'
 }
 
 function isDirectory(cwd: string): boolean {
@@ -515,7 +515,7 @@ export async function startCodeSession(
     env = launch.env
   }
   const resume = typeof row?.resume === 'string' && /^[\w-]{8,}$/.test(row.resume) ? row.resume : ''
-  if (resume !== '' && harness !== 'claude' && harness !== 'codex' && harness !== 'cursor') {
+  if (resume !== '' && harness !== 'claude' && harness !== 'codex' && harness !== 'cursor' && harness !== 'antigravity') {
     return { ok: false as const, reason: 'This agent cannot pick up where it left off.' }
   }
   if (resume !== '' && harness === 'claude') {
@@ -969,11 +969,12 @@ export function registerAgentRelayHandlers(): void {
     opencode: PREFS.getChatModel('opencode'),
     openrouter: PREFS.getChatModel('openrouter'),
     claude: PREFS.getChatModel('claude'),
-    codex: PREFS.getChatModel('codex')
+    codex: PREFS.getChatModel('codex'),
+    antigravity: PREFS.getChatModel('antigravity')
   }))
 
   ipcMain.handle(CHANNELS.chatSetModelPick, (_e, backend: unknown, model: unknown) => {
-    if ((backend === 'opencode' || backend === 'openrouter' || backend === 'claude' || backend === 'codex') && typeof model === 'string') {
+    if ((backend === 'opencode' || backend === 'openrouter' || backend === 'claude' || backend === 'codex' || backend === 'antigravity') && typeof model === 'string') {
       PREFS.setChatModel(backend, model)
     }
   })

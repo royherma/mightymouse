@@ -168,6 +168,7 @@ const HARNESS_BINARY: Record<AgentHarness, string> = {
   codex: 'codex',
   opencode: 'opencode',
   cursor: 'cursor-agent',
+  antigravity: 'agy',
   tmux: ''
 }
 
@@ -226,7 +227,7 @@ export async function startNewAgent(
     return { ok: false, reason: 'cli-missing', detail: cli }
   }
 
-  const prompt = text === '' ? [] : harness === 'opencode' ? ['--prompt', text] : [text]
+  const prompt = text === '' ? [] : harness === 'opencode' ? ['--prompt', text] : harness === 'antigravity' ? ['-i', text] : [text]
   const resume = resumeArgs(harness, opts?.resume ?? '')
   const envArgs = Object.entries(opts?.env ?? {}).map(([k, v]) => `${k}=${v}`)
   const launcher = envArgs.length > 0 ? ['/usr/bin/env', ...envArgs] : []
@@ -354,12 +355,13 @@ function resumeArgs(harness: AgentHarness, sessionId: string): string[] {
   if (harness === 'claude') return ['--resume', sessionId]
   if (harness === 'codex') return ['resume', sessionId]
   if (harness === 'cursor') return ['--resume', sessionId]
+  if (harness === 'antigravity') return ['--conversation', sessionId]
   return []
 }
 
 function modelArgs(harness: AgentHarness, model: string): string[] {
   if (model === '') return []
-  if (harness === 'claude' || harness === 'cursor') return ['--model', model]
+  if (harness === 'claude' || harness === 'cursor' || harness === 'antigravity') return ['--model', model]
   if (harness === 'codex' || harness === 'opencode') return ['-m', model]
   return []
 }

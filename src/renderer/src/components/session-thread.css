@@ -838,7 +838,7 @@
   [data-reply-window] .session-detail-thread > :not(.session-detail-composer, .session-detail-failed, [data-screen-toggle]) {
     display: none;
   }
-  [data-reply-window] [data-screen-toggle] {
-    margin-top: auto;
+  [data-reply-window] .session-detail-thread {
+    justify-content: flex-end;
   }
 }
