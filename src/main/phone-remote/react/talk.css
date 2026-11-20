@@ -254,110 +254,14 @@
 
 .talkDock {
   flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding-top: 12px;
-  border-top: 1px solid var(--surface3);
+  padding-top: 8px;
 }
-.talkOrb {
-  position: relative;
-  border: 0;
-  width: 84px;
-  height: 84px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--on-accent);
-  box-shadow: 0 8px 22px rgba(var(--accent-rgb), 0.32);
-  touch-action: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none;
-  transition:
-    transform 0.1s ease-out,
-    background-color 0.15s;
-}
-.talkOrb:active {
-  transform: scale(0.94);
-}
-.talkOrb[data-state='listening'] {
-  background: var(--red);
-  box-shadow: 0 8px 22px rgba(var(--red-rgb), 0.35);
-  animation: talkPulse 1.4s ease-out infinite;
-}
-.talkOrb[data-state='hearing'] {
-  opacity: 0.8;
-}
-.talkOrb .micWaveform {
-  position: static;
-  transform: none;
-  width: 48px;
-  height: 34px;
-  z-index: auto;
-}
-.talkOrb .micWaveformBars {
-  width: 48px;
-  height: 34px;
-  gap: 4px;
-  padding: 0;
-  border-radius: 0;
-  background: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  box-shadow: none;
-}
-.talkOrb .micWaveformBars i {
-  width: 5px;
-  background: var(--on-accent);
-  box-shadow: none;
-}
-.talkHint {
-  margin: 0;
-  min-height: 1.3em;
-  font-size: 13px;
-  color: var(--text-muted-medium);
-  text-align: center;
-}
-.talkHint.error {
-  color: var(--red);
-}
-
-.proRoot[data-orient='landscape'] .talkOrb {
-  width: 64px;
-  height: 64px;
-  grid-row: span 2;
-}
-.proRoot[data-orient='landscape'] .talkDock {
-  display: grid;
-  grid-template-columns: auto auto;
-  justify-content: center;
-  align-items: center;
-  column-gap: 16px;
-  row-gap: 0;
-  padding-top: 10px;
-}
-.proRoot[data-orient='landscape'] .talkHint {
-  align-self: end;
-  text-align: left;
-}
-.proRoot[data-orient='landscape'] .proRoot[data-orient='landscape'] 
 @keyframes talkCount {
   from {
     width: 0;
   }
   to {
     width: 100%;
-  }
-}
-@keyframes talkPulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(var(--red-rgb), 0.4);
-  }
-  100% {
-    box-shadow: 0 0 0 18px rgba(var(--red-rgb), 0);
   }
 }
 @keyframes talkIn {
@@ -367,8 +271,7 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .talkTurn,
-  .talkOrb[data-state='listening'] {
+  .talkTurn {
     animation: none;
   }
 }
@@ -377,8 +280,7 @@
 .talkLink,
 .talkIconBtn,
 .talkOption,
-.talkIdea,
-.talkOrb {
+.talkIdea {
   font: inherit;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -428,10 +330,6 @@
   color: var(--text-muted-medium);
 }
 .talkDock .aiComposer {
-  align-self: stretch;
-  padding: 4px 0 0;
+  padding: 0;
   background: none;
-}
-.proRoot[data-orient='landscape'] .talkDock .aiComposer {
-  grid-column: 1 / -1;
 }

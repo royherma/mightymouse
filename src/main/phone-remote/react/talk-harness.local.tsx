@@ -1,5 +1,5 @@
 import { StrictMode, useEffect, useRef, useState } from 'react'
-import { AudioLines, History } from 'lucide-react'
+import { History, Laptop } from 'lucide-react'
 import { createRoot } from 'react-dom/client'
 import { CONFIG } from '@shared/config'
 import { COMPUTER_OPTION, TALK, TALK_LABELS } from '@shared/talk'
@@ -10,7 +10,7 @@ import type { TalkState, TalkTurnView } from './hooks/use-talk'
 import './theme.css'
 import './ai/ai.css'
 
-// ?state= or #state= one of: button|empty|listening|hearing|deciding|counting|choosing|running|done|failed|heard-error|all
+// ?state= or #state= one of: button|empty|listening|deciding|counting|choosing|running|done|failed|all
 function stateFromUrl(): string {
   return location.hash.slice(1) || new URLSearchParams(location.search).get('state') || 'all'
 }
@@ -123,11 +123,6 @@ export function Harness(): React.JSX.Element {
       console.log(`[talk] ${what}`, ...args)
   const talk: TalkState = {
     turns: turnsFor(state),
-    listening: state === 'listening',
-    hearing: state === 'hearing',
-    heardError: state === 'heard-error' ? 'Couldn’t hear that, try again' : '',
-    onMicDown: log('micDown'),
-    onMicUp: log('micUp'),
     say: (text) => {
       log('say')(text)
       return true
@@ -148,13 +143,21 @@ export function Harness(): React.JSX.Element {
         aria-label={TALK_LABELS.title}
         onClick={() => setOpen(true)}
       >
-        <AudioLines size={19} strokeWidth={2.25} />
+        <Laptop size={19} strokeWidth={2.25} />
         <span className="proBtnLabel">{TALK_LABELS.button}</span>
       </Button>
       <TalkSheet
         open={open}
         talk={talk}
-        micStreamRef={micStreamRef}
+        mic={{
+          onMicDown: log('micDown'),
+          onMicUp: log('micUp'),
+          dictating: false,
+          recording: state === 'listening',
+          micStreamRef,
+          draftPatch: null,
+          onDraftConsumed: log('draftConsumed')
+        }}
         onClose={() => setOpen(false)}
         onOpenCode={log('openCode')}
       />
