@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { Dispatch, RefObject, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { CONFIG } from '@shared/config'
-import { PHONE_AUDIO_TO, type PhoneAudioDestination } from '@shared/types'
 import type { TalkOptionWire } from '@shared/phone-remote-protocol'
 import { TALK, TALK_LABELS, COMPUTER_OPTION } from '@shared/talk'
 import { appendStep, type ChatStep } from '../chat-steps'
@@ -28,14 +27,6 @@ export interface TalkTurnView {
 interface UseTalkArgs {
   bus: SocketBus
   send: UseConnectionResult['send']
-  micDown: (to?: PhoneAudioDestination) => void
-  micUp: () => void
-  cancelRecording: () => void
-  settleClip: (opts?: { keepBlob?: boolean }) => void
-  inFlightClipRef: RefObject<{ id: string; to: PhoneAudioDestination } | null>
-  recording: boolean
-  recordingTo: PhoneAudioDestination
-  hearing: boolean
   setTalkOpen: Dispatch<SetStateAction<boolean>>
 }
 
@@ -56,11 +47,6 @@ function newTalkId(): string {
 
 export interface TalkState {
   turns: TalkTurnView[]
-  listening: boolean
-  hearing: boolean
-  heardError: string
-  onMicDown: () => void
-  onMicUp: () => void
   say: (text: string) => boolean
   go: (id: string, target: string) => void
   change: (id: string) => void
@@ -70,25 +56,15 @@ export interface TalkState {
 export function useTalk({
   bus,
   send,
-  micDown,
-  micUp,
-  cancelRecording,
-  settleClip,
-  inFlightClipRef,
-  recording,
-  recordingTo,
-  hearing,
   setTalkOpen
 }: UseTalkArgs): { openTalk: () => void; closeTalk: () => void; talk: TalkState } {
   const [turns, setTurns] = useState<TalkTurnView[]>([])
-  const [heardError, setHeardError] = useState('')
 
   const patch = useCallback((id: string, change: (turn: TalkTurnView) => TalkTurnView) => {
     setTurns((prev) => prev.map((t) => (t.id === id ? change(t) : t)))
   }, [])
 
   const addTurn = useCallback((id: string, text: string) => {
-    setHeardError('')
     setTurns((prev) => {
       if (prev.some((t) => t.id === id)) return prev.map((t) => (t.id === id ? { ...t, text } : t))
       const turn: TalkTurnView = {
@@ -109,10 +85,6 @@ export function useTalk({
 
   useEffect(() => {
     const unsubscribers = [
-      bus.subscribe('talkHeard', (msg) => {
-        if (inFlightClipRef.current?.id === msg.id) settleClip()
-        addTurn(msg.id, msg.text)
-      }),
       bus.subscribe('talkRoute', (msg) => {
         hapticTick()
         patch(msg.id, (t) =>
@@ -150,18 +122,10 @@ export function useTalk({
           target: msg.target || t.target,
           openLabel: msg.openLabel
         }))
-      }),
-      bus.subscribe('transcribeFailed', (msg) => {
-        if (
-          inFlightClipRef.current?.id === msg.id &&
-          inFlightClipRef.current.to === PHONE_AUDIO_TO.talk
-        ) {
-          setHeardError(msg.reason)
-        }
       })
     ]
     return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
-  }, [bus, addTurn, patch, settleClip, inFlightClipRef])
+  }, [bus, patch])
 
   const go = useCallback(
     (id: string, target: string) => {
@@ -205,37 +169,21 @@ export function useTalk({
       const text = raw.trim().slice(0, TALK.TEXT_MAX_CHARS)
       if (text === '') return false
       const id = newTalkId()
-      if (!send({ type: 'talkSend', id, text })) {
-        setHeardError(TALK_LABELS.notConnected)
-        return false
-      }
+      if (!send({ type: 'talkSend', id, text })) return false
       addTurn(id, text)
       return true
     },
     [send, addTurn]
   )
 
-  const onTalkMicDown = useCallback(() => {
-    setHeardError('')
-    micDown(PHONE_AUDIO_TO.talk)
-  }, [micDown])
-
   const openTalk = useCallback(() => setTalkOpen(true), [setTalkOpen])
-  const closeTalk = useCallback(() => {
-    if (recording && recordingTo === PHONE_AUDIO_TO.talk) cancelRecording()
-    setTalkOpen(false)
-  }, [recording, recordingTo, cancelRecording, setTalkOpen])
+  const closeTalk = useCallback(() => setTalkOpen(false), [setTalkOpen])
 
   return {
     openTalk,
     closeTalk,
     talk: {
       turns,
-      listening: recording && recordingTo === PHONE_AUDIO_TO.talk,
-      hearing,
-      heardError,
-      onMicDown: onTalkMicDown,
-      onMicUp: micUp,
       say,
       go,
       change,

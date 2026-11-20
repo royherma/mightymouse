@@ -60,7 +60,6 @@ export async function handleTalkText(rawId: unknown, rawText: unknown): Promise<
   if (id === '' || text === '') return
   const turn: TalkTurn = { text, route: null, started: false, cancelled: false, runId: '' }
   remember(id, turn)
-  sendToPhone({ type: 'talkHeard', id, text })
   const route = await routeTalk(text).catch((err: unknown) => {
     devLog.warn('[talk] routing failed, doing it on the computer', err)
     return null

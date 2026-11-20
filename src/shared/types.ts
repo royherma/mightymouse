@@ -3237,8 +3237,7 @@ export type UserInputSource = 'input' | 'switch' | 'cursor'
 export const PHONE_AUDIO_TO = {
   paste: 'paste',
   chat: 'chat',
-  note: 'note',
-  talk: 'talk'
+  note: 'note'
 } as const
 export type PhoneAudioDestination = (typeof PHONE_AUDIO_TO)[keyof typeof PHONE_AUDIO_TO]
 export function isAudioDestination(value: unknown): value is PhoneAudioDestination {

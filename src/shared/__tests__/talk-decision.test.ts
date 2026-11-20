@@ -152,7 +152,7 @@ describe('talk wire input', () => {
 describe('isAudioDestination', () => {
   it('accepts every known destination and nothing else', () => {
     for (const to of Object.values(PHONE_AUDIO_TO)) expect(isAudioDestination(to)).toBe(true)
-    expect(isAudioDestination('talk')).toBe(true)
+    expect(isAudioDestination('note')).toBe(true)
     expect(isAudioDestination('shell')).toBe(false)
     expect(isAudioDestination(undefined)).toBe(false)
   })

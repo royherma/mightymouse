@@ -6,7 +6,7 @@ import {
   useState,
   type CSSProperties
 } from 'react'
-import { AudioLines, History } from 'lucide-react'
+import { History, Laptop } from 'lucide-react'
 import MirrorAudioBadge from './MirrorAudioBadge'
 import { MirrorFullScreenBadge, MirrorPane, MirrorTouchModeBadge } from './MirrorPane'
 import { VoiceCallPane } from './VoiceCallPane'
@@ -1511,7 +1511,7 @@ export default function TouchpadLayout(props: {
           else openTalk()
         }}
       >
-        <AudioLines size={19} strokeWidth={2.25} />
+        <Laptop size={19} strokeWidth={2.25} />
         <span className="proBtnLabel">{TALK_LABELS.button}</span>
       </Button>
 
@@ -1617,7 +1617,15 @@ export default function TouchpadLayout(props: {
       <TalkSheet
         open={talkOpen}
         talk={talk}
-        micStreamRef={micStreamRef}
+        mic={{
+          onMicDown: onChatMicDown,
+          onMicUp: onChatMicUp,
+          dictating: chatDictating,
+          recording: chatRecording,
+          micStreamRef,
+          draftPatch: chatDraftPatch,
+          onDraftConsumed: onChatDraftConsumed
+        }}
         onClose={closeTalk}
         onOpenCode={
           advanced

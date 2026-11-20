@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { ArrowLeft, ArrowUp, AudioLines, Check, ChevronDown, CircleOff, FolderPlus, MessageCircle, Mic, Monitor, Mouse, RefreshCw, Settings, Square } from 'lucide-react'
+import { ArrowLeft, ArrowUp, Check, Laptop, ChevronDown, CircleOff, FolderPlus, MessageCircle, Mic, Monitor, Mouse, RefreshCw, Settings, Square } from 'lucide-react'
 import { THOUGHT_MIC_CLASS } from '../mic-nodes'
 import { CONFIG } from '@shared/config'
 import type { AgentRelaySessionInfo } from '@shared/types'
@@ -491,7 +491,7 @@ export function AiHome(props: {
         <div className="aiHeadSide" data-end="">
           {props.onTalk && (
             <Button variant="bare" type="button" className="aiIconBtn" aria-label={TALK_LABELS.title} title={TALK_LABELS.title} data-label={TALK_LABELS.button} onClick={props.onTalk}>
-              <AudioLines size={19} />
+              <Laptop size={19} />
             </Button>
           )}
           {props.onWatch && (

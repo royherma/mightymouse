@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState, type RefObject } from 'react'
-import { AudioLines, Bot, Check, Loader2, Mic, Monitor, Plus, Square, X } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { Bot, Check, Laptop, Loader2, Plus, Square, X } from 'lucide-react'
 import type { TalkOptionWire } from '@shared/phone-remote-protocol'
 import { TALK, TALK_LABELS } from '@shared/talk'
 import { Button } from '@shared/ui/Button'
 import PhoneRemoteTitleBar from './PhoneRemoteTitleBar'
 import { StepRow } from './ActProgressSheet'
-import { MicWaveform } from './MicWaveform'
 import { Avatar } from './ai/AiHome'
-import { Composer } from './ai/Composer'
+import { Composer, type ComposerMic } from './ai/Composer'
 import { hapticTick } from './haptics'
 import { talkHeadline, type TalkState, type TalkTurnView } from './hooks/use-talk'
 import './talk.css'
@@ -19,7 +18,7 @@ function OptionIcon({ option }: { option: TalkOptionWire }): React.JSX.Element {
   if (option.kind === 'computer') {
     return (
       <Avatar size={34}>
-        <Monitor size={17} strokeWidth={2.25} />
+        <Laptop size={17} strokeWidth={2.25} />
       </Avatar>
     )
   }
@@ -214,7 +213,7 @@ function TalkEmpty({ talk }: { talk: TalkState }): React.JSX.Element {
   return (
     <div className="talkEmpty">
       <span className="talkEmptyMark">
-        <AudioLines size={26} strokeWidth={2} />
+        <Laptop size={26} strokeWidth={2} />
       </span>
       <p className="talkEmptyLead">{TALK_LABELS.emptyLead}</p>
       <p className="talkEmptySub">{TALK_LABELS.emptySub}</p>
@@ -229,68 +228,16 @@ function TalkEmpty({ talk }: { talk: TalkState }): React.JSX.Element {
   )
 }
 
-function TalkOrb({
-  talk,
-  micStreamRef
-}: {
-  talk: TalkState
-  micStreamRef: RefObject<MediaStream | null>
-}): React.JSX.Element {
-  const [orb, setOrb] = useState<HTMLButtonElement | null>(null)
-  const { onMicDown, onMicUp } = talk
-  // Native non-passive listeners: React's passive pointer events let iOS flip a tap-latched recording back off.
-  useEffect(() => {
-    if (!orb) return
-    const down = (e: PointerEvent): void => {
-      e.preventDefault()
-      hapticTick()
-      onMicDown()
-    }
-    const up = (e: PointerEvent): void => {
-      e.preventDefault()
-      onMicUp()
-    }
-    orb.addEventListener('pointerdown', down, { passive: false })
-    orb.addEventListener('pointerup', up)
-    orb.addEventListener('pointercancel', up)
-    return () => {
-      orb.removeEventListener('pointerdown', down)
-      orb.removeEventListener('pointerup', up)
-      orb.removeEventListener('pointercancel', up)
-    }
-  }, [orb, onMicDown, onMicUp])
-
-  const state = talk.listening ? 'listening' : talk.hearing ? 'hearing' : 'idle'
-  return (
-    <Button
-      ref={setOrb}
-      variant="bare"
-      className="talkOrb"
-      data-state={state}
-      aria-label={talk.listening ? TALK_LABELS.stopAndSend : TALK_LABELS.button}
-      aria-pressed={talk.listening}
-    >
-      {state === 'listening' ? (
-        <MicWaveform streamRef={micStreamRef} />
-      ) : state === 'hearing' ? (
-        <Loader2 size={30} className="animate-spin" />
-      ) : (
-        <Mic size={32} strokeWidth={2.25} />
-      )}
-    </Button>
-  )
-}
-
 export default function TalkSheet({
   open,
   talk,
-  micStreamRef,
+  mic,
   onClose,
   onOpenCode
 }: {
   open: boolean
   talk: TalkState
-  micStreamRef: RefObject<MediaStream | null>
+  mic?: ComposerMic
   onClose: () => void
   onOpenCode?: () => void
 }): React.JSX.Element {
@@ -307,14 +254,6 @@ export default function TalkSheet({
       list.scrollTo({ top: newest.offsetTop - TALK_LIST_PAD_PX, behavior: 'smooth' })
   }, [open, lastKey])
 
-  const hint = talk.heardError
-    ? talk.heardError
-    : talk.listening
-      ? TALK_LABELS.listening
-      : talk.hearing
-        ? TALK_LABELS.hearing
-        : TALK_LABELS.hold
-
   return (
     <>
       {open && <div className="historyScrim talkScrim" onClick={onClose} />}
@@ -328,7 +267,7 @@ export default function TalkSheet({
           className="historyHeader"
           title={
             <>
-              <AudioLines size={17} strokeWidth={2.25} />
+              <Laptop size={17} strokeWidth={2.25} />
               <span className="historyTitle">{TALK_LABELS.title}</span>
             </>
           }
@@ -353,13 +292,9 @@ export default function TalkSheet({
           )}
         </div>
         <div className="talkDock">
-          <TalkOrb talk={talk} micStreamRef={micStreamRef} />
-          <p className={`talkHint${talk.heardError ? ' error' : ''}`} aria-live="polite">
-            {hint}
-          </p>
           <Composer
             placeholder={TALK_LABELS.typePlaceholder}
-            disabled={talk.listening}
+            mic={open ? mic : undefined}
             onSend={(text) => talk.say(text)}
           />
         </div>

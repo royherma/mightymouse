@@ -1800,19 +1800,7 @@ export function useMirror({ onReady }: AppProps = {}) {
     setChatDictating
   })
 
-  const { openTalk, closeTalk, talk } = useTalk({
-    bus,
-    send,
-    micDown,
-    micUp,
-    cancelRecording: () => micSidePress('cancel'),
-    settleClip,
-    inFlightClipRef,
-    recording,
-    recordingTo,
-    hearing: chatDictating && talkOpen,
-    setTalkOpen
-  })
+  const { openTalk, closeTalk, talk } = useTalk({ bus, send, setTalkOpen })
 
   const {
     relayPending,

@@ -835,7 +835,6 @@ export type PhoneRemoteEvent =
    *  reply text for the same reason. */
   | { type: 'chatSessionPhase'; sessionId: string; phase: string; detail?: string }
   | { type: 'chatTranscript'; ok: boolean; text: string; reason?: string }
-  | { type: 'talkHeard'; id: string; text: string }
   | { type: 'talkRoute'; id: string; auto: boolean; pick: string; options: TalkOptionWire[] }
   | { type: 'talkStep'; id: string; phase?: string; detail?: string; chunk?: string }
   | { type: 'talkDone'; id: string; ok: boolean; reply: string; target: string; openLabel?: string }
