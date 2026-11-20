@@ -1,17 +1,5 @@
 import { useEffect, useRef, useState, type RefObject } from 'react'
-import {
-  ArrowUp,
-  AudioLines,
-  Bot,
-  Check,
-  Keyboard,
-  Loader2,
-  Mic,
-  Monitor,
-  Plus,
-  Square,
-  X
-} from 'lucide-react'
+import { AudioLines, Bot, Check, Loader2, Mic, Monitor, Plus, Square, X } from 'lucide-react'
 import type { TalkOptionWire } from '@shared/phone-remote-protocol'
 import { TALK, TALK_LABELS } from '@shared/talk'
 import { Button } from '@shared/ui/Button'
@@ -19,6 +7,7 @@ import PhoneRemoteTitleBar from './PhoneRemoteTitleBar'
 import { StepRow } from './ActProgressSheet'
 import { MicWaveform } from './MicWaveform'
 import { Avatar } from './ai/AiHome'
+import { Composer } from './ai/Composer'
 import { hapticTick } from './haptics'
 import { talkHeadline, type TalkState, type TalkTurnView } from './hooks/use-talk'
 import './talk.css'
@@ -292,52 +281,6 @@ function TalkOrb({
   )
 }
 
-function TalkTyping({ talk, onDone }: { talk: TalkState; onDone: () => void }): React.JSX.Element {
-  const [text, setText] = useState('')
-  const submit = (): void => {
-    if (talk.say(text)) {
-      setText('')
-      onDone()
-    }
-  }
-  return (
-    <form
-      className="talkType"
-      onSubmit={(e) => {
-        e.preventDefault()
-        submit()
-      }}
-    >
-      <Button
-        variant="bare"
-        className="talkIconBtn"
-        aria-label={TALK_LABELS.talkInstead}
-        onClick={onDone}
-      >
-        <Mic size={18} strokeWidth={2.25} />
-      </Button>
-      <input
-        className="talkTypeInput"
-        autoFocus
-        value={text}
-        maxLength={TALK.TEXT_MAX_CHARS}
-        placeholder={TALK_LABELS.typePlaceholder}
-        enterKeyHint="send"
-        onChange={(e) => setText(e.target.value)}
-      />
-      <Button
-        variant="bare"
-        type="submit"
-        className="talkTypeSend"
-        aria-label={TALK_LABELS.send}
-        disabled={text.trim() === ''}
-      >
-        <ArrowUp size={18} strokeWidth={2.5} />
-      </Button>
-    </form>
-  )
-}
-
 export default function TalkSheet({
   open,
   talk,
@@ -351,7 +294,6 @@ export default function TalkSheet({
   onClose: () => void
   onOpenCode?: () => void
 }): React.JSX.Element {
-  const [typing, setTyping] = useState(false)
   const listRef = useRef<HTMLDivElement | null>(null)
   const last = talk.turns.at(-1)
   const lastKey = last
@@ -411,25 +353,15 @@ export default function TalkSheet({
           )}
         </div>
         <div className="talkDock">
-          {typing ? (
-            <TalkTyping talk={talk} onDone={() => setTyping(false)} />
-          ) : (
-            <>
-              <TalkOrb talk={talk} micStreamRef={micStreamRef} />
-              <p className={`talkHint${talk.heardError ? ' error' : ''}`} aria-live="polite">
-                {hint}
-              </p>
-              <Button
-                variant="bare"
-                className="talkLink talkTypeToggle"
-                onClick={() => setTyping(true)}
-                disabled={talk.listening}
-              >
-                <Keyboard size={14} strokeWidth={2.25} />
-                {TALK_LABELS.typeInstead}
-              </Button>
-            </>
-          )}
+          <TalkOrb talk={talk} micStreamRef={micStreamRef} />
+          <p className={`talkHint${talk.heardError ? ' error' : ''}`} aria-live="polite">
+            {hint}
+          </p>
+          <Composer
+            placeholder={TALK_LABELS.typePlaceholder}
+            disabled={talk.listening}
+            onSend={(text) => talk.say(text)}
+          />
         </div>
       </div>
     </>

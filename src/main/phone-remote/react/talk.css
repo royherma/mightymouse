@@ -324,43 +324,6 @@
 .talkHint.error {
   color: var(--red);
 }
-.talkTypeToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-}
-.talkType {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-}
-.talkTypeInput {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 22px;
-  border: 1px solid var(--surface3);
-  background: var(--surface2);
-  color: var(--on-surface);
-  font: inherit;
-  font-size: 16px;
-  outline: none;
-}
-.talkTypeInput:focus {
-  border-color: var(--accent-border-subtle);
-}
-.talkTypeSend {
-  width: 40px;
-  min-width: 40px;
-  height: 40px;
-  padding: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-}
 
 .proRoot[data-orient='landscape'] .talkOrb {
   width: 64px;
@@ -380,15 +343,7 @@
   align-self: end;
   text-align: left;
 }
-.proRoot[data-orient='landscape'] .talkTypeToggle {
-  align-self: start;
-  justify-self: start;
-  padding: 0;
-}
-.proRoot[data-orient='landscape'] .talkType {
-  grid-column: 1 / -1;
-}
-
+.proRoot[data-orient='landscape'] .proRoot[data-orient='landscape'] 
 @keyframes talkCount {
   from {
     width: 0;
@@ -421,7 +376,6 @@
 .talkPill,
 .talkLink,
 .talkIconBtn,
-.talkTypeSend,
 .talkOption,
 .talkIdea,
 .talkOrb {
@@ -473,12 +427,11 @@
   background: transparent;
   color: var(--text-muted-medium);
 }
-.talkTypeSend {
-  border: 0;
-  background: var(--accent);
-  color: var(--on-accent);
+.talkDock .aiComposer {
+  align-self: stretch;
+  padding: 4px 0 0;
+  background: none;
 }
-.talkTypeSend:disabled {
-  opacity: 0.4;
-  cursor: default;
+.proRoot[data-orient='landscape'] .talkDock .aiComposer {
+  grid-column: 1 / -1;
 }

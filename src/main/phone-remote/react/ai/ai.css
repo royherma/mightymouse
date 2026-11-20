@@ -1,4 +1,5 @@
-.ai {
+.ai,
+.talkSheet {
   --ai-bg: #faf9f7;
   --ai-card: #ffffff;
   --ai-text: #1c1a18;
@@ -19,6 +20,8 @@
   --ai-danger: #d7443e;
   --ai-ok: #2d9a5d;
   --ai-mono: ui-monospace, 'SF Mono', Menlo, monospace;
+}
+.ai {
   position: fixed;
   inset: 0;
   z-index: var(--z-sheet-popover);
@@ -634,7 +637,8 @@
   border-color: var(--ai-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--ai-accent) 22%, transparent);
 }
-.ai .aiComposerRow textarea:focus-visible {
+.ai .aiComposerRow textarea:focus-visible,
+.talkSheet .aiComposerRow textarea:focus-visible {
   outline: none;
   filter: none;
 }
