@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Keyboard flows</title>
+<style>
+  :root { --bg: #f6f5f3; --card: #fff; --ink: #1c1a18; --mute: #68635c; --line: rgba(32,30,28,.12); --primary: #c2501a; --soft: #fcefe4; --ok: #1a7842; --ok-soft: #e7f3ec; --bad: #c0352b; --bad-soft: #fbeae8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.4 -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  header { display: flex; align-items: center; gap: 16px; padding: 16px 28px 8px; }
+  header h1 { font-size: 20px; margin: 0; letter-spacing: -.01em; }
+  header a { color: var(--mute); font-size: 13px; }
+  .toggle { margin-left: auto; display: flex; background: #e9e6e1; border-radius: 12px; padding: 3px; }
+  .toggle button { border: 0; background: none; padding: 8px 16px; border-radius: 9px; font: 600 14px -apple-system, system-ui; color: var(--mute); cursor: pointer; }
+  .toggle button.on { background: var(--card); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+  .start { width: 320px; margin: 6px auto 0; text-align: center; background: var(--ink); color: #fff; border-radius: 14px; padding: 12px; font-weight: 600; font-size: 15px; }
+  .start small { display: block; font-weight: 400; opacity: .75; font-size: 12.5px; }
+  svg.fan { display: block; width: 100%; height: 44px; }
+  .cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; padding: 0 28px; }
+  .col { display: flex; flex-direction: column; align-items: stretch; }
+  .head { background: var(--primary); color: #fff; border-radius: 12px; padding: 10px 14px; font-weight: 700; font-size: 16px; display: flex; gap: 8px; align-items: center; }
+  .head span { font-weight: 400; font-size: 12.5px; opacity: .85; margin-left: auto; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 9px 12px; font-size: 13.5px; position: relative; }
+  .step b { font-weight: 600; }
+  .arrow { height: 18px; display: grid; place-items: center; color: var(--mute); font-size: 13px; line-height: 1; }
+  .step.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .step.bad { border-color: var(--bad); background: var(--bad-soft); }
+  .step.bad::before { content: 'TODAY'; position: absolute; top: -9px; left: 10px; background: var(--bad); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 6px; letter-spacing: .04em; }
+  .step.fix { border: 1.5px dashed var(--ok); background: var(--ok-soft); }
+  .step.fix::before { content: 'AFTER (proposed)'; position: absolute; top: -9px; left: 10px; background: var(--ok); color: #fff; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 6px; letter-spacing: .04em; }
+  .ex { margin-top: 14px; background: var(--card); border-radius: 12px; padding: 10px 12px; border: 1px solid var(--line); }
+  .ex .lbl { font-size: 11px; font-weight: 700; color: var(--mute); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .field { background: #f2f1ee; border-radius: 8px; padding: 6px 9px; font-size: 13.5px; }
+  .field mark { background: #b9d5ff; border-radius: 2px; padding: 0 1px; }
+  .field .new { color: var(--ok); font-weight: 600; }
+  .field .gone { color: var(--bad); text-decoration: line-through; }
+  .say { font-size: 12.5px; color: var(--primary); margin: 5px 0; font-weight: 600; }
+  .down { text-align: center; color: var(--mute); font-size: 12px; margin: 3px 0; }
+  .legend { display: flex; gap: 18px; justify-content: center; padding: 16px 28px 0; font-size: 12.5px; color: var(--mute); }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 5px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>MightyMouse keyboard: what each button does</h1>
+  <a href="/keyboard-harness.local.html">keyboard states page</a>
+  <div class="toggle"><button data-mode="plain" class="on">Nothing highlighted</button><button data-mode="hl">Text highlighted</button></div>
+</header>
+<div class="start">You're in any text box<small id="startSub">cursor blinking, nothing selected</small></div>
+<svg class="fan" viewBox="0 0 1000 44" preserveAspectRatio="none">
+  <path d="M500 0 V14 M500 14 H125 V44 M500 14 H375 V44 M500 14 H625 V44 M500 14 H875 V44" fill="none" stroke="#b6b1aa" stroke-width="2" vector-effect="non-scaling-stroke"/>
+</svg>
+<div class="cols" id="cols"></div>
+<div class="legend">
+  <span><i style="background:var(--ok-soft);border:1px solid var(--ok)"></i>works today</span>
+  <span><i style="background:var(--bad-soft);border:1px solid var(--bad)"></i>TODAY: wrong behaviour</span>
+  <span><i style="background:var(--ok-soft);border:1.5px dashed var(--ok)"></i>AFTER: proposed fix, not built</span>
+</div>
+<script>
+const FLOWS = {
+  plain: [
+    { head: 'Type', sub: 'letters, 123, #+=', steps: [
+      ['Tap letters', ''], ['Word ideas appear in the bar', ''], ['Tap an idea to finish the word', 'ok'], ['Two spaces = ". " and a capital next', 'ok'],
+    ], ex: { lbl: 'Example', before: 'Running a bit la', say: 'tap "late" in the bar', after: 'Running a bit <span class="new">late </span>' } },
+    { head: 'Talk', sub: 'tap or hold', steps: [
+      ['Tap Talk (or hold it while you speak)', ''], ['Your words show live in the bar', ''], ['Tap ✓ (or let go)', ''], ['Text is typed at the cursor', 'ok'], ['Bar offers Undo or Polish it for 7 s', 'ok'],
+    ], ex: { lbl: 'Example in Messages', before: '', say: '🎤 "running ten minutes late"', after: '<span class="new">Running 10 minutes late.</span>' } },
+    { head: '✨ Rewrite', sub: 'on the phone', steps: [
+      ['Tap ✨', ''], ['Pick Fix, Shorter, Friendlier or Professional', ''], ['Uses the text around the cursor', 'ok'], ['Card shows the new version', ''], ['Replace, or Keep mine', 'ok'], ['Undo after Replace puts it back', 'ok'],
+    ], ex: { lbl: 'Example: Shorter', before: 'Hey so sorry I am running about ten minutes late can we push the call', say: '✨ → Shorter → Replace', after: '<span class="new">Running 10 min late, can we push the call?</span>' } },
+    { head: 'Space', sub: 'hold and drag', steps: [
+      ['Hold the space bar', ''], ['Slide left or right', ''], ['The cursor moves one letter per step', 'ok'], ['Let go to keep typing there', 'ok'],
+    ], ex: { lbl: 'Example', before: 'See you at 7|', say: 'slide left 1', after: 'See you at |7' } },
+  ],
+  hl: [
+    { head: 'Type', sub: 'letters, 123, #+=', steps: [
+      ['Highlight a word', ''], ['Type a letter', ''], ['The highlight is replaced by what you type', 'ok'],
+    ], ex: { lbl: 'Example', before: 'See you <mark>Tuesday</mark>', say: 'type "Friday"', after: 'See you <span class="new">Friday</span>' } },
+    { head: 'Talk', sub: 'tap or hold', steps: [
+      ['Highlight words', ''], ['Tap Talk and say the new words', ''], ['Tap ✓', ''], ['The highlight is replaced by what you said', 'ok'], ['Undo puts it back', 'ok'],
+    ], ex: { lbl: 'Example', before: 'Meet at <mark>the usual place</mark>', say: '🎤 "the café on 5th"', after: 'Meet at <span class="new">the café on 5th</span>' } },
+    { head: '✨ Rewrite', sub: 'on the phone', steps: [
+      ['Highlight one sentence', ''], ['Tap ✨ → Shorter', ''], ['Rewrites only the highlight', 'ok'], ['Replace swaps only that sentence', 'ok'], ['Undo puts your sentence back', 'ok'],
+    ], ex: { lbl: 'Example: Shorter', before: 'Thanks for today. <mark>I really think that we should probably meet again next week if that works</mark>', say: '✨ → Shorter → Replace', after: 'Thanks for today. <span class="new">Let\'s meet again next week?</span>' } },
+    { head: 'Space', sub: 'hold and drag', steps: [
+      ['Highlight text', ''], ['Hold and drag space', ''], ['The highlight closes and the cursor moves', 'ok'],
+    ], ex: { lbl: 'Example', before: 'See <mark>you</mark> at 7', say: 'slide right 2', after: 'See you a|t 7' } },
+  ],
+}
+function render(mode) {
+  document.getElementById('startSub').textContent = mode === 'hl' ? 'some text highlighted in blue' : 'cursor blinking, nothing selected'
+  document.getElementById('cols').innerHTML = FLOWS[mode].map((c) => `
+    <div class="col">
+      <div class="head">${c.head}<span>${c.sub}</span></div>
+      ${c.steps.map(([t, k]) => `<div class="arrow">▼</div><div class="step ${k}">${t}</div>`).join('')}
+      <div class="ex"><div class="lbl">${c.ex.lbl}</div>
+        <div class="field">${c.ex.before || '<span style="color:#aaa">(empty)</span>'}</div>
+        <div class="say">${c.ex.say}</div>
+        <div class="field">${c.ex.after}</div>
+      </div>
+    </div>`).join('')
+  document.querySelectorAll('.toggle button').forEach((b) => b.classList.toggle('on', b.dataset.mode === mode))
+}
+document.querySelectorAll('.toggle button').forEach((b) => b.addEventListener('click', () => render(b.dataset.mode)))
+render(new URLSearchParams(location.search).get('mode') === 'hl' ? 'hl' : 'plain')
+</script>
+</body>
+</html>

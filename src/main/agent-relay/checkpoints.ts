@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { copyFileSync, existsSync, mkdtempSync, realpathSync, rmSync, unlinkSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdtempSync, realpathSync, rmSync, statSync, unlinkSync, utimesSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { isAbsolute, join, relative, resolve } from 'node:path'
 import { promisify } from 'node:util'
@@ -58,7 +58,12 @@ async function withTempIndex<T>(root: string, seedFromRepo: boolean, job: (index
       const raw = await git(root, ['rev-parse', '--git-path', 'index'])
       const real = isAbsolute(raw) ? raw : join(root, raw)
       // Seeding with the real index reuses its stat cache, so `add -A` does not rehash the whole tree.
-      if (existsSync(real)) copyFileSync(real, indexFile)
+      if (existsSync(real)) {
+        copyFileSync(real, indexFile)
+        // The copy must keep the real index's mtime, or git's same-second (racy) check skips a same-size edit.
+        const { atime, mtime } = statSync(real)
+        utimesSync(indexFile, atime, mtime)
+      }
     }
     return await job(indexFile)
   } finally {

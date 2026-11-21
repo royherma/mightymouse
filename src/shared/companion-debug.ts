@@ -58,6 +58,8 @@ export interface CompanionStageEvent {
   /** Wall-clock ms this stage took, if known. */
   tookMs?: number
   detail?: string
+  /** Plain-words step for the voice pill and its chat ("Opening x.com"). */
+  say?: string
   /** Absolute path to a screenshot this event produced, if any. The renderer
    *  turns it into a URL with `window.api.mediaUrl()` — main deliberately does
    *  NOT send a media:// URL, so the scheme's encoding lives in exactly one

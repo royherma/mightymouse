@@ -32,7 +32,7 @@ final class Analytics {
 
     /// Unprefixed (unlike `Credentials.webKeyPrefix` keys) so the webview never
     /// sees it. Not private: `AppModel`'s fresh-install sweep must skip this key.
-    static let anonIdKey = "analytics-anon-id"
+    static let anonIdKey = Credentials.analyticsAnonIdKey
 
     /// Matches `MAX_BUFFER` in the desktop client. A cap rather than a queue: a
     /// phone with no connectivity must not grow this without bound.

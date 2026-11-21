@@ -5,6 +5,7 @@ import { Button } from './Button'
 
 const PEEK_MS = 1000
 const SLOW_MS = 20_000
+const STUCK_MS = 45_000
 const CLOCK_SLACK_MS = 5_000
 
 /** `pane` undefined = spawn not back yet; '' = opened in a terminal app we can't address. */
@@ -128,6 +129,24 @@ export function StartingAgent(props: StartingInfo & { now: number }): React.JSX.
   const closed = peek !== null && !peek.alive
   const inTerminal = pane === ''
   const slow = !prompt && !closed && now - since > SLOW_MS && (peek?.tail.length ?? 0) > 0
+  const stuck = slow && now - since > STUCK_MS
+  const [revealFailed, setRevealFailed] = useState(false)
+
+  if (!closed && !prompt && !slow && !inTerminal)
+    return (
+      <div className="starting-agent-placeholder" aria-live="polite">
+        <div className="session-detail-thinking">
+          <span className="session-detail-thinking-dots" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span>Starting</span>
+        </div>
+        <span className="skeleton starting-agent-line" aria-hidden="true" />
+        <span className="skeleton starting-agent-line" aria-hidden="true" />
+      </div>
+    )
 
   return (
     <div className="starting-agent" aria-live="polite">
@@ -177,8 +196,22 @@ export function StartingAgent(props: StartingInfo & { now: number }): React.JSX.
 
       {slow && peek && (
         <div className="starting-agent-screen">
-          <p className="starting-agent-detail">Taking longer than usual. This is what it shows:</p>
+          <p className="starting-agent-detail">
+            {stuck ? 'It started, but it is not showing up here. You can keep going in its terminal:' : 'Taking longer than usual. This is what it shows:'}
+          </p>
           <pre>{peek.tail.join('\n')}</pre>
+          {stuck && pane && (
+            <div className="starting-agent-actions">
+              <Button variant="primary" onClick={() => void window.api.codeStartupReveal(pane).then((ok) => setRevealFailed(!ok))}>
+                {revealFailed ? "Couldn't open its terminal" : 'Open terminal'}
+              </Button>
+              {onClose && (
+                <Button variant="ghost" onClick={onClose}>
+                  Close
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

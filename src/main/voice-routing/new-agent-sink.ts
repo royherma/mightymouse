@@ -234,8 +234,9 @@ export async function startNewAgent(
   const effort = harness === 'tmux' ? [] : reasoningArgs(harness, opts?.effort, opts?.think)
   const relay = harness === 'codex' ? codexRelayArgs() : []
   const plan = opts?.plan === true && harness !== 'tmux' ? PLAN_ARGS[harness] ?? [] : []
-  // The = form: `--add-dir <dir>` takes several values and swallows the prompt after it.
-  const readable = harness === 'claude' ? (opts?.readDirs ?? []).map((dir) => `--add-dir=${dir}`) : []
+  // Settings, not --add-dir: --add-dir stops the agent on a "trust this folder?" screen before it starts.
+  const readDirs = harness === 'claude' ? (opts?.readDirs ?? []) : []
+  const readable = readDirs.length > 0 ? ['--settings', JSON.stringify({ permissions: { additionalDirectories: readDirs } })] : []
   const command = binary === '' ? [] : [...launcher, binary, ...relay, ...resume, ...readable, ...modelArgs(harness, opts?.model ?? ''), ...effort, ...plan, ...prompt]
 
   const tmux = resolveBinary('tmux')

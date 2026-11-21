@@ -239,8 +239,23 @@ async function handOff(sink: TalkSink, turn: PendingTalk): Promise<HandOff> {
   return { ...base, ok: true, reply: TALK_LABELS.agentHasIt, openLabel: sink.session.label }
 }
 
-export function recordTalkTurn(source: PendingTalk['source'], said: string, done: string): void {
-  const sessionId = MIGHTY.appendTurn(talkSession().id, { source, q: said, a: done, ts: new Date().toISOString(), ok: true, backend: '' })
+export function recordTalkTurn(
+  source: PendingTalk['source'],
+  said: string,
+  done: string,
+  run?: { steps: string[]; durationMs: number }
+): void {
+  const toolCalls = run?.steps.map((say) => ({ name: '', inputPreview: '', ok: true, say }))
+  const sessionId = MIGHTY.appendTurn(talkSession().id, {
+    source,
+    q: said,
+    a: done,
+    ts: new Date().toISOString(),
+    ok: true,
+    backend: '',
+    ...(run ? { durationMs: run.durationMs } : {}),
+    ...(toolCalls?.length ? { toolCalls } : {})
+  })
   broadcastMightyTurnAppended(sessionId)
 }
 

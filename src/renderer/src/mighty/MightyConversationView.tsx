@@ -104,6 +104,15 @@ export const Message = memo(function Message({
   return (
     <div className="space-y-2">
       <Bubble text={q} ts={ts} side="user" onEdit={onEdit} />
+      {a === '' && !pending && onRegenerate && (
+        <Row gap={1.5} className="text-xs text-muted">
+          <span>{CONFIG.UI_LABELS.CHAT_NO_REPLY}</span>
+          <Button variant="ghost" className="px-2 text-xs" onClick={onRegenerate}>
+            <RotateCcw size={12} />
+            {CONFIG.UI_LABELS.CHAT_RETRY}
+          </Button>
+        </Row>
+      )}
       {(a !== '' || pending) && (
         <div className="flex justify-start">
           <div className="min-w-0 flex-1">
@@ -284,8 +293,16 @@ export function ToolCallTrail({ items }: { items: ToolCallSummary[] }): JSX.Elem
           className="flex items-center gap-1.5 text-xs text-muted px-2 py-1 rounded-lg bg-surface1/60 w-fit max-w-full"
         >
           <Check size={12} className={row.ok ? 'shrink-0' : 'text-red-400'} />
-          <span className="font-medium text-on-surface shrink-0">{row.name}</span>
-          <span className="truncate font-mono">{row.inputPreview}</span>
+          {row.say ? (
+            <span className="truncate text-on-surface" title={row.name ? `${row.name} ${row.inputPreview}` : undefined}>
+              {row.say}
+            </span>
+          ) : (
+            <>
+              <span className="font-medium text-on-surface shrink-0">{row.name}</span>
+              <span className="truncate font-mono">{row.inputPreview}</span>
+            </>
+          )}
         </div>
       ))}
     </div>
@@ -381,7 +398,7 @@ export function Bubble({
 
   return (
     <div className={`group flex ${user ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex flex-col ${user ? 'items-end max-w-[80%]' : 'items-stretch w-full'}`}>
+      <div className={`flex min-w-0 flex-col ${user ? 'items-end max-w-[80%]' : 'items-start max-w-full'}`}>
         <div
           className={
             user

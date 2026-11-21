@@ -46,7 +46,7 @@ import { getPanelState } from './panel-state'
 import { FEEDBACK } from '../store/feedback'
 import { getBugReportContext, submitBugReport } from '../bug-report'
 import { closeBugReportWindow } from '../bug-report-window'
-import { hideReplyWindow, showReplyWindow } from '../reply-window'
+import { hideReplyWindow, shootBehindReply, showReplyWindow } from '../reply-window'
 import { resolveSessionRef } from '../agent-relay/session-control'
 import { showAgentInCodeTab } from '../mighty/mighty-window'
 import type {
@@ -110,6 +110,7 @@ export function registerSystemHandlers(): void {
   ipcMain.on(CHANNELS.replyWindowShowOver, (_e, bundleId: unknown, on: unknown) => {
     if (typeof bundleId === 'string' && bundleId) void import('../reply-focus').then((m) => m.setShowOver(bundleId, on === true))
   })
+  ipcMain.handle(CHANNELS.replyWindowShot, () => shootBehindReply())
   ipcMain.on(CHANNELS.replyWindowShow, (_e, ref: unknown) => {
     if (typeof ref === 'string' && ref) showReplyWindow(ref)
   })

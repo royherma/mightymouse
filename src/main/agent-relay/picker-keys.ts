@@ -489,13 +489,22 @@ export function parseStartupPrompt(lines: string[]): StartupPrompt | null {
   let i = footer - 1
   while (i >= 0 && lines[i].trim() === '') i--
   const block: string[] = []
-  for (; i >= 0 && lines[i].trim() !== ''; i--) block.unshift(lines[i])
+  for (; i >= 0 && lines[i].trim() !== '' && !RULE.test(lines[i].trim()); i--) block.unshift(lines[i])
   const isNumbered = (l: string): boolean => NUMBER.test(l.trim().replace(OPTION_MARK, ''))
   const firstNumbered = block.findIndex(isNumbered)
+  const marked = block.findIndex((l) => OPTION_MARK.test(l.trim()))
   let rows: string[]
   if (block.filter(isNumbered).length >= 2) {
     rows = block.filter(isNumbered).map((l) => l.trim())
     i += firstNumbered
+  } else if (marked !== -1) {
+    const indent = indentOf(block[marked])
+    let top = marked
+    while (top > 0 && indentOf(block[top - 1]) === indent) top--
+    let end = marked
+    while (end + 1 < block.length && indentOf(block[end + 1]) === indent) end++
+    rows = block.slice(top, end + 1).map((l) => l.trim())
+    i += top
   } else {
     const indent = Math.min(...block.map(indentOf))
     rows = block.filter((l) => indentOf(l) === indent).map((l) => l.trim())

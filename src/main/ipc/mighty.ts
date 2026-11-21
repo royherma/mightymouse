@@ -3,7 +3,7 @@
  * artifact registry, and settings. Extracted verbatim from the old monolithic
  * `ipc.ts`.
  */
-import { ipcMain, shell, dialog } from 'electron'
+import { BrowserWindow, ipcMain, shell, dialog } from 'electron'
 import { rmSync, existsSync, realpathSync, readdirSync, writeFileSync, mkdirSync } from 'fs'
 import { execFileSync } from 'child_process'
 import { createHash } from 'crypto'
@@ -290,6 +290,15 @@ export function registerMightyHandlers(): void {
   })
 
   ipcMain.handle(CHANNELS.mightyDeleteProject, (_, id: string) => MIGHTY.deleteProject(id))
+  ipcMain.handle(CHANNELS.mightyReorderProjects, (_, ids: string[]) => {
+    const changed = MIGHTY.reorderProjects(ids)
+    if (changed) {
+      for (const window of BrowserWindow.getAllWindows()) {
+        if (!window.isDestroyed()) window.webContents.send(CHANNELS.mightyProjectsChanged)
+      }
+    }
+    return changed
+  })
   ipcMain.handle(CHANNELS.mightyPickProjectImage, async (_, projectId: string) => {
     const project = MIGHTY.getProject(projectId)
     if (!project) return null

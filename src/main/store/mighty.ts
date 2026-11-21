@@ -536,10 +536,27 @@ export const MIGHTY = {
 
   // ── Projects ──────────────────────────────────────────────────────────────────
 
-  /** All projects, oldest-created first (stable list order, matches listJobs). */
   listProjects(): MightyProject[] {
     const map = latestById(readLines<MightyProject>(PATHS.MIGHTY_PROJECTS))
-    return [...map.values()].sort((a, b) => (a.created < b.created ? -1 : 1))
+    const rank = (p: MightyProject): number => p.order ?? Number.MAX_SAFE_INTEGER
+    return [...map.values()].sort((a, b) => rank(a) - rank(b) || (a.created < b.created ? -1 : 1))
+  },
+
+  reorderProjects(ids: string[]): boolean {
+    if (PREFS.getIncognito()) return false
+    const known = this.listProjects()
+    const byId = new Map(known.map((p) => [p.id, p]))
+    const ordered = [...ids.filter((id) => byId.has(id)), ...known.map((p) => p.id).filter((id) => !ids.includes(id))]
+    const updated = historyTimestamp()
+    let changed = false
+    ordered.forEach((id, order) => {
+      const project = byId.get(id)
+      if (!project || project.order === order) return
+      appendLine(PATHS.MIGHTY_PROJECTS, { ...project, order, updated })
+      changed = true
+    })
+    if (changed) projectsWritten?.()
+    return changed
   },
 
   getProject(id: string): MightyProject | null {

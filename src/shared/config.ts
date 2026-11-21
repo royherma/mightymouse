@@ -88,7 +88,7 @@ export const CONFIG = {
   RELEASE_PAGE_URL: `https://github.com/${RELEASES_REPO}/releases/latest`,
   RELEASE_LATEST_API: `https://api.github.com/repos/${RELEASES_REPO}/releases/latest`,
   // Keep in sync with package.json "version". Shown in Settings footer.
-  APP_VERSION: '0.57.0',
+  APP_VERSION: '0.58.0',
 
   // mightymouse:// in prod/dev; mightymouse-staging:// in a staging packaged build
   // (registered in main/index.ts, matched in deeplink.ts — read PROTOCOL_SCHEME
@@ -1428,7 +1428,7 @@ export const CONFIG = {
     PILL_H: 52,
     // Transparent inset around the minimized capsule; below ~20 the bubble shadow clips on the window edge.
     PAD: 20,
-    CAPTION_MAX_H: 140,
+    CAPTION_MAX_H: 320,
     // Width the puck window grows by at the `debug` size, to seat the signal
     // panel BESIDE the circle. Debug deliberately never goes full-screen: the
     // End button lives on the puck, so leaving the puck stranded the user with
@@ -1938,7 +1938,14 @@ YOU ARE BEING LISTENED TO, NOT READ. This answer will be spoken aloud.
 - Lead with the answer. No preamble, no restating the question.
 - Plain spoken language only: no markdown, no bullet points, no code blocks, no URLs, no emoji — they are unreadable out loud.
 - Write numbers, dates, and units the way a person says them ("about twenty megabytes", "the third of June").
-- If the full answer is genuinely long, give the short version and offer to go deeper.`,
+- If the full answer is genuinely long, give the short version and offer to go deeper.
+
+LIVE STEPS - while you work, the user watches a small status pill. Every short line you write BEFORE a tool call appears on it as "what I'm doing now". It is the only proof you are not stuck, and it is shown, not spoken.
+- Before each action (or each quick batch of actions), write ONE line of 3-9 words: present tense, about the real thing in front of you. Name the app, site, button, field, person or file.
+- Useful first, then a bit of personality, like a sharp friend at the keyboard: "Hunting for the Post button", "Drafting something you'd actually say", "X is slow, still loading", "Found Sam, opening the DM".
+- Say the snag the moment you hit it: "Login wall, trying another way". A long wait with no new line looks frozen.
+- No filler openers ("Okay", "Let me", "Now I will"), no emoji, no markdown, no period at the end.
+- These lines never replace the spoken answer: finish with the 2-3 spoken sentences above.`,
 
   // {{ACT_TOOL_HINTS}} is filled by backend/prompts.ts from platform.shell.agentToolHints() —
   // config is renderer-shared and cannot import the OS boundary.

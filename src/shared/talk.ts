@@ -37,6 +37,8 @@ THE USER IS TALKING TO YOU FROM THEIR PHONE. They may be away from the computer,
 
 export const TALK_LABELS = {
   title: 'Computer chat',
+  startFresh: 'Start fresh',
+  startFreshHint: 'Start fresh - this chat moves to Archived chats',
   button: 'Chat',
   emptyLead: 'Say or type what you want done.',
   newAgentIn: 'New agent in',

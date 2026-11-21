@@ -1,11 +1,12 @@
 import { spawn, type ChildProcess } from 'child_process'
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, symlinkSync, writeFileSync } from 'fs'
 import { homedir, tmpdir } from 'os'
 import { join, sep } from 'path'
 import { CONFIG } from '../../shared/config'
 import { PATHS } from '../store/paths'
 import { clearBinaryCache, resolveBinary, shell } from '../platform'
 import { BACKENDS } from './adapters'
+import { SERVER_KEY as MCP_SERVER_KEY } from '../agent-relay/mcp-clients'
 import {
   PLAN_BACKENDS,
   PLAN_LOGINS,
@@ -262,6 +263,7 @@ export async function addPlanLogin(backend: PlanBackend): Promise<PlanLoginsResu
     return fail(`${account.email} is already added. Sign in with a different account.`)
   }
   save([...load(), { ...login, email: account.email, plan: account.plan }])
+  if (backend === 'claude') syncClaudeLogin(dir)
   await refreshLogin(load().find((l) => l.id === id)!, true)
   return { logins: load(), error: null }
 }
@@ -278,6 +280,7 @@ export async function reconnectPlanLogin(id: string): Promise<PlanLoginsResult> 
   const account = await readAccount(login)
   if (!account) return { logins: load(), error: 'Sign-in did not finish. Try again.' }
   patch(id, { email: account.email, plan: account.plan, limitedUntil: null, paused: false })
+  if (login.backend === 'claude' && login.dir) syncClaudeLogin(login.dir)
   await refreshLogin(load().find((l) => l.id === id)!, true)
   return { logins: load(), error: null }
 }
@@ -320,17 +323,91 @@ export function setPlanLoginPick(backend: PlanBackend, id: string): PlanLoginPic
   return planLoginPicks()
 }
 
-export function pickedLoginEnv(backend: string): Record<string, string> {
-  if (!isPlanBackend(backend)) return {}
-  const login = load().find((l) => l.id === planLoginPicks()[backend])
-  return login ? envFor(login) : {}
+type ServerMap = Record<string, unknown>
+type ClaudeProject = Record<string, unknown> & { mcpServers?: ServerMap; enabledMcpjsonServers?: string[]; disabledMcpjsonServers?: string[] }
+type ClaudeJson = Record<string, unknown> & { mcpServers?: ServerMap; projects?: Record<string, ClaudeProject> }
+
+const ANSWERED_KEY = /^(has(?!Available|OpusPlanDefault).+|.+Dismissed|.+Seen|claudeInChromeDefaultEnabled|theme)$/
+
+const readClaudeJson = (file: string): ClaudeJson | null => {
+  try {
+    const parsed = JSON.parse(readFileSync(file, 'utf-8')) as unknown
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as ClaudeJson) : null
+  } catch {
+    return null
+  }
 }
 
-export function pickPlanLogin(backend: string): { id: string; env: Record<string, string> } | null {
+const answeredFrom = (main: Record<string, unknown>, mine: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(Object.entries(main).filter(([key, value]) => ANSWERED_KEY.test(key) && typeof value !== 'object' && !(key in mine)))
+
+function withMainServers(mine: ServerMap | undefined, main: ServerMap | undefined): ServerMap | undefined {
+  if (!mine && !main) return undefined
+  const next: ServerMap = { ...mine }
+  for (const [name, server] of Object.entries(main ?? {})) if (!(name in next)) next[name] = server
+  if (main?.[MCP_SERVER_KEY] === undefined) delete next[MCP_SERVER_KEY]
+  else next[MCP_SERVER_KEY] = main[MCP_SERVER_KEY]
+  return next
+}
+
+const union = (mine: string[] | undefined, main: string[] | undefined): string[] | undefined =>
+  main?.length ? [...new Set([...(mine ?? []), ...main])] : mine
+
+function withMainProject(mine: ClaudeProject = {}, main: ClaudeProject): ClaudeProject {
+  const next: ClaudeProject = { ...answeredFrom(main, mine), ...mine }
+  if (main.hasTrustDialogAccepted === true) next.hasTrustDialogAccepted = true
+  const servers = withMainServers(mine.mcpServers, main.mcpServers)
+  if (servers) next.mcpServers = servers
+  const enabled = union(mine.enabledMcpjsonServers, main.enabledMcpjsonServers)
+  const disabled = union(mine.disabledMcpjsonServers, main.disabledMcpjsonServers)
+  if (enabled) next.enabledMcpjsonServers = enabled
+  if (disabled) next.disabledMcpjsonServers = disabled
+  return next
+}
+
+// Only fills what this login lacks (its oauthAccount, userID and caches stay its own); mightymouse-code always mirrors the main login.
+export function syncClaudeLogin(dir: string, cwd?: string): void {
+  if (!dir.startsWith(LOGINS_DIR + sep)) return
+  const file = join(dir, '.claude.json')
+  try {
+    const mine = existsSync(file) ? readClaudeJson(file) : {}
+    if (!mine) return
+    const main = readClaudeJson(join(homedir(), '.claude.json'))
+    const next: ClaudeJson = { ...(main ? answeredFrom(main, mine) : {}), ...mine, hasCompletedOnboarding: true }
+    const servers = main ? withMainServers(mine.mcpServers, main.mcpServers) : undefined
+    if (servers) next.mcpServers = servers
+    const mainProject = cwd ? main?.projects?.[cwd] : undefined
+    if (cwd && mainProject) next.projects = { ...mine.projects, [cwd]: withMainProject(mine.projects?.[cwd], mainProject) }
+    const text = JSON.stringify(next, null, 2)
+    if (text === JSON.stringify(mine, null, 2)) return
+    const tmp = `${file}.mm-${process.pid}.tmp`
+    writeFileSync(tmp, text, { encoding: 'utf-8', mode: 0o600 })
+    renameSync(tmp, file)
+  } catch (err) {
+    console.warn('[plan-logins] could not sync Claude login settings', dir, err)
+  }
+}
+
+export function syncAllClaudeLogins(): void {
+  for (const l of load()) if (l.backend === 'claude' && l.dir) syncClaudeLogin(l.dir)
+}
+
+function launchEnv(l: PlanLogin, cwd?: string): Record<string, string> {
+  if (l.backend === 'claude' && l.dir) syncClaudeLogin(l.dir, cwd)
+  return envFor(l)
+}
+
+export function pickedLoginEnv(backend: string, cwd?: string): Record<string, string> {
+  if (!isPlanBackend(backend)) return {}
+  const login = load().find((l) => l.id === planLoginPicks()[backend])
+  return login ? launchEnv(login, cwd) : {}
+}
+
+export function pickPlanLogin(backend: string, cwd?: string): { id: string; env: Record<string, string> } | null {
   if (!isPlanBackend(backend)) return null
   const mine = load().filter((l) => l.backend === backend && !l.paused)
   const pick = mine.find((l) => isPlanLoginOpen(l, Date.now())) ?? mine[0]
-  return pick ? { id: pick.id, env: envFor(pick) } : null
+  return pick ? { id: pick.id, env: launchEnv(pick, cwd) } : null
 }
 
 export function planLoginHasRoom(backend: string): boolean {

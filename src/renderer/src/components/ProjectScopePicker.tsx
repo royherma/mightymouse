@@ -89,7 +89,7 @@ export function ProjectScopePicker({
         createPortal(
           <div
             ref={menuRef}
-            className="fixed z-[200] max-h-[min(16rem,calc(100vh-1rem))] overflow-y-auto rounded-lg border border-surface3 bg-surface1 py-1 shadow-lg"
+            className="fixed z-[200] max-h-[min(16rem,calc(100vh-1rem))] overflow-y-auto rounded-lg border border-surface3 bg-[var(--surface-solid)] py-1 shadow-lg"
             style={{ top: menuPos.top, left: menuPos.left, width: MOVE_MENU_W }}
           >
             {!readOnly && onNewProject && (

@@ -4,7 +4,7 @@ import { join } from 'path'
 import { MIGHTY } from './store/mighty'
 import { CONFIG } from '../shared/config'
 import { buildSnippet, fuzzyMatch, type FuzzyMatch, type Snippet } from '../shared/fuzzy'
-import type { MightySession } from '../shared/types'
+import { hasRealExchange, type MightySession } from '../shared/types'
 import type { NavigatorContentHit, NavigatorSearchRef } from '../shared/navigator-targets'
 
 const CLAUDE_TRANSCRIPTS = join(homedir(), '.claude', 'projects')
@@ -136,7 +136,7 @@ function transcript(path: string): Promise<Transcript | null> {
 
 function searchChats(words: string[]): NavigatorContentHit[] {
   return MIGHTY.readSessions()
-    .filter((s) => s.turns.length > 0)
+    .filter(hasRealExchange)
     .sort((a, b) => (a.updated < b.updated ? 1 : -1))
     .flatMap((s) => {
       const doc = chatDoc(s)

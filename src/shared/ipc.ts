@@ -154,6 +154,7 @@ export const CHANNELS = Object.freeze({
   replyWindowSeeing: 'reply-window-seeing',
   replyWindowAuto: 'reply-window-auto',
   replyWindowShowOver: 'reply-window-show-over',
+  replyWindowShot: 'reply-window-shot',
   // main → panel broadcast after a save so the panel reloads its chip row.
   actionsChanged: 'actions-changed',
   skillsList: 'skills-list',
@@ -368,6 +369,7 @@ export const CHANNELS = Object.freeze({
   chatModelPicks: 'chat-model-picks',
   chatSetModelPick: 'chat-set-model-pick',
   chatSourceModels: 'chat-source-models',
+  chatModelInfo: 'chat-model-info',
   codeSetUpAgentProvider: 'code-set-up-agent-provider',
   codeAgentSetupProgress: 'code-agent-setup-progress',
   agentRelayRequestsChanged: 'agent-relay-requests-changed',
@@ -758,6 +760,7 @@ export const CHANNELS = Object.freeze({
   mightyListProjects: 'mighty-list-projects',
   mightyUpsertProject: 'mighty-upsert-project',
   mightyDeleteProject: 'mighty-delete-project',
+  mightyReorderProjects: 'mighty-reorder-projects',
   mightyProjectsChanged: 'mighty-projects-changed',
   mightyAssignSessionProject: 'mighty-assign-session-project',
   mightyPickProjectFolder: 'mighty-pick-project-folder',
@@ -800,6 +803,7 @@ export const CHANNELS = Object.freeze({
   codeTakeStartedAgent: 'code-take-started-agent',
   codeStartupPeek: 'code-startup-peek',
   codeStartupAnswer: 'code-startup-answer',
+  codeStartupReveal: 'code-startup-reveal',
   // main → Mighty window: the zoom level changed. Fired for EVERY route (menu
   // ⌘+/⌘-/⌘0, trackpad pinch, or our own IPC), because main is the only place
   // that sees them all — the renderer can't observe a menu-driven zoom itself.

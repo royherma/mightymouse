@@ -95,7 +95,7 @@ export const VERBS: Record<string, Verb> = {
       // `open -b` even when already fronted: it launches a closed app AND gives a running app with no window a window.
       const r = spawnSync('open', ['-b', bundleId], { timeout: 5000, encoding: 'utf8' })
       return fronted || r.status === 0
-        ? ok(`Opened ${arg} on your Mac.`)
+        ? ok(`Opened ${arg}.`)
         : { ok: false, reason: 'named-app-missing' }
     }
   },

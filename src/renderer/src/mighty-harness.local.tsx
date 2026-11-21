@@ -2,6 +2,7 @@ import { CONFIG } from '../../shared/config'
 import type { MightyProject, MightySession, MightySettings } from '../../shared/types'
 
 const state = new URLSearchParams(location.search).get('state') ?? 'default'
+const openId = new URLSearchParams(location.search).get('open') ?? 's1'
 const modelPreview = new URLSearchParams(location.search).has('models')
 const updateReady = new URLSearchParams(location.search).get('update') === 'ready'
 const ago = (min: number): string => new Date(Date.now() - min * 60_000).toISOString()
@@ -53,7 +54,8 @@ const sessions: MightySession[] =
         session('s2', 'Write a thank-you email to a customer', 55, 'pr1'),
         session('s3', 'Sort last year receipts by month', 300, 'pr2'),
         session('s4', 'Shorten the homepage headline', 1500, 'pr3'),
-        session('s5', 'Plan a weekend in Lisbon', 2900)
+        session('s5', 'Plan a weekend in Lisbon', 2900),
+        session('s6', 'Make a post for Emera socials', 34, undefined, [{ ...turn('Make a post for Emera socials, square, a few variations', '', 34), run_id: 'r-dead' }])
       ]
 
 const settings: MightySettings = {
@@ -235,8 +237,16 @@ const explicit: Record<string, unknown> = {
   agentRelayGetRequests: async () => ({ pending: [], resolved: [], dismissed: [] }),
   mighty: {
     onOpenSession: (cb: (id: string) => void) => {
-      if (state === 'chat') setTimeout(() => cb('s1'), 400)
+      if (state === 'chat') setTimeout(() => cb(openId), 400)
       return noop
+    },
+    chat: async (message: string, sentTo?: string) => {
+      console.log('[harness-chat] sentTo=' + (sentTo ?? 'NEW'))
+      await new Promise((r) => setTimeout(r, 800))
+      const now = new Date().toISOString()
+      const fresh = { schema_version: 1, id: 'sent1', created: now, updated: now, title: message, turns: [{ source: 'chat', q: message, a: 'Stub reply', ts: now, ok: true, backend: 'claude' }] }
+      ;(sessions as unknown[]).unshift(fresh)
+      return { sessionId: 'sent1', answer: 'Stub reply' }
     },
     listSessions: async () => sessions,
     getSession: async (id: string) => sessions.find((s) => s.id === id) ?? null,

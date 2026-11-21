@@ -1172,14 +1172,14 @@ export const PREFS = {
     }
   },
 
-  // One switch behind every per-run duration. Default ON (file-absent = enabled), and
-  // backed by the old transcribe-time file so an existing "off" survives the merge.
+  // One switch behind every per-run duration. Default OFF (file-absent = hidden), and
+  // backed by the old transcribe-time file so an existing choice survives the merge.
   getShowTiming(): boolean {
-    if (!existsSync(PATHS.SHOW_TIMING_PREF)) return true
+    if (!existsSync(PATHS.SHOW_TIMING_PREF)) return false
     try {
       return readFileSync(PATHS.SHOW_TIMING_PREF, 'utf-8').trim() === '1'
     } catch {
-      return true
+      return false
     }
   },
 

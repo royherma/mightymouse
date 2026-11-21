@@ -90,9 +90,11 @@ import {
   agentModelsState,
   agentReasoningEfforts,
   checkOpencodeModel,
+  opencodeModelConfig,
   OPENCODE_QUIET_ENV,
   isModelHarness,
   listChatSourceModels,
+  chatModelInfo,
   ollamaLaunch,
   setAgentModel,
   setUpAgentProvider
@@ -108,7 +110,7 @@ import {
 } from '../agent-relay/session-transcript'
 import { affectsRecordAbove } from '../infra/scan'
 import { askSideQuestion } from '../agent-relay/side-question'
-import { pickedLoginEnv, planAccountFor } from '../backend/plan-logins'
+import { pickedLoginEnv, planAccountFor, syncAllClaudeLogins, syncClaudeLogin } from '../backend/plan-logins'
 import { planTierLabel } from '../../shared/plan-logins'
 import { NO_AFFECTS, sessionAffects, type SessionAffects } from '../../shared/surfaces'
 import { codexThreadFor, watchCodexThreads, withCodexThreads } from '../agent-relay/codex-threads'
@@ -523,18 +525,20 @@ export async function startCodeSession(
     if (!saved) return { ok: false as const, reason: 'This conversation is no longer saved on this Mac, so it cannot pick up where it left off.' }
     const configDir = dirname(dirname(dirname(saved)))
     if (configDir !== join(homedir(), '.claude')) env = { ...env, CLAUDE_CONFIG_DIR: configDir }
+    syncClaudeLogin(configDir, cwd)
   }
-  if (!local && resume === '') env = { ...env, ...pickedLoginEnv(harness) }
+  if (!local && resume === '') env = { ...env, ...pickedLoginEnv(harness, cwd) }
   if (harness === 'opencode') {
     const problem = await checkOpencodeModel(model)
     if (problem) return { ok: false as const, reason: problem }
-    env = { ...env, ...OPENCODE_QUIET_ENV, ...opencodeRelayEnv() }
+    env = { ...env, ...OPENCODE_QUIET_ENV, ...opencodeRelayEnv(await opencodeModelConfig(model)) }
   }
   const knownEfforts = agentReasoningEfforts(local ? 'ollama' : harness, model)
   if (row?.effort !== undefined && (!isReasoningEffort(row.effort) || (knownEfforts.length > 0 && !knownEfforts.includes(row.effort)))) {
     devLog.warn(`[code] effort refused harness=${harness} model=${model} effort=${String(row.effort)} known=${knownEfforts.join(',')}`)
     return { ok: false as const, reason: 'That reasoning level is not available for this model. Pick another level.' }
   }
+  const readDirs = [...new Set(files.filter(isAbsolute).map(dirname))].filter((dir) => dir !== cwd && !dir.startsWith(`${cwd}/`))
   const started = await startNewAgent(sink, message, harness, {
     reveal: !inApp,
     model,
@@ -543,11 +547,11 @@ export async function startCodeSession(
     think: local || typeof row?.think !== 'boolean' ? undefined : row.think,
     effort: isReasoningEffort(row?.effort) ? row.effort : undefined,
     plan: row?.plan === true,
-    readDirs: [...new Set(files.filter(isAbsolute).map(dirname))].filter((dir) => dir !== cwd && !dir.startsWith(`${cwd}/`))
+    readDirs
   })
   if (!started.ok) return { ok: false as const, reason: reasonText(started, harness) }
   codeSessionHarness.set(started.pane, harness)
-  if (inApp && started.pane !== '') watchStartup({ pane: started.pane, from: project, cwd })
+  if (inApp && started.pane !== '') watchStartup({ pane: started.pane, from: project, cwd, readDirs })
   track(ANALYTICS_EVENT.code_session_started, { harness })
   if (resume !== '') return { ok: true as const, pane: started.pane }
   recordOpeningTurn({ pane: started.pane, cwd }, said, files)
@@ -952,6 +956,10 @@ export function registerAgentRelayHandlers(): void {
     answerStartup(typeof pane === 'string' ? pane : '', typeof index === 'number' ? index : -1)
   )
 
+  ipcMain.handle(CHANNELS.codeStartupReveal, (_e, pane: unknown) =>
+    typeof pane === 'string' && codeSessionHarness.has(pane) ? showHiddenSession(pane, undefined, homedir()) : false
+  )
+
   ipcMain.handle(CHANNELS.codeAgentModels, () => agentModelsState())
 
   ipcMain.handle(CHANNELS.codeSetUpAgentProvider, (event, harness: unknown) => {
@@ -980,11 +988,14 @@ export function registerAgentRelayHandlers(): void {
   })
 
   ipcMain.handle(CHANNELS.chatSourceModels, () => listChatSourceModels())
+  ipcMain.handle(CHANNELS.chatModelInfo, (_e, ids: unknown) =>
+    chatModelInfo(Array.isArray(ids) ? ids.filter((x): x is string => typeof x === 'string') : []))
 
   ipcMain.handle(CHANNELS.agentRelayListClients, () => detectMcpClients())
 
   ipcMain.handle(CHANNELS.agentRelayConfigureClient, (_e, id: McpClientId) => {
     const result = configureMcpClient(id)
+    if (result.ok && id === 'claude-code') syncAllClaudeLogins()
     if (result.ok) track(ANALYTICS_EVENT.setting_toggled, { key: 'agent_relay_client', value: id })
     return result
   })

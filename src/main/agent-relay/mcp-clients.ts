@@ -13,7 +13,7 @@ import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { McpClientId, McpClientState } from '../../shared/types'
 
-const SERVER_KEY = 'mightymouse-code'
+export const SERVER_KEY = 'mightymouse-code'
 const COMMAND = 'npx'
 const ARGS = ['-y', 'mightymouse-code']
 const CODEX_RELAY_ENV = ['TMUX', 'TMUX_PANE', 'CODEX_THREAD_ID', 'CODEX_SESSION_ID', 'CMUX_WORKSPACE_ID', 'CMUX_TAB_ID', 'CMUX_BUNDLE_ID', 'TERM_PROGRAM', '__CFBundleIdentifier']
@@ -114,7 +114,7 @@ const CLIENTS: Client[] = [
   }
 ]
 
-export function opencodeRelayEnv(): Record<string, string> {
+export function opencodeRelayEnv(extra: Record<string, unknown> = {}): Record<string, string> {
   const claudeConfig = join(homedir(), '.claude.json')
   const raw = existsSync(claudeConfig) ? readFileSync(claudeConfig, 'utf8') : ''
   const entry = safeParseJson(raw)?.mcpServers?.[SERVER_KEY]
@@ -123,7 +123,7 @@ export function opencodeRelayEnv(): Record<string, string> {
       ? [entry.command, ...(Array.isArray(entry.args) ? entry.args : [])]
       : [COMMAND, ...ARGS]
   const mcp = { [SERVER_KEY]: { type: 'local', command, enabled: true } }
-  return { OPENCODE_CONFIG_CONTENT: JSON.stringify({ mcp }) }
+  return { OPENCODE_CONFIG_CONTENT: JSON.stringify({ ...extra, mcp }) }
 }
 
 /** Detected clients only — an absent config file means that client isn't installed. */

@@ -408,7 +408,6 @@ export function MightySidebar({
             {CODE_MAIN.map(codeRow)}
             {bubbaRow}
             {moreRow}
-            {talkRow}
             <SidebarSection nested label={L.SIDEBAR_SETUP} />
             {CODE_SETUP.map(codeRow)}
           </>
@@ -416,7 +415,6 @@ export function MightySidebar({
         {mode !== 'code' && CHAT_NAV.map(tabRow)}
         {mode !== 'code' && bubbaRow}
         {mode !== 'code' && moreRow}
-        {mode !== 'code' && talkRow}
         {morePos &&
           createPortal(
             <div
@@ -426,6 +424,7 @@ export function MightySidebar({
               onClick={() => setMorePos(null)}
             >
               {moreNav.map(tabRow)}
+              {talkRow}
               {mode === 'all' && (
                 <>
                   <SidebarSection nested label={CODE_LABEL} />

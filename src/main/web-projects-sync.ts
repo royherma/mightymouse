@@ -30,6 +30,7 @@ interface ProjectRow {
   instructions: string | null
   brief: ProjectBrief | null
   archived: boolean
+  sort_order: number | null
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -100,6 +101,7 @@ function toRow(project: MightyProject, userId: string, brief: ProjectBrief | nul
     instructions: project.systemPrompt?.slice(0, MAX_INSTRUCTIONS_CHARS) ?? null,
     brief,
     archived: project.archived === true,
+    sort_order: project.order ?? null,
     created_at: project.created,
     updated_at: project.updated
   }
@@ -115,7 +117,8 @@ function fromRow(row: ProjectRow, local?: MightyProject): MightyProject {
     icon: row.icon ?? local?.icon,
     defaultModel: row.default_model ?? undefined,
     systemPrompt: row.instructions ?? local?.systemPrompt,
-    archived: row.archived
+    archived: row.archived,
+    order: row.sort_order ?? local?.order
   }
 }
 
@@ -189,7 +192,7 @@ async function reconcile(): Promise<boolean> {
       if (current !== project) changedLocal = MIGHTY.upsertProject(current) !== null || changedLocal
 
       const next = toRow(current, userId, about.value)
-      const drifted = newer === 'same' && (next.icon !== row.icon || next.image_url !== row.image_url)
+      const drifted = newer === 'same' && (next.icon !== row.icon || next.image_url !== row.image_url || next.sort_order !== row.sort_order)
       if (newer === 'local' || drifted || context.push || about.push) push.push({ ...next, instructions: context.value })
     }
     for (const row of remote.values()) {

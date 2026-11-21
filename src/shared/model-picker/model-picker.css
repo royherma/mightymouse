@@ -459,3 +459,60 @@
   color: var(--muted);
   font-size: var(--font-xs);
 }
+
+.mm-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px 16px;
+  border-radius: 16px;
+  background: rgba(var(--shadow-rgb), 0.04);
+}
+.mm-info-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mm-info-head b {
+  display: block;
+  color: var(--on-surface);
+  font-size: var(--font-md);
+  font-weight: 680;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.mm-info-head small {
+  display: block;
+  color: var(--muted);
+  font-size: var(--font-micro);
+}
+.mm-info p {
+  color: var(--muted);
+  font-size: var(--font-xs);
+  line-height: 1.45;
+}
+.mm-info dl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid rgba(var(--shadow-rgb), 0.06);
+}
+.mm-info dl > div {
+  display: grid;
+  grid-template-columns: 68px 1fr;
+  gap: 8px;
+  font-size: var(--font-xs);
+  line-height: 1.4;
+}
+.mm-info dt {
+  color: var(--muted);
+}
+.mm-info dd {
+  margin: 0;
+  color: var(--on-surface);
+  font-weight: 560;
+}

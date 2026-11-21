@@ -4,7 +4,7 @@ import { Button } from './Button'
 import { Switch } from './Switch'
 import { ProviderIcon, type ProviderIconId } from './ProviderIcon'
 import { CONFIG } from '../../../shared/config'
-import type { AgentModelChoice, AgentModelOption, AgentSetupProgress } from '../../../shared/types'
+import type { AgentModelChoice, AgentModelOption, AgentSetupProgress, ModelInfo } from '../../../shared/types'
 import { opencodeAccountName } from '../../../shared/model-label'
 import {
   PLAN_BACKENDS,
@@ -19,6 +19,7 @@ import { ThinkingDial, type DialLevel } from '../../../shared/model-picker/Think
 import {
   MenuList,
   ModelMenu as SharedModelMenu,
+  parseGroupHover,
   PickerIcon,
   PickerPop,
   SIDE_W,
@@ -53,6 +54,8 @@ export const HARNESS_NAME: Record<Harness, string> = {
   antigravity: 'Antigravity',
   ollama: 'Local (Ollama)'
 }
+
+const isModelHarness = (h: string): h is Harness => h in HARNESS_NAME
 
 const harnessIcon = (h: Harness): ProviderIconId => (h === 'ollama' || h === 'cursor' || h === 'antigravity' ? MODEL_SOURCES[h].icon : h)
 
@@ -421,6 +424,113 @@ export function EffortBars({ filled, of }: { filled: number; of: number }): JSX.
   )
 }
 
+const tokens = (n: number): string =>
+  n >= 1e6 ? `${(n / 1e6).toFixed(1).replace(/\.0$/, '')}M` : `${Math.round(n / 1e3)}K`
+
+const dollars = (n: number): string => `${Number(n.toFixed(2))}`
+
+function released(date: string): string {
+  const [y, m, d] = date.split('-').map(Number)
+  const when = new Date(y, (m || 1) - 1, d || 1)
+  const days = Math.floor((Date.now() - when.getTime()) / 86_400_000)
+  const ago = days < 1 ? 'today'
+    : days < 31 ? `${days} day${days === 1 ? '' : 's'} ago`
+    : days < 365 ? `${Math.floor(days / 30.4)} month${Math.floor(days / 30.4) === 1 ? '' : 's'} ago`
+    : `${Math.floor(days / 365)} year${Math.floor(days / 365) === 1 ? '' : 's'} ago`
+  return `${when.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}, ${ago}`
+}
+
+function InfoCard({ icon, title, sub, note, rows }: {
+  icon: ProviderIconId
+  title: string
+  sub: string
+  note?: string
+  rows: Array<[string, string | undefined]>
+}): JSX.Element {
+  const shown = rows.filter((r): r is [string, string] => !!r[1])
+  return (
+    <div className="mm-info">
+      <div className="mm-info-head">
+        <span className="mm-pick-logo"><ProviderIcon id={icon} size={18} /></span>
+        <span className="min-w-0">
+          <b>{title}</b>
+          <small>{sub}</small>
+        </span>
+      </div>
+      {note && <p>{note}</p>}
+      {shown.length > 0 && (
+        <dl>
+          {shown.map(([k, v]) => (
+            <div key={k}><dt>{k}</dt><dd>{v}</dd></div>
+          ))}
+        </dl>
+      )}
+    </div>
+  )
+}
+
+export function ModelInfoCard({ icon, label, sub, info }: { icon: ProviderIconId; label: string; sub: string; info?: ModelInfo }): JSX.Element {
+  const L = CONFIG.UI_LABELS
+  const reads = info?.reads?.map((r) => (r === 'image' ? 'images' : r === 'pdf' ? 'PDFs' : r)).join(', ')
+  return (
+    <InfoCard
+      icon={icon}
+      title={info?.name ?? label}
+      sub={sub}
+      note={info ? info.description : L.MODEL_INFO_EMPTY}
+      rows={[
+        [L.MODEL_INFO_MAKER, info?.maker],
+        [L.MODEL_INFO_RELEASED, info?.released && released(info.released)],
+        [L.MODEL_INFO_CONTEXT, info?.context ? L.MODEL_INFO_CONTEXT_VALUE.replace('{n}', tokens(info.context)) : undefined],
+        [L.MODEL_INFO_PRICE, info?.price && (info.price.input === 0 && info.price.output === 0
+          ? L.MODEL_INFO_FREE
+          : L.MODEL_INFO_PRICE_VALUE.replace('{in}', dollars(info.price.input)).replace('{out}', dollars(info.price.output)))],
+        [L.MODEL_INFO_READS, reads && `Text, ${reads}`]
+      ]}
+    />
+  )
+}
+
+export function ProviderInfoCard({ icon, title, sub, infos }: { icon: ProviderIconId; title: string; sub: string; infos: Array<ModelInfo | undefined> }): JSX.Element {
+  const L = CONFIG.UI_LABELS
+  const known = infos.filter((i): i is ModelInfo => !!i)
+  const newest = known.filter((i) => i.released).sort((a, b) => (b.released ?? '').localeCompare(a.released ?? ''))[0]
+  return (
+    <InfoCard
+      icon={icon}
+      title={title}
+      sub={sub}
+      rows={[
+        [L.MODEL_INFO_MODELS, String(infos.length)],
+        [L.MODEL_INFO_NEWEST, newest?.released && `${newest.name}, ${released(newest.released)}`],
+        [L.MODEL_INFO_MAKER, [...new Set(known.flatMap((i) => (i.maker ? [i.maker] : [])))].slice(0, 4).join(', ') || undefined]
+      ]}
+    />
+  )
+}
+
+function ModelDetails({ option }: { option: AgentModelOption }): JSX.Element {
+  const L = CONFIG.UI_LABELS
+  const account = option.harness === 'opencode' ? opencodeAccountName(option.model) : undefined
+  const sub = isPlanHarness(option.harness)
+    ? L.MODEL_INFO_PLAN.replace('{name}', HARNESS_NAME[option.harness])
+    : account ? `${HARNESS_NAME[option.harness]} · ${account}` : HARNESS_NAME[option.harness]
+  return <ModelInfoCard icon={harnessIcon(option.harness)} label={option.label} sub={sub} info={option.info} />
+}
+
+function ProviderDetails({ options, group, section }: { options: AgentModelOption[]; group: Harness; section?: string }): JSX.Element {
+  const L = CONFIG.UI_LABELS
+  const models = options.filter((o) => o.harness === group && o.model !== '' && (!section || opencodeAccountName(o.model) === section))
+  return (
+    <ProviderInfoCard
+      icon={section === 'OpenRouter' ? 'openrouter' : harnessIcon(group)}
+      title={section ?? HARNESS_NAME[group]}
+      sub={section ? HARNESS_NAME[group] : isPlanHarness(group) ? L.MODEL_INFO_PLAN.replace('{name}', HARNESS_NAME[group]) : ''}
+      infos={models.map((o) => o.info)}
+    />
+  )
+}
+
 export function AgentSettingsChip({
   models,
   agents
@@ -430,7 +540,10 @@ export function AgentSettingsChip({
 }): JSX.Element | null {
   const { options, selected, choose, needsSetup, setup, setUp, effort, efforts, setEffort, canPlan, plan, setPlan } = models
   const hasDial = selected !== null && efforts.length > 0
-  const { open, setOpen, btnRef, menuRef, pos } = usePopover(WIDE_MENU_W + (hasDial ? SIDE_W : 0), WIDE_MENU_MAX_H, 'left', `${options.length}:${efforts.length}:${selected?.model}`)
+  const hasSide = hasDial || options.some((o) => o.info)
+  const { open, setOpen, btnRef, menuRef, pos } = usePopover(WIDE_MENU_W + (hasSide ? SIDE_W : 0), WIDE_MENU_MAX_H, 'left', `${options.length}:${efforts.length}:${selected?.model}`)
+  const [hover, setHover] = useState<string | null>(null)
+  useEffect(() => { if (!open) setHover(null) }, [open])
   const accounts = usePlanAccounts()
   const { groups, items, pick } = modelMenuParts(options, choose, accounts)
   const setupRows = needsSetup.map((h) => setupRowFor(h, setup[h], setUp))
@@ -439,6 +552,27 @@ export function AgentSettingsChip({
   if (!selected && !hasModels) return null
   const label = selected ? triggerLabel(options, selected) : 'Set up a model'
   const agentCount = agents && agents.count > 1 ? L.CODE_DRAFT_AGENTS_COUNT.replace('{n}', String(agents.count)) : ''
+  const hoverGroup = hover ? parseGroupHover(hover) : null
+  const hoverOption = hover && !hoverGroup ? options.find((o) => optionId(o) === hover) : undefined
+  const selectedOption = selected ? options.find((o) => optionId(o) === optionId(selected)) : undefined
+  const dial = hasDial && selected && (
+    <ThinkingDial
+      levels={effortLevels(efforts)}
+      value={effort}
+      onChange={(id) => { if (id === 'default' || isReasoningEffort(id)) setEffort(id) }}
+      label={L.CODE_DRAFT_THINKING}
+    >
+      <span className="mm-dial-for">
+        <span className="mm-pick-logo"><ProviderIcon id={harnessIcon(selected.harness)} size={13} /></span>
+        {label}
+      </span>
+      <p>{L.CODE_DRAFT_THINKING_NOTE}</p>
+    </ThinkingDial>
+  )
+  const side = !hasSide ? undefined
+    : hoverGroup && isModelHarness(hoverGroup.group) ? <ProviderDetails options={options} group={hoverGroup.group} section={hoverGroup.section} />
+    : hoverOption ? <ModelDetails option={hoverOption} />
+    : dial || (selectedOption && <ModelDetails option={selectedOption} />)
 
   return (
     <PickerIcon.Provider value={ProviderIcon}>
@@ -473,20 +607,7 @@ export function AgentSettingsChip({
           pos={pos}
           role="dialog"
           ariaLabel={L.CODE_DRAFT_SETTINGS_TITLE}
-          side={hasDial && selected && (
-              <ThinkingDial
-                levels={effortLevels(efforts)}
-                value={effort}
-                onChange={(id) => { if (id === 'default' || isReasoningEffort(id)) setEffort(id) }}
-                label={L.CODE_DRAFT_THINKING}
-              >
-                <span className="mm-dial-for">
-                  <span className="mm-pick-logo"><ProviderIcon id={harnessIcon(selected.harness)} size={13} /></span>
-                  {label}
-                </span>
-                <p>{L.CODE_DRAFT_THINKING_NOTE}</p>
-              </ThinkingDial>
-          )}
+          side={side}
         >
           {hasModels && (
             <div role="listbox" aria-label="Model" className="flex min-h-0 flex-1 flex-col pt-1">
@@ -497,6 +618,7 @@ export function AgentSettingsChip({
                 onPick={pick}
                 setupRows={setupRows}
                 searchable={items.length > 8}
+                onHover={hasSide ? setHover : undefined}
               />
             </div>
           )}

@@ -35,7 +35,7 @@ import { readLastTab } from './mighty/mighty-shared'
 import { CONFIG } from '../../shared/config'
 import { sessionRow } from '../../shared/relay-status'
 import { mightyProjectForCwd } from '../../shared/relay-sessions'
-import type { AgentRelaySessionInfo, MightyProject } from '../../shared/types'
+import { hasRealExchange, type AgentRelaySessionInfo, type MightyProject } from '../../shared/types'
 import {
   SCREEN_TARGETS,
   matchesTarget,
@@ -115,7 +115,7 @@ export default function NavigatorApp(): JSX.Element {
   const [lastQuery, setLastQuery] = useState('')
   const [opens, setOpens] = useState(0)
   const queryRef = useRef('')
-  const [rawPos, setPos] = useState<{ col: 0 | 1; i: number }>({ col: 0, i: 0 })
+  const [rawPos, setPos] = useState<{ col: 0 | 1; i: number; auto?: boolean }>({ col: 0, i: 0, auto: true })
   const [chats, setChats] = useState<NavigatorTarget[]>([])
   const [projectList, setProjectList] = useState<MightyProject[]>([])
   const [agentSessions, setAgentSessions] = useState<AgentRelaySessionInfo[]>([])
@@ -134,7 +134,7 @@ export default function NavigatorApp(): JSX.Element {
       .then((sessions) => {
         if (!alive) return
         setChats(
-          sessions.slice(0, 8).map((s) => ({
+          sessions.filter(hasRealExchange).slice(0, 8).map((s) => ({
             id: `chat:${s.id}`,
             category: 'chat' as const,
             label: s.title || CONFIG.UI_LABELS.UNTITLED_CHAT,
@@ -180,7 +180,7 @@ export default function NavigatorApp(): JSX.Element {
       if (queryRef.current.trim()) setLastQuery(queryRef.current.trim())
       queryRef.current = ''
       setQuery('')
-      setPos({ col: 0, i: 0 })
+      setPos({ col: 0, i: 0, auto: true })
     }
     const onFocus = (): void => {
       clear()
@@ -199,7 +199,7 @@ export default function NavigatorApp(): JSX.Element {
   const projects = useMemo<NavigatorTarget[]>(
     () =>
       projectList.map((p) => {
-        const code = mode === 'code' && p.repoFolder !== undefined
+        const code = p.repoFolder !== undefined
         return {
           id: `${code ? 'codeProject' : 'project'}:${p.id}`,
           category: 'project' as const,
@@ -209,7 +209,7 @@ export default function NavigatorApp(): JSX.Element {
           avatar: { icon: p.icon, imagePath: p.imagePath }
         }
       }),
-    [projectList, mode]
+    [projectList]
   )
 
   const sessions = useMemo<NavigatorTarget[]>(() => {
@@ -301,8 +301,12 @@ export default function NavigatorApp(): JSX.Element {
   const columns = useMemo(() => [groupRows(actions), groupRows(recent)], [actions, recent])
   const lists = useMemo(() => columns.map((c) => c.flatMap((g) => g.rows)), [columns])
 
-  const col = lists[rawPos.col].length > 0 ? rawPos.col : rawPos.col === 0 ? 1 : 0
-  const active = Math.min(col === rawPos.col ? rawPos.i : 0, Math.max(lists[col].length - 1, 0))
+  const q = query.trim().toLowerCase()
+  // Typing is a search for an existing conversation; only a named action or screen outranks it.
+  const actionHit = lists[0].some((t) => t.category !== 'project' && t.label.toLowerCase().startsWith(q))
+  const wantCol: 0 | 1 = rawPos.auto ? (q && !actionHit && lists[1].length > 0 ? 1 : 0) : rawPos.col
+  const col = lists[wantCol].length > 0 ? wantCol : wantCol === 0 ? 1 : 0
+  const active = Math.min(col === wantCol ? rawPos.i : 0, Math.max(lists[col].length - 1, 0))
   useEffect(() => {
     colRefs.current[col]?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' })
   }, [col, active, lists])
@@ -319,7 +323,7 @@ export default function NavigatorApp(): JSX.Element {
   const type = (next: string): void => {
     queryRef.current = next
     setQuery(next)
-    setPos({ col: 0, i: 0 })
+    setPos({ col: 0, i: 0, auto: true })
   }
 
   const onKeyDown = (e: React.KeyboardEvent): void => {

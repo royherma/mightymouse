@@ -24,7 +24,7 @@ export type CodeAgentRelay = Pick<
   'status' | 'clients' | 'pending' | 'resolved' | 'dismissed' | 'respond'
 >
 
-type Starting = { since: number; pane?: string }
+type Starting = { since: number; pane?: string; message?: string }
 
 function findSession(
   names: AgentRelaySessionInfo[],
@@ -114,7 +114,7 @@ export function CodeAgentPane({
     if (!cwd) return
     const since = Date.now()
     setFailure(undefined)
-    setStarting({ since })
+    setStarting({ since, message })
     setNow(since)
     const page = browserPage?.()
     const result = await window.api.codeStartAgent({
@@ -151,13 +151,16 @@ export function CodeAgentPane({
   const body = (): JSX.Element => {
     if (!label && cwd && starting)
       return (
-        <StartingAgent
-          pane={starting.pane}
-          project={projectName}
-          since={starting.since}
-          now={now}
-          onClose={() => setStarting(null)}
-        />
+        <div className="session-detail-turns px-3 py-2">
+          {starting.message && <div className="session-detail-said">{starting.message.replace(/^\[[^\]\n]*\]\n/, '')}</div>}
+          <StartingAgent
+            pane={starting.pane}
+            project={projectName}
+            since={starting.since}
+            now={now}
+            onClose={() => setStarting(null)}
+          />
+        </div>
       )
     if (!label && cwd && renderDraft) return renderDraft((message, paths) => start(message, paths, null), failure?.reason)
     if (!label && cwd)

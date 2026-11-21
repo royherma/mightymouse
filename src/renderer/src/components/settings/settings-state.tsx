@@ -190,7 +190,7 @@ export function useSettingsState({
   const [runTranscript, setRunTranscript] = useState(false)
   // Seeded ON to match the pref's default, so the switch doesn't flash off for the
   // frame before settingsGetPrefs resolves.
-  const [showTiming, setShowTiming] = useState(true)
+  const [showTiming, setShowTiming] = useState(false)
   const [historyEncryption, setHistoryEncryption] = useState(false)
   const [incognito, setIncognito] = useState(false)
   const [phoneRemoteEnabled, setPhoneRemoteEnabled] = useState(false)

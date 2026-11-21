@@ -900,7 +900,7 @@ interface AgyEvent {
     step_type?: string
     tool_name?: string
     text_delta?: string
-    tool_info?: { parameters?: { CommandLine?: string; Path?: string }; error?: unknown }
+    tool_info?: { parameters?: { CommandLine?: string; Path?: string }; error?: unknown; output?: string }
   }
   result?: { status?: string; response?: string; error?: string }
 }
@@ -973,7 +973,8 @@ const antigravity: BackendAdapter = {
     const id = String(step.step_index ?? '')
     const cmd = shortCmd(step.tool_info?.parameters?.CommandLine ?? step.tool_info?.parameters?.Path)
     if (step.state === 'ACTIVE') return { id, edge: 'start', kind: step.tool_name ?? 'tool', cmd }
-    return { id, edge: 'end', kind: 'tool', cmd: '', exit: step.tool_info?.error ? 1 : 0 }
+    const exited = /Command exited with code (\d+)/.exec(step.tool_info?.output ?? '')
+    return { id, edge: 'end', kind: 'tool', cmd: '', exit: exited ? Number(exited[1]) : step.tool_info?.error ? 1 : 0 }
   },
 
   versionArgs: ['--version'],

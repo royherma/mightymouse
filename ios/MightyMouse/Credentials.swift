@@ -10,6 +10,7 @@ final class Credentials {
     /// handed to JavaScript -- injecting an auth bearer token into the webview
     /// would widen the blast radius of any XSS on the remote UI.
     static let webKeyPrefix = "web."
+    static let analyticsAnonIdKey = "analytics-anon-id"
 
     /// The App Group doubles as a Keychain access group on iOS -- and unlike a
     /// `keychain-access-groups` entitlement entry it is used WITHOUT the team-id

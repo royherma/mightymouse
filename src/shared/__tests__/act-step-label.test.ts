@@ -20,6 +20,11 @@ describe('actStepLabel', () => {
     expect(actStepLabel(bash('mm-input key "cmd+t"'))).toBe('key “cmd+t”')
   })
 
+  // Bug: the bare branch of TEXT_RE runs to end of line, so the next chained command lands in the label.
+  it('an unquoted key chained with && shows only its own combo', () => {
+    expect(actStepLabel(bash('mm-input key cmd+a && mm-input type foo'))).toBe('key “cmd+a”')
+  })
+
   it('renders a drag as both of its ends', () => {
     // Drag is the one verb whose midpoint (what the highlight overlay uses)
     // would be actively misleading as a label — it names a spot neither end

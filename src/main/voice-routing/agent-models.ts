@@ -1,6 +1,6 @@
 import { execFile } from 'child_process'
 import { existsSync, readFileSync, writeFileSync } from 'fs'
-import { open, readdir, stat } from 'fs/promises'
+import { open, readdir, readFile, stat } from 'fs/promises'
 import { homedir } from 'os'
 import { join } from 'path'
 import { PATHS } from '../store/paths'
@@ -13,8 +13,8 @@ import { CONFIG } from '../../shared/config'
 import { opencodeProblem } from '../backend/opencode-errors'
 import { claudeModelLabel, prettyOllamaModel } from '../../shared/model-label'
 import { CLAUDE_REASONING_EFFORTS, isReasoningEffort, opencodeSourceModels, showsOn, type ReasoningEffort, type SourceModel } from '../../shared/model-sources'
-import { hasOpenRouterKey, listOpenRouterModels, openRouterThinks } from '../backend/openrouter'
-import type { AgentModelChoice, AgentModelOption, AgentModelsState, AgentSetupProgress } from '../../shared/types'
+import { hasOpenRouterKey, listOpenRouterModels, openRouterMeta, openRouterThinks } from '../backend/openrouter'
+import type { AgentModelChoice, AgentModelOption, AgentModelsState, AgentSetupProgress, ModelInfo } from '../../shared/types'
 
 const CLAUDE_MODELS: ReadonlyArray<{ model: string; label: string }> = [
   { model: 'fable', label: 'Fable' },
@@ -209,6 +209,121 @@ function antigravityModels(): Promise<Array<{ model: string; label: string }>> {
   return agyCache
 }
 
+// OpenCode keeps the models.dev catalog here: release dates, makers, context and prices for every provider.
+const MODELS_DEV_CACHE = join(process.env.XDG_CACHE_HOME || join(homedir(), '.cache'), 'opencode', 'models.json')
+const LABS = ['anthropic', 'openai', 'google', 'xai', 'deepseek', 'moonshotai', 'zai', 'alibaba', 'mistral', 'minimax', 'meta']
+const MAKER_ALIAS: Record<string, string> = { 'z-ai': 'zai', 'x-ai': 'xai', 'meta-llama': 'meta', mistralai: 'mistral', qwen: 'alibaba' }
+
+interface DevModel {
+  name?: string
+  description?: string
+  release_date?: string
+  limit?: { context?: number }
+  cost?: { input?: number; output?: number }
+  modalities?: { input?: string[] }
+}
+type DevCatalog = Record<string, { name?: string; models?: Record<string, DevModel> }>
+let devCatalog: { mtime: number; data: Promise<DevCatalog> } | null = null
+
+async function modelsDev(): Promise<DevCatalog> {
+  const mtime = (await stat(MODELS_DEV_CACHE).catch(() => null))?.mtimeMs ?? 0
+  if (!devCatalog || devCatalog.mtime !== mtime) {
+    devCatalog = { mtime, data: readFile(MODELS_DEV_CACHE, 'utf8').then((t) => JSON.parse(t) as DevCatalog).catch(() => ({})) }
+  }
+  return devCatalog.data
+}
+
+const providerName = (db: DevCatalog, id: string): string =>
+  db[id]?.name?.replace(/\s*\(.*\)$/, '') ?? id.charAt(0).toUpperCase() + id.slice(1)
+
+function devLookup(db: DevCatalog, provider: string | undefined, key: string): ModelInfo | undefined {
+  const lab = (id: string): boolean => !!db[id]?.models?.[key]
+  const home = provider && db[provider]?.models?.[key] ? provider : LABS.find(lab)
+  const m = home ? db[home]?.models?.[key] : undefined
+  if (!home || !m) return undefined
+  const makerId = key.includes('/') ? key.split('/')[0].replace(/^~/, '') : LABS.includes(home) ? home : LABS.find(lab)
+  const reads = (m.modalities?.input ?? []).filter((x) => x !== 'text')
+  return {
+    name: m.name ?? key,
+    maker: makerId ? providerName(db, MAKER_ALIAS[makerId] ?? makerId) : undefined,
+    released: m.release_date,
+    description: m.description,
+    context: m.limit?.context,
+    price: m.cost && typeof m.cost.input === 'number' && typeof m.cost.output === 'number' ? { input: m.cost.input, output: m.cost.output } : undefined,
+    reads: reads.length > 0 ? reads : undefined
+  }
+}
+
+const PLAN_PRICED = new Set(['claude', 'codex', 'cursor', 'antigravity'])
+
+function openRouterInfo(db: DevCatalog, key: string): ModelInfo | undefined {
+  const m = openRouterMeta(key)
+  if (!m) return undefined
+  const perM = (x?: string): number => Number(x ?? NaN) * 1e6
+  const price = { input: perM(m.pricing?.prompt), output: perM(m.pricing?.completion) }
+  const makerId = key.split('/')[0].replace(/^~/, '')
+  const reads = (m.architecture?.input_modalities ?? []).filter((x) => x !== 'text' && x !== 'file')
+  return {
+    name: m.name?.replace(/^[^:]+:\s*/, '') ?? key,
+    maker: providerName(db, MAKER_ALIAS[makerId] ?? makerId),
+    released: m.created ? new Date(m.created * 1000).toISOString().slice(0, 10) : undefined,
+    description: m.description?.split(/(?<=\.)\s/)[0],
+    context: m.context_length,
+    price: Number.isFinite(price.input) && Number.isFinite(price.output) ? price : undefined,
+    reads: reads.length > 0 ? reads : undefined
+  }
+}
+
+// OpenRouter ships models days before models.dev (OpenCode's catalog) lists them; OpenCode runs them once its config names them.
+async function newerOpenRouterModels(listed: string[]): Promise<string[]> {
+  if (!listed.some((m) => m.startsWith('openrouter/'))) return []
+  const known = (await modelsDev()).openrouter?.models ?? {}
+  const have = new Set(listed)
+  return (await listOpenRouterModels()).filter((id) => !id.includes(':') && !known[id] && !have.has(`openrouter/${id}`))
+}
+
+export async function opencodeModelConfig(model: string): Promise<Record<string, unknown>> {
+  if (!model.startsWith('openrouter/')) return {}
+  const key = model.slice('openrouter/'.length)
+  if ((await modelsDev()).openrouter?.models?.[key]) return {}
+  await listOpenRouterModels()
+  const name = openRouterMeta(key)?.name?.replace(/^[^:]+:\s*/, '') ?? key
+  return { provider: { openrouter: { models: { [key]: { name } } } } }
+}
+
+function modelInfo(db: DevCatalog, o: AgentModelOption): ModelInfo | undefined {
+  if (o.model === '' || o.harness === 'ollama') return undefined
+  let info: ModelInfo | undefined
+  if (o.harness === 'opencode') {
+    const [provider, ...rest] = o.model.split('/')
+    info = devLookup(db, provider, rest.join('/')) ?? (provider === 'openrouter' ? openRouterInfo(db, rest.join('/')) : undefined)
+    if (info && provider === 'opencode-go') info.price = undefined
+  } else if (o.harness === 'claude') {
+    const m = /^(\w+) (\d+)(?:\.(\d+))?$/.exec(o.label)
+    info = m ? devLookup(db, 'anthropic', `claude-${m[1].toLowerCase()}-${m[2]}${m[3] ? `-${m[3]}` : ''}`) : undefined
+  } else {
+    info = devLookup(db, o.harness === 'codex' ? 'openai' : undefined, o.model)
+  }
+  if (info && PLAN_PRICED.has(o.harness)) info.price = undefined
+  return info
+}
+
+export async function chatModelInfo(ids: string[]): Promise<Record<string, ModelInfo>> {
+  const db = await modelsDev()
+  const out: Record<string, ModelInfo> = {}
+  for (const id of ids) {
+    const [source, ...rest] = id.split(':')
+    const model = rest.join(':')
+    const info = source === 'opencode' ? modelInfo(db, { harness: 'opencode', model, label: model })
+      : source === 'openrouter' || source === 'mightymouse' ? devLookup(db, 'openrouter', model)
+      : undefined
+    if (!info) continue
+    if (source === 'mightymouse') info.price = undefined
+    out[id] = info
+  }
+  return out
+}
+
 export function isModelHarness(value: unknown): value is AgentModelChoice['harness'] {
   return value === 'claude' || value === 'codex' || value === 'opencode' || value === 'cursor' || value === 'antigravity' || value === 'ollama'
 }
@@ -228,7 +343,9 @@ export async function listAgentModels(): Promise<AgentModelOption[]> {
   }
   if (installed.includes('opencode') && showsOn('opencode', 'code')) {
     options.push({ harness: 'opencode', model: '', label: 'Default' })
-    for (const m of opencodeSourceModels(await opencodeModels(), 'code'))
+    const listed = await opencodeModels()
+    const newer = (await newerOpenRouterModels(listed)).map((id) => `openrouter/${id}`)
+    for (const m of opencodeSourceModels([...listed, ...newer], 'code'))
       options.push({ harness: 'opencode', model: m.model, label: m.label })
   }
   if (installed.includes('cursor') && showsOn('cursor', 'code')) {
@@ -242,7 +359,11 @@ export async function listAgentModels(): Promise<AgentModelOption[]> {
   if (installed.includes('claude') && showsOn('ollama', 'code')) {
     for (const model of await listCodingModels()) options.push({ harness: 'ollama', model, label: prettyOllamaModel(model) })
   }
-  return options
+  const db = await modelsDev()
+  return options.map((o) => {
+    const info = modelInfo(db, o)
+    return info ? { ...o, info } : o
+  })
 }
 
 export async function listChatSourceModels(): Promise<SourceModel[]> {
@@ -348,11 +469,13 @@ export async function checkOpencodeModel(model: string): Promise<string | null> 
   if (model === '' || workingOpencodeModels.has(model)) return null
   const bin = resolveBinary('opencode')
   if (!bin) return 'OpenCode is not installed.'
+  const config = await opencodeModelConfig(model)
+  const extraEnv: Record<string, string> = Object.keys(config).length > 0 ? { OPENCODE_CONFIG_CONTENT: JSON.stringify(config) } : {}
   return new Promise((resolve) => {
     const child = execFile(
       bin,
       ['run', '-m', model, 'Reply with the single word OK.'],
-      { cwd: homedir(), timeout: OPENCODE_CHECK_TIMEOUT_MS, env: { ...process.env, ...OPENCODE_QUIET_ENV } },
+      { cwd: homedir(), timeout: OPENCODE_CHECK_TIMEOUT_MS, env: { ...process.env, ...OPENCODE_QUIET_ENV, ...extraEnv } },
       (err, stdout, stderr) => {
         const out = `${stdout}\n${stderr}`.replace(/\x1b\[[0-9;]*m/g, '')
         const error = out.match(/Error:\s*(.+)/)?.[1]?.trim()

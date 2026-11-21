@@ -5,7 +5,7 @@ import { runMighty } from './mighty/run-mighty'
 import { abortRun, resolveRunModel } from './backend/runner'
 import { speak, resolvedTtsProvider } from './audio/tts'
 import { sendCompanionStageEvent, setCompanionRunActive } from './companion-window'
-import { actStepLabel } from '../shared/act-step-label'
+import { actStepLabel, friendlyStep } from '../shared/act-step-label'
 import { runLabel } from '../shared/model-label'
 import { fireScreenshot } from './capture/screenshot'
 import { looksLikeScreenReference } from '../shared/companion-vision-trigger'
@@ -229,6 +229,7 @@ export async function runCompanionAskTurn(
     setCompanionRunActive(false, false, () => {})
     sendCompanionStageEvent({ stage: 'wake', provider: 'esc', state: 'ok', detail: WAKE_EVENT.stop, ts: Date.now() })
   })
+  let stepCount = 0
   const result = await runMighty({
     message: transcript,
     sessionId,
@@ -248,6 +249,7 @@ export async function runCompanionAskTurn(
         provider,
         state: 'ok',
         detail: 'looked at the screen',
+        say: 'Looking at the screen',
         imagePath: screenshotPath,
         ts: Date.now()
       })
@@ -258,12 +260,14 @@ export async function runCompanionAskTurn(
     // click went wrong when it does.
     onEvent: (event) => {
       const label = actStepLabel(event)
-      if (!label) return
+      const say = friendlyStep(event, stepCount++) ?? undefined
+      if (!label && !say) return
       sendCompanionStageEvent({
         stage: 'step',
         provider,
         state: 'ok',
-        detail: label,
+        detail: label ?? say,
+        say,
         ts: Date.now()
       })
     }

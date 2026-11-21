@@ -680,7 +680,7 @@ export async function runBackend(opts: RunOptions): Promise<void> {
     }
   }
 
-  const planLogin = pickPlanLogin(backend)
+  const planLogin = pickPlanLogin(backend, opts.workDir)
   if (planLogin) spawnEnv = { ...spawnEnv, ...planLogin.env }
 
   // Log execution

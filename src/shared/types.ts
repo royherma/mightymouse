@@ -2146,6 +2146,13 @@ export interface ToolCallSummary {
   /** One-line rendering of the tool's input (same helper the live view uses). */
   inputPreview: string
   ok: boolean
+  /** Plain-words label ("Heading to x.com"); absent on old rows and on tools with none. */
+  say?: string
+}
+
+// A dictation is stored as a session whose one turn has no reply (capture-actions.ts); it is not a conversation.
+export function hasRealExchange(s: MightySession): boolean {
+  return s.turns.some((t) => (t.a ?? '').trim() !== '')
 }
 
 /** A resumable Mighty conversation. One row per session in sessions.jsonl (latest wins). */
@@ -2241,6 +2248,8 @@ export interface MightyProject {
   imageRemoved?: boolean
   archived?: boolean
   pinned?: boolean
+  /** Sidebar position the user dragged it to; absent sorts after, oldest first. */
+  order?: number
 }
 
 export interface ProjectRepoLink {
@@ -3792,9 +3801,20 @@ export interface AgentModelChoice {
   model: string
 }
 
+export interface ModelInfo {
+  name: string
+  maker?: string
+  released?: string
+  description?: string
+  context?: number
+  price?: { input: number; output: number }
+  reads?: string[]
+}
+
 export interface AgentModelOption extends AgentModelChoice {
   label: string
   reasoningEfforts?: ReasoningEffort[]
+  info?: ModelInfo
 }
 
 export interface AgentSetupProgress {

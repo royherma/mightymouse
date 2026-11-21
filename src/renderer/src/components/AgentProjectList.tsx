@@ -2,7 +2,7 @@ import { Button } from './Button'
 import { JSX, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Archive, ArchiveRestore, Bell, CircleDot, FolderPlus, House, Pencil, Pin, PinOff, Plus, Search, Terminal } from 'lucide-react'
 import { CONFIG } from '../../../shared/config'
-import { ProjectGroupHeader } from './ProjectIcon'
+import { ProjectGroupHeader, useProjectReorder } from './ProjectIcon'
 import { matchesSession, sessionHaystack, sessionRow } from '../../../shared/relay-status'
 import type { SessionRow } from '../../../shared/relay-status'
 import { sortEntries, sessionSpoke } from '../../../shared/relay-sessions'
@@ -212,6 +212,7 @@ export function AgentProjectList({
   isPinned,
   onPin,
   onNewProject,
+  onMoveProject,
   searchRequest = 0,
   onConductorStarted,
   heading = CONFIG.UI_LABELS.CODE_AGENTS_SIDEBAR_TITLE
@@ -226,6 +227,7 @@ export function AgentProjectList({
   isPinned?: (session: AgentRelaySessionInfo) => boolean
   onPin?: (session: AgentRelaySessionInfo) => void
   onNewProject?: () => void
+  onMoveProject?: (dragged: string, target: string, after: boolean) => void
   searchRequest?: number
   selectedKey: string
   showSelected?: boolean
@@ -238,6 +240,7 @@ export function AgentProjectList({
   onPrepareNewAgent?: (group: AgentGroup) => void
 }): JSX.Element {
   const [folded, fold] = useFolded('agents')
+  const projectDrag = useProjectReorder((dragged, target, after) => onMoveProject?.(dragged, target, after))
   const sectionShut = folded[FOLD_SECTION] === true
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [onlyAlerts, setOnlyAlerts] = useState(false)
@@ -586,9 +589,16 @@ export function AgentProjectList({
         const { shut, showAll, live, ended, endedShown, shown } = groupView(group)
         const full = groups.find((g) => g.id === group.id) ?? group
         const cwd = groupCwd(full)
+        const movable = onMoveProject !== undefined && group.id !== UNASSIGNED
         return (
-          <div key={group.id} className="agent-projects-group mb-1" data-project="">
+          <div
+            key={group.id}
+            className="agent-projects-group mb-1"
+            data-project=""
+            {...(movable ? projectDrag.dropProps(group.id) : {})}
+          >
             <div
+              {...(movable ? projectDrag.handleProps(group.id) : {})}
               className="agent-projects-headrow"
               onContextMenu={(e) =>
                 void showMenu(e, PROJECT_MENU, {

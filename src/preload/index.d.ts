@@ -276,6 +276,7 @@ interface CustomAPI {
   codeNoProjectFolder: () => Promise<string>
   codeStartupPeek: (pane: string) => Promise<StartupPeek>
   codeStartupAnswer: (pane: string, index: number) => Promise<boolean>
+  codeStartupReveal: (pane: string) => Promise<boolean>
   onIncognitoChanged: (callback: (on: boolean) => void) => () => void
   onViewAsUserChanged: (callback: (on: boolean) => void) => () => void
   onBackendChanged: (callback: (backend: BackendId) => void) => () => void
@@ -300,6 +301,7 @@ interface CustomAPI {
   onReplyWindowSeeing: (callback: (seeing: ReplyWindowSeeing) => void) => () => void
   replyWindowAuto: (on?: boolean) => Promise<boolean>
   replyWindowShowOver: (bundleId: string, on: boolean) => void
+  replyWindowShot: () => Promise<string | undefined>
   hudDismiss: (runId: string) => void
   hudStopCapture: (runId: string) => void
   hudCancelCapture: (runId: string) => void
@@ -470,6 +472,7 @@ interface CustomAPI {
     newSession: (projectId?: string) => Promise<MightySession>
     deleteSession: (id: string) => Promise<boolean>
     listProjects: () => Promise<MightyProject[]>
+    reorderProjects: (ids: string[]) => Promise<boolean>
     upsertProject: (project: MightyProject) => Promise<MightyProject | null>
     deleteProject: (id: string) => Promise<boolean>
     assignSessionProject: (sessionId: string, projectId?: string) => Promise<boolean>
@@ -974,6 +977,7 @@ interface CustomAPI {
   chatModelPicks: () => Promise<{ opencode: string; openrouter: string; claude: string; codex: string; antigravity: string }>
   chatSetModelPick: (backend: 'opencode' | 'openrouter' | 'claude' | 'codex' | 'antigravity', model: string) => Promise<void>
   chatSourceModels: () => Promise<import('../shared/model-sources').SourceModel[]>
+  chatModelInfo: (ids: string[]) => Promise<Record<string, import('../shared/types').ModelInfo>>
   onAgentSetupProgress: (callback: (payload: AgentSetupProgress) => void) => () => void
   onAgentRelayRequestsChanged: (callback: (snapshot: RelaySnapshotWire) => void) => () => void
   onAgentRelayStatusChanged: (callback: (status: AgentRelayStatus) => void) => () => void

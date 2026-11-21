@@ -53,6 +53,12 @@ enum SharedAppGroup {
         return dir
     }
 
+    static var keyboardDirectory: URL? {
+        guard let dir = containerURL?.appendingPathComponent("keyboard", isDirectory: true) else { return nil }
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        return dir
+    }
+
     static var recordingsDirectory: URL {
         guard let container = containerURL else {
             fatalError("App Group \(id) container is unavailable.")

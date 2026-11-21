@@ -99,6 +99,14 @@ export function usePopover(width: number, maxH: number, align: 'left' | 'right',
 
 const COLLAPSED_KEY = 'mm.picker.collapsed'
 
+const GROUP_HOVER = 'group\u0000'
+export const groupHoverId = (group: string, section?: string): string => `${GROUP_HOVER}${group}\u0000${section ?? ''}`
+export function parseGroupHover(id: string): { group: string; section?: string } | null {
+  if (!id.startsWith(GROUP_HOVER)) return null
+  const [group, section] = id.slice(GROUP_HOVER.length).split('\u0000')
+  return { group, section: section || undefined }
+}
+
 function readCollapsed(): Set<string> {
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? '[]')
@@ -108,10 +116,11 @@ function readCollapsed(): Set<string> {
   }
 }
 
-function GroupHead({ open, count, onToggle, sub = false, children }: {
+function GroupHead({ open, count, onToggle, onHover, sub = false, children }: {
   open: boolean
   count: number
   onToggle?: () => void
+  onHover?: () => void
   sub?: boolean
   children: React.ReactNode
 }): JSX.Element {
@@ -122,6 +131,7 @@ function GroupHead({ open, count, onToggle, sub = false, children }: {
       aria-expanded={open}
       disabled={!onToggle}
       onClick={onToggle}
+      onMouseEnter={onHover}
     >
       {children}
       {!open && <span className="mm-pick-count">{count}</span>}
@@ -130,7 +140,7 @@ function GroupHead({ open, count, onToggle, sub = false, children }: {
   )
 }
 
-function MenuRow({ item, on, onPick }: { item: MenuItem; on: boolean; onPick: (id: string) => void }): JSX.Element {
+function MenuRow({ item, on, onPick, onHover }: { item: MenuItem; on: boolean; onPick: (id: string) => void; onHover?: (id: string) => void }): JSX.Element {
   const ProviderIcon = useContext(PickerIcon)
   return (
     <Button
@@ -138,6 +148,8 @@ function MenuRow({ item, on, onPick }: { item: MenuItem; on: boolean; onPick: (i
       role="option"
       aria-selected={on}
       onClick={() => onPick(item.id)}
+      onMouseEnter={() => onHover?.(item.id)}
+      onFocus={() => onHover?.(item.id)}
       className={`mm-pick-row${item.hero ? ' mm-pick-hero' : ''}${item.muted ? ' is-muted' : ''}`}
     >
       {item.icon && <span className="mm-pick-logo"><ProviderIcon id={item.icon} size={item.hero ? 38 : 14} /></span>}
@@ -158,7 +170,8 @@ export function MenuList({
   selectedId,
   onPick,
   setupRows = [],
-  searchable = true
+  searchable = true,
+  onHover
 }: {
   groups: MenuGroup[]
   items: MenuItem[]
@@ -166,6 +179,7 @@ export function MenuList({
   onPick: (id: string) => void
   setupRows?: MenuSetupRow[]
   searchable?: boolean
+  onHover?: (id: string | null) => void
 }): JSX.Element {
   const ProviderIcon = useContext(PickerIcon)
   const [query, setQuery] = useState('')
@@ -182,6 +196,7 @@ export function MenuList({
       return
     }
   }
+  useEffect(() => () => onHover?.(null), [onHover])
   const groupName = (key: string): string => groups.find((g) => g.key === key)?.name ?? key
   const shown =
     q === ''
@@ -205,7 +220,7 @@ export function MenuList({
         aria-label="Search models"
         className="mm-pick-search"
       />}
-      <div className="mm-pick-list">
+      <div className="mm-pick-list" onMouseLeave={() => onHover?.(null)}>
         {shown.length === 0 && setupShown.length === 0 && (
           <div className="px-3 py-3 text-sm text-muted">No model matches "{query}"</div>
         )}
@@ -214,7 +229,7 @@ export function MenuList({
           const rest = rows.filter((o) => !o.hero)
           return (
             <div key={g.key}>
-              {rows.filter((o) => o.hero).map((o) => <MenuRow key={o.id} item={o} on={o.id === selectedId} onPick={onPick} />)}
+              {rows.filter((o) => o.hero).map((o) => <MenuRow key={o.id} item={o} on={o.id === selectedId} onPick={onPick} onHover={onHover} />)}
               {rest.length > 0 && (
                 <>
                   <div className="mm-pick-headrow">
@@ -222,6 +237,7 @@ export function MenuList({
                       open={searching || !collapsed.has(g.key)}
                       count={rest.length}
                       onToggle={searching ? undefined : () => toggle(g.key)}
+                      onHover={onHover && (() => onHover(groupHoverId(g.key)))}
                     >
                       {g.icon && <ProviderIcon id={g.icon} size={11} />}
                       {g.name}
@@ -235,13 +251,13 @@ export function MenuList({
                     return (
                       <div key={key}>
                         {section !== undefined && (
-                          <GroupHead sub open={open} count={inSection.length} onToggle={searching ? undefined : () => toggle(key)}>
+                          <GroupHead sub open={open} count={inSection.length} onToggle={searching ? undefined : () => toggle(key)} onHover={onHover && (() => onHover(groupHoverId(g.key, section)))}>
                             {section}
                           </GroupHead>
                         )}
                         {open && (
                           <div className="mm-pick-grid">
-                            {inSection.map((o) => <MenuRow key={o.id} item={o} on={o.id === selectedId} onPick={onPick} />)}
+                            {inSection.map((o) => <MenuRow key={o.id} item={o} on={o.id === selectedId} onPick={onPick} onHover={onHover} />)}
                           </div>
                         )}
                       </div>
@@ -325,6 +341,7 @@ export interface ModelMenuProps {
   wide?: boolean
   footer?: React.ReactNode
   side?: React.ReactNode
+  onHover?: (id: string | null) => void
 }
 
 export function ModelMenu({
@@ -342,7 +359,8 @@ export function ModelMenu({
   searchable = true,
   wide = false,
   footer,
-  side
+  side,
+  onHover
 }: ModelMenuProps): JSX.Element {
   const { open, setOpen, btnRef, menuRef, pos } = usePopover(
     (wide ? WIDE_MENU_W : MENU_W) + (side ? SIDE_W : 0),
@@ -377,6 +395,7 @@ export function ModelMenu({
             onPick={pick}
             setupRows={setupRows}
             searchable={searchable}
+            onHover={onHover}
           />
           {footer && <div className="mm-pick-foot">{footer}</div>}
         </PickerPop>

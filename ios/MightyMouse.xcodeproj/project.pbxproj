@@ -7,15 +7,23 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0F392FF87F8C0F4F871636D9 /* Generated/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* Generated/Theme.swift */; };
+		0F392FF87F8C0F4F871636D9 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* Theme.swift */; };
 		2794BFB59BE33DABD803A7F9 /* HostStatusWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = E537670D95B901809EA29BC1 /* HostStatusWidget.swift */; };
 		2912113BAF592497C4FCE470 /* MMLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000024 /* MMLog.swift */; };
 		2A8E47E0D6B12F8A38EF50D8 /* SharedAppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2AF8BB95DC978BF73BE9 /* SharedAppGroup.swift */; };
+		2BEE01EF7D9C439F48D80429 /* SharedAppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2AF8BB95DC978BF73BE9 /* SharedAppGroup.swift */; };
+		31328386D29D453D90444543 /* VoiceTyping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A88DD53CE9C3FD600BC4E9E /* VoiceTyping.swift */; };
 		3BC2433F62F127D2C56566B9 /* AudioCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A5BAF473ED15366FEBB3044 /* AudioCapture.swift */; };
+		3E55D3F64FE06DB093CA4C26 /* VoiceTyping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A88DD53CE9C3FD600BC4E9E /* VoiceTyping.swift */; };
+		3F80E6C92488AA89CD95FE91 /* Credentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* Credentials.swift */; };
 		4DD057670B000F6ABC3A7E44 /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* Intents.swift */; };
 		4DD057670B000F6ABC3A7E45 /* BackgroundActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000030 /* BackgroundActivity.swift */; };
+		552A44DA928E3B4002D42A51 /* OnDeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* OnDeviceModel.swift */; };
 		5BC8F4098F213306E9F81E84 /* RecordingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F862CCC3C5019A3600066535 /* RecordingModel.swift */; };
 		5D4948B02B84B94244856F77 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA2134463F01DA2A5A8E98AE /* Foundation.framework */; };
+		698F326C1B6F123DD8DEA376 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* Theme.swift */; };
+		6C0C4BB5B300740B10DD8149 /* MightyMouseKeyboard.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 32728635386FD066DA72E6FA /* MightyMouseKeyboard.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		7A7DE8208BFAC5DFBD987C8B /* KeyboardCompanion.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC18358833C5BE80DD25F611 /* KeyboardCompanion.swift */; };
 		7E880BDE5B2E6BA3F66028A7 /* MightyMouseWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B4B05E6FCFF491628E142974 /* MightyMouseWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9F4CD1D588D901F623905439 /* OnDeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* OnDeviceModel.swift */; };
 		A10000000000000000000001 /* MightyMouseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* MightyMouseApp.swift */; };
@@ -29,27 +37,30 @@
 		A10000000000000000000010 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* PrivacyInfo.xcprivacy */; };
 		A10000000000000000000012 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* Config.swift */; };
 		A10000000000000000000013 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000015 /* Assets.xcassets */; };
-		A10000000000000000000020 /* Generated/Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* Generated/Theme.swift */; };
+		A10000000000000000000020 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* Theme.swift */; };
 		A10000000000000000000021 /* Primitives.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* Primitives.swift */; };
 		A10000000000000000000022 /* Prefs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* Prefs.swift */; };
 		A10000000000000000000023 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000023 /* Analytics.swift */; };
 		A10000000000000000000024 /* MMLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000024 /* MMLog.swift */; };
 		A10000000000000000000025 /* OnDeviceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* OnDeviceModel.swift */; };
 		A10000000000000000000026 /* QrScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000026 /* QrScanner.swift */; };
-		A10000000000000000000035 /* PhotoLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000035 /* PhotoLibrary.swift */; };
 		A10000000000000000000027 /* LanSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000027 /* LanSession.swift */; };
 		A10000000000000000000028 /* DebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000028 /* DebugView.swift */; };
 		A10000000000000000000030 /* BackgroundActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000030 /* BackgroundActivity.swift */; };
 		A10000000000000000000031 /* PipMirror.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000031 /* PipMirror.swift */; };
 		A10000000000000000000032 /* GlassesSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000032 /* GlassesSession.swift */; };
 		A10000000000000000000033 /* MacRelayClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000033 /* MacRelayClient.swift */; };
-		A10000000000000000000036 /* MacIntentClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000036 /* MacIntentClient.swift */; };
 		A10000000000000000000034 /* PushRegistration.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000034 /* PushRegistration.swift */; };
+		A10000000000000000000035 /* PhotoLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000035 /* PhotoLibrary.swift */; };
+		A10000000000000000000036 /* MacIntentClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000036 /* MacIntentClient.swift */; };
 		BEFA7423FC6947BF1D60DA68 /* PairingURLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3123E3D55C0E6229A10A2B0 /* PairingURLTests.swift */; };
 		C51D737D966EDC014446E7E9 /* SharedAppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45D2AF8BB95DC978BF73BE9 /* SharedAppGroup.swift */; };
 		C966AC02A964D6E7C19687B7 /* MightyMouseWidgetsBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5552B8CA0AD31D83F0A513CE /* MightyMouseWidgetsBundle.swift */; };
 		CE6F12E5D82446F57AE6BC10 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA2134463F01DA2A5A8E98AE /* Foundation.framework */; };
 		DCEE160E18FF71F6C2DD0CC1 /* ControlWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1766B353F3967C5A7B6B641C /* ControlWidgets.swift */; };
+		E017E63DB50E64D2C0C4E84A /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23902E0E87A1F4BB70D14953 /* KeyboardViewController.swift */; };
+		E94B95C1CE882DE5FF099E7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA2134463F01DA2A5A8E98AE /* Foundation.framework */; };
+		F2AE1527D1E65238D8DB0A6D /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* Config.swift */; };
 		N10000000000000000000010 /* MightyMouseNSE.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = N10000000000000000000009 /* MightyMouseNSE.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		N30000000000000000000001 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = N20000000000000000000001 /* NotificationService.swift */; };
 		N30000000000000000000002 /* RelayNotificationCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = N20000000000000000000004 /* RelayNotificationCategory.swift */; };
@@ -79,6 +90,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = E10000000000000000000001;
 			remoteInfo = MightyMouse;
+		};
+		423138E4BC2E47FDB68AC3B6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 900000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E7B0480DB9305AF13E5D425B;
+			remoteInfo = MightyMouseKeyboard;
 		};
 		BE99E671DD6767A772823C10 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -113,6 +131,7 @@
 				7E880BDE5B2E6BA3F66028A7 /* MightyMouseWidgets.appex in Embed Foundation Extensions */,
 				N10000000000000000000010 /* MightyMouseNSE.appex in Embed Foundation Extensions */,
 				N40000000000000000000010 /* MightyMouseShare.appex in Embed Foundation Extensions */,
+				6C0C4BB5B300740B10DD8149 /* MightyMouseKeyboard.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -120,8 +139,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		08D259EA402ED4A82CF428D6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0B12F59C4B90307649A7C380 /* MightyMouseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MightyMouseTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1766B353F3967C5A7B6B641C /* ControlWidgets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ControlWidgets.swift; sourceTree = "<group>"; };
+		1A88DD53CE9C3FD600BC4E9E /* VoiceTyping.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoiceTyping.swift; sourceTree = "<group>"; };
+		23902E0E87A1F4BB70D14953 /* KeyboardViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
+		32728635386FD066DA72E6FA /* MightyMouseKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MightyMouseKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5552B8CA0AD31D83F0A513CE /* MightyMouseWidgetsBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MightyMouseWidgetsBundle.swift; sourceTree = "<group>"; };
 		5A5BAF473ED15366FEBB3044 /* AudioCapture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioCapture.swift; sourceTree = "<group>"; };
 		6F811D7FD92B771FFB9F3B4E /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -140,24 +163,26 @@
 		B10000000000000000000013 /* MightyMouse */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = MightyMouse; sourceTree = "<group>"; };
 		B10000000000000000000014 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		B10000000000000000000015 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		B10000000000000000000020 /* Generated/Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generated/Theme.swift; sourceTree = "<group>"; };
+		B10000000000000000000020 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Generated/Theme.swift; sourceTree = "<group>"; };
 		B10000000000000000000021 /* Primitives.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Primitives.swift; sourceTree = "<group>"; };
 		B10000000000000000000022 /* Prefs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Prefs.swift; sourceTree = "<group>"; };
 		B10000000000000000000023 /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		B10000000000000000000024 /* MMLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MMLog.swift; sourceTree = "<group>"; };
 		B10000000000000000000025 /* OnDeviceModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnDeviceModel.swift; sourceTree = "<group>"; };
 		B10000000000000000000026 /* QrScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QrScanner.swift; sourceTree = "<group>"; };
-		B10000000000000000000035 /* PhotoLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibrary.swift; sourceTree = "<group>"; };
 		B10000000000000000000027 /* LanSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanSession.swift; sourceTree = "<group>"; };
 		B10000000000000000000028 /* DebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugView.swift; sourceTree = "<group>"; };
 		B10000000000000000000030 /* BackgroundActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundActivity.swift; sourceTree = "<group>"; };
 		B10000000000000000000031 /* PipMirror.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipMirror.swift; sourceTree = "<group>"; };
 		B10000000000000000000032 /* GlassesSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassesSession.swift; sourceTree = "<group>"; };
 		B10000000000000000000033 /* MacRelayClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacRelayClient.swift; sourceTree = "<group>"; };
-		B10000000000000000000036 /* MacIntentClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacIntentClient.swift; sourceTree = "<group>"; };
 		B10000000000000000000034 /* PushRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushRegistration.swift; sourceTree = "<group>"; };
+		B10000000000000000000035 /* PhotoLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibrary.swift; sourceTree = "<group>"; };
+		B10000000000000000000036 /* MacIntentClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacIntentClient.swift; sourceTree = "<group>"; };
 		B45D2AF8BB95DC978BF73BE9 /* SharedAppGroup.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SharedAppGroup.swift; sourceTree = "<group>"; };
 		B4B05E6FCFF491628E142974 /* MightyMouseWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MightyMouseWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		BC18358833C5BE80DD25F611 /* KeyboardCompanion.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardCompanion.swift; sourceTree = "<group>"; };
+		BCFC7F9DB96B550B31722460 /* MightyMouseKeyboard.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = MightyMouseKeyboard.entitlements; sourceTree = "<group>"; };
 		CA2134463F01DA2A5A8E98AE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		E3123E3D55C0E6229A10A2B0 /* PairingURLTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PairingURLTests.swift; sourceTree = "<group>"; };
 		E537670D95B901809EA29BC1 /* HostStatusWidget.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HostStatusWidget.swift; sourceTree = "<group>"; };
@@ -189,6 +214,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FC8BA84E55821AF45C74FE85 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E94B95C1CE882DE5FF099E7A /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		FF89CEA2FE8CAE43D342E8F4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -214,6 +247,17 @@
 				CA2134463F01DA2A5A8E98AE /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		7737D682A06E713495AA2F18 /* MightyMouseKeyboard */ = {
+			isa = PBXGroup;
+			children = (
+				23902E0E87A1F4BB70D14953 /* KeyboardViewController.swift */,
+				08D259EA402ED4A82CF428D6 /* Info.plist */,
+				BCFC7F9DB96B550B31722460 /* MightyMouseKeyboard.entitlements */,
+			);
+			name = MightyMouseKeyboard;
+			path = MightyMouseKeyboard;
 			sourceTree = "<group>";
 		};
 		A0367F8E66CA1D6386730E1C /* MightyMouseWidgets */ = {
@@ -247,6 +291,7 @@
 				A0367F8E66CA1D6386730E1C /* MightyMouseWidgets */,
 				A0EC388A3A8769ED1E3A2475 /* Frameworks */,
 				0DEAEA879329B5661673134A /* MightyMouseTests */,
+				7737D682A06E713495AA2F18 /* MightyMouseKeyboard */,
 			);
 			sourceTree = "<group>";
 		};
@@ -268,7 +313,7 @@
 				B10000000000000000000010 /* PrivacyInfo.xcprivacy */,
 				B10000000000000000000011 /* MightyMouse.entitlements */,
 				B10000000000000000000015 /* Assets.xcassets */,
-				B10000000000000000000020 /* Generated/Theme.swift */,
+				B10000000000000000000020 /* Theme.swift */,
 				B10000000000000000000021 /* Primitives.swift */,
 				B10000000000000000000022 /* Prefs.swift */,
 				B10000000000000000000023 /* Analytics.swift */,
@@ -285,6 +330,8 @@
 				B45D2AF8BB95DC978BF73BE9 /* SharedAppGroup.swift */,
 				5A5BAF473ED15366FEBB3044 /* AudioCapture.swift */,
 				F862CCC3C5019A3600066535 /* RecordingModel.swift */,
+				1A88DD53CE9C3FD600BC4E9E /* VoiceTyping.swift */,
+				BC18358833C5BE80DD25F611 /* KeyboardCompanion.swift */,
 			);
 			path = MightyMouse;
 			sourceTree = "<group>";
@@ -297,6 +344,7 @@
 				B10000000000000000000012 /* MightyMouse.app */,
 				B4B05E6FCFF491628E142974 /* MightyMouseWidgets.appex */,
 				0B12F59C4B90307649A7C380 /* MightyMouseTests.xctest */,
+				32728635386FD066DA72E6FA /* MightyMouseKeyboard.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -382,11 +430,29 @@
 				EF655C9BD2D214C7DED39F33 /* PBXTargetDependency */,
 				N10000000000000000000008 /* PBXTargetDependency */,
 				N40000000000000000000008 /* PBXTargetDependency */,
+				C9B343F6E756A7F9C5FF3652 /* PBXTargetDependency */,
 			);
 			name = MightyMouse;
 			productName = MightyMouse;
 			productReference = B10000000000000000000012 /* MightyMouse.app */;
 			productType = "com.apple.product-type.application";
+		};
+		E7B0480DB9305AF13E5D425B /* MightyMouseKeyboard */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 50688E781A45C1FE51064EAB /* Build configuration list for PBXNativeTarget "MightyMouseKeyboard" */;
+			buildPhases = (
+				E42962323B995A21752A8A34 /* Sources */,
+				FC8BA84E55821AF45C74FE85 /* Frameworks */,
+				028AD15201784B353A66059B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MightyMouseKeyboard;
+			productName = MightyMouseKeyboard;
+			productReference = 32728635386FD066DA72E6FA /* MightyMouseKeyboard.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		N10000000000000000000001 /* MightyMouseNSE */ = {
 			isa = PBXNativeTarget;
@@ -449,11 +515,19 @@
 				N40000000000000000000001 /* MightyMouseShare */,
 				2372F2D416B3111816F4A74A /* MightyMouseWidgets */,
 				A7065C82B815BC9AF54B1AB9 /* MightyMouseTests */,
+				E7B0480DB9305AF13E5D425B /* MightyMouseKeyboard */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		028AD15201784B353A66059B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		43F59164C9AC765B2323027E /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -492,7 +566,7 @@
 				9F4CD1D588D901F623905439 /* OnDeviceModel.swift in Sources */,
 				2794BFB59BE33DABD803A7F9 /* HostStatusWidget.swift in Sources */,
 				2912113BAF592497C4FCE470 /* MMLog.swift in Sources */,
-				0F392FF87F8C0F4F871636D9 /* Generated/Theme.swift in Sources */,
+				0F392FF87F8C0F4F871636D9 /* Theme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -520,7 +594,7 @@
 				A10000000000000000000008 /* Intents.swift in Sources */,
 				A10000000000000000000030 /* BackgroundActivity.swift in Sources */,
 				A10000000000000000000009 /* RemoteWebView.swift in Sources */,
-				A10000000000000000000020 /* Generated/Theme.swift in Sources */,
+				A10000000000000000000020 /* Theme.swift in Sources */,
 				A10000000000000000000021 /* Primitives.swift in Sources */,
 				A10000000000000000000022 /* Prefs.swift in Sources */,
 				A10000000000000000000023 /* Analytics.swift in Sources */,
@@ -537,6 +611,22 @@
 				C51D737D966EDC014446E7E9 /* SharedAppGroup.swift in Sources */,
 				3BC2433F62F127D2C56566B9 /* AudioCapture.swift in Sources */,
 				5BC8F4098F213306E9F81E84 /* RecordingModel.swift in Sources */,
+				31328386D29D453D90444543 /* VoiceTyping.swift in Sources */,
+				7A7DE8208BFAC5DFBD987C8B /* KeyboardCompanion.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E42962323B995A21752A8A34 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E017E63DB50E64D2C0C4E84A /* KeyboardViewController.swift in Sources */,
+				2BEE01EF7D9C439F48D80429 /* SharedAppGroup.swift in Sources */,
+				3E55D3F64FE06DB093CA4C26 /* VoiceTyping.swift in Sources */,
+				698F326C1B6F123DD8DEA376 /* Theme.swift in Sources */,
+				552A44DA928E3B4002D42A51 /* OnDeviceModel.swift in Sources */,
+				F2AE1527D1E65238D8DB0A6D /* Config.swift in Sources */,
+				3F80E6C92488AA89CD95FE91 /* Credentials.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -580,6 +670,12 @@
 			target = E10000000000000000000001 /* MightyMouse */;
 			targetProxy = 2AC366CF86788295B55EF131 /* PBXContainerItemProxy */;
 		};
+		C9B343F6E756A7F9C5FF3652 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = MightyMouseKeyboard;
+			target = E7B0480DB9305AF13E5D425B /* MightyMouseKeyboard */;
+			targetProxy = 423138E4BC2E47FDB68AC3B6 /* PBXContainerItemProxy */;
+		};
 		EF655C9BD2D214C7DED39F33 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			name = MightyMouseWidgets;
@@ -616,6 +712,41 @@
 			};
 			name = Release;
 		};
+		5D0053E02FE4EE77A4F7280D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				"CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_ENTITLEMENTS = MightyMouseKeyboard/MightyMouseKeyboard.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 22;
+				DEVELOPMENT_TEAM = BZJ35GS989;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MightyMouseKeyboard/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.10;
+				MM_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZnpzeHVzbHZjZWFqbHhtdnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxOTcwNDMsImV4cCI6MjA5NTc3MzA0M30.EvljnMIt7bg-TKiyvu87YwJ0njL_D0tfvtHEp-bQDCo";
+				MM_SUPABASE_REF = nyfzsxuslvceajlxmvry;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.dev.keyboard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
 		A2B1C919ECABEF82BFB40F89 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -642,6 +773,43 @@
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
+		};
+		B9CA70AC54E61926F34E511C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				"CODE_SIGNING_ALLOWED[sdk=iphonesimulator*]" = NO;
+				"CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]" = NO;
+				CODE_SIGN_ENTITLEMENTS = MightyMouseKeyboard/MightyMouseKeyboard.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 22;
+				DEVELOPMENT_TEAM = BZJ35GS989;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = MightyMouseKeyboard/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.10;
+				MM_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6eWxoZGpqZnN4eWx0dmdubnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUzNDAsImV4cCI6MjA5NTc2MTM0MH0.B_jqHJM4bACKLs3H6_58fVTFz6-xL16hGpy-ynDWAD0";
+				MM_SUPABASE_REF = czylhdjjfsxyltvgnnyh;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.keyboard;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "MM Keyboard App Store";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
 		};
 		C6B319BEEEE6DFA9E6C64F4F /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -711,8 +879,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MM_APPLINKS_HOST = "mightymouse-portal-staging.pages.dev";
 				MM_APS_ENVIRONMENT = development;
-				MM_APPLINKS_HOST = mightymouse-portal-staging.pages.dev;
 				MM_DISPLAY_NAME = "MightyMouse Dev";
 				MM_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZnpzeHVzbHZjZWFqbHhtdnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxOTcwNDMsImV4cCI6MjA5NTc3MzA0M30.EvljnMIt7bg-TKiyvu87YwJ0njL_D0tfvtHEp-bQDCo";
 				MM_SUPABASE_REF = nyfzsxuslvceajlxmvry;
@@ -746,8 +914,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MM_APS_ENVIRONMENT = production;
 				MM_APPLINKS_HOST = app.getmightymouse.com;
+				MM_APS_ENVIRONMENT = production;
 				MM_DISPLAY_NAME = MightyMouse;
 				MM_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6eWxoZGpqZnN4eWx0dmdubnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUzNDAsImV4cCI6MjA5NTc2MTM0MH0.B_jqHJM4bACKLs3H6_58fVTFz6-xL16hGpy-ynDWAD0";
 				MM_SUPABASE_REF = czylhdjjfsxyltvgnnyh;
@@ -918,6 +1086,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		50688E781A45C1FE51064EAB /* Build configuration list for PBXNativeTarget "MightyMouseKeyboard" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B9CA70AC54E61926F34E511C /* Release */,
+				5D0053E02FE4EE77A4F7280D /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		9FAB7303B12C56D1A030E20A /* Build configuration list for PBXNativeTarget "MightyMouseTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

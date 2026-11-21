@@ -1,3 +1,4 @@
+import { friendlyStep } from '../../shared/act-step-label'
 import { join } from 'path'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'fs'
 import { randomUUID } from 'crypto'
@@ -221,15 +222,23 @@ function recentTurnsByBudget(priorTurns: MightyTurn[], budgetTokens: number): Mi
   return kept.reverse()
 }
 
+function stampOf(d: Date): string {
+  return d.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+}
+
 // Shell-transport backends only; local/mlx http adapters use priorMessagesFor's messages[] instead.
 function renderConversation(priorTurns: MightyTurn[], message: string): string {
   const name = PREFS.getMightyName()
   const lines: string[] = []
   const recent = recentTurnsByBudget(priorTurns, CONVO_TOKEN_BUDGET)
+  const now = new Date()
+  lines.push(`NOW: ${stampOf(now)}`)
   if (recent.length > 0) {
-    lines.push('CONVERSATION SO FAR:')
+    lines.push('CONVERSATION SO FAR (messages from an earlier day carry their date; treat them as past, not current):')
     for (const t of recent) {
-      lines.push(`User: ${t.q}`)
+      const when = new Date(t.ts)
+      const earlierDay = !Number.isNaN(when.getTime()) && when.toDateString() !== now.toDateString()
+      lines.push(`${earlierDay ? `[${stampOf(when)}] ` : ''}User: ${t.q}`)
       if (t.a.trim() !== '') lines.push(`${name}: ${t.a}`)
     }
     lines.push('')
@@ -613,7 +622,8 @@ export function runMighty(opts: RunMightyOpts): Promise<MightyChatResult> {
         if (event.kind === RUN_EVENT.text) {
           streamedText = streamedText === '' ? event.text : `${streamedText}\n\n${event.text}`
         } else if (event.kind === RUN_EVENT.tool_start) {
-          const row: ToolCallSummary = { name: event.name, inputPreview: toolCallInputPreview(event.input), ok: true }
+          const say = friendlyStep(event, toolCalls.length) ?? undefined
+          const row: ToolCallSummary = { name: event.name, inputPreview: toolCallInputPreview(event.input), ok: true, ...(say ? { say } : {}) }
           openToolCalls.set(event.id, row)
           toolCalls.push(row)
         } else if (event.kind === RUN_EVENT.tool_end) {

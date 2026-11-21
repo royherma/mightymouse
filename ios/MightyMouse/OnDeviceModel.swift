@@ -95,10 +95,22 @@ enum OnDeviceModel {
         return cleaned.count < note.count * 2 / 3 ? note : cleaned
     }
 
+    static func rewrite(_ text: String, instruction: String) async throws -> String {
+        try await complete(
+            instructions: "\(instruction) Keep the same language. Write like a person texting: plain words, no em dashes, no emoji or greetings the original did not have. Reply with the rewritten text and nothing else.",
+            prompt: text
+        )
+    }
+
     /// Answers `question` on-device. Throws `Unavailable` when the model can't
     /// run, so the caller can speak the reason rather than a generic failure.
     static func answer(to question: String) async throws -> String {
         try await complete(instructions: instructions, prompt: question)
+    }
+
+    static func plain(_ text: String) -> String {
+        text.replacingOccurrences(of: #"\s*[—–]\s*"#, with: " - ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private static func complete(instructions: String, prompt: String) async throws -> String {
@@ -112,7 +124,7 @@ enum OnDeviceModel {
         let session = LanguageModelSession(instructions: instructions)
         let options = GenerationOptions(maximumResponseTokens: maxTokens)
         let response = try await session.respond(to: prompt, options: options)
-        return response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+        return plain(response.content)
         #else
         throw Unavailable.unsupportedOS
         #endif
@@ -122,3 +134,4 @@ enum OnDeviceModel {
 extension OnDeviceModel.Unavailable: LocalizedError {
     var errorDescription: String? { message }
 }
+

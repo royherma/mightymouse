@@ -136,3 +136,34 @@ describe('PREFS', () => {
     expect(PREFS.getPhoneRemoteSkin()).toBe(CONFIG.PHONE_REMOTE.SKIN_DEFAULT)
   })
 })
+
+describe('PREFS timing line', () => {
+  beforeAll(async () => {
+    mkdirSync(appDir, { recursive: true })
+    PREFS = (await import('../prefs')).PREFS
+  })
+
+  afterAll(() => rmSync(HOME, { recursive: true, force: true }))
+
+  beforeEach(() => {
+    for (const f of readdirSync(appDir)) unlinkSync(join(appDir, f))
+  })
+
+  it('is off for someone who never touched the switch', () => {
+    expect(PREFS.getShowTiming()).toBe(false)
+  })
+
+  it('someone who already turned it on, or off, keeps that choice', () => {
+    writeFileSync(file('transcribe-time-toggle.txt'), '1\n', 'utf-8')
+    expect(PREFS.getShowTiming()).toBe(true)
+    writeFileSync(file('transcribe-time-toggle.txt'), '0', 'utf-8')
+    expect(PREFS.getShowTiming()).toBe(false)
+  })
+
+  it('round-trips through the switch', () => {
+    PREFS.setShowTiming(true)
+    expect(PREFS.getShowTiming()).toBe(true)
+    PREFS.setShowTiming(false)
+    expect(PREFS.getShowTiming()).toBe(false)
+  })
+})

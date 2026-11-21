@@ -102,6 +102,7 @@ export async function runLiveTurn(
   turnUsage = undefined
   turnHops = []
   turnFast = 0
+  turnSteps = []
   turnStartedAt = startedAt
   turnFirstSound = null
   takeJevInputTokens()
@@ -281,7 +282,7 @@ async function answerTurn(said: string, ack: Ack): Promise<LiveTurnResult> {
   const lines = done.map((d) => d.line)
   if (done.length === clauses.length) {
     turnRoute = `fast×${done.length}`
-    recordTalkTurn('voice', said, lines.join(' · '))
+    recordTalkTurn('voice', said, lines.join(' · '), { steps: turnSteps, durationMs: Date.now() - quickAt })
     if (done.some((d) => d.answer)) return voicedReply(said, lines.join(' '), undefined, SPOKEN_SENTENCES)
     showHideoutTurn(said, lines.join(' · '), [])
     return actionDone(said, lines.join(' · '))
@@ -438,6 +439,7 @@ let turnRoute = ''
 let turnUsage: TurnUsage | undefined
 let turnHops: HideoutHop[] = []
 let turnFast = 0
+let turnSteps: string[] = []
 let turnStartedAt = 0
 let turnFirstSound: number | null = null
 
@@ -460,7 +462,8 @@ function logTurn(heard: string, result: LiveTurnResult, startedAt: number): void
 }
 
 function sendStep(detail: string): void {
-  sendCompanionStageEvent({ stage: 'step', provider: 'decide', state: 'start', detail, ts: Date.now() })
+  turnSteps.push(detail)
+  sendCompanionStageEvent({ stage: 'step', provider: 'decide', state: 'start', detail, say: detail, ts: Date.now() })
 }
 
 // A done action is shown and chimed, not read aloud: speech synthesis costs ~2s.

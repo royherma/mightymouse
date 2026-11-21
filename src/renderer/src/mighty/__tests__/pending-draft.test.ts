@@ -78,6 +78,12 @@ describe('splitPendingDraft', () => {
     expect(splitPendingDraft(withDraft, false).draft).toBe('transcript')
   })
 
+  it('a sent message whose reply never came stays a message, not a draft', () => {
+    const sent = { ...turn('book the 9am train', ''), run_id: 'r1' }
+    const view = splitPendingDraft(session([turn('hi', 'hello'), sent]), false)
+    expect(view).toEqual({ turns: [turn('hi', 'hello'), sent], draft: '' })
+  })
+
   it('does not mutate the session it reads', () => {
     const turns = [turn('hi', 'hello'), turn('unsent', '')]
     const s = session(turns)

@@ -64,13 +64,19 @@ function buildWindow(height = HEIGHT): BrowserWindow {
   return win
 }
 
-async function captureBehind(win: BrowserWindow): Promise<void> {
+export async function shootBehindReply(): Promise<string | undefined> {
+  const win = getReplyWindow()
+  return win ? captureBehind(win, false) : undefined
+}
+
+async function captureBehind(win: BrowserWindow, announce = true): Promise<string | undefined> {
   const { captureScreenUnderCursor } = await import('./reply-focus')
   // protection takes effect a beat after it is set; on only for our shot so the user's own screenshots still show the window
   win.setContentProtection(true)
   await new Promise((done) => setTimeout(done, PROTECTION_SETTLE_MS))
   const path = await captureScreenUnderCursor().finally(() => !win.isDestroyed() && win.setContentProtection(false))
-  if (path && !win.isDestroyed()) win.webContents.send(CHANNELS.replyWindowScreen, path)
+  if (announce && path && !win.isDestroyed()) win.webContents.send(CHANNELS.replyWindowScreen, path)
+  return path
 }
 
 export function getReplyWindow(): BrowserWindow | null {

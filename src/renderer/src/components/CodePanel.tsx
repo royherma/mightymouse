@@ -3,6 +3,7 @@ import { ArchiveSuggestions, PriorityToolbar, PrioritySession } from './SessionP
 import { useSessionPriority } from '../hooks/useSessionPriority'
 import { PRIORITY_COPY, priorityKey } from '../../../shared/session-priority'
 import { Button } from './Button'
+import { moveProject } from './ProjectIcon'
 import type { ReasoningEffort } from '../../../shared/model-sources'
 import { SegmentedControl, type SegmentItem } from './SegmentedControl'
 import './SessionTable.css'
@@ -1114,6 +1115,7 @@ export function CodePanel(props: {
     <AgentProjectList
       heading={listHeading}
       groups={agentGroups}
+      onMoveProject={(dragged, target, after) => setProjects(moveProject(projects, dragged, target, after))}
       archived={archive.showArchived}
       archivedCount={archive.count}
       onToggleArchived={() => { archive.setShowArchived(!archive.showArchived); setDetailLabel(null) }}

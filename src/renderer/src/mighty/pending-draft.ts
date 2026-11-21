@@ -29,7 +29,7 @@ export function splitPendingDraft(
 ): SessionView {
   const all = session?.turns ?? []
   const last = all[all.length - 1]
-  if (!inFlight && last && last.a === '' && last.q !== '') {
+  if (!inFlight && last && last.a === '' && last.q !== '' && !last.run_id) {
     return { turns: all.slice(0, -1), draft: last.q }
   }
   return { turns: all, draft: '' }

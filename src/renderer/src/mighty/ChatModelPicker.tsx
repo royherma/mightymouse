@@ -1,12 +1,15 @@
 import { JSX, useCallback, useEffect, useState } from 'react'
 import { Brain, ChevronDown } from 'lucide-react'
 import {
+  ModelInfoCard,
   ModelMenu,
+  ProviderInfoCard,
   setupRowFor,
   type MenuGroup,
   type MenuItem
 } from '../components/AgentModelPicker'
 import { ThinkingDial } from '../../../shared/model-picker/ThinkingDial'
+import { parseGroupHover } from '../../../shared/model-picker/ModelMenu'
 import { useModelCatalog } from '../components/ModelPicker'
 import { MODELS } from '../SettingsApp'
 import { ProviderIcon, providerIconFor, type ProviderIconId } from '../components/ProviderIcon'
@@ -14,7 +17,7 @@ import { LOCAL_BACKEND, MLX_BACKEND, localModelLabel, prettyOllamaModel } from '
 import { CONFIG } from '../../../shared/config'
 import { opencodeAccountName, opencodeModelLabel } from '../../../shared/model-label'
 import { MODEL_SOURCES, showsOn, type SourceModel } from '../../../shared/model-sources'
-import type { AgentModelOption, AgentSetupProgress, BackendId } from '../../../shared/types'
+import type { AgentModelOption, AgentSetupProgress, BackendId, ModelInfo } from '../../../shared/types'
 
 // Code has its own picker (components/AgentModelPicker.tsx) - a model-list change is a decision for both.
 
@@ -68,6 +71,13 @@ export function ChatModelPicker({
   const [mlx, setMlx] = useState<string[]>([])
   const [sourced, setSourced] = useState<SourceModel[]>([])
   const [setup, setSetup] = useState<AgentSetupProgress | 'failed' | undefined>()
+  const [infos, setInfos] = useState<Record<string, ModelInfo>>({})
+  const [hover, setHover] = useState<string | null>(null)
+
+  useEffect(() => {
+    const ids = [...catalog.map((c) => `mightymouse:${c.id}`), ...sourced.map((s) => `${s.source}:${s.model}`)]
+    if (ids.length > 0) void window.api.chatModelInfo(ids).then(setInfos).catch(() => undefined)
+  }, [catalog, sourced])
 
   const load = useCallback(async (): Promise<string[]> => {
     const [p, l, m, picks, src] = await Promise.all([
@@ -241,6 +251,33 @@ export function ChatModelPicker({
       <p>{L.MODEL_PICK_THINK_NOTE}</p>
     </ThinkingDial>
   ) : undefined
+  const infoFor = (id: string): ModelInfo | undefined =>
+    infos[id] ?? planOptions.find((o) => `${o.harness}:${o.model}` === id)?.info
+  const hasSide = thinks || Object.keys(infos).length > 0 || planOptions.some((o) => o.info)
+  const cardFor = (id: string): JSX.Element | undefined => {
+    const item = items.find((i) => i.id === id)
+    if (!item) return undefined
+    const group = groups.find((g) => g.key === item.group)
+    const sub = [group?.name, item.section].filter(Boolean).join(' · ')
+    const info = item.hero || item.group === ACCOUNTS ? { name: item.label, description: item.sub } : infoFor(id)
+    return <ModelInfoCard icon={item.icon ?? 'mightymouse'} label={item.label} sub={sub} info={info} />
+  }
+  const hoverGroup = hover ? parseGroupHover(hover) : null
+  const groupCard = hoverGroup && (() => {
+    const group = groups.find((g) => g.key === hoverGroup.group)
+    if (!group || group.key === ACCOUNTS) return undefined
+    const inGroup = items.filter((i) => i.group === group.key && !i.hero && i.id.split(':')[1] !== '' && (!hoverGroup.section || i.section === hoverGroup.section))
+    return (
+      <ProviderInfoCard
+        icon={hoverGroup.section === 'OpenRouter' ? 'openrouter' : group.icon ?? 'mightymouse'}
+        title={hoverGroup.section ?? group.name}
+        sub={hoverGroup.section ? group.name : ''}
+        infos={inGroup.map((i) => infoFor(i.id))}
+      />
+    )
+  })()
+  const panel = !hasSide ? undefined
+    : groupCard ?? (hover && cardFor(hover)) ?? side ?? cardFor(`${backend}:${modelOf(backend, prefs)}`)
   const footer = !thinks && pickedName ? (
     <div className="mm-pick-note">
       <Brain size={14} strokeWidth={2} />
@@ -258,7 +295,8 @@ export function ChatModelPicker({
         setupRows={local.length === 0 ? [setupRowFor('ollama', setup, setUpLocal)] : []}
         wide
         footer={footer}
-        side={side}
+        side={panel}
+        onHover={hasSide ? setHover : undefined}
         title={CONFIG.BACKEND_META[backend]?.tip ?? ''}
         triggerClassName="inline-flex w-fit max-w-[14rem] items-center gap-1.5 rounded-lg border border-surface3 bg-surface2 px-2 py-1 text-left text-xs font-medium text-on-surface hover:bg-surface1"
         trigger={

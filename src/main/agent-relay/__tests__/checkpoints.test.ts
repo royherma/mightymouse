@@ -1,5 +1,5 @@
 import { execFileSync } from 'child_process'
-import { existsSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync, unlinkSync, utimesSync, writeFileSync } from 'fs'
 import { tmpdir } from 'os'
 import { join } from 'path'
 import { afterAll, describe, expect, it, vi } from 'vitest'
@@ -98,4 +98,25 @@ describe('checkpoints across several messages', () => {
     expect(repo.read('a.txt')).toBe('v2')
   }, 30_000)
 
+  it('an edit in the same second as the last git write, same size, still lands in the checkpoint', async () => {
+    const repo = fresh()
+    repo.run('config', 'core.trustctime', 'false')
+    const sameSecond = new Date('2026-01-01T00:00:00Z')
+    repo.put('a.txt', 'v0')
+    utimesSync(join(repo.dir, 'a.txt'), sameSecond, sameSecond)
+    repo.run('add', '.')
+    repo.run('commit', '-qm', 'base')
+    utimesSync(join(repo.dir, '.git', 'index'), sameSecond, sameSecond)
+    const session = { sessionId: 'sess-racy', cwd: repo.dir }
+    const t1 = 4_000_000
+
+    await saveCheckpoint(session, t1)
+    repo.put('a.txt', 'v1')
+    utimesSync(join(repo.dir, 'a.txt'), sameSecond, sameSecond)
+    await saveCheckpoint(session, t1 + 1_000)
+    repo.put('a.txt', 'v2')
+
+    expect(await toggleTurnUndo(session, t1 + 1_000, ['a.txt'])).toEqual({ ok: true, state: 'putBack', files: 1 })
+    expect(repo.read('a.txt')).toBe('v1')
+  }, 30_000)
 })

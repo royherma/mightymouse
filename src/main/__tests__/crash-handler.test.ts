@@ -89,3 +89,28 @@ describe('what counts as a crash', () => {
     expect(trackError.mock.calls[0][0]).toMatchObject({ kind: 'unhandledRejection', message: 'plain string reason' })
   })
 })
+
+describe('a helper process going away', () => {
+  async function childGone(): Promise<(details: { type: string; reason: string; exitCode: number }) => void> {
+    await installAndGrab()
+    const { app } = await import('electron')
+    const call = vi.mocked(app.on).mock.calls.find(([event]) => event === 'child-process-gone')
+    return (details) => (call?.[1] as (e: unknown, d: unknown) => void)({}, details)
+  }
+
+  it('a GPU helper SIGTERMed at logout or shutdown is not a crash', async () => {
+    const gone = await childGone()
+    gone({ type: 'GPU', reason: 'killed', exitCode: 15 })
+    expect(trackError).not.toHaveBeenCalled()
+  })
+
+  it('a helper killed any other way, or crashing with exit 15, is still reported', async () => {
+    const gone = await childGone()
+    gone({ type: 'Utility', reason: 'killed', exitCode: 9 })
+    gone({ type: 'GPU', reason: 'crashed', exitCode: 15 })
+    expect(trackError.mock.calls.map((c) => (c[0] as { message: string }).message)).toEqual([
+      'Utility killed (exit 9)',
+      'GPU crashed (exit 15)'
+    ])
+  })
+})

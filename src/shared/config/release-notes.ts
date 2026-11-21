@@ -4,6 +4,48 @@
 
 export const RELEASE_NOTES = [
   {
+    version: '0.58.0',
+    date: '2026-11-21',
+    changes: [
+      {
+        icon: '💬',
+        title: 'Ask your computer to do it for you.',
+        detail:
+          'Computer chat sits in your sidebar and on your phone. Ask for something and it shows WHO will do it, then sends back a picture of the result.'
+      },
+      {
+        icon: '🎙️',
+        title: 'Hey Mighty wakes for you, not the room.',
+        detail:
+          'Voice mode waits for its own name, so chatter nearby never sets it off. While it works, the pill says each step in plain words.'
+      },
+      {
+        icon: '🤖',
+        title: 'Antigravity joins your coding agents.',
+        detail:
+          "Run Google's Antigravity beside Claude and Codex, with plan mode and resume. Chat can use its Gemini and Claude models too."
+      },
+      {
+        icon: '📊',
+        title: "Every AI plan's limits in ONE table.",
+        detail:
+          'Your AI plans shows 5-hour and weekly bars for each Claude, ChatGPT and Google account, with Reconnect and Remove in its menu.'
+      },
+      {
+        icon: '🌐',
+        title: 'Start a NEW agent right from the page.',
+        detail:
+          'On a tab with no agent, the box over your browser starts one in the project serving that page, with its address attached. Closing it puts you back in your browser.'
+      },
+      {
+        icon: '📁',
+        title: 'Put your projects in YOUR order.',
+        detail:
+          'Drag a project in the sidebar to move it. Your phone and the web app list them in the same order.'
+      }
+    ]
+  },
+  {
     version: '0.57.0',
     date: '2026-11-16',
     changes: [

@@ -6,6 +6,7 @@ import { formatTabName, dayKeyFor } from './workspace-naming'
 import { CONFIG } from '../../../shared/config'
 import { type Snippet } from '../../../shared/fuzzy'
 import { type TimelineItem } from '../lib/run-events'
+export { hasRealExchange } from '../../../shared/types'
 import type { MightySession, MightyRunSource, MightySchedule, MightyOutputFormat, ChatTabNameFormat } from '../../../shared/types'
 
 // Mighty — the standing personal agent window (?window=mighty). Four tabs:
@@ -61,13 +62,6 @@ export function sourceGroupOf(s: MightySession): string {
   return SIDEBAR_SOURCE_GROUPS.find((g) => g.sources.includes(source as MightyRunSource))?.key ?? 'chat'
 }
 
-/** Was anything actually sent in this conversation? A capture mints a session whose
- *  single turn holds the transcript with an empty `a` (capture-actions.ts) — nothing
- *  ever reached a model, so it's a row with no conversation behind it. Any turn with
- *  a reply, or any second turn, means the user went on to use it. */
-export function hasRealExchange(s: MightySession): boolean {
-  return s.turns.some((t) => (t.a ?? '').trim() !== '')
-}
 
 export const TABS: Array<{ id: Tab; label: string; icon: typeof MessageSquare }> = [
   { id: 'chat', label: 'Chat', icon: MessageSquare },

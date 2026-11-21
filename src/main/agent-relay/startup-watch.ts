@@ -1,4 +1,5 @@
 import { mkdirSync } from 'fs'
+import { tmpdir } from 'os'
 import { devLog } from '../../shared/env'
 import type { StartupPrompt } from '../../shared/types'
 import { PATHS } from '../store/paths'
@@ -12,6 +13,7 @@ const QUIET_MS = 10 * 60_000
 const CARD_MS = 60 * 60_000
 const TYPE_ROW = /^Type something/
 const TRUST_YES = /^Yes\b.*\btrust/i
+const ADD_DIR_YES = /^Yes, add\b/i
 
 interface Card {
   id: string
@@ -59,7 +61,7 @@ function verdict(card: Card): Verdict {
   return request.status === 'resolved' && index !== -1 ? { kind: 'picked', index } : { kind: 'left' }
 }
 
-async function watch(pane: string, from: string, cwd: string): Promise<void> {
+async function watch(pane: string, from: string, cwd: string, ownDirs: string[]): Promise<void> {
   const quietBy = Date.now() + QUIET_MS
   let card: Card | null = null
   for (;;) {
@@ -83,16 +85,22 @@ async function watch(pane: string, from: string, cwd: string): Promise<void> {
       card = null
       continue
     }
-    const trust = cwd === PATHS.CODE_NO_PROJECT ? prompt.options.findIndex((option) => TRUST_YES.test(option)) : -1
+    const asked = prompt.question.replace(/\s+/g, '')
+    const ownDir = ownDirs.some((dir) => asked.includes(dir))
+    const trust = ownDir
+      ? prompt.options.findIndex((option) => ADD_DIR_YES.test(option))
+      : cwd === PATHS.CODE_NO_PROJECT ? prompt.options.findIndex((option) => TRUST_YES.test(option)) : -1
     if (trust !== -1) await answerStartup(pane, trust)
     else card = await ask(prompt, from, cwd)
   }
 }
 
-export function watchStartup(input: { pane: string; from: string; cwd: string }): void {
+export function watchStartup(input: { pane: string; from: string; cwd: string; readDirs?: string[] }): void {
   if (watched.has(input.pane)) return
   watched.add(input.pane)
-  void watch(input.pane, input.from, input.cwd)
+  const squash = (path: string): string => path.replace(/\s+/g, '')
+  const ownDirs = (input.readDirs ?? []).filter((dir) => dir.startsWith(tmpdir())).map(squash)
+  void watch(input.pane, input.from, input.cwd, ownDirs)
     .catch((err) => devLog.error('[startup-watch] failed', err))
     .finally(() => watched.delete(input.pane))
 }

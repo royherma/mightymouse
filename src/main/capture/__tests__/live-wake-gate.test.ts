@@ -15,6 +15,7 @@ const h = vi.hoisted(() => ({
 
 vi.mock('../../companion-window', () => ({ sendCompanionStageEvent: vi.fn(), sendToCompanion: vi.fn(), isCompanionMicPaused: () => false }))
 vi.mock('../../talk/talk-turn', () => ({
+  recordTalkTurn: () => {},
   runTalk: async (_id: string, text: string, start: { events: { runOnComputer: (t: string, s: string) => Promise<unknown> } }) => {
     await start.events.runOnComputer(text, 'computer-chat')
     return { kind: 'computer', ok: true, reply: '', target: '', sessionId: 'computer-chat' }
@@ -169,5 +170,19 @@ describe('live words while talking', () => {
     expect(await runLiveDraft(WAV)).toEqual({ text: 'so anyway the meeting', addressed: false })
     expect(h.prime).not.toHaveBeenCalled()
     expect(h.sound).not.toHaveBeenCalled()
+  })
+})
+
+describe('the wake model vouches for a misheard name', () => {
+  it('runs the request when Parakeet wrote the name as "They might"', async () => {
+    h.heard = 'They might open the calendar'
+    await runLiveTurn(WAV, '', true)
+    expect(h.ask).toHaveBeenCalledWith('open the calendar', 'computer-chat')
+  })
+
+  it('without the wake model the same words are ignored', async () => {
+    h.heard = 'They might open the calendar'
+    expect(await runLiveTurn(WAV, '', false)).toMatchObject({ ignored: true, error: 'not addressed' })
+    expect(h.ask).not.toHaveBeenCalled()
   })
 })

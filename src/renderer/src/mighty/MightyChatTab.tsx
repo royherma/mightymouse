@@ -2,7 +2,7 @@ import { JSX, type ComponentProps, useCallback, useEffect, useLayoutEffect, useM
 import { createPortal } from 'react-dom'
 import { Check, FolderPlus, Folders, LayoutGrid, Loader2, MessageSquare, Pencil, Pin, PinOff, Plus, Search, SlidersHorizontal, SquarePen } from 'lucide-react'
 import { Button } from '../components/Button'
-import { ProjectGroupHeader } from '../components/ProjectIcon'
+import { ProjectGroupHeader, moveProject, useProjectReorder } from '../components/ProjectIcon'
 
 // The user's tree has 1,234 chats in one group - rendering them all is what made the sidebar crawl.
 const SIDEBAR_CHAT_CAP = 5
@@ -236,6 +236,9 @@ export function ChatTab({
   }, [loadProjects, loadSessions])
 
   useEffect(() => window.api.mighty.onProjectsChanged(() => void loadProjects()), [loadProjects])
+  const projectDrag = useProjectReorder((dragged, target, after) =>
+    setProjects(moveProject(projects, dragged, target, after))
+  )
   useEffect(() => window.api.mighty.onTurnAppended(() => void loadSessions()), [loadSessions])
 
   useEffect(() => {
@@ -869,49 +872,51 @@ export function ChatTab({
     const collapsed = folded[p.id] === true
     const expanded = expandedLists[p.id] === true || query !== ''
     return (
-      <div key={p.id} className="mb-1">
-        <ProjectGroupHeader
-          name={p.name}
-          count={groupSessions.length}
-          collapsed={collapsed}
-          icon={p.icon}
-          imagePath={p.imagePath}
-          onToggle={() => fold(p.id, !collapsed)}
-          actions={
-            <>
-              <Button
-                variant="icon"
-                type="button"
-                onClick={() => {
-                  void newChatInActivePane(p.id)
-                  onShowChat()
-                }}
-                className="opacity-0 group-hover:opacity-100"
-                title="New chat in this project"
-              >
-                <Plus size={13} />
-              </Button>
-              <Button
-                variant="icon"
-                type="button"
-                onClick={() => void toggleProjectPin(p)}
-                className="opacity-0 group-hover:opacity-100"
-                title={p.pinned ? 'Unpin' : 'Pin to top'}
-              >
-                {p.pinned ? <PinOff size={12} /> : <Pin size={12} />}
-              </Button>
-              <Button
-                variant="icon"
-                type="button"
-                onClick={() => setEditingProject(p)}
-                className="opacity-0 group-hover:opacity-100"
-                title="Project settings"
-              >
-                <Pencil size={12} />
-              </Button>
-            </>
-          }
-        />
+      <div key={p.id} className="mb-1" {...projectDrag.dropProps(p.id)}>
+        <div {...projectDrag.handleProps(p.id)}>
+          <ProjectGroupHeader
+            name={p.name}
+            count={groupSessions.length}
+            collapsed={collapsed}
+            icon={p.icon}
+            imagePath={p.imagePath}
+            onToggle={() => fold(p.id, !collapsed)}
+            actions={
+              <>
+                <Button
+                  variant="icon"
+                  type="button"
+                  onClick={() => {
+                    void newChatInActivePane(p.id)
+                    onShowChat()
+                  }}
+                  className="opacity-0 group-hover:opacity-100"
+                  title="New chat in this project"
+                >
+                  <Plus size={13} />
+                </Button>
+                <Button
+                  variant="icon"
+                  type="button"
+                  onClick={() => void toggleProjectPin(p)}
+                  className="opacity-0 group-hover:opacity-100"
+                  title={p.pinned ? 'Unpin' : 'Pin to top'}
+                >
+                  {p.pinned ? <PinOff size={12} /> : <Pin size={12} />}
+                </Button>
+                <Button
+                  variant="icon"
+                  type="button"
+                  onClick={() => setEditingProject(p)}
+                  className="opacity-0 group-hover:opacity-100"
+                  title="Project settings"
+                >
+                  <Pencil size={12} />
+                </Button>
+              </>
+            }
+          />
+        </div>
         {!collapsed && (
           <>
             {draftProjectId === p.id && renderDraftRow()}

@@ -6,10 +6,11 @@
 // running concurrently never cross-talk. See the onPhase/onEvent sessionId filter below
 // — that's the bugfix this multi-pane feature required (ChatTab never needed it because
 // only one session was ever live).
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Download,
   MessageSquare,
+  RotateCcw,
   ArrowUp,
   Square,
   Volume2,
@@ -26,6 +27,7 @@ import { useAttachments, useComposerInbox } from '../hooks/useAttachments'
 import { useInterval } from '../hooks/useInterval'
 import { CONFIG } from '../../../shared/config'
 import { devLog } from '../../../shared/env'
+import { builtDay } from '../../../shared/built'
 import { Message } from './MightyConversationView'
 import { QUICK_START_PROMPTS, EMPTY_TIMELINE, routeFor, type SendRoute } from './mighty-shared'
 import { ChatModelPicker } from './ChatModelPicker'
@@ -685,6 +687,12 @@ export function ConversationPane({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [turns])
   const inFlight = busy || running
+  const isComputerChat = session?.title === TALK.SESSION_TITLE
+  const startFresh = async (): Promise<void> => {
+    const sid = sessionIdRef.current
+    if (!sid || !(await window.api.mighty.setSessionArchived(sid, true))) return
+    onSessionCreated((await window.api.mighty.talkSession()).id)
+  }
   useEffect(() => {
     const steer = steerRef.current
     if (inFlight || !steer) return
@@ -801,7 +809,7 @@ export function ConversationPane({
           />
           <div className="agent-draft-row">
             <AttachButton onClick={() => void att.pick()} />
-            {(scopeProjectId || projects.some((p) => !p.archived)) && (
+            {!isComputerChat && (scopeProjectId || projects.some((p) => !p.archived)) && (
               <ProjectScopePicker
                 projects={projects}
                 valueId={scopeProjectId}
@@ -925,6 +933,18 @@ export function ConversationPane({
         >
           {spoken.enabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
         </Button>
+        {isComputerChat && turns.length > 0 && !inFlight && (
+          <Button
+            variant="icon"
+            type="button"
+            onClick={() => void startFresh()}
+            title={TALK_LABELS.startFreshHint}
+            aria-label={TALK_LABELS.startFresh}
+            className="shrink-0"
+          >
+            <RotateCcw size={15} />
+          </Button>
+        )}
         {exportDone && <span className="text-xs text-muted shrink-0">{CONFIG.UI_LABELS.CHAT_EXPORT_DONE}</span>}
         {turns.length > 0 && (
           <div className="relative shrink-0" ref={exportMenuRef}>
@@ -938,7 +958,7 @@ export function ConversationPane({
               <Download size={15} />
             </Button>
             {exportMenuOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-48 rounded-lg border border-surface3 bg-surface1 shadow-lg py-1 z-10">
+              <div className="absolute right-0 top-full mt-1.5 w-48 rounded-lg border border-surface3 bg-[var(--surface-solid)] shadow-lg py-1 z-10">
                 <Button
                   variant="bare"
                   onClick={() => void exportChat('markdown')}
@@ -1000,8 +1020,11 @@ export function ConversationPane({
             </div>
           )}
           {turns.map((t, i) => (
+            <Fragment key={i}>
+            {builtDay(t.ts) !== (i === 0 ? 'Today' : builtDay(turns[i - 1].ts)) && (
+              <div className="my-2 text-center text-micro font-medium text-muted">{builtDay(t.ts)}</div>
+            )}
             <Message
-              key={i}
               name={name}
               q={t.q}
               a={t.a}
@@ -1030,6 +1053,7 @@ export function ConversationPane({
                   : undefined
               }
             />
+            </Fragment>
           ))}
           {inFlight && talkOffer && (
             <Row gap={1.5} className="flex-wrap text-xs text-muted">

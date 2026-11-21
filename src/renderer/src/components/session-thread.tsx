@@ -36,6 +36,7 @@ import './session-thread.css'
 /** 20, not the wire's 50: a whole afternoon of turns buries the actions above it. */
 const TIMELINE_MAX = 20
 const LONG_GAP_MS = 5 * 60_000
+const BTW_HINT_EVERY = 3
 
 /** A sent turn is NOT a fake card: the approve path reads that type off the store. */
 type Turn =
@@ -578,7 +579,7 @@ function RunningHelpers(props: { helpers: AgentHelper[] }): React.JSX.Element | 
 export type BrowserPage = { url: string; title: string }
 export const BrowserPageContext = createContext<(() => BrowserPage | undefined) | null>(null)
 
-export type ReplyScreen = { path?: string; on: boolean; setOn: (on: boolean) => void; clear: () => void }
+export type ReplyScreen = { path?: string; on: boolean; setOn: (on: boolean) => void; clear: () => void; fresh: () => Promise<string | undefined> }
 export const ReplyScreenContext = createContext<ReplyScreen | undefined>(undefined)
 
 const SUBAGENT_PREFIX = 'Do this in a subagent so you stay free for my next message:\n\n'
@@ -748,6 +749,8 @@ export function SessionThread(props: {
     (stoppedAt !== undefined && (last?.at ?? 0) <= stoppedAt) ||
     (last?.kind === 'said' && isInterruptMarker(last.text))
   const thinking = (working || awaitingReply) && !stopHeld
+  const askCount = turns.filter((t) => t.kind === 'sent' || (t.kind === 'said' && t.role === 'you')).length
+  const showBtwHint = askCount % BTW_HINT_EVERY === 1
   const helpers = useRunningHelpers(sessionRef, thinking)
   const agentSpokeLast = !thinking && last?.kind === 'said' && last.role === 'agent'
 
@@ -843,6 +846,10 @@ export function SessionThread(props: {
     // something to work on without a word of prose.
     if ((!text && paths.length === 0) || !canReply || sendingRef.current) return false
     sendingRef.current = true
+    if (replyScreen?.on && !replyScreen.path) {
+      const shot = await replyScreen.fresh()
+      if (shot) paths.push(shot)
+    }
     setSendFailed(false)
     setResumeFailed(undefined)
     const sentAt = Date.now()
@@ -1162,7 +1169,7 @@ export function SessionThread(props: {
             canReply
               ? att.attachments.length > 0
                 ? CONFIG.UI_LABELS.CODE_ATTACHED_PLACEHOLDER
-                : thinking && isClaude
+                : thinking && isClaude && showBtwHint
                   ? CONFIG.UI_LABELS.CODE_SESSION_BUSY_PLACEHOLDER
                   : CONFIG.UI_LABELS.CODE_SESSION_REPLY_PLACEHOLDER
               : booting || resumed

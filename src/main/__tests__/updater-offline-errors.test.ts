@@ -16,7 +16,9 @@ describe('isOfflineOrServerHiccup', () => {
     'net::ERR_CONNECTION_TIMED_OUT',
     'net::ERR_HTTP2_PROTOCOL_ERROR',
     'HttpError: 503 Service Unavailable\n"method: GET url: https://example.com/latest-mac.yml"',
-    '502 Bad Gateway'
+    '502 Bad Gateway',
+    'HttpError: 618 \n"method: GET url: https://github.com/x/y/releases/download/v1/latest-mac.yml"\nData:\n jwt:expired',
+    '618 jwt:expired'
   ])('a laptop going offline or the server blinking is not reported: %s', (message) => {
     expect(isOfflineOrServerHiccup(message)).toBe(true)
   })
@@ -27,7 +29,9 @@ describe('isOfflineOrServerHiccup', () => {
     'ENOSPC: no space left on device',
     'sha512 checksum mismatch, expected abc, got def',
     'net::ERR_CERT_AUTHORITY_INVALID',
-    'Update file 5123 bytes short'
+    'Update file 5123 bytes short',
+    'HttpError: 418 \n"method: GET url: https://example.com/latest-mac.yml"',
+    'Downloaded 618 of 900 bytes, sha512 mismatch'
   ])('a real update failure still gets reported: %s', (message) => {
     expect(isOfflineOrServerHiccup(message)).toBe(false)
   })

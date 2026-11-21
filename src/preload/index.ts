@@ -268,6 +268,7 @@ const api = {
     ipcRenderer.invoke(CHANNELS.codeStartupPeek, pane),
   codeStartupAnswer: (pane: string, index: number): Promise<boolean> =>
     ipcRenderer.invoke(CHANNELS.codeStartupAnswer, pane, index),
+  codeStartupReveal: (pane: string): Promise<boolean> => ipcRenderer.invoke(CHANNELS.codeStartupReveal, pane),
   // Incognito flipped from any surface (tray or Settings) — keep badges live.
   onIncognitoChanged: (callback: (on: boolean) => void) => {
     const handler = (_: unknown, on: boolean): void => callback(on)
@@ -344,6 +345,7 @@ const api = {
   replyWindowAuto: (on?: boolean): Promise<boolean> => ipcRenderer.invoke(CHANNELS.replyWindowAuto, on),
   replyWindowApp: (): Promise<ReplyWindowApp | null> => ipcRenderer.invoke(CHANNELS.replyWindowApp),
   replyWindowShowOver: (bundleId: string, on: boolean) => ipcRenderer.send(CHANNELS.replyWindowShowOver, bundleId, on),
+  replyWindowShot: (): Promise<string | undefined> => ipcRenderer.invoke(CHANNELS.replyWindowShot),
   onReplyWindowScreen: (callback: (path: string) => void) => {
     const handler = (_: unknown, path: string): void => callback(path)
     ipcRenderer.on(CHANNELS.replyWindowScreen, handler)
@@ -733,6 +735,8 @@ const api = {
       ipcRenderer.invoke(CHANNELS.mightyUpsertProject, project),
     deleteProject: (id: string): Promise<boolean> =>
       ipcRenderer.invoke(CHANNELS.mightyDeleteProject, id),
+    reorderProjects: (ids: string[]): Promise<boolean> =>
+      ipcRenderer.invoke(CHANNELS.mightyReorderProjects, ids),
     assignSessionProject: (sessionId: string, projectId?: string): Promise<boolean> =>
       ipcRenderer.invoke(CHANNELS.mightyAssignSessionProject, sessionId, projectId),
     pickProjectFolder: (
@@ -1326,6 +1330,7 @@ const api = {
   chatSetModelPick: (backend: 'opencode' | 'openrouter' | 'claude' | 'codex' | 'antigravity', model: string) =>
     ipcRenderer.invoke(CHANNELS.chatSetModelPick, backend, model),
   chatSourceModels: () => ipcRenderer.invoke(CHANNELS.chatSourceModels),
+  chatModelInfo: (ids: string[]) => ipcRenderer.invoke(CHANNELS.chatModelInfo, ids),
   codeSetUpAgentProvider: (harness: AgentModelChoice['harness']) =>
     ipcRenderer.invoke(CHANNELS.codeSetUpAgentProvider, harness),
   onAgentSetupProgress: (callback: (payload: AgentSetupProgress) => void): (() => void) => {

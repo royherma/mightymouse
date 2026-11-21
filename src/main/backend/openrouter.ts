@@ -24,6 +24,16 @@ export async function hasOpenRouterKey(): Promise<boolean> {
 }
 
 let modelIds: string[] = []
+export interface OpenRouterMeta {
+  name?: string
+  created?: number
+  description?: string
+  context_length?: number
+  pricing?: { prompt?: string; completion?: string }
+  architecture?: { input_modalities?: string[] }
+}
+const modelMeta = new Map<string, OpenRouterMeta>()
+export const openRouterMeta = (id: string): OpenRouterMeta | undefined => modelMeta.get(id)
 const reasoningKind = new Map<string, 'effort' | 'toggle'>()
 
 export function openRouterThinks(model: string): boolean {
@@ -42,8 +52,9 @@ export async function listOpenRouterModels(): Promise<string[]> {
   if (modelIds.length > 0) return modelIds
   try {
     const res = await fetch(`${API}/models`, { signal: AbortSignal.timeout(10000) })
-    const body = (await res.json()) as { data?: Array<{ id: string; supported_parameters?: string[] }> }
+    const body = (await res.json()) as { data?: Array<OpenRouterMeta & { id: string; supported_parameters?: string[] }> }
     for (const m of body.data ?? []) {
+      modelMeta.set(m.id, m)
       const p = m.supported_parameters ?? []
       if (p.includes('reasoning')) reasoningKind.set(m.id, p.includes('reasoning_effort') ? 'effort' : 'toggle')
     }

@@ -244,7 +244,8 @@ export default function ReplyApp({
   seeing,
   embedded = false,
   minimized = false,
-  onMinimize
+  onMinimize,
+  onChoose
 }: {
   chat?: ReplyChats
   onHide: () => void
@@ -255,6 +256,7 @@ export default function ReplyApp({
   embedded?: boolean
   minimized?: boolean
   onMinimize?: (minimized: boolean) => void
+  onChoose?: (ref: string | null) => void
 }): React.JSX.Element {
   const relay = useAgentRelay()
   const rootRef = useRef<HTMLDivElement>(null)
@@ -325,6 +327,8 @@ export default function ReplyApp({
   const newInProject = newIn ? mightyProjectForCwd(newIn, repoProjects) : null
   const folderName = (cwd: string): string =>
     cwd === homeCwd ? CONFIG.UI_LABELS.CODE_NO_PROJECT : (cwd.split('/').pop() ?? cwd)
+  const shownFolder = session ? (mightyProjectForCwd(session.cwd, repoProjects)?.repoFolder ?? session.cwd) : agentFolder
+  const newHereLabel = `New agent${shownFolder && shownFolder !== homeCwd ? ` in ${folderName(shownFolder)}` : ''}`
 
   const [menu, setMenu] = useState<'agents' | 'projects' | 'more' | null>(null)
   const [query, setQuery] = useState('')
@@ -338,7 +342,8 @@ export default function ReplyApp({
     setRecent(next)
     store(REPLY_RECENT_KEY, JSON.stringify(next))
   }
-  const show = (ref: string | undefined, starting: typeof draft = null): void => {
+  const show = (ref: string | undefined, starting: typeof draft = null, auto = false): void => {
+    if (!auto) onChoose?.(ref ?? null)
     if (ref) open(ref)
     setDraft(starting)
     setPaneKey((k) => k + 1)
@@ -353,8 +358,8 @@ export default function ReplyApp({
     if (followedAim.current !== null && here !== followedAim.current) leftAim.current = true
     followedAim.current = aimKey
     if (leftAim.current || !aim) return
-    if (typeof aim === 'string') show(aim)
-    else if (aim.cwd || agentFolder) show(undefined, { cwd: aim.cwd || agentFolder! })
+    if (typeof aim === 'string') show(aim, null, true)
+    else if (aim.cwd || agentFolder) show(undefined, { cwd: aim.cwd || agentFolder! }, true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aimKey])
   const chooseProject = (name: string | undefined): void => {
@@ -665,6 +670,17 @@ export default function ReplyApp({
             {...hoverProps(autoSwitch ? AUTO_ON_TIP : AUTO_OFF_TIP)}
           >
             <LocateFixed size={14} strokeWidth={2} />
+          </Button>
+        )}
+        {(session || chatting) && !draft && !minimized && shownFolder && (
+          <Button
+            variant="icon"
+            className="[-webkit-app-region:no-drag]"
+            onClick={() => show(undefined, { cwd: shownFolder })}
+            aria-label={newHereLabel}
+            {...hoverProps(newHereLabel)}
+          >
+            <Plus size={15} strokeWidth={2} />
           </Button>
         )}
         {(session || chatting || draft) && !minimized && (
@@ -1031,17 +1047,28 @@ export function ReplyWindowApp(): React.JSX.Element {
   const [aimed, setAimed] = useState<(ReplyWindowAim & { n: number; newIn?: string }) | null>(null)
   const [shot, setShot] = useState<{ path?: string; on: boolean }>(() => ({ on: readScreenPref() }))
   const [seeing, setSeeing] = useState<ReplyWindowSeeing>()
+  const page = useRef('')
+  const chosen = useRef(new Map<string, string | null>())
   useEffect(
     () =>
       window.api.onReplyWindowSeeing((next) => {
         setSeeing(next)
+        page.current = next.page
         const folder = next.folder ?? ''
-        if (!next.ref)
+        if (!next.ref && !chosen.current.has(next.page))
           setAimed((prev) => (prev?.newIn === folder ? prev : { order: prev?.order ?? [], newIn: folder, n: (prev?.n ?? 0) + 1 }))
       }),
     []
   )
-  useEffect(() => window.api.onReplyWindowAim((aim) => setAimed((prev) => ({ ...aim, n: (prev?.n ?? 0) + 1 }))), [])
+  useEffect(
+    () =>
+      window.api.onReplyWindowAim((aim) => {
+        const mine = chosen.current.get(page.current)
+        if (mine === null || (mine !== undefined && mine === stored(REPLY_AGENT_KEY))) return
+        setAimed((prev) => ({ ...aim, ref: mine ?? aim.ref, n: (prev?.n ?? 0) + 1 }))
+      }),
+    []
+  )
   useEffect(() => window.api.onReplyWindowScreen((path) => setShot({ path, on: readScreenPref() })), [])
   const screen = useMemo(
     () => ({
@@ -1050,7 +1077,8 @@ export function ReplyWindowApp(): React.JSX.Element {
         writeScreenPref(on)
         setShot((prev) => ({ ...prev, on }))
       },
-      clear: () => setShot((prev) => ({ ...prev, on: false }))
+      clear: () => setShot((prev) => ({ ...prev, path: undefined })),
+      fresh: () => window.api.replyWindowShot()
     }),
     [shot]
   )
@@ -1064,6 +1092,7 @@ export function ReplyWindowApp(): React.JSX.Element {
         chat={chat}
         onHide={() => window.api.replyWindowHide()}
         onOpenBig={(ref) => window.api.replyWindowOpenBig(ref)}
+        onChoose={(ref) => page.current && chosen.current.set(page.current, ref)}
       />
     </ReplyScreenContext.Provider>
   )

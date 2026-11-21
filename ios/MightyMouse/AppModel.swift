@@ -20,7 +20,10 @@ final class AppModel: ObservableObject {
     @Published private(set) var showingDeck = false
     @Published private(set) var deckParked = false
     @Published private(set) var chatLink: URL?
-    @Published private(set) var showingChat = false
+    @Published private(set) var showingChat = false { didSet { if showingChat { chatMounted = true } } }
+    @Published private(set) var chatMounted = false
+    private var chatBehindLobby = false
+    @Published var keyboardCompanion: KeyboardCompanionMode?
     @Published private(set) var chatOffered = Prefs.advancedMode || Prefs.chatUnlocked
     private var wantsDeck = false
     private var deckMountedUnproven = false
@@ -125,7 +128,10 @@ final class AppModel: ObservableObject {
 
     private func refreshChatOffered() {
         chatOffered = Prefs.advancedMode || Prefs.chatUnlocked
-        if !chatOffered { showingChat = false }
+        if !chatOffered {
+            showingChat = false
+            chatMounted = false
+        }
     }
 
     func unlockChat() {
@@ -465,6 +471,7 @@ final class AppModel: ObservableObject {
         remoteURL = nil
         searchOutcome = outcome
         connectingMac = showingDeck && outcome == DiscoveryOutcome.notFound
+        if connectingMac { coverChatWithLobby() }
         showingDeck = false
         wantsDeck = false
         deckMountedUnproven = false
@@ -482,7 +489,10 @@ final class AppModel: ObservableObject {
         MMLog.phase.log("saved Mac did not answer → deck unmounted")
         deckMountedUnproven = false
         remoteURL = nil
-        if showingDeck { connectingMac = true }
+        if showingDeck {
+            connectingMac = true
+            coverChatWithLobby()
+        }
         showingDeck = false
         deckParked = false
     }
@@ -550,9 +560,9 @@ final class AppModel: ObservableObject {
 
     /// The chat's laptop button: straight to the remote when the Mac already answered, else the lobby sheet.
     func macTapped() {
-        showingChat = false
         if remoteURL != nil, !deckMountedUnproven || deckParked { return openDeck() }
         connectingMac = true
+        coverChatWithLobby()
         if searchOutcome == DiscoveryOutcome.left || (deckMountedUnproven && searchOutcome == DiscoveryOutcome.notFound) { retrySearch() }
     }
 
@@ -563,16 +573,25 @@ final class AppModel: ObservableObject {
     func hideDeck() {
         showingDeck = false
         deckParked = true
+    }
+
+    private func coverChatWithLobby() {
+        if showingChat { chatBehindLobby = true }
         showingChat = false
     }
 
     func openChat() {
         guard chatOffered else { return }
+        chatBehindLobby = false
         connectingMac = false
         showingChat = true
     }
 
     func openChatLink(_ url: URL) {
+        if let mode = KeyboardCompanionMode(url: url) {
+            keyboardCompanion = mode
+            return
+        }
         if url.scheme == "mightymouse" {
             if url.host == "deck" { macTapped() }
             return
@@ -587,6 +606,8 @@ final class AppModel: ObservableObject {
     private func openDeck() {
         wantsDeck = false
         connectingMac = false
+        if chatBehindLobby, chatOffered { showingChat = true }
+        chatBehindLobby = false
         showingDeck = true
     }
 
@@ -634,6 +655,7 @@ struct ContentView: View {
     var body: some View {
         routed
             .onOpenURL { model.openChatLink($0) }
+            .fullScreenCover(item: $model.keyboardCompanion) { KeyboardCompanionView(mode: $0) }
             .onChange(of: scenePhase) { old, phase in
                 // `.inactive` alone cannot mean "leaving": iOS also fires it for
                 // Control Center, a notification banner, and as the middle step
@@ -693,7 +715,11 @@ struct ContentView: View {
     private var live: some View {
         ZStack {
             LobbyView(model: model, onChat: model.chatOffered ? { model.openChat() } : nil)
-            if model.showingChat { ChatHome(model: model) }
+            if model.chatMounted {
+                ChatHome(model: model)
+                    .opacity(model.showingChat ? 1 : 0)
+                    .allowsHitTesting(model.showingChat)
+            }
             if model.showingDeck || model.deckParked, let remoteURL = model.remoteURL {
                 RemoteDeck(
                     url: remoteURL,
