@@ -4,6 +4,30 @@
 
 export const RELEASE_NOTES = [
   {
+    version: '0.58.1',
+    date: '2026-11-22',
+    changes: [
+      {
+        icon: '⚡',
+        title: 'New agents start straight away, on EVERY login.',
+        detail:
+          "New agents no longer stop on Claude's setup questions. A second Claude account reuses the answers from your main one, and sending your screen never asks you to trust a folder."
+      },
+      {
+        icon: '🧠',
+        title: 'Hover a model to see who made it.',
+        detail:
+          'Chat and Code show its maker, release date, price and how much it can read at once. The newest OpenRouter models show up and run too.'
+      },
+      {
+        icon: '🌐',
+        title: 'The agent you pick STAYS on the page.',
+        detail:
+          "Pick an agent in the box over your browser and it becomes that page's agent. Press + to start a fresh one, and Send my screen stays ticked."
+      }
+    ]
+  },
+  {
     version: '0.58.0',
     date: '2026-11-21',
     changes: [

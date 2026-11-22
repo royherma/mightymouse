@@ -346,6 +346,7 @@ const api = {
   replyWindowApp: (): Promise<ReplyWindowApp | null> => ipcRenderer.invoke(CHANNELS.replyWindowApp),
   replyWindowShowOver: (bundleId: string, on: boolean) => ipcRenderer.send(CHANNELS.replyWindowShowOver, bundleId, on),
   replyWindowShot: (): Promise<string | undefined> => ipcRenderer.invoke(CHANNELS.replyWindowShot),
+  replyWindowPickForPage: (url: string, ref: string | null) => ipcRenderer.send(CHANNELS.replyWindowPickForPage, url, ref),
   onReplyWindowScreen: (callback: (path: string) => void) => {
     const handler = (_: unknown, path: string): void => callback(path)
     ipcRenderer.on(CHANNELS.replyWindowScreen, handler)

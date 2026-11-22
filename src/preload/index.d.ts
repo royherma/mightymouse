@@ -302,6 +302,7 @@ interface CustomAPI {
   replyWindowAuto: (on?: boolean) => Promise<boolean>
   replyWindowShowOver: (bundleId: string, on: boolean) => void
   replyWindowShot: () => Promise<string | undefined>
+  replyWindowPickForPage: (url: string, ref: string | null) => void
   hudDismiss: (runId: string) => void
   hudStopCapture: (runId: string) => void
   hudCancelCapture: (runId: string) => void

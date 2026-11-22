@@ -1104,6 +1104,7 @@ export interface StoredSettings {
   transcriptFormats?: Record<string, boolean>
   replyWindowShowOver?: string[]
   replyWindowAutoSwitch?: boolean
+  replyPagePicks?: Record<string, string>
 }
 
 // ── Analytics ────────────────────────────────────────────────────────────────
@@ -3416,7 +3417,7 @@ export interface ReplyWindowApp {
   shows: boolean
 }
 
-export type ReplyMatch = 'made' | 'folder' | 'chat'
+export type ReplyMatch = 'picked' | 'made' | 'folder' | 'chat'
 
 export interface ReplyWindowSeeing {
   page: string

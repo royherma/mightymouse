@@ -111,6 +111,9 @@ export function registerSystemHandlers(): void {
     if (typeof bundleId === 'string' && bundleId) void import('../reply-focus').then((m) => m.setShowOver(bundleId, on === true))
   })
   ipcMain.handle(CHANNELS.replyWindowShot, () => shootBehindReply())
+  ipcMain.on(CHANNELS.replyWindowPickForPage, (_e, url: unknown, ref: unknown) => {
+    if (typeof url === 'string' && url) void import('../reply-focus').then((m) => m.pickForPage(url, typeof ref === 'string' && ref ? ref : null))
+  })
   ipcMain.on(CHANNELS.replyWindowShow, (_e, ref: unknown) => {
     if (typeof ref === 'string' && ref) showReplyWindow(ref)
   })

@@ -51,6 +51,7 @@ const WATCHED_APPS = new Set([CMUX_APP, ...BROWSERS])
 const PAGE_MATCH_MS = 10 * 60_000
 // a tools list or port table names many pages once or twice; an agent working on one names it far more
 const MIN_STRAY_MENTIONS = 3
+const MAX_PAGE_PICKS = 200
 const LSOF = '/usr/sbin/lsof'
 const ICON_MS = 1500
 const MAX_ICON_BYTES = 64_000
@@ -267,6 +268,9 @@ async function agentInFront(searchConversations: boolean, waitForChats: boolean)
     return pane ? live.find((s) => s.origin?.tmuxPane === pane)?.sessionId : undefined
   }
   if (!front.url) return undefined
+  const pick = SETTINGS.get().replyPagePicks?.[pageKey(front.url)]
+  const picked = pick && live.find((s) => s.sessionId === pick || s.label === pick)?.sessionId
+  if (picked) return matched('picked', picked)
   const made = fromBuilt(front.url, live) ?? fromStamp(front.url, live)
   if (made) return matched('made', made)
   const nearby = await folderAgents(front.url, live)
@@ -303,16 +307,25 @@ async function tick(): Promise<void> {
   // a folder guess now and the chat answer a few seconds later would flip the window twice
   const settling = seenUrl !== '' && chatSearches.has(pageKey(seenUrl))
   if (settling) return
-  if (auto && seenPage && seenPage !== toldPage) {
-    toldPage = seenPage
+  const here = seenUrl ? pageKey(seenUrl) : seenPage
+  if (auto && here && here !== toldPage) {
+    toldPage = here
     devLog.log(`[reply-follow] page=${seenPage} agent=${found ?? "none"} why=${matchedBy ?? "none"}`)
     const told = { page: seenPage, url: seenUrl, ref: found, why: matchedBy, folder: found ? undefined : seenFolder }
     tellReplyWindow(told)
-    void pageIcon(seenUrl).then((icon) => icon && toldPage === told.page && tellReplyWindow({ ...told, icon }))
+    void pageIcon(seenUrl).then((icon) => icon && toldPage === here && tellReplyWindow({ ...told, icon }))
     if (!found) autoSwitched = undefined
   }
   if (!auto || !found || found === autoSwitched) return
   if (switchReplyWindow({ ref: found, order: focusOrder() })) autoSwitched = found
+}
+
+export function pickForPage(url: string, ref: string | null): void {
+  const key = pageKey(url)
+  const kept = Object.entries(SETTINGS.get().replyPagePicks ?? {}).filter(([page]) => page !== key)
+  const next = ref ? [...kept.slice(1 - MAX_PAGE_PICKS), [key, ref]] : kept
+  SETTINGS.set({ replyPagePicks: Object.fromEntries(next) })
+  toldPage = undefined
 }
 
 export function autoSwitchOn(): boolean {

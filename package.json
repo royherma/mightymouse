@@ -1,6 +1,6 @@
 {
   "name": "mightymouse",
-  "version": "0.58.0",
+  "version": "0.58.1",
   "description": "MightyMouse floating rewrite and ask AI utility",
   "main": "./out/main/index.js",
   "author": "Techguyver Labs",

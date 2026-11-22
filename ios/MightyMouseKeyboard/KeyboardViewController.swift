@@ -74,7 +74,135 @@ private final class KeyButton: UIControl {
     }
 }
 
+private final class KeysView: UIView {
+    private struct Held {
+        let touch: UITouch
+        var key: KeyButton
+        let start: CGPoint
+        let at: TimeInterval
+        var cursorX: CGFloat?
+    }
+
+    var letterKeys: [KeyButton] = []
+    var spaceKey: KeyButton?
+    var functionKeys: [UIView] = []
+    var onPress: ((KeyButton) -> Void)?
+    var onSlide: ((KeyButton) -> Void)?
+    var onType: ((KeyButton) -> Void)?
+    var onCursor: ((Int) -> Void)?
+    var onRelease: (() -> Void)?
+    private var held: [Held] = []
+    private var tapKeys: [KeyButton] { letterKeys + (spaceKey.map { [$0] } ?? []) }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        isMultipleTouchEnabled = true
+        backgroundColor = KeyboardViewController.touchableClear
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    // The hosted window's system gesture gates hold every key's touch down and lift until they fail.
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        var node: UIView? = superview
+        while let current = node {
+            current.gestureRecognizers?.forEach {
+                $0.delaysTouchesBegan = false
+                $0.delaysTouchesEnded = false
+            }
+            node = current.superview
+        }
+    }
+
+    private func distance(_ rect: CGRect, _ p: CGPoint) -> CGFloat {
+        let dx = max(rect.minX - p.x, 0, p.x - rect.maxX)
+        let dy = max(rect.minY - p.y, 0, p.y - rect.maxY)
+        return dx * dx + dy * dy
+    }
+
+    private func nearest<V: UIView>(_ views: [V], to p: CGPoint) -> V? {
+        views.filter { !$0.isHidden }.min { distance($0.frame, p) < distance($1.frame, p) }
+    }
+
+    // The bar's buttons end 6pt above its bottom edge; that strip belongs to the top row.
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        bounds.inset(by: UIEdgeInsets(top: -6, left: 0, bottom: 0, right: 0)).contains(point)
+    }
+
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        guard self.point(inside: point, with: event),
+              let key = nearest((tapKeys as [UIView]) + functionKeys, to: point) else { return nil }
+        return tapKeys.contains { $0 === key } ? self : key
+    }
+
+    func reset() {
+        held.forEach { $0.key.isHighlighted = false }
+        held.removeAll()
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            let pending = held.filter { $0.cursorX == nil }
+            held.removeAll { $0.cursorX == nil }
+            for entry in pending {
+                entry.key.isHighlighted = false
+                onType?(entry.key)
+            }
+            let p = touch.location(in: self)
+            guard let key = nearest(tapKeys, to: p) else { continue }
+            held.append(Held(touch: touch, key: key, start: p, at: touch.timestamp))
+            key.isHighlighted = true
+            onPress?(key)
+        }
+    }
+
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            guard let i = held.firstIndex(where: { $0.touch === touch }) else { continue }
+            let p = touch.location(in: self)
+            if held[i].key === spaceKey {
+                guard let cursorX = held[i].cursorX else {
+                    if abs(p.x - held[i].start.x) >= 24 || touch.timestamp - held[i].at >= 0.5 { held[i].cursorX = p.x }
+                    continue
+                }
+                let steps = Int((p.x - cursorX) / 9)
+                if steps != 0 {
+                    held[i].cursorX = cursorX + CGFloat(steps) * 9
+                    onCursor?(steps)
+                }
+                continue
+            }
+            guard touch.timestamp - held[i].at >= 0.15,
+                  let key = nearest(letterKeys, to: p), key !== held[i].key else { continue }
+            held[i].key.isHighlighted = false
+            held[i].key = key
+            key.isHighlighted = true
+            onSlide?(key)
+        }
+    }
+
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            guard let i = held.firstIndex(where: { $0.touch === touch }) else { continue }
+            let entry = held.remove(at: i)
+            entry.key.isHighlighted = false
+            if entry.cursorX == nil { onType?(entry.key) } else { onRelease?() }
+        }
+    }
+
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        for touch in touches {
+            guard let i = held.firstIndex(where: { $0.touch === touch }) else { continue }
+            held.remove(at: i).key.isHighlighted = false
+        }
+        onRelease?()
+    }
+}
+
 final class KeyboardViewController: UIInputViewController {
+    // iOS drops touches on fully transparent pixels of a keyboard extension; gaps need a faint fill.
+    static let touchableClear = UIColor(white: 0.5, alpha: 0.01)
     static let letterKey = UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.42, alpha: 1) : .white }
     static let functionKey = UIColor { $0.userInterfaceStyle == .dark ? UIColor(white: 0.27, alpha: 1) : UIColor(red: 0.67, green: 0.69, blue: 0.73, alpha: 1) }
     private static let accent = UIColor(MMColor.accent)
@@ -108,8 +236,16 @@ final class KeyboardViewController: UIInputViewController {
     private var deleteTimer: Timer?
     private var micDownAt = Date.distantPast
     private var hasLiveText = false
-    private var spaceDragged = false
-    private var dragRemainder: CGFloat = 0
+    private let cursorTick = UISelectionFeedbackGenerator()
+    private let checker = UITextChecker()
+    private var suggestionWork: DispatchWorkItem?
+    private var lastCorrection: (original: String, fixed: String, separator: String)?
+    private static let quickFixes = ["i": "I", "im": "I'm", "ive": "I've", "dont": "don't", "cant": "can't", "wont": "won't",
+                                     "didnt": "didn't", "doesnt": "doesn't", "isnt": "isn't", "thats": "that's",
+                                     "whats": "what's", "youre": "you're", "theyre": "they're", "couldnt": "couldn't"]
+    private static let learnedKey = "mm.keyboard.nextWords"
+    private var starterWords: [String: [String]] = [:]
+    private var learnedWords = UserDefaults.standard.dictionary(forKey: learnedKey) as? [String: [String]] ?? [:]
 
     private let bar = UIView()
     private var barRow = UIStackView()
@@ -127,7 +263,7 @@ final class KeyboardViewController: UIInputViewController {
     private let previewCard = UIView()
     private let previewTitle = UILabel()
     private let previewText = UILabel()
-    private let keysView = UIView()
+    private let keysView = KeysView()
     private var keyRows: [[KeyButton]] = []
     private var popup: UILabel?
 
@@ -153,9 +289,23 @@ final class KeyboardViewController: UIInputViewController {
             keysView.topAnchor.constraint(equalTo: bar.bottomAnchor),
             keysView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             keysView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            keysView.heightAnchor.constraint(equalToConstant: 4 * Self.keyHeight + 3 * Self.rowGap),
-            keysView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -4),
+            keysView.heightAnchor.constraint(equalToConstant: 4 * Self.keyHeight + 3 * Self.rowGap + 4),
+            keysView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
+        keysView.onPress = { [weak self] key in self?.keyDown(key) }
+        keysView.onSlide = { [weak self] key in self?.showPopup(key.label.text ?? "", over: key) }
+        keysView.onType = { [weak self] key in
+            guard let self else { return }
+            if key === self.keysView.spaceKey { self.typeText(" ") } else { self.keyTapped(key) }
+        }
+        keysView.onCursor = { [weak self] steps in
+            self?.textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
+            self?.cursorTick.selectionChanged()
+        }
+        keysView.onRelease = { [weak self] in
+            self?.hidePopup()
+            self?.updateAutoShift()
+        }
         let height = view.heightAnchor.constraint(equalToConstant: Self.barHeight + 4 * Self.keyHeight + 3 * Self.rowGap + 4)
         height.priority = .required - 1
         height.isActive = true
@@ -174,6 +324,7 @@ final class KeyboardViewController: UIInputViewController {
         mic.onCapReached = { [weak self] in self?.finishListening() }
         rebuildKeys()
         renderBar()
+        loadStarterWords()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -186,6 +337,7 @@ final class KeyboardViewController: UIInputViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        UserDefaults.standard.set(learnedWords, forKey: Self.learnedKey)
         if mode == .starting || mode == .listening {
             if mode == .listening { talkEnded("cancelled") }
             mic.cancel()
@@ -202,13 +354,23 @@ final class KeyboardViewController: UIInputViewController {
     override func textDidChange(_ textInput: UITextInput?) {
         updateAutoShift()
         refreshReturnKey()
-        if mode == .idle { renderSuggestions() }
+        if mode == .idle { scheduleSuggestions() }
     }
 
     // MARK: Typing
 
-    private func typeText(_ text: String) {
+    private func typeText(_ text: String, correct: Bool = true) {
         let proxy = textDocumentProxy
+        lastCorrection = nil
+        if let c = text.first, !(c.isLetter || c == "'") {
+            let word = currentWord, previous = previousWord()
+            if correct, let fix = correction(for: word, after: previous) {
+                for _ in 0..<word.count { proxy.deleteBackward() }
+                proxy.insertText(fix)
+                lastCorrection = (word, fix, text)
+            }
+            learn(lastCorrection?.fixed ?? word, after: previous)
+        }
         if text == " ", let before = proxy.documentContextBeforeInput, before.hasSuffix(" "),
            before.dropLast().last.map({ $0.isLetter || $0.isNumber }) == true {
             proxy.deleteBackward()
@@ -223,7 +385,7 @@ final class KeyboardViewController: UIInputViewController {
         default: break
         }
         updateAutoShift()
-        renderSuggestions()
+        scheduleSuggestions()
     }
 
     private func updateAutoShift() {
@@ -235,7 +397,7 @@ final class KeyboardViewController: UIInputViewController {
         if next != shift { shift = next; refreshKeyLabels() }
     }
 
-    @objc private func keyTapped(_ sender: KeyButton) {
+    private func keyTapped(_ sender: KeyButton) {
         hidePopup()
         guard let output = sender.output else { return }
         let upper = layerMode == .letters && shift != .off
@@ -243,7 +405,7 @@ final class KeyboardViewController: UIInputViewController {
         refreshKeyLabels()
     }
 
-    @objc private func keyDown(_ sender: KeyButton) {
+    private func keyDown(_ sender: KeyButton) {
         UIDevice.current.playInputClick()
         guard sender.output != nil, let text = sender.label.text else { return }
         showPopup(text, over: sender)
@@ -278,6 +440,14 @@ final class KeyboardViewController: UIInputViewController {
 
     @objc private func deleteDown() {
         UIDevice.current.playInputClick()
+        if let fix = lastCorrection, textDocumentProxy.documentContextBeforeInput?.hasSuffix(fix.fixed + fix.separator) == true {
+            for _ in 0..<(fix.fixed + fix.separator).count { textDocumentProxy.deleteBackward() }
+            textDocumentProxy.insertText(fix.original)
+            UITextChecker.learnWord(fix.original)
+            lastCorrection = nil
+            scheduleSuggestions()
+            return
+        }
         textDocumentProxy.deleteBackward()
         deleteTimer?.invalidate()
         var ticks = 0
@@ -298,52 +468,105 @@ final class KeyboardViewController: UIInputViewController {
         deleteTimer?.invalidate()
         deleteTimer = nil
         updateAutoShift()
-        renderSuggestions()
-    }
-
-    @objc private func spaceTapped() {
-        if !spaceDragged { typeText(" ") }
-        spaceDragged = false
-    }
-
-    @objc private func spacePanned(_ pan: UIPanGestureRecognizer) {
-        switch pan.state {
-        case .began:
-            spaceDragged = true
-            dragRemainder = 0
-        case .changed:
-            dragRemainder += pan.translation(in: view).x
-            pan.setTranslation(.zero, in: view)
-            let steps = Int(dragRemainder / 9)
-            if steps != 0 {
-                textDocumentProxy.adjustTextPosition(byCharacterOffset: steps)
-                dragRemainder -= CGFloat(steps) * 9
-                UISelectionFeedbackGenerator().selectionChanged()
-            }
-        default:
-            spaceDragged = false
-            updateAutoShift()
-        }
+        scheduleSuggestions()
     }
 
     // MARK: Suggestions
+
+    private func scheduleSuggestions() {
+        suggestionWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in self?.renderSuggestions() }
+        suggestionWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.06, execute: work)
+    }
 
     private var currentWord: String {
         guard let before = textDocumentProxy.documentContextBeforeInput else { return "" }
         return String(before.reversed().prefix { $0.isLetter || $0 == "'" }.reversed())
     }
 
+    private func loadStarterWords() {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let url = Bundle.main.url(forResource: "next-words", withExtension: "txt"),
+                  let text = try? String(contentsOf: url, encoding: .utf8) else { return }
+            var table: [String: [String]] = [:]
+            for line in text.split(separator: "\n") {
+                let parts = line.split(separator: "\t")
+                if parts.count == 2 { table[String(parts[0])] = parts[1].split(separator: " ").map(String.init) }
+            }
+            DispatchQueue.main.async { self?.starterWords = table }
+        }
+    }
+
+    private func previousWord() -> String {
+        var text = Substring(textDocumentProxy.documentContextBeforeInput ?? "")
+        while let c = text.last, c.isLetter || c == "'" { text.removeLast() }
+        while text.last == " " { text.removeLast() }
+        guard let last = text.last, !".!?\n".contains(last) else { return "<s>" }
+        return String(text.reversed().prefix { $0.isLetter || $0 == "'" }.reversed()).lowercased()
+    }
+
+    private func nextWords(after previous: String) -> [String] {
+        var out: [String] = []
+        for word in (learnedWords[previous] ?? []) + (starterWords[previous] ?? []) where !out.contains(word) { out.append(word) }
+        return out
+    }
+
+    private func cased(_ word: String, capital: Bool) -> String {
+        capital || word == "i" || word.hasPrefix("i'") ? word.prefix(1).uppercased() + word.dropFirst() : word
+    }
+
+    private func learn(_ word: String, after previous: String) {
+        let word = word.lowercased()
+        guard !previous.isEmpty, word.count > 1 || word == "a" || word == "i",
+              learnedWords[previous] != nil || learnedWords.count < 5000 else { return }
+        let range = NSRange(location: 0, length: (word as NSString).length)
+        guard checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: spellLanguage).location == NSNotFound else { return }
+        var list = learnedWords[previous] ?? []
+        list.removeAll { $0 == word }
+        list.insert(word, at: 0)
+        learnedWords[previous] = Array(list.prefix(3))
+    }
+
+    // The keyboard declares "mul" in Info.plist, which UITextChecker has no dictionary for.
+    private lazy var spellLanguage: String = {
+        let available = UITextChecker.availableLanguages
+        for code in Locale.preferredLanguages.map({ $0.replacingOccurrences(of: "-", with: "_") }) {
+            if available.contains(code) { return code }
+            guard let base = code.split(separator: "_").first.map(String.init) else { continue }
+            if base == "en", available.contains("en_US") { return "en_US" }
+            if let match = available.first(where: { $0 == base || $0.hasPrefix(base + "_") }) { return match }
+        }
+        return available.contains("en_US") ? "en_US" : available.first ?? "en_US"
+    }()
+
+    private func correction(for word: String, after previous: String) -> String? {
+        if let fix = Self.quickFixes[word.lowercased()] { return fix == word ? nil : fix }
+        guard word.count > 1, textDocumentProxy.autocorrectionType != .no, !UITextChecker.hasLearnedWord(word),
+              word.dropFirst().allSatisfy({ !$0.isUppercase }),
+              word.first?.isUppercase != true || previous == "<s>" else { return nil }
+        let language = spellLanguage
+        let range = NSRange(location: 0, length: (word as NSString).length)
+        guard checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: language).location != NSNotFound,
+              let guess = checker.guesses(forWordRange: range, in: word, language: language)?.first,
+              abs(guess.count - word.count) <= 2 else { return nil }
+        return word.first?.isUppercase == true ? guess.prefix(1).uppercased() + guess.dropFirst() : guess
+    }
+
     private func suggestions() -> [String] {
         let word = currentWord
-        guard !word.isEmpty else { return [] }
-        let checker = UITextChecker()
-        let language = textInputMode?.primaryLanguage?.replacingOccurrences(of: "-", with: "_") ?? "en_US"
+        let previous = previousWord()
+        let next = nextWords(after: previous)
+        guard !word.isEmpty else {
+            let top = next.prefix(3).map { cased($0, capital: shift != .off) }
+            return top.count == 3 ? [top[1], top[0], top[2]] : top
+        }
+        let language = spellLanguage
         let range = NSRange(location: 0, length: (word as NSString).length)
         var found: [String] = []
-        let misspelled = checker.rangeOfMisspelledWord(in: word, range: range, startingAt: 0, wrap: false, language: language)
-        if misspelled.location != NSNotFound, let guess = checker.guesses(forWordRange: range, in: word, language: language)?.first {
-            found.append(guess)
-        }
+        if let fix = correction(for: word, after: previous) { found.append(fix) }
+        let lower = word.lowercased()
+        found += next.filter { $0.hasPrefix(lower) && $0.count > word.count }.map { cased($0, capital: false) }
         found += (checker.completions(forPartialWordRange: range, in: word, language: language) ?? []).filter { $0.count > word.count }
         var unique: [String] = []
         for candidate in found where !unique.contains(candidate) { unique.append(candidate) }
@@ -354,10 +577,11 @@ final class KeyboardViewController: UIInputViewController {
         guard let title = sender.title(for: .normal), !title.isEmpty else { return }
         UIDevice.current.playInputClick()
         if title.hasPrefix("\u{201C}") {
-            typeText(" ")
+            typeText(" ", correct: false)
             return
         }
         let word = currentWord
+        learn(title, after: previousWord())
         for _ in 0..<word.count { textDocumentProxy.deleteBackward() }
         let matched = word.first?.isUppercase == true ? title.prefix(1).uppercased() + title.dropFirst() : title
         textDocumentProxy.insertText(matched + " ")
@@ -666,6 +890,7 @@ final class KeyboardViewController: UIInputViewController {
 
     private func buildBar() {
         bar.translatesAutoresizingMaskIntoConstraints = false
+        bar.backgroundColor = Self.touchableClear
         view.addSubview(bar)
 
         var talk = UIButton.Configuration.filled()
@@ -928,7 +1153,7 @@ final class KeyboardViewController: UIInputViewController {
         } else {
             previewCard.isHidden = true
         }
-        if !showChips && !isNote { renderSuggestions() }
+        if !showChips && !isNote { scheduleSuggestions() }
     }
 
     private func renderSuggestions() {
@@ -949,15 +1174,13 @@ final class KeyboardViewController: UIInputViewController {
     }
 
     private func rebuildKeys() {
+        keysView.reset()
         keysView.subviews.forEach { $0.removeFromSuperview() }
         keyRows = rows().map { row in
             row.map { ch in
                 let key = KeyButton()
                 key.output = ch
                 key.label.font = .systemFont(ofSize: 25)
-                key.addTarget(self, action: #selector(keyDown(_:)), for: .touchDown)
-                key.addTarget(self, action: #selector(keyTapped(_:)), for: .touchUpInside)
-                key.addTarget(self, action: #selector(hidePopup), for: [.touchUpOutside, .touchCancel, .touchDragExit])
                 keysView.addSubview(key)
                 return key
             }
@@ -998,9 +1221,6 @@ final class KeyboardViewController: UIInputViewController {
         let space = KeyButton()
         space.label.text = "space"
         space.label.font = .systemFont(ofSize: 16)
-        space.addTarget(self, action: #selector(spaceTapped), for: .touchUpInside)
-        space.addTarget(self, action: #selector(playClick), for: .touchDown)
-        space.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(spacePanned(_:))))
         space.tag = 5
 
         let ret = KeyButton()
@@ -1010,12 +1230,14 @@ final class KeyboardViewController: UIInputViewController {
         ret.tag = 6
 
         [left, delete, layerKey, globe, space, ret].forEach(keysView.addSubview)
+        keysView.letterKeys = keyRows.flatMap { $0 }
+        keysView.spaceKey = space
+        keysView.functionKeys = [left, delete, layerKey, globe, ret]
         refreshKeyLabels()
         refreshReturnKey()
         view.setNeedsLayout()
     }
 
-    @objc private func playClick() { UIDevice.current.playInputClick() }
 
     private func refreshKeyLabels() {
         let upper = layerMode == .letters && shift != .off

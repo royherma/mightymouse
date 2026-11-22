@@ -128,7 +128,7 @@ const MENU_BOX =
   'absolute top-full z-50 mt-1 rounded-lg border border-surface3 bg-[var(--window-bg)] p-1 shadow-[var(--shadow-popover)]'
 const MAX_NUMBERED = 9
 const MENU_FITS_HEIGHT = 440
-const MATCH_WHY: Record<ReplyMatch, string> = { made: 'it made this page', folder: "it works in this page's folder", chat: 'it talked about this page' }
+const MATCH_WHY: Record<ReplyMatch, string> = { picked: 'you picked it on this tab', made: 'it made this page', folder: "it works in this page's folder", chat: 'it talked about this page' }
 const AUTO_ON_TIP = 'Auto-switch is on: when you change browser tabs, this jumps to the agent working on that page. Click to turn it off.'
 const AUTO_OFF_TIP = 'Auto-switch is off: this stays on the agent you picked. Click to have it jump to the agent behind each browser tab.'
 const MENU_INSET = 12
@@ -1053,7 +1053,7 @@ export function ReplyWindowApp(): React.JSX.Element {
     () =>
       window.api.onReplyWindowSeeing((next) => {
         setSeeing(next)
-        page.current = next.page
+        page.current = next.url.split(/[?#]/)[0] || next.page
         const folder = next.folder ?? ''
         if (!next.ref && !chosen.current.has(next.page))
           setAimed((prev) => (prev?.newIn === folder ? prev : { order: prev?.order ?? [], newIn: folder, n: (prev?.n ?? 0) + 1 }))
@@ -1092,7 +1092,11 @@ export function ReplyWindowApp(): React.JSX.Element {
         chat={chat}
         onHide={() => window.api.replyWindowHide()}
         onOpenBig={(ref) => window.api.replyWindowOpenBig(ref)}
-        onChoose={(ref) => page.current && chosen.current.set(page.current, ref)}
+        onChoose={(ref) => {
+          if (!page.current) return
+          chosen.current.set(page.current, ref)
+          window.api.replyWindowPickForPage(page.current, ref)
+        }}
       />
     </ReplyScreenContext.Provider>
   )

@@ -20,8 +20,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var showingDeck = false
     @Published private(set) var deckParked = false
     @Published private(set) var chatLink: URL?
-    @Published private(set) var showingChat = false { didSet { if showingChat { chatMounted = true } } }
-    @Published private(set) var chatMounted = false
+    @Published private(set) var showingChat = Prefs.advancedMode || Prefs.chatUnlocked { didSet { if showingChat { chatMounted = true } } }
+    @Published private(set) var chatMounted = Prefs.advancedMode || Prefs.chatUnlocked
     private var chatBehindLobby = false
     @Published var keyboardCompanion: KeyboardCompanionMode?
     @Published private(set) var chatOffered = Prefs.advancedMode || Prefs.chatUnlocked
@@ -113,7 +113,7 @@ final class AppModel: ObservableObject {
             if credentials.value(for: Credentials.webKeyPrefix + AppConfig.deviceCredentialKey) != nil {
                 remoteURL = Prefs.lastRemoteURL
                 deckMountedUnproven = remoteURL != nil
-                showingDeck = remoteURL != nil
+                showingDeck = remoteURL != nil && !Prefs.advancedMode
             }
             beginDiscovery()
         }
@@ -573,6 +573,10 @@ final class AppModel: ObservableObject {
     func hideDeck() {
         showingDeck = false
         deckParked = true
+        if chatOffered {
+            connectingMac = false
+            showingChat = true
+        }
     }
 
     private func coverChatWithLobby() {

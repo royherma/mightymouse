@@ -59,6 +59,7 @@
 		CE6F12E5D82446F57AE6BC10 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA2134463F01DA2A5A8E98AE /* Foundation.framework */; };
 		DCEE160E18FF71F6C2DD0CC1 /* ControlWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1766B353F3967C5A7B6B641C /* ControlWidgets.swift */; };
 		E017E63DB50E64D2C0C4E84A /* KeyboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 23902E0E87A1F4BB70D14953 /* KeyboardViewController.swift */; };
+		4E57A0D1C0FFEE0A11CE0002 /* next-words.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4E57A0D1C0FFEE0A11CE0001 /* next-words.txt */; };
 		E94B95C1CE882DE5FF099E7A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CA2134463F01DA2A5A8E98AE /* Foundation.framework */; };
 		F2AE1527D1E65238D8DB0A6D /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* Config.swift */; };
 		N10000000000000000000010 /* MightyMouseNSE.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = N10000000000000000000009 /* MightyMouseNSE.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -144,6 +145,7 @@
 		1766B353F3967C5A7B6B641C /* ControlWidgets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ControlWidgets.swift; sourceTree = "<group>"; };
 		1A88DD53CE9C3FD600BC4E9E /* VoiceTyping.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = VoiceTyping.swift; sourceTree = "<group>"; };
 		23902E0E87A1F4BB70D14953 /* KeyboardViewController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeyboardViewController.swift; sourceTree = "<group>"; };
+		4E57A0D1C0FFEE0A11CE0001 /* next-words.txt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "next-words.txt"; sourceTree = "<group>"; };
 		32728635386FD066DA72E6FA /* MightyMouseKeyboard.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MightyMouseKeyboard.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		5552B8CA0AD31D83F0A513CE /* MightyMouseWidgetsBundle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MightyMouseWidgetsBundle.swift; sourceTree = "<group>"; };
 		5A5BAF473ED15366FEBB3044 /* AudioCapture.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AudioCapture.swift; sourceTree = "<group>"; };
@@ -254,6 +256,7 @@
 			children = (
 				23902E0E87A1F4BB70D14953 /* KeyboardViewController.swift */,
 				08D259EA402ED4A82CF428D6 /* Info.plist */,
+				4E57A0D1C0FFEE0A11CE0001 /* next-words.txt */,
 				BCFC7F9DB96B550B31722460 /* MightyMouseKeyboard.entitlements */,
 			);
 			name = MightyMouseKeyboard;
@@ -525,6 +528,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4E57A0D1C0FFEE0A11CE0002 /* next-words.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -723,7 +727,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MightyMouseKeyboard/Info.plist;
@@ -733,7 +737,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				MM_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZnpzeHVzbHZjZWFqbHhtdnJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxOTcwNDMsImV4cCI6MjA5NTc3MzA0M30.EvljnMIt7bg-TKiyvu87YwJ0njL_D0tfvtHEp-bQDCo";
 				MM_SUPABASE_REF = nyfzsxuslvceajlxmvry;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.dev.keyboard;
@@ -756,13 +760,13 @@
 				"CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]" = NO;
 				CODE_SIGN_ENTITLEMENTS = MightyMouseWidgets/MightyMouseWidgets.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				ENABLE_TESTABILITY = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MightyMouseWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.dev.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -785,7 +789,7 @@
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MightyMouseKeyboard/Info.plist;
@@ -795,7 +799,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				MM_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6eWxoZGpqZnN4eWx0dmdubnloIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxODUzNDAsImV4cCI6MjA5NTc2MTM0MH0.B_jqHJM4bACKLs3H6_58fVTFz6-xL16hGpy-ynDWAD0";
 				MM_SUPABASE_REF = czylhdjjfsxyltvgnnyh;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.keyboard;
@@ -821,12 +825,12 @@
 				CODE_SIGN_ENTITLEMENTS = MightyMouseWidgets/MightyMouseWidgets.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MightyMouseWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.widgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "MM Widgets App Store";
@@ -866,7 +870,7 @@
 				"CODE_SIGNING_REQUIRED[sdk=iphonesimulator*]" = NO;
 				CODE_SIGN_ENTITLEMENTS = MightyMouse/MightyMouse.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				ENABLE_TESTABILITY = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -906,7 +910,7 @@
 				CODE_SIGN_ENTITLEMENTS = MightyMouse/MightyMouse.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				INFOPLIST_FILE = MightyMouse/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
@@ -963,7 +967,7 @@
 				CODE_SIGN_ENTITLEMENTS = MightyMouseNSE/MightyMouseNSE.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MightyMouseNSE/Info.plist;
@@ -973,7 +977,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.dev.nse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -995,7 +999,7 @@
 				CODE_SIGN_ENTITLEMENTS = MightyMouseNSE/MightyMouseNSE.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MightyMouseNSE/Info.plist;
@@ -1005,7 +1009,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.nse;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "MM NSE App Store";
@@ -1028,7 +1032,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MightyMouseShare/Info.plist;
@@ -1038,7 +1042,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.dev.share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1060,7 +1064,7 @@
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 22;
+				CURRENT_PROJECT_VERSION = 24;
 				DEVELOPMENT_TEAM = BZJ35GS989;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = MightyMouseShare/Info.plist;
@@ -1070,7 +1074,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.10;
+				MARKETING_VERSION = 1.0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.mightymouse.ios.share;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "MM Share App Store";

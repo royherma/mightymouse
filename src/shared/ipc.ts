@@ -154,6 +154,7 @@ export const CHANNELS = Object.freeze({
   replyWindowSeeing: 'reply-window-seeing',
   replyWindowAuto: 'reply-window-auto',
   replyWindowShowOver: 'reply-window-show-over',
+  replyWindowPickForPage: 'reply-window-pick-for-page',
   replyWindowShot: 'reply-window-shot',
   // main → panel broadcast after a save so the panel reloads its chip row.
   actionsChanged: 'actions-changed',

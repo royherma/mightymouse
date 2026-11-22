@@ -36,6 +36,8 @@ const PROGRESS_NUDGE_INTERVAL_MS = 1000
 // tick; if it fires, treat the download as failed so the tray clears the row.
 let stallWatchdog: ReturnType<typeof setTimeout> | null = null
 const STALL_TIMEOUT_MS = 5 * 60 * 1000
+let activeDownload: { cancel: () => void; settled: Promise<void> } | null = null
+let retriedAfterStall = false
 
 function clearStallWatchdog(): void {
   if (stallWatchdog) {
@@ -47,6 +49,17 @@ function clearStallWatchdog(): void {
 function armStallWatchdog(): void {
   clearStallWatchdog()
   stallWatchdog = setTimeout(() => {
+    stallWatchdog = null
+    // electron-updater reuses an in-flight download, so a hung one blocks every later check until cancelled.
+    const stalled = activeDownload
+    activeDownload = null
+    stalled?.cancel()
+    if (stalled && !retriedAfterStall) {
+      retriedAfterStall = true
+      devLog.warn('[updater] download stalled — no progress for 5min, retrying')
+      void stalled.settled.then(() => checkForUpdates())
+      return
+    }
     devLog.error('[updater] download stalled — no progress for 5min, clearing tray row')
     trackError({
       kind: 'update_stalled',
@@ -134,7 +147,23 @@ export async function checkForUpdates(): Promise<void> {
   }
   try {
     const result = await autoUpdater.checkForUpdates()
-    result?.downloadPromise?.catch(() => {})
+    const download = result?.downloadPromise
+    const token = result?.cancellationToken
+    if (download && token && !activeDownload) {
+      const entry = {
+        cancel: () => token.cancel(),
+        settled: download.then(
+          () => {},
+          () => {}
+        )
+      }
+      activeDownload = entry
+      void entry.settled.then(() => {
+        if (activeDownload === entry) activeDownload = null
+      })
+    } else {
+      download?.catch(() => {})
+    }
   } catch (err) {
     devLog.error('[updater] check failed:', err)
   }
@@ -192,6 +221,7 @@ export function setupAutoUpdater(): void {
   })
   autoUpdater.on('update-downloaded', (info: UpdateInfo) => {
     clearStallWatchdog()
+    retriedAfterStall = false
     track(ANALYTICS_EVENT.update_downloaded, { version: info.version })
     broadcastUpdateStatus({ state: 'downloaded', version: info.version })
   })
