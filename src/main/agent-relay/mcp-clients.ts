@@ -8,7 +8,7 @@
  * are files the user's other tools own, and clobbering one breaks every OTHER
  * MCP server they had configured.
  */
-import { readFileSync, writeFileSync, existsSync, copyFileSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, copyFileSync, mkdirSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { join } from 'node:path'
 import type { McpClientId, McpClientState } from '../../shared/types'
@@ -114,14 +114,32 @@ const CLIENTS: Client[] = [
   }
 ]
 
-export function opencodeRelayEnv(extra: Record<string, unknown> = {}): Record<string, string> {
+export function relayCommand(): string[] {
   const claudeConfig = join(homedir(), '.claude.json')
   const raw = existsSync(claudeConfig) ? readFileSync(claudeConfig, 'utf8') : ''
   const entry = safeParseJson(raw)?.mcpServers?.[SERVER_KEY]
-  const command =
-    typeof entry?.command === 'string'
-      ? [entry.command, ...(Array.isArray(entry.args) ? entry.args : [])]
-      : [COMMAND, ...ARGS]
+  return typeof entry?.command === 'string'
+    ? [entry.command, ...(Array.isArray(entry.args) ? entry.args : [])]
+    : [COMMAND, ...ARGS]
+}
+
+export function antigravityHasRelay(home: string): boolean {
+  const path = join(home, '.gemini', 'config', 'mcp_config.json')
+  return existsSync(path) && !!safeParseJson(readFileSync(path, 'utf8'))?.mcpServers?.[SERVER_KEY]
+}
+
+export function addCursorRelay(home: string): void {
+  const path = join(home, '.cursor', 'mcp.json')
+  const root = existsSync(path) ? safeParseJson(readFileSync(path, 'utf8')) : {}
+  if (!root || root.mcpServers?.[SERVER_KEY]) return
+  const [command, ...args] = relayCommand()
+  root.mcpServers = { ...root.mcpServers, [SERVER_KEY]: { command, args } }
+  mkdirSync(join(home, '.cursor'), { recursive: true })
+  writeFileSync(path, JSON.stringify(root, null, 2) + '\n', 'utf8')
+}
+
+export function opencodeRelayEnv(extra: Record<string, unknown> = {}): Record<string, string> {
+  const command = relayCommand()
   const mcp = { [SERVER_KEY]: { type: 'local', command, enabled: true } }
   return { OPENCODE_CONFIG_CONTENT: JSON.stringify({ ...extra, mcp }) }
 }

@@ -114,3 +114,30 @@ describe('a helper process going away', () => {
     ])
   })
 })
+
+describe('a renderer window going away', () => {
+  async function rendererGone(): Promise<(details: { reason: string; exitCode: number }) => void> {
+    await installAndGrab()
+    const { app } = await import('electron')
+    const call = vi.mocked(app.on).mock.calls.find(([event]) => event === 'render-process-gone')
+    return (details) => (call?.[1] as (e: unknown, wc: unknown, d: unknown) => void)({}, {}, details)
+  }
+
+  it('a renderer SIGTERMed at logout or shutdown is not a crash', async () => {
+    const gone = await rendererGone()
+    gone({ reason: 'killed', exitCode: 15 })
+    expect(trackError).not.toHaveBeenCalled()
+  })
+
+  it('a renderer killed any other way, or crashing with exit 15, is still reported', async () => {
+    const gone = await rendererGone()
+    gone({ reason: 'killed', exitCode: 9 })
+    gone({ reason: 'crashed', exitCode: 15 })
+    gone({ reason: 'oom', exitCode: 0 })
+    expect(trackError.mock.calls.map((c) => (c[0] as { message: string }).message)).toEqual([
+      'renderer killed (exit 9)',
+      'renderer crashed (exit 15)',
+      'renderer oom (exit 0)'
+    ])
+  })
+})

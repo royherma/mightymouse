@@ -1,6 +1,6 @@
 import { ipcMain } from 'electron'
 import { CHANNELS } from '../shared/ipc'
-import { hideNavigatorWindow } from './navigator-window'
+import { hideNavigatorWindow, showNavigatorWindow } from './navigator-window'
 import { navigatorCaptureAction } from './capture'
 import { showAnalyticsWindow } from './analytics-window'
 import { showCheatSheetWindow } from './cheatsheet-window'
@@ -18,6 +18,7 @@ import { showAgentInCodeTab, showMightyWindow } from './mighty/mighty-window'
 import { isCurrentUserAdmin } from './auth'
 import { ADMIN_SCREEN_IDS, type NavigatorSearchRef } from '../shared/navigator-targets'
 import { searchConversations } from './navigator-search'
+import { resolveSessionRef } from './agent-relay/session-control'
 
 // The actions that live in index.ts next to the hotkey handlers. Passed in
 // rather than imported so there is still exactly ONE definition of each.
@@ -61,11 +62,13 @@ function runShortcut(id: string, a: NavigatorActions): void {
 
 export function registerNavigatorIpc(actions: NavigatorActions): void {
   ipcMain.removeHandler(CHANNELS.navigatorClose)
+  ipcMain.removeHandler(CHANNELS.navigatorOpen)
   ipcMain.removeHandler(CHANNELS.navigatorRun)
   ipcMain.removeHandler(CHANNELS.navigatorSearch)
   ipcMain.handle(CHANNELS.navigatorClose, () => hideNavigatorWindow())
+  ipcMain.handle(CHANNELS.navigatorOpen, () => showNavigatorWindow())
   ipcMain.handle(CHANNELS.navigatorSearch, (_e, query: string, refs: NavigatorSearchRef[]) =>
-    searchConversations(query, refs)
+    searchConversations(query, refs, resolveSessionRef)
   )
 
   ipcMain.handle(CHANNELS.navigatorRun, async (_e, targetId: string) => {

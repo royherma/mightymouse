@@ -552,6 +552,7 @@ interface CustomAPI {
   navigator: {
     run: (targetId: string) => Promise<void>
     close: () => Promise<void>
+    open: () => Promise<void>
     search: (
       query: string,
       refs: import('../shared/navigator-targets').NavigatorSearchRef[]
@@ -916,6 +917,7 @@ interface CustomAPI {
     login: (cwd: string, name: string) => Promise<import('../shared/types').McpActionResult>
     openClaudeConnectors: () => Promise<void>
   }
+  agentRelaySessionLoads: () => Promise<Record<string, import('../shared/types').SessionLoad>>
   agentRelaySessionScreen: (
     ref: string,
     back?: number

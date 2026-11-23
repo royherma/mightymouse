@@ -350,6 +350,7 @@ export const CHANNELS = Object.freeze({
   mcpLogin: 'mcp-login',
   mcpOpenClaudeConnectors: 'mcp-open-claude-connectors',
   agentRelaySessionScreen: 'agent-relay-session-screen',
+  agentRelaySessionLoads: 'agent-relay-session-loads',
   agentRelaySessionKeys: 'agent-relay-session-keys',
   agentRelaySessionFit: 'agent-relay-session-fit',
   agentRelaySessionWatch: 'agent-relay-session-watch',
@@ -694,6 +695,7 @@ export const CHANNELS = Object.freeze({
   // Sessions: list summaries, fetch one full session, start a new one.
   navigatorRun: 'navigator-run',
   navigatorClose: 'navigator-close',
+  navigatorOpen: 'navigator-open',
   navigatorSearch: 'navigator-search',
   mightyListSessions: 'mighty-list-sessions',
   mightyGetSession: 'mighty-get-session',

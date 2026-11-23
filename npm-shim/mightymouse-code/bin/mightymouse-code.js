@@ -118,13 +118,21 @@ function sessionModel(agent) {
   if (env.MM_AGENT_MODEL && env.MM_AGENT_MODEL.trim()) return modelLabel(env.MM_AGENT_MODEL)
   const ran = agent === 'codex' ? '' : transcriptModel()
   if (ran) return modelLabel(ran)
+  const flag = agentArgModel()
+  if (flag) return modelLabel(flag)
   const direct = env.ANTHROPIC_MODEL || env.OPENAI_MODEL
   if (direct && direct.trim()) return modelLabel(direct)
   // Each agent's own config, and ONLY its own: reading Claude's settings for a
   // Codex session would label that card "Opus 5" with total confidence and be
   // wrong, which is worse than the blank it replaces.
-  const raw = agent === 'codex' ? codexConfigModel() : claudeSettingsModel()
+  const raw = agent === 'codex' ? codexConfigModel() : agent === 'claude-code' ? claudeSettingsModel() : ''
   return raw ? modelLabel(raw) : ''
+}
+
+function agentArgModel() {
+  const agent = ancestors().find((a) => !LAUNCHER.test(a.line))
+  const hit = agent && agent.line.match(/\s--model(?:=|\s+)([\w.:/-]+)/)
+  return hit ? hit[1] : ''
 }
 
 // Kept across reads: a tail filled by one huge tool result has no assistant line.
@@ -223,7 +231,7 @@ function modelLabel(raw) {
     // A trailing WORD is a codename the vendor uses in its own UI ("gpt-5.6-terra",
     // "gpt-5-codex"), so keeping it makes the card say what the agent's own status
     // bar says. A trailing date is not a codename and is dropped by the \d guard.
-    const code = after.slice(version[0].length).match(/^-([a-z]{3,})$/)
+    const code = after.slice(version[0].length).match(/^-([a-z]{3,})(?:-(?:minimal|low|medium|high|xhigh|max))?$/)
     const label = code ? `${number} ${code[1][0].toUpperCase()}${code[1].slice(1)}` : number
     return `${name} ${label}`
   }
@@ -250,12 +258,16 @@ function detectAgent() {
     ['@openai/codex', 'codex'],
     ['/codex', 'codex'],
     ['claude', 'claude-code'],
+    ['cursor-agent', 'cursor'],
     ['gemini', 'gemini'],
     ['opencode', 'opencode']
   ]
   for (const line of ancestorCommands()) {
+    const [, exe = '', script = ''] = line.trim().split(/\s+/)
+    const program = /^(node|bun|deno)$/.test(exe.split('/').pop()) ? [exe, script] : [exe]
+    if (program.some((p) => p.split('/').pop() === 'agy')) return 'antigravity'
     for (const [needle, agent] of AGENTS) {
-      if (line.includes(needle)) return agent
+      if (program.some((p) => p.includes(needle))) return agent
     }
   }
   return ''
@@ -543,16 +555,34 @@ function isUtilitySession(cwd) {
  * blocks a tool call, and an env var this host doesn't set is a normal
  * missing field, not an error.
  */
+function paneFromTty() {
+  try {
+    const ttys = ancestors().map((a) =>
+      execFileSync('ps', ['-o', 'tty=', '-p', String(a.pid)], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 1000 }).trim()
+    )
+    const tty = ttys.find((t) => t && t !== '??')
+    if (!tty) return null
+    const tmux = ['/opt/homebrew/bin/tmux', '/usr/local/bin/tmux', '/usr/bin/tmux'].find((b) => { try { return statSync(b).isFile() } catch { return false } }) || 'tmux'
+    const rows = execFileSync(tmux, ['list-panes', '-a', '-F', '#{pane_tty} #{pane_id} #{socket_path}'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 1000 })
+    const row = rows.split('\n').map((l) => l.split(' ')).find(([t]) => t === `/dev/${tty}`)
+    return row ? { pane: row[1], socket: row[2] } : null
+  } catch {
+    return null
+  }
+}
+
 function deriveOrigin() {
   const env = process.env
+  // Cursor starts MCP servers without TMUX/TMUX_PANE, so find the pane by the agent's terminal.
+  const found = env.TMUX_PANE ? null : paneFromTty()
   const origin = {
     cmuxWorkspaceId: env.CMUX_WORKSPACE_ID || '',
     cmuxTabId: env.CMUX_TAB_ID || '',
     cmuxBundleId: env.CMUX_BUNDLE_ID || '',
-    tmuxPane: env.TMUX_PANE || '',
+    tmuxPane: env.TMUX_PANE || found?.pane || '',
     // The server socket path, e.g. "/private/tmp/tmux-502/default,3005,4" --
     // targets the right tmux SERVER, not just the right pane id within it.
-    tmuxSocket: env.TMUX ? env.TMUX.split(',')[0] : '',
+    tmuxSocket: env.TMUX ? env.TMUX.split(',')[0] : found?.socket || '',
     termProgram: env.TERM_PROGRAM || '',
     hostBundleId: env.__CFBundleIdentifier || ''
   }

@@ -24,7 +24,7 @@ import { CONFIG } from '../../../shared/config'
 import { RailEdgeToggle, RailModeSwitch, SideBrowser } from './side-browser'
 import { useRailBrowserShortcut, useRailMode } from '../hooks/useRailMode'
 import { useRailResize } from '../hooks/useRailResize'
-import { sessionRow, isOriginResolvable, sessionIsWorking, recapLine, agentVendor, nameFromMessage, isPlaceholderName } from '../../../shared/relay-status'
+import { sessionRow, isOriginResolvable, sessionIsWorking, agentVendor, nameFromMessage, isPlaceholderName } from '../../../shared/relay-status'
 
 import type {
   AgentChecklist,
@@ -72,9 +72,11 @@ export function SessionDetail(props: {
   project?: MightyProject
   archived?: boolean
   onArchive?: () => void
+  headActions?: React.ReactNode
+  hideViewToggle?: boolean
 }): React.JSX.Element {
   const { session, history, onRespond, onBack, shared, backLabel, withRail, opening, starting } = props
-  const sessionRef = session.sessionId ?? session.label
+  const sessionRef = session.sessionId ?? (session.origin?.tmuxPane || session.label)
   const sheetRef = useRef<HTMLDivElement>(null)
   const terminalRef = useRef<HTMLDivElement>(null)
   const [railMode, setRailMode] = useRailMode(sessionRef)
@@ -348,10 +350,10 @@ export function SessionDetail(props: {
             />
             {props.project?.name ?? folderName}
           </span>
-          <span className="code-detail-pos" data-health={row.health}>
+          <span className="code-detail-pos" data-health={row.health} title={row.state_text}>
             {row.state_text}
           </span>
-          {canStepIn && (
+          {canStepIn && !props.hideViewToggle && (
             <Button
               variant="icon"
               onClick={() => setTerminalView(!terminal)}
@@ -362,14 +364,8 @@ export function SessionDetail(props: {
               {terminal ? <MessageSquare size={15} strokeWidth={2} /> : <SquareTerminal size={15} strokeWidth={2} />}
             </Button>
           )}
+          {props.headActions}
         </div>
-
-        {!withRail && !terminal && recapLine(row) && (
-          <div className="session-detail-tldr">
-            <span className="session-tldr-tag">{CONFIG.UI_LABELS.CODE_SESSION_RECAP}</span>
-            {recapLine(row)}
-          </div>
-        )}
 
         {terminal ? (
           <div ref={terminalRef} className="session-detail-terminal">

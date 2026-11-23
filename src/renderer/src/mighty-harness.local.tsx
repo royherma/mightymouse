@@ -92,11 +92,12 @@ const homeLog = <T,>(kind: string, value: T): T => {
   ;((window as unknown as { __homeLog?: unknown[] }).__homeLog ??= []).push({ kind, value })
   return value
 }
-const trailTitles = state === 'home' ? ['Phone chat edge cases', 'Landing page lock protection', 'Projects icons addition'] : ['Fix login bug', 'Add dark mode', 'Write release notes']
+const baseTitles = state === 'home' ? ['Phone chat edge cases', 'Landing page lock protection', 'Projects icons addition'] : ['Fix login bug', 'Add dark mode', 'Write release notes']
+const trailTitles = new URLSearchParams(location.search).has('many') ? [...baseTitles, 'Pricing page copy', 'Fix flaky upload test', 'Onboarding email', 'Speed up search', 'Dark mode icons', 'Refund flow'] : baseTitles
 const trailSessions = trailTitles.map((label, i) => ({
-  label,
-  stated: label,
-  tldr: label,
+  label: i < 3 ? label : 'shop',
+  stated: i < 3 ? label : undefined,
+  tldr: i < 3 ? label : undefined,
   sessionId: `trail-${i + 1}`,
   cwd: '/Users/me/shop',
   since: Date.now() - (i + 1) * 600_000,
@@ -214,6 +215,11 @@ const explicit: Record<string, unknown> = {
   skillsList: async () => [],
   agentRelaySessionTranscript: async (ref: string) => (delegating && ref === 'trail-1' ? delegateTurns : delegating && ref === 'trail-2' ? helperTurns : []),
   agentRelaySessionChecklist: async () => null,
+  agentRelaySessionLoads: async () => ({
+    'trail-1': { cpuPct: 31.4, memMb: 1840, agentCpuPct: 2.1, started: 4, top: [{ name: 'esbuild', count: 3, cpuPct: 27.9, memMb: 610 }, { name: 'node', count: 1, cpuPct: 1.4, memMb: 220 }] },
+    'trail-2': { cpuPct: 3.2, memMb: 512, agentCpuPct: 3.2, started: 1, top: [{ name: 'node', count: 1, cpuPct: 0, memMb: 52 }] },
+    'trail-3': { cpuPct: 0.4, memMb: 430, agentCpuPct: 0.4, started: 1, top: [] }
+  }),
   agentRelaySessionKeys: async () => true,
   agentRelaySessionHelpers: async (ref: string) => (delegating && ref === 'trail-1' ? delegateHelpers : []),
   agentRelaySessionSent: async () => [],
@@ -229,6 +235,7 @@ const explicit: Record<string, unknown> = {
   codeAgentModels: async () => ({ options: [], selected: { harness: 'claude', model: 'opus' }, needsSetup: [] }),
   planLoginsList: async () => [],
   planLoginPicks: async () => ({}),
+  chatModelInfo: async () => ({}),
   markupList: async () => [],
   built: { list: async () => [] },
   infra: { list: async () => [] },

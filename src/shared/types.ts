@@ -3569,6 +3569,14 @@ export type TurnUndoState = 'undo' | 'putBack'
 
 export type CheckpointResult = { ok: true; state: TurnUndoState; files: number } | { ok: false; error: string }
 
+export interface SessionLoad {
+  cpuPct: number
+  memMb: number
+  agentCpuPct: number
+  started: number
+  top: { name: string; count: number; cpuPct: number; memMb: number }[]
+}
+
 export interface AgentRelaySessionInfo {
   label: string
   project?: { name: string; icon?: string; imageBase64?: string }
@@ -3659,6 +3667,7 @@ export interface AgentRelaySessionInfo {
    *  six panes sharing one checkout, this is the only one that says which is
    *  which by subject. Absent whenever the agent never declared one. */
   tldr?: string
+  aiTitle?: string
   /** How far along the agent says it is, 0-1, declared via `notify`. Lives on
    *  the session and not on a card: the number describes the AGENT, so a card
    *  the sheet fails to match must not be able to take the ring down with it. */

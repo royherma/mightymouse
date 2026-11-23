@@ -1,13 +1,16 @@
+import { existsSync } from 'fs'
 import { open, stat } from 'fs/promises'
 import { homedir } from 'os'
-import { join } from 'path'
 import { MIGHTY } from './store/mighty'
 import { CONFIG } from '../shared/config'
 import { buildSnippet, fuzzyMatch, type FuzzyMatch, type Snippet } from '../shared/fuzzy'
 import { hasRealExchange, type MightySession } from '../shared/types'
 import type { NavigatorContentHit, NavigatorSearchRef } from '../shared/navigator-targets'
+import { nameFromMessage } from '../shared/relay-status'
+import type { AgentTranscriptTurn } from '../shared/types'
+import { claudeTranscriptPaths, readSessionTranscript, type TranscriptSession } from './agent-relay/session-transcript'
 
-const CLAUDE_TRANSCRIPTS = join(homedir(), '.claude', 'projects')
+export type ResolveSession = (ref: string) => TranscriptSession | undefined
 const READ_CHUNK_BYTES = 8 * 1024 * 1024
 const MIN_QUERY_CHARS = 2
 const MAX_CHAT_HITS = 30
@@ -25,11 +28,30 @@ interface Transcript extends Doc {
 }
 
 const chatDocs = new WeakMap<Readonly<MightySession>, Doc>()
+const turnDocs = new WeakMap<AgentTranscriptTurn[], Doc>()
 const transcripts = new Map<string, Transcript>()
 const reading = new Map<string, Promise<Transcript | null>>()
 
-function claudeTranscriptPath(sessionId: string, cwd: string): string {
-  return join(CLAUDE_TRANSCRIPTS, cwd.replace(/[^a-zA-Z0-9]/g, '-'), `${sessionId}.jsonl`)
+function turnsDoc(turns: AgentTranscriptTurn[]): Doc {
+  let doc = turnDocs.get(turns)
+  if (!doc) {
+    const text = turns.filter((t) => t.role !== 'tool').map((t) => t.text).join('\n')
+    doc = { text, lower: text.toLowerCase() }
+    turnDocs.set(turns, doc)
+  }
+  return doc
+}
+
+async function sessionDoc(
+  ref: NavigatorSearchRef,
+  resolve: ResolveSession
+): Promise<{ doc: Doc | null; title: string }> {
+  const session = resolve(ref.sessionId)
+  const turns = session ? readSessionTranscript(session) : []
+  const title = nameFromMessage(turns.find((t) => t.role === 'you')?.text) ?? ''
+  const claudeFile = claudeTranscriptPaths(homedir(), ref.cwd, ref.sessionId).find((p) => existsSync(p))
+  const full = claudeFile ? await transcript(claudeFile) : null
+  return { doc: full ?? (turns.length ? turnsDoc(turns) : null), title }
 }
 
 function queryWords(query: string): string[] {
@@ -156,17 +178,17 @@ function searchChats(words: string[]): NavigatorContentHit[] {
 
 export async function searchConversations(
   query: string,
-  refs: NavigatorSearchRef[]
+  refs: NavigatorSearchRef[],
+  resolve: ResolveSession = () => undefined
 ): Promise<NavigatorContentHit[]> {
-  const docs = await Promise.all(
-    refs.map((r) => transcript(claudeTranscriptPath(r.sessionId, r.cwd)))
-  )
+  const docs = await Promise.all(refs.map((r) => sessionDoc(r, resolve)))
   const words = queryWords(query)
+  if (words.length === 0) return refs.flatMap((r, i) => (docs[i].title ? [{ id: r.id, title: docs[i].title, snippet: null }] : []))
   if (words.join('').length < MIN_QUERY_CHARS) return []
   const sessions = refs.flatMap((r, i) => {
-    const doc = docs[i]
+    const { doc, title } = docs[i]
     const match = doc && matchAll(doc, words)
-    return match ? [{ id: r.id, title: '', snippet: snippet(doc, match) }] : []
+    return match ? [{ id: r.id, title, snippet: snippet(doc, match) }] : []
   })
   return [...searchChats(words), ...sessions]
 }

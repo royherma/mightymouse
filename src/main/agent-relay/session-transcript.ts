@@ -2,6 +2,9 @@ import { closeSync, existsSync, openSync, readdirSync, readFileSync, readSync, s
 import { homedir } from 'os'
 import { dirname, join } from 'path'
 import { splitAgentMessage } from '../../shared/attachments'
+import { readAntigravityTranscript } from './antigravity-transcript'
+import { readOpencodeTranscript } from './opencode-transcript'
+import { readCursorTranscript } from './cursor-transcript'
 import { agentLabel } from '../../shared/relay-status'
 import {
   askedEnvs,
@@ -274,6 +277,10 @@ function isInjected(text: string): boolean {
     text.startsWith('# AGENTS.md instructions for ') ||
     text.startsWith('<environment_context>') ||
     text.startsWith('<system-reminder>') ||
+    text.startsWith('<task-notification>') ||
+    text.startsWith('<command-name>') ||
+    text.startsWith('<command-message>') ||
+    text.startsWith('<local-command-') ||
     text.startsWith('[Image:') ||
     text.startsWith('Caveat: The messages below')
   )
@@ -549,7 +556,7 @@ function withOpening(recent: AgentTranscriptTurn[], opening?: AgentTranscriptTur
   return [opening, ...recent]
 }
 
-type TranscriptSession = { cwd?: string; sessionId?: string; facts?: { agent?: string } }
+export type TranscriptSession = { cwd?: string; sessionId?: string; since?: number; facts?: { agent?: string; agentPid?: number } }
 
 function sessionCursor(session: TranscriptSession, home: string): Cursor | undefined {
   return sessionSource(session, home)?.cursor
@@ -583,7 +590,9 @@ function sessionSource(session: TranscriptSession, home: string): { cursor: Curs
 // Empty = no transcript found, i.e. a session that has not written one yet.
 export function readSessionTranscript(session: TranscriptSession, home = homedir()): AgentTranscriptTurn[] {
   const cursor = sessionCursor(session, home)
-  return cursor ? withOpening(cursor.turns.slice(-MAX_TURNS), cursor.opening) : []
+  if (cursor) return withOpening(cursor.turns.slice(-MAX_TURNS), cursor.opening)
+  const other = readOpencodeTranscript(session, home) ?? readAntigravityTranscript(session, home) ?? readCursorTranscript(session, home) ?? []
+  return other.length > MAX_TURNS ? [other[0], ...other.slice(-MAX_TURNS)] : other
 }
 
 export function readSessionTools(session: TranscriptSession, home = homedir()): AgentToolUse[] {

@@ -53,6 +53,8 @@ export function resolveSessionRef(ref: string): AgentSession | undefined {
   // surface that has one is immune to the collision below.
   const full = resolveSessionId(ref)
   if (full) return sessions.find((s) => s.sessionId === full)
+  const byPane = sessions.filter((s) => !s.staleSince && s.origin?.tmuxPane === ref)
+  if (/^%\d+$/.test(ref)) return byPane.length === 1 ? byPane[0] : undefined
   const hits = sessions.filter((s) => s.label === ref || s.stated === ref)
   return hits.length === 1 ? hits[0] : undefined
 }

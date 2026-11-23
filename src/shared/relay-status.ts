@@ -614,9 +614,18 @@ export function withoutAttachments(text: string): string {
   return lines.join('\n').replace(IMAGE_MARKERS, '')
 }
 
+// Six id-less agents in one checkout share a label; the live terminal pane is what tells them apart.
+export function sessionRef(s: Pick<AgentRelaySessionInfo, 'sessionId' | 'stated' | 'label' | 'stale' | 'origin'>): string {
+  return s.sessionId ?? s.stated ?? ((!s.stale && s.origin?.tmuxPane) || s.label)
+}
+
+export function isPaneOf(s: Pick<AgentRelaySessionInfo, 'stale' | 'origin'>, ref: string | null): boolean {
+  return !!ref && !s.stale && /^%\d+$/.test(ref) && s.origin?.tmuxPane === ref
+}
+
 export function nameFromMessage(text: string | undefined): string | undefined {
   const line = text && withoutAttachments(text).replace(/\s+/g, ' ').trim()
-  if (!line) return undefined
+  if (!line || /^<(command-|local-command-|task-notification|system-reminder)/.test(line)) return undefined
   if (line.length <= 48) return line
   const cut = line.slice(0, 48)
   return cut.slice(0, cut.lastIndexOf(' ') > 20 ? cut.lastIndexOf(' ') : 48).trim()

@@ -168,6 +168,7 @@ export function installCrashHandlers(): void {
   // A renderer window crashed / was killed (white screen, OOM, GPU fault).
   app.on('render-process-gone', (_e, _wc, details) => {
     devLog.error('[crash] render-process-gone:', details)
+    if (details.reason === 'killed' && details.exitCode === 15) return
     const message = `renderer ${details.reason} (exit ${details.exitCode})`
     trackError({
       kind: 'render-process-gone',

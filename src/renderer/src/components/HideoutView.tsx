@@ -12,6 +12,7 @@ import { HIDEOUT_FULL, HIDEOUT_NAME, HIDEOUT_SIDE, HIDEOUT_STUCK_VERDICTS, hideo
 import type { CompanionState } from '../../../shared/companion-state'
 import type { AgentChecklist, AgentRelaySessionInfo } from '../../../shared/types'
 import './HideoutView.css'
+import { sessionRef } from '../../../shared/relay-status'
 
 const HOURS = 8
 const HOUR_MS = 3_600_000
@@ -225,7 +226,7 @@ function TodayChart({ answered, arrived, hideout, now }: { answered: number[]; a
 }
 
 function useChecklist(session: AgentRelaySessionInfo | undefined): AgentChecklist | undefined {
-  const ref = session ? (session.sessionId ?? session.label) : undefined
+  const ref = session ? sessionRef(session) : undefined
   const [value, setValue] = useState<{ ref?: string; list?: AgentChecklist }>({})
   useEffect(() => {
     if (!ref) return

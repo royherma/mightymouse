@@ -3,7 +3,7 @@ import { ArrowUp, Check, ChevronDown, Ellipsis, LocateFixed, Maximize2, MessageS
 import { CONFIG } from '../../shared/config'
 import { previousList, senderMatchKey } from '../../shared/relay-cards'
 import { mightyProjectForCwd } from '../../shared/relay-sessions'
-import { sessionIsWorking, sessionRow } from '../../shared/relay-status'
+import { sessionIsWorking, sessionRef, sessionRow } from '../../shared/relay-status'
 import type { AgentRelaySessionInfo, AgentTranscriptTurn, MightyProject, MightySession, PopoverMenuItem, ReplyMatch, ReplyWindowAim, ReplyWindowApp, ReplyWindowSeeing } from '../../shared/types'
 import { Button } from './components/Button'
 import { Tooltip, useTooltip } from './components/Tooltip'
@@ -49,8 +49,9 @@ function store(key: string, value: string | undefined): void {
   }
 }
 
-const refOf = (s: AgentRelaySessionInfo): string => s.sessionId ?? s.label
-const nameOf = (s: AgentRelaySessionInfo, now: number): string => s.tldr || sessionRow(s, now).name || 'Unnamed agent'
+const refOf = sessionRef
+const nameOf = (s: AgentRelaySessionInfo, now: number): string =>
+  s.aiTitle || s.tldr || sessionRow(s, now).name || 'Unnamed agent'
 const projectOf = (s: AgentRelaySessionInfo): string => s.project?.name ?? s.label.split('/')[0]
 
 export function ProjectPicture({ project, size }: { project: AgentRelaySessionInfo['project']; size: number }): React.JSX.Element {
@@ -176,7 +177,7 @@ function NewAgentForPage({
   const [talkLive, setTalkLive] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   useEffect(() => inputRef.current?.focus(), [])
-  const empty = !text.trim() && att.attachments.length === 0
+  const empty = !text.trim() && att.attachments.length === 0 && !(screen?.on && screen.path)
   const send = (): void => {
     if (empty) return
     const paths = [...att.attachments.map((a) => a.path), ...(screen?.on && screen.path ? [screen.path] : [])]
@@ -553,8 +554,8 @@ export default function ReplyApp({
     }
     const trigger = rootRef.current?.querySelector(`[data-menu="${kind}"]`)?.getBoundingClientRect()
     if (!trigger) return
-    const width = kind === 'agents' ? window.innerWidth - 2 * MENU_INSET : kind === 'projects' ? 240 : 224
-    const x = kind === 'more' ? window.innerWidth - MENU_INSET - width : MENU_INSET
+    const width = kind === 'agents' ? window.innerWidth - MENU_INSET - trigger.left : kind === 'projects' ? 240 : 224
+    const x = kind === 'more' ? trigger.right - width : trigger.left
     const picked = await window.api.popoverMenu({
       items,
       width,
@@ -620,7 +621,7 @@ export default function ReplyApp({
             className="flex w-full min-w-0 flex-col rounded-md px-1.5 py-0.5 text-left hover:bg-surface2"
           >
             <span className="flex w-full min-w-0 items-center gap-1 text-sm font-medium text-fg">
-              <span className="truncate">
+              <span className="truncate" data-testid="reply-header-name">
                 {session
                   ? nameOf(session, now)
                   : chatting
@@ -642,6 +643,11 @@ export default function ReplyApp({
             )}
             {draft && draft !== 'chat' && (
               <span className="w-full truncate text-xs text-muted">{folderName(draft.cwd)}</span>
+            )}
+            {session?.aiTitle && session.tldr && session.tldr !== session.aiTitle && (
+              <span className="w-full truncate text-xs text-muted" data-testid="reply-header-summary">
+                {session.tldr}
+              </span>
             )}
             {session && row && (
               <span className="w-full truncate text-xs text-muted" data-health={row.health}>

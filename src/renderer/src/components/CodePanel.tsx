@@ -9,6 +9,9 @@ import { SegmentedControl, type SegmentItem } from './SegmentedControl'
 import './SessionTable.css'
 import { PulseCell } from './session-pulse'
 import { usePulseFresh } from './session-pulse-mac'
+import { LoadBadge, LoadCell, useSessionLoads } from './session-load'
+import { SessionPanes } from './SessionPanes'
+import type { SessionLoad } from '../../../shared/types'
 import type { PulseRow } from '../../../shared/session-pulse'
 import { Tooltip, useTooltip } from './Tooltip'
 import { createPortal } from 'react-dom'
@@ -34,6 +37,7 @@ import {
   GitBranch,
   Layers,
   LayoutGrid,
+  Columns2,
   Columns3,
   KeyRound,
   Server,
@@ -148,7 +152,9 @@ import {
   matchesSession,
   withSeenIdle,
   recapLine,
-  relativeAge
+  relativeAge,
+  sessionRef,
+  isPaneOf
 } from '../../../shared/relay-status'
 
 const ADMIN_CODE_TABS: readonly CodeTab[] = ['factory', 'keys']
@@ -420,6 +426,7 @@ export function CodePanel(props: {
     allSessions.flatMap((session) => (session.sessionId ? [session.sessionId] : [])),
     effectiveDensity === 'list'
   )
+  const loads = useSessionLoads(true)
   const sessionGroupViews = groupSessions(
     entries,
     sessionGroup,
@@ -587,7 +594,7 @@ export function CodePanel(props: {
   // one. Keying on label alone sent every stated-name agent to the dead-agent
   // fallback below, history and all.
   const isDetail = (s: AgentRelaySessionInfo): boolean =>
-    s.sessionId === detailLabel || s.label === detailLabel || s.stated === detailLabel
+    s.sessionId === detailLabel || s.label === detailLabel || s.stated === detailLabel || isPaneOf(s, detailLabel)
   const lastDetail = useRef<AgentRelaySessionInfo | null>(null)
   const listedDetail = detailLabel ? archive.all.find(isDetail) : undefined
   const last = lastDetail.current && isDetail(lastDetail.current) ? lastDetail.current : null
@@ -595,7 +602,7 @@ export function CodePanel(props: {
     !listedDetail && last?.pid !== undefined
       ? archive.all.find((s) => !s.stale && s.pid === last.pid && s.cwd === last.cwd)
       : undefined
-  if (sameProcess) setDetailLabel(sameProcess.sessionId ?? sameProcess.label)
+  if (sameProcess) setDetailLabel(sessionRef(sameProcess))
   const liveSession = listedDetail ?? sameProcess ?? null
   if (liveSession) lastDetail.current = liveSession
   if (reopening && (liveSession || detailLabel !== reopenLabel)) setReopening(false)
@@ -616,7 +623,7 @@ export function CodePanel(props: {
   // instant it lands in seenIdle, so watching it would never fire. Also catches
   // a fresh ping arriving while the sheet is already open on that session.
   const viewedRawSession = detailLabel
-    ? (line?.names ?? []).find((s) => s.sessionId === detailLabel || s.label === detailLabel || s.stated === detailLabel)
+    ? (line?.names ?? []).find((s) => s.sessionId === detailLabel || s.label === detailLabel || s.stated === detailLabel || isPaneOf(s, detailLabel))
     : undefined
   const viewedIdleAt = viewedRawSession?.idleSince
   const viewedIdleKey = viewedRawSession?.stated ?? viewedRawSession?.label
@@ -661,6 +668,23 @@ export function CodePanel(props: {
   const startInView =
     !!awaitingAgent && (!awaitingAgent.handedTo || awaitingAgent.handedTo === detailLabel)
   const detailKey = senderMatchKey(detailSession?.stated ?? detailSession?.label)
+  const renderPane = (session: AgentRelaySessionInfo, headActions?: React.ReactNode): React.JSX.Element => {
+    const key = senderMatchKey(session.stated ?? session.label)
+    return (
+      <SessionDetail
+        session={session}
+        history={[...pending, ...previous]
+          .filter((r) => senderMatchKey(r.params.from) === key)
+          .sort((a, b) => b.createdAt - a.createdAt)}
+        onRespond={onRespond}
+        shared={priority.sharedFor(session) ?? undefined}
+        project={mightyProjectForCwd(session.cwd, openProjects) ?? undefined}
+        onBack={() => openSession(session.sessionId || session.label)}
+        headActions={headActions}
+        hideViewToggle={headActions !== undefined}
+      />
+    )
+  }
 
   const activeTab: CodeTab = !isAdmin && ADMIN_CODE_TABS.includes(tab) ? 'needs' : tab
   // Sessions tab has no archive toggle, so it must never open stuck on the archived view.
@@ -881,7 +905,7 @@ export function CodePanel(props: {
   useEffect(() => {
     const pick = focusPane ? allSessions.find((s) => !s.stale && s.origin?.tmuxPane === focusPane) : undefined
     if (!pick) return
-    setDetailLabel(pick.sessionId ?? pick.stated ?? pick.label)
+    setDetailLabel(sessionRef(pick))
     setFocusPane(null)
   }, [allSessions, focusPane])
 
@@ -890,7 +914,7 @@ export function CodePanel(props: {
     if (!awaitingAgent || awaitingAgent.handedTo) return
     const pick = startedSession(allSessions, awaitingAgent)
     if (!pick) return
-    const ref = pick.sessionId ?? pick.stated ?? pick.label
+    const ref = sessionRef(pick)
     startThreadKeys.current.set(ref, `start-${awaitingAgent.since}`)
     setDetailLabel(ref)
     setAwaitingAgent((prev) => (prev ? { ...prev, handedTo: ref } : null))
@@ -1081,13 +1105,13 @@ export function CodePanel(props: {
 
   const inlineAgentList = showAgentList && !listSlot
   const pickAgentSession = (session: AgentRelaySessionInfo): void => {
-    if (onOpenAgent) return onOpenAgent(session.sessionId ?? session.stated ?? session.label)
+    if (onOpenAgent) return onOpenAgent(sessionRef(session))
     onShow?.()
     setTab('agents')
     setAgentTableId(null)
     setAgentFromTable(false)
     setAgentDraft(null)
-    setDetailLabel(session.sessionId ?? session.stated ?? session.label)
+    setDetailLabel(sessionRef(session))
     const key = senderMatchKey(session.stated ?? session.label)
     const group = agentGroups.find((g) =>
       g.entries.some((e) => senderMatchKey(e.session.stated ?? e.session.label) === key)
@@ -1470,8 +1494,18 @@ export function CodePanel(props: {
                         }}
                         onPick={(session) => {
                           setAgentFromTable(true)
-                          setDetailLabel(session.sessionId ?? session.stated ?? session.label)
+                          setDetailLabel(sessionRef(session))
                         }}
+                        loads={loads}
+                        renderPane={renderPane}
+                        onNewSession={
+                          homeDraft
+                            ? async () => {
+                                const result = await window.api.codeStartAgent({ project: homeDraft.name, cwd: homeDraft.cwd, inApp: true })
+                                return result.ok ? null : result.reason
+                              }
+                            : undefined
+                        }
                         home={
                           homeDraft
                             ? {
@@ -1863,6 +1897,17 @@ export function CodePanel(props: {
                       <Rows3 size={13} strokeWidth={2.5} />
                       List
                     </Button>
+                    <Button
+                      variant="bare"
+                      className="code-session-density-btn"
+                      data-on={effectiveDensity === 'panes' || undefined}
+                      aria-pressed={effectiveDensity === 'panes'}
+                      onClick={() => changeDensity('panes')}
+                      title="Several sessions side by side, each with its chat and a reply box"
+                    >
+                      <Columns2 size={13} strokeWidth={2.5} />
+                      Panes
+                    </Button>
                   </div>
                 </div>
               )}
@@ -1891,6 +1936,13 @@ export function CodePanel(props: {
                     Show all {allSessions.length}
                   </Button>
                 </CodeEmpty>
+              ) : effectiveDensity === 'panes' ? (
+                <SessionPanes
+                  sessions={sessionGroupViews.flatMap((group) => group.entries.map((entry) => entry.session))}
+                  loads={loads}
+                  onOpen={(session) => openSession(session.sessionId || session.label)}
+                  renderDetail={renderPane}
+                />
               ) : onBoard ? (
                 <div
                   className="code-session-board"
@@ -1994,6 +2046,7 @@ export function CodePanel(props: {
                                 <span>{L.CODE_SESSIONS_COL_MODEL}</span>
                                 <span>{L.CODE_SESSIONS_COL_STATE}</span>
                                 <span>{L.CODE_SESSIONS_COL_PULSE}</span>
+                                <span>{L.CODE_SESSIONS_COL_LOAD}</span>
                                 <span>{L.CODE_SESSIONS_COL_ACTIVITY}</span>
                               </div>
                             )}
@@ -2002,6 +2055,7 @@ export function CodePanel(props: {
                                 entry={entry}
                                 density={effectiveDensity}
                                 pulse={entry.session.sessionId ? pulses[entry.session.sessionId] : undefined}
+                                load={entry.session.sessionId ? loads[entry.session.sessionId] : undefined}
                                 now={now}
                                 key={priorityKey(entry.session)}
                                 archived={archive.showArchived}
@@ -2076,6 +2130,7 @@ function SessionCard({
   entry,
   density,
   pulse,
+  load,
   now,
   archived,
   onOpen,
@@ -2088,6 +2143,7 @@ function SessionCard({
   /** 'list' is one line; 'board' is the compact card in a status column. */
   density: SessionDensity
   pulse?: PulseRow
+  load?: SessionLoad
   now?: number
   archived?: boolean
   /** Open this session on its own. Always passed — a card with no cards waiting
@@ -2270,12 +2326,14 @@ function SessionCard({
         {session.progress !== undefined && (
           <ProgressMeter value={session.progress} classes={MAC_METER_CLASSES} />
         )}
+        {density !== 'list' && <LoadBadge load={load} />}
         <span className="code-session-go">
           {waiting > 0 ? `See ${waiting === 1 ? 'it' : 'them'}` : 'Details'}
           <ChevronRight size={12} strokeWidth={2.5} />
         </span>
       </div>
       {density === 'list' && <PulseCell row={pulse} hoverProps={hoverProps} />}
+      {density === 'list' && <LoadCell load={load} hoverProps={hoverProps} />}
       {density === 'list' && now !== undefined && (
         <SessionTime at={Math.max(lastEventAt(entry), session.lastActivityAt ?? 0)} now={now} />
       )}

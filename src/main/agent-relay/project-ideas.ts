@@ -158,7 +158,7 @@ function readTail(path: string, bytes: number): string {
 
 export function sessionAiTitle(cwd: string, sessionId: string): string | undefined {
   const cached = titleBySession.get(sessionId)
-  if (cached && (cached.title || Date.now() - cached.at < IDEAS.TITLE_RECHECK_MS)) return cached.title
+  if (cached && Date.now() - cached.at < IDEAS.TITLE_RECHECK_MS) return cached.title
   const path = transcriptPath(cwd, sessionId)
   const last = path ? [...readTail(path, IDEAS.TITLE_TAIL_BYTES).matchAll(AI_TITLE_ROW)].at(-1)?.[1] : undefined
   let title: string | undefined
@@ -167,6 +167,7 @@ export function sessionAiTitle(cwd: string, sessionId: string): string | undefin
   } catch {
     title = undefined
   }
+  title ??= cached?.title
   titleBySession.set(sessionId, { at: Date.now(), title })
   return title
 }

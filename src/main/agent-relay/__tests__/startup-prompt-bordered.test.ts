@@ -66,4 +66,28 @@ describe('parseStartupPrompt: questions with a border right above the options', 
     expect(p?.selected).toBe(1)
     expect(p?.question).toBe('Pick a theme for this terminal?')
   })
+  it('reads a question drawn inside a box (Cursor workspace trust)', () => {
+    const w = 60
+    const row = (text: string): string => `  │${text.padEnd(w)}│`
+    const p = parseStartupPrompt([
+      `  ╭${'─'.repeat(w)}╮`,
+      row(''),
+      row('  ⚠ Workspace Trust Required'),
+      row(''),
+      row('  Cursor Agent can execute code and access files in this directory.'),
+      row(''),
+      row('  Do you trust the contents of this directory?'),
+      row(''),
+      row('    /Users/me/project'),
+      row(''),
+      row('  ▶ [a] Trust this workspace'),
+      row('    [q] Quit'),
+      row(''),
+      row('  Use arrow keys to navigate, Enter to select, or press the key shown'),
+      `  ╰${'─'.repeat(w)}╯`
+    ])
+    expect(p?.options).toEqual(['Trust this workspace', 'Quit'])
+    expect(p?.selected).toBe(0)
+    expect(p?.question).toBe('Do you trust the contents of this directory?')
+  })
 })

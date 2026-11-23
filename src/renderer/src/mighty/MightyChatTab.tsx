@@ -153,6 +153,7 @@ export function ChatTab({
   const [filter, setFilter] = useState('')
   const [filterOpen, setFilterOpen] = useState(false)
   const [sessionShortcutsOpen, setSessionShortcutsOpen] = useState(false)
+  const numberedRowsRef = useRef<string[]>([])
   const filterInputRef = useRef<HTMLInputElement>(null)
   // Source filter (the funnel next to ⌘F): hidden group keys, and whether to list
   // conversations nothing was ever sent in. Both seeded from PREFS on mount; the
@@ -680,13 +681,6 @@ export function ChatTab({
       } else if (k === 'k' && !e.shiftKey) {
         e.preventDefault()
         setSessionShortcutsOpen((open) => !open)
-      } else if (sessionShortcutsOpen && /^[1-9]$/.test(e.key)) {
-        const session = orderedSessions[Number(e.key) - 1]
-        if (!session) return
-        e.preventDefault()
-        e.stopImmediatePropagation()
-        openSessionInActivePane(session.id)
-        setSessionShortcutsOpen(false)
       } else if (k === '\\') {
         e.preventDefault()
         toggleSidebar()
@@ -716,14 +710,28 @@ export function ChatTab({
     toggleSidebar,
     newChatInActivePane,
     cycleSession,
-    orderedSessions,
-    openSessionInActivePane,
     nerdMode,
     activeTab,
     focusMode,
     workspace,
     onNerdMode
   ])
+
+  useEffect(() => {
+    if (!sessionShortcutsOpen) return
+    const onDigit = (e: KeyboardEvent): void => {
+      if (!e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || !/^[1-9]$/.test(e.key)) return
+      const id = numberedRowsRef.current[Number(e.key) - 1]
+      if (!id) return
+      e.preventDefault()
+      e.stopImmediatePropagation()
+      openSessionInActivePane(id)
+      setSessionShortcutsOpen(false)
+    }
+    // Capture phase: MightyApp's bubble listener maps ⌘1-n to tabs and would win otherwise.
+    window.addEventListener('keydown', onDigit, true)
+    return () => window.removeEventListener('keydown', onDigit, true)
+  }, [sessionShortcutsOpen, openSessionInActivePane])
 
   // Search the sidebar list by title AND message text, typo-tolerantly.
   //
@@ -820,16 +828,20 @@ export function ChatTab({
     [query, searchHits]
   )
 
+  const numberedRows: string[] = []
+  numberedRowsRef.current = numberedRows
+  const rowNumber = (id: string): number | undefined => {
+    if (!sessionShortcutsOpen || numberedRows.length >= 9) return undefined
+    numberedRows.push(id)
+    return numberedRows.length
+  }
+
   const renderRow = (s: MightySession, place: 'pinned' | 'loose' | 'project'): JSX.Element => (
     <SessionRow
       key={s.id}
       s={s}
       leading={place === 'pinned' ? <MessageSquare size={14} /> : undefined}
-      shortcut={
-        sessionShortcutsOpen && orderedSessions.findIndex((session) => session.id === s.id) < 9
-          ? orderedSessions.findIndex((session) => session.id === s.id) + 1
-          : undefined
-      }
+      shortcut={rowNumber(s.id)}
       nested={place === 'project'}
       openState={visible ? chatOpenState(s.id, activePane, openElsewhere) : 'closed'}
       openColor={openColors?.get(s.id) ?? null}

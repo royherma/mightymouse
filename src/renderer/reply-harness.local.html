@@ -60,7 +60,7 @@
         { label: 'ShowAndTell/dev', sessionId: 's2', tldr: 'Floating reply window', project: { name: 'MightyMouse' }, cwd: '/Users/roy/Development/ShowAndTell', since: now - 900000, pid: 102, agent: 'claude', model: 'Opus 5', busySince: now - 40000 },
         { label: 'hyperframes/main', sessionId: 's3', tldr: 'Export presets', project: { name: 'hyperframes' }, cwd: '/Users/roy/Development/hyperframes', since: now - 7200000, stale: true, staleSince: now - 600000 }
       ]
-      const sessions = q.get('n') === '0' ? [] : all
+      const sessions = q.get('n') === '0' ? [] : (window.__harnessSessions ?? all)
       const talk = {
         s1: [
           { role: 'you', at: now - 900000, text: 'Build the outreach page for everyone who clicked apply.' },

@@ -26,7 +26,7 @@ export type SessionGroup = (typeof SESSION_GROUPS)[number]
 export const SESSION_SORTS = ['recent', 'waiting', 'age', 'name', 'priority'] as const
 export type SessionSort = (typeof SESSION_SORTS)[number]
 
-export const SESSION_DENSITIES = ['grid', 'board', 'list'] as const
+export const SESSION_DENSITIES = ['grid', 'board', 'list', 'panes'] as const
 export type SessionDensity = (typeof SESSION_DENSITIES)[number]
 
 /** Chips are additive within the set: picking none means "everything", and

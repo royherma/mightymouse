@@ -471,15 +471,19 @@ const readRecapOpen = (): boolean => {
   }
 }
 
-function FloatingRecap({ text, onSize }: { text: string; onSize: (px: number) => void }): React.JSX.Element {
+export const writeRecapOpen = (open: boolean): void => {
+  try {
+    localStorage.setItem(RECAP_OPEN_KEY, open ? '1' : '0')
+  } catch {
+    return
+  }
+}
+
+export function FloatingRecap({ text, onSize }: { text: string; onSize: (px: number) => void }): React.JSX.Element {
   const [open, setOpenState] = useState(readRecapOpen)
   const setOpen = (next: boolean): void => {
     setOpenState(next)
-    try {
-      localStorage.setItem(RECAP_OPEN_KEY, next ? '1' : '0')
-    } catch {
-      return
-    }
+    writeRecapOpen(next)
   }
   const boxRef = useRef<HTMLDivElement>(null)
   useLayoutEffect(() => {
@@ -844,11 +848,15 @@ export function SessionThread(props: {
     }
     // An attachment on its own is a message: the agent opens the file and has
     // something to work on without a word of prose.
-    if ((!text && paths.length === 0) || !canReply || sendingRef.current) return false
+    if ((!text && paths.length === 0 && !replyScreen?.on) || !canReply || sendingRef.current) return false
     sendingRef.current = true
     if (replyScreen?.on && !replyScreen.path) {
       const shot = await replyScreen.fresh()
       if (shot) paths.push(shot)
+    }
+    if (!text && paths.length === 0) {
+      sendingRef.current = false
+      return false
     }
     setSendFailed(false)
     setResumeFailed(undefined)
@@ -1204,7 +1212,7 @@ export function SessionThread(props: {
           <Button
             variant="bare"
             className="session-detail-send"
-            disabled={!canReply || (!draft.trim() && att.attachments.length === 0)}
+            disabled={!canReply || (!draft.trim() && att.attachments.length === 0 && !replyScreen?.on)}
             aria-label={CONFIG.UI_LABELS.CODE_SESSION_SEND}
             onClick={() => void submit()}
           >

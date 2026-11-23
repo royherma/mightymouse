@@ -349,7 +349,8 @@
   overflow-y: auto;
   padding: 14px 16px;
   border-radius: 12px;
-  background: var(--surface2);
+  background: linear-gradient(var(--surface2), var(--surface2)), var(--bg);
+  box-shadow: 0 -6px 16px rgba(var(--shadow-rgb), 0.08);
   font-size: var(--thread-text);
   font-weight: 560;
   line-height: 1.5;

@@ -4,6 +4,24 @@
 
 export const RELEASE_NOTES = [
   {
+    version: '0.58.2',
+    date: '2026-11-23',
+    changes: [
+      {
+        icon: '⬇️',
+        title: 'Updates finish downloading, even on a shaky connection.',
+        detail:
+          'A download that stops moving for five minutes now cancels itself and tries AGAIN, instead of sitting stuck until you restart the app.'
+      },
+      {
+        icon: '🔕',
+        title: 'Shutting down your computer stays QUIET.',
+        detail:
+          "Logging out or shutting down no longer pops up a false 'hit a snag' notice. You only hear from us when something really broke."
+      }
+    ]
+  },
+  {
     version: '0.58.1',
     date: '2026-11-22',
     changes: [

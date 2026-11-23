@@ -463,14 +463,22 @@ const PANE_ID = /^%\d+$/
 const PROMPT_FOOTER = /(?:press )?enter to (confirm|select|continue)|esc to cancel . tab to amend/i
 const HOOKS_MENU_FOOTER = /Press t to trust all; enter to review hooks; esc to close/i
 const HOOKS_MENU_TITLE = 'Hooks'
-const OPTION_MARK = /^[❯›>]\s*/
+const OPTION_MARK = /^[❯›>▶]\s*/
 const NUMBER = /^\d+\.\s+/
 const RULE = /^[─━-]{8,}/
 const DASHED_RULE = /^╌{8,}/
 
-const indentOf = (line: string): number => line.replace(/[❯›>]/, ' ').search(/\S/)
+const indentOf = (line: string): number => line.replace(/[❯›>▶]/, ' ').search(/\S/)
+const KEY_HINT = /^\[\w\]\s+/
 
-export function parseStartupPrompt(lines: string[]): StartupPrompt | null {
+function unbox(line: string): string {
+  if (/^\s*[╭╰┌└][─━]+[╮╯┐┘]\s*$/.test(line)) return '─'.repeat(8)
+  const inner = /^\s*[│┃|](.*)[│┃|]\s*$/.exec(line)
+  return inner ? inner[1].replace(/\s+$/, '') : line
+}
+
+export function parseStartupPrompt(screen: string[]): StartupPrompt | null {
+  const lines = screen.map(unbox)
   const hooksFooter = lines.findIndex((line) => HOOKS_MENU_FOOTER.test(line))
   if (hooksFooter !== -1) {
     const title = lines.findIndex((line) => line.trim() === HOOKS_MENU_TITLE)
@@ -511,7 +519,7 @@ export function parseStartupPrompt(lines: string[]): StartupPrompt | null {
   }
   if (rows.length < 2) return null
   const selected = Math.max(0, rows.findIndex((l) => OPTION_MARK.test(l)))
-  const options = rows.map((l) => l.replace(OPTION_MARK, '').replace(NUMBER, '').trim())
+  const options = rows.map((l) => l.replace(OPTION_MARK, '').replace(NUMBER, '').replace(KEY_HINT, '').trim())
 
   const paragraphs: string[] = []
   let para: string[] = []

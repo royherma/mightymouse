@@ -14,7 +14,8 @@
 // a project is only offered when something is running there, so there is always
 // a real cwd to inherit and nothing has to be configured up front.
 import { execFile } from 'child_process'
-import { existsSync, statSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs'
+import { homedir } from 'os'
 import { dirname, join } from 'path'
 import { resolveBinary } from '../platform'
 import { cmuxPath } from '../agent-relay/origin-resolver'
@@ -24,7 +25,7 @@ import type { JevSink } from './jev-client'
 import type { AgentHarness, MightyProject } from '../../shared/types'
 import { mightyProjectForCwd } from '../../shared/relay-sessions'
 import { PLAN_ARGS, reasoningArgs, type ReasoningEffort } from '../../shared/model-sources'
-import { codexRelayArgs } from '../agent-relay/mcp-clients'
+import { SERVER_KEY, addCursorRelay, antigravityHasRelay, codexRelayArgs, relayCommand } from '../agent-relay/mcp-clients'
 
 /** Same bound, and for the same reason, as the origin resolver's: a wedged
  *  tmux/cmux daemon must never freeze the click that triggered the spawn. */
@@ -211,6 +212,41 @@ function hasTerminalHost(): boolean {
   return process.platform === 'darwin'
 }
 
+function trustAntigravityFolder(cwd: string, home: string): void {
+  const file = join(home, '.gemini', 'antigravity-cli', 'settings.json')
+  try {
+    const settings = existsSync(file) ? (JSON.parse(readFileSync(file, 'utf-8')) as { trustedWorkspaces?: unknown }) : {}
+    const trusted = Array.isArray(settings.trustedWorkspaces) ? (settings.trustedWorkspaces as string[]) : []
+    if (trusted.includes(cwd)) return
+    mkdirSync(dirname(file), { recursive: true })
+    writeFileSync(file, JSON.stringify({ ...settings, trustedWorkspaces: [...trusted, cwd] }, null, 2), 'utf-8')
+  } catch (err) {
+    devLog.warn('[routing] could not mark folder trusted for Antigravity', (err as Error).message)
+  }
+}
+
+function trustCursorFolder(cwd: string, home: string): void {
+  const slug = cwd.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '')
+  const file = join(home, '.cursor', 'projects', slug, '.workspace-trusted')
+  if (existsSync(file)) return
+  try {
+    mkdirSync(dirname(file), { recursive: true })
+    writeFileSync(file, JSON.stringify({ trustedAt: new Date().toISOString(), workspacePath: cwd, trustMethod: 'cli-flag' }, null, 2), 'utf-8')
+  } catch (err) {
+    devLog.warn('[routing] could not mark folder trusted for Cursor', (err as Error).message)
+  }
+}
+
+function addAntigravityRelay(bin: string, home: string): Promise<void> {
+  const [command, ...args] = relayCommand()
+  return new Promise((resolve) => {
+    execFile(bin, ['mcp', 'add', SERVER_KEY, '--', command, ...args], { env: { ...process.env, HOME: home }, timeout: SPAWN_TIMEOUT_MS }, (err) => {
+      if (err) devLog.warn('[routing] could not add the MightyMouse server to Antigravity', err.message)
+      resolve()
+    })
+  })
+}
+
 export async function startNewAgent(
   sink: NewAgentSink,
   text: string,
@@ -227,12 +263,26 @@ export async function startNewAgent(
     return { ok: false, reason: 'cli-missing', detail: cli }
   }
 
+  if (harness === 'antigravity') {
+    const home = opts?.env?.HOME || homedir()
+    trustAntigravityFolder(sink.cwd, home)
+    if (!antigravityHasRelay(home)) await addAntigravityRelay(binary as string, home)
+  }
+  if (harness === 'cursor') {
+    const home = opts?.env?.HOME || homedir()
+    trustCursorFolder(sink.cwd, home)
+    try {
+      addCursorRelay(home)
+    } catch (err) {
+      devLog.warn('[routing] could not add the MightyMouse server to Cursor', (err as Error).message)
+    }
+  }
   const prompt = text === '' ? [] : harness === 'opencode' ? ['--prompt', text] : harness === 'antigravity' ? ['-i', text] : [text]
   const resume = resumeArgs(harness, opts?.resume ?? '')
   const envArgs = Object.entries(opts?.env ?? {}).map(([k, v]) => `${k}=${v}`)
   const launcher = envArgs.length > 0 ? ['/usr/bin/env', ...envArgs] : []
   const effort = harness === 'tmux' ? [] : reasoningArgs(harness, opts?.effort, opts?.think)
-  const relay = harness === 'codex' ? codexRelayArgs() : []
+  const relay = harness === 'codex' ? codexRelayArgs() : harness === 'cursor' ? ['--approve-mcps'] : []
   const plan = opts?.plan === true && harness !== 'tmux' ? PLAN_ARGS[harness] ?? [] : []
   // Settings, not --add-dir: --add-dir stops the agent on a "trust this folder?" screen before it starts.
   const readDirs = harness === 'claude' ? (opts?.readDirs ?? []) : []

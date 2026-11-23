@@ -331,11 +331,14 @@ export function recordOpeningTurn(start: { pane: string; cwd: string }, text: st
   openingTurns.push({ pane: start.pane, cwd: start.cwd, turn: sentTurn(text, files) })
 }
 
-export function recordSentTurn(label: string, text: string, files: string[] = []): SentTurn[] {
-  const turns = sentTurns.get(label) ?? []
+// Never the bare label: every unnamed agent in a folder shares it, so one agent's messages showed in another's chat.
+const sentKey = (s: AgentSession): string => (s.facts?.pid ? `pid:${s.facts.pid}` : (s.sessionId ?? s.label))
+
+export function recordSentTurn(key: string, text: string, files: string[] = []): SentTurn[] {
+  const turns = sentTurns.get(key) ?? []
   turns.push(sentTurn(text, files))
   const capped = turns.slice(-SENT_TURNS_PER_LABEL)
-  sentTurns.set(label, capped)
+  sentTurns.set(key, capped)
   return capped
 }
 
@@ -348,7 +351,7 @@ export async function sendToSession(
 ): Promise<'tmux' | 'tty' | 'skipped'> {
   const via = await sendPaneText(session.origin, agentMessageBody(files, (opts.context ?? '') + said), session.facts?.pid)
   if (via === 'skipped') return via
-  const turns = recordSentTurn(session.label, said, files)
+  const turns = recordSentTurn(sentKey(session), said, files)
   sendToPhone({ type: 'relaySessionSent', label: opts.echoLabel ?? session.label, turns: forPhone(turns) })
   return via
 }
@@ -368,24 +371,13 @@ function claimOpening(session: { cwd?: string; since: number; origin?: { tmuxPan
   return openingTurns.splice(at, 1)[0].turn
 }
 
-/** Every turn typed at this agent, matched the way the renderer keys sessions.
- *  The map is keyed on the raw label a caller happened to hold, and the Mac
- *  pane addresses agents by the normalised key -- looking up raw would return
- *  an empty thread for a session that has plenty.
- *
- *  The Mac sheet passes a session ID, not a label (`sessionId ?? label`), and
- *  no amount of normalising turns a uuid into a name -- so the ref is resolved
- *  to its session's label first or every reply vanishes on send. */
-export function sentTurnsFor(ref: string): SentTurn[] {
-  const session = resolveSessionRef(ref)
-  const label = session?.label ?? ref
-  const opening = session ? claimOpening(session) : undefined
-  if (opening) sentTurns.set(label, [opening, ...(sentTurns.get(label) ?? [])])
-  const exact = sentTurns.get(label)
-  if (exact) return exact
-  const want = senderMatchKey(label)
-  for (const [key, turns] of sentTurns) if (senderMatchKey(key) === want) return turns
-  return []
+export function sentTurnsFor(ref: string | AgentSession): SentTurn[] {
+  const session = typeof ref === 'string' ? resolveSessionRef(ref) : ref
+  if (!session) return []
+  const key = sentKey(session)
+  const opening = claimOpening(session)
+  if (opening) sentTurns.set(key, [opening, ...(sentTurns.get(key) ?? [])])
+  return sentTurns.get(key) ?? []
 }
 
 /** Answers the phone's ask on open. Always answers, even with nothing -- the
@@ -396,7 +388,7 @@ export function handleRelaySessionSentGet(msg: Msg<'relaySessionSentGet'>): void
   sendToPhone({
     type: 'relaySessionSent',
     label: msg.label,
-    turns: forPhone(sentTurns.get(msg.label) ?? [])
+    turns: forPhone(sentTurnsFor(msg.label))
   })
 }
 

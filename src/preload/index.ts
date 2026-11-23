@@ -915,6 +915,7 @@ const api = {
   navigator: {
     run: (targetId: string) => ipcRenderer.invoke(CHANNELS.navigatorRun, targetId),
     close: () => ipcRenderer.invoke(CHANNELS.navigatorClose),
+    open: () => ipcRenderer.invoke(CHANNELS.navigatorOpen),
     search: (query: string, refs: import('../shared/navigator-targets').NavigatorSearchRef[]) =>
       ipcRenderer.invoke(CHANNELS.navigatorSearch, query, refs)
   },
@@ -1280,6 +1281,7 @@ const api = {
     login: (cwd: string, name: string) => ipcRenderer.invoke(CHANNELS.mcpLogin, cwd, name),
     openClaudeConnectors: () => ipcRenderer.invoke(CHANNELS.mcpOpenClaudeConnectors)
   },
+  agentRelaySessionLoads: () => ipcRenderer.invoke(CHANNELS.agentRelaySessionLoads),
   agentRelaySessionScreen: (ref: string, back?: number) =>
     ipcRenderer.invoke(CHANNELS.agentRelaySessionScreen, ref, back),
   agentRelaySessionKeys: (ref: string, keys: ({ text: string } | { key: string } | { paste: string })[]) =>

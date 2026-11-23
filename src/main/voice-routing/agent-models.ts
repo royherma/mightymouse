@@ -141,73 +141,101 @@ export function agentReasoningEfforts(harness: string, model: string): Reasoning
   return []
 }
 
-const OPENCODE_LIST_TIMEOUT_MS = 15000
-let opencodeCache: Promise<string[]> | null = null
+const MODEL_LIST_TTL_MS = 5 * 60_000
 
-function opencodeModels(): Promise<string[]> {
+function expiringList<T>(load: () => Promise<T[]>): { get: () => Promise<T[]>; clear: () => void } {
+  let cached: Promise<T[]> | null = null
+  let cachedAt = 0
+  return {
+    get() {
+      if (Date.now() - cachedAt > MODEL_LIST_TTL_MS) cached = null
+      if (!cached) {
+        cachedAt = Date.now()
+        const pending: Promise<T[]> = load().then((models) => {
+          if (models.length === 0 && cached === pending) cached = null
+          return models
+        })
+        cached = pending
+      }
+      return cached
+    },
+    clear() {
+      cached = null
+    }
+  }
+}
+
+const OPENCODE_LIST_TIMEOUT_MS = 15000
+
+const opencodeList = expiringList<string>((): Promise<string[]> => {
   const bin = resolveBinary('opencode')
   if (!bin) return Promise.resolve([])
-  opencodeCache ??= new Promise<string[]>((resolve) => {
+  return new Promise((resolve) => {
     execFile(
       bin,
       ['models'],
       { timeout: OPENCODE_LIST_TIMEOUT_MS, maxBuffer: 4 * 1024 * 1024 },
       (err, stdout) => {
-        const models = err
-          ? []
-          : stdout
-              .split('\n')
-              .map((l) => l.trim())
-              .filter((l) => /^[\w.-]+\/\S+$/.test(l))
-        if (models.length === 0) opencodeCache = null
-        resolve(models)
+        resolve(
+          err
+            ? []
+            : stdout
+                .split('\n')
+                .map((l) => l.trim())
+                .filter((l) => /^[\w.-]+\/\S+$/.test(l))
+        )
       }
     )
   })
-  return opencodeCache
-}
+})
+
+const opencodeModels = opencodeList.get
 
 const CURSOR_LIST_TIMEOUT_MS = 15000
-let cursorCache: Promise<Array<{ model: string; label: string }>> | null = null
 
-function cursorModels(): Promise<Array<{ model: string; label: string }>> {
+const cursorList = expiringList<{ model: string; label: string }>(() => {
   const bin = resolveBinary('cursor-agent')
   if (!bin) return Promise.resolve([])
-  cursorCache ??= new Promise((resolve) => {
+  return new Promise((resolve) => {
     execFile(bin, ['--list-models'], { timeout: CURSOR_LIST_TIMEOUT_MS, maxBuffer: 1024 * 1024 }, (err, stdout) => {
-      const models = err
-        ? []
-        : stdout.split('\n').flatMap((line) => {
-            const m = /^\s*([\w.-]+)\s+-\s+(.+?)\s*$/.exec(line)
-            return m ? [{ model: m[1], label: m[2].replace(/\s*\((current|default)\)$/i, '') }] : []
-          })
-      if (models.length === 0) cursorCache = null
-      resolve(models)
+      resolve(
+        err
+          ? []
+          : stdout.split('\n').flatMap((line) => {
+              const m = /^\s*([\w.-]+)\s+-\s+(.+?)\s*$/.exec(line)
+              return m ? [{ model: m[1], label: m[2].replace(/\s*\((current|default)\)$/i, '') }] : []
+            })
+      )
     })
   })
-  return cursorCache
-}
+})
+
+const cursorModels = cursorList.get
 
 const AGY_LIST_TIMEOUT_MS = 20000
-let agyCache: Promise<Array<{ model: string; label: string }>> | null = null
 
-function antigravityModels(): Promise<Array<{ model: string; label: string }>> {
+const agyList = expiringList<{ model: string; label: string }>(() => {
   const bin = resolveBinary('agy')
   if (!bin) return Promise.resolve([])
-  agyCache ??= new Promise((resolve) => {
+  return new Promise((resolve) => {
     execFile(bin, ['models'], { timeout: AGY_LIST_TIMEOUT_MS, maxBuffer: 1024 * 1024 }, (err, stdout) => {
-      const models = err
-        ? []
-        : stdout.split('\n').flatMap((line) => {
-            const m = /^([\w.-]+)\t(.+?)\s*$/.exec(line)
-            return m ? [{ model: m[1], label: m[2] }] : []
-          })
-      if (models.length === 0) agyCache = null
-      resolve(models)
+      resolve(
+        err
+          ? []
+          : stdout.split('\n').flatMap((line) => {
+              const m = /^([\w.-]+)\t(.+?)\s*$/.exec(line)
+              return m ? [{ model: m[1], label: m[2] }] : []
+            })
+      )
     })
   })
-  return agyCache
+})
+
+export function clearAntigravityModelCache(): void {
+  agyList.clear()
 }
+
+const antigravityModels = agyList.get
 
 // OpenCode keeps the models.dev catalog here: release dates, makers, context and prices for every provider.
 const MODELS_DEV_CACHE = join(process.env.XDG_CACHE_HOME || join(homedir(), '.cache'), 'opencode', 'models.json')
@@ -416,7 +444,12 @@ export async function setUpAgentProvider(
   return { ok: pulled }
 }
 
-export async function ollamaLaunch(model: string): Promise<{ model: string; env: Record<string, string> } | { error: string }> {
+export async function ollamaLaunch(asked: string): Promise<{ model: string; env: Record<string, string> } | { error: string }> {
+  if (!(await isOllamaRunning()) && !(await setUpLocalBackend('local', () => undefined)).ok) {
+    return { error: "Ollama isn't running and couldn't be started." }
+  }
+  const model = asked || (await listCodingModels())[0] || ''
+  if (!model) return { error: 'No local model is downloaded yet. Pick one in Settings.' }
   const agent = await ensureAgentModel(model)
   if ('error' in agent) return agent
   return {

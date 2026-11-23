@@ -1,4 +1,4 @@
-import { BrowserWindow, ipcMain, screen, type IpcMainInvokeEvent } from 'electron'
+import { BrowserWindow, ipcMain, screen, type IpcMainInvokeEvent, type Rectangle } from 'electron'
 import { join } from 'path'
 import { is } from '@electron-toolkit/utils'
 import { chrome } from './platform'
@@ -66,23 +66,34 @@ function finish(id: string | null, refocus: boolean): void {
   done.resolve(id)
 }
 
-function place(height: number): void {
-  if (!open || !menuWindow || menuWindow.isDestroyed() || open.owner.isDestroyed()) return
-  const { anchor, width } = open.request
-  const content = open.owner.getContentBounds()
-  const area = screen.getDisplayMatching(content).workArea
+export function popoverBounds(
+  content: Rectangle,
+  area: Rectangle,
+  request: Pick<PopoverMenuRequest, 'anchor' | 'width'>,
+  height: number,
+  side: Side | null
+): { bounds: Rectangle; side: Side } {
+  const { anchor, width } = request
   const top = content.y + anchor.y
   const bottom = top + anchor.height
   const below = area.y + area.height - bottom - GAP
   const above = top - area.y - GAP
-  // side is fixed at first show so typing in the search box never flips the menu across the button
-  open.side ??= height <= below || below >= above ? 'below' : 'above'
-  const room = open.side === 'below' ? below : above
+  const chosen = side ?? (height <= below || below >= above ? 'below' : 'above')
+  const room = chosen === 'below' ? below : above
   const h = Math.max(1, Math.min(Math.ceil(height), room))
-  const w = Math.min(width, area.width)
+  const w = Math.min(Math.round(width), area.width)
   const x = Math.min(Math.max(area.x, Math.round(content.x + anchor.x)), area.x + area.width - w)
-  const y = open.side === 'below' ? bottom + GAP : top - GAP - h
-  menuWindow.setBounds({ x, y: Math.round(y), width: w, height: h })
+  const y = Math.round(chosen === 'below' ? bottom + GAP : top - GAP - h)
+  return { bounds: { x, y, width: w, height: h }, side: chosen }
+}
+
+function place(height: number): void {
+  if (!open || !menuWindow || menuWindow.isDestroyed() || open.owner.isDestroyed()) return
+  const content = open.owner.getContentBounds()
+  // side is fixed at first show so typing in the search box never flips the menu across the button
+  const placed = popoverBounds(content, screen.getDisplayMatching(content).workArea, open.request, height, open.side)
+  open.side = placed.side
+  menuWindow.setBounds(placed.bounds)
   if (!menuWindow.isVisible()) {
     // show() alone: focus() activates the app and raises the main window over the browser
     menuWindow.show()

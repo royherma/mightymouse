@@ -33,7 +33,7 @@ import { ProjectAvatar } from './components/ProjectIcon'
 import { useIsAdmin } from './hooks/useIsAdmin'
 import { readLastTab } from './mighty/mighty-shared'
 import { CONFIG } from '../../shared/config'
-import { sessionRow } from '../../shared/relay-status'
+import { isPlaceholderName, sessionRef, sessionRow } from '../../shared/relay-status'
 import { mightyProjectForCwd } from '../../shared/relay-sessions'
 import { hasRealExchange, type AgentRelaySessionInfo, type MightyProject } from '../../shared/types'
 import {
@@ -97,6 +97,7 @@ function groupRows(rows: NavigatorTarget[]): { cat: NavigatorCategory; rows: Nav
   return [...new Set(rows.map((t) => t.category))].map((cat) => ({ cat, rows: rows.filter((t) => t.category === cat) }))
 }
 const IDLE_SESSIONS = 10
+const sessionTargetId = (s: AgentRelaySessionInfo): string => `session:${sessionRef(s)}`
 const SEARCH_DEBOUNCE_MS = 120
 const MARKER = 'bg-yellow/50 text-on-surface font-semibold rounded-[3px] px-0.5'
 const NEW_CHAT_ID = 'screen:newChat'
@@ -119,6 +120,7 @@ export default function NavigatorApp(): JSX.Element {
   const [chats, setChats] = useState<NavigatorTarget[]>([])
   const [projectList, setProjectList] = useState<MightyProject[]>([])
   const [agentSessions, setAgentSessions] = useState<AgentRelaySessionInfo[]>([])
+  const [firstAsks, setFirstAsks] = useState<Map<string, string>>(new Map())
   const [hits, setHits] = useState<{ query: string; found: NavigatorContentHit[] }>({ query: '', found: [] })
   const isAdmin = useIsAdmin()
   const [mode, setMode] = useState(readLastTab)
@@ -217,35 +219,41 @@ export default function NavigatorApp(): JSX.Element {
     const recent = [...agentSessions].sort(
       (a, b) => (b.lastActivityAt ?? b.since ?? 0) - (a.lastActivityAt ?? a.since ?? 0)
     )
+    const seen = new Set<string>()
     return recent.flatMap((s) => {
+      if (seen.has(sessionTargetId(s))) return []
+      seen.add(sessionTargetId(s))
       const row = sessionRow(s, now)
       const label = row.name ?? row.tldr ?? row.agent ?? row.repo
       if (!label || row.unnamed) return []
       const project = mightyProjectForCwd(s.cwd, projectList)
+      const named = !!row.name && !isPlaceholderName(row.name, row.branch ?? row.repo)
       return [{
-        id: `session:${s.sessionId ?? s.stated ?? s.label}`,
+        id: sessionTargetId(s),
+        named,
         category: 'session' as const,
-        label,
+        label: (!named && firstAsks.get(sessionTargetId(s))) || label,
         detail: project?.name ?? row.repo,
         keywords: row.tldr,
         icon: 'SquareTerminal',
         avatar: { icon: project?.icon, imagePath: project?.imagePath }
       }]
     })
-  }, [agentSessions, projectList])
+  }, [agentSessions, projectList, firstAsks])
 
   const searchRefs = useMemo<NavigatorSearchRef[]>(
     () =>
-      agentSessions.flatMap((s) =>
-        s.sessionId && s.cwd ? [{ id: `session:${s.sessionId}`, sessionId: s.sessionId, cwd: s.cwd }] : []
-      ),
+      [...new Map(agentSessions.map((s) => [sessionTargetId(s), { id: sessionTargetId(s), sessionId: sessionRef(s), cwd: s.cwd ?? '' }])).values()],
     [agentSessions]
   )
 
   useEffect(() => {
     const q = query.trim()
     if (!q) {
-      void window.api.navigator.search('', searchRefs).catch(() => {})
+      void window.api.navigator
+        .search('', searchRefs)
+        .then((found) => setFirstAsks(new Map(found.map((h) => [h.id, h.title]))))
+        .catch(() => {})
       return
     }
     let alive = true
@@ -285,7 +293,7 @@ export default function NavigatorApp(): JSX.Element {
     const inside = hits.found.flatMap<NavigatorTarget>((h) => {
       if (shown.has(h.id)) return []
       const session = sessionById.get(h.id)
-      if (session) return [{ ...session, detail: h.snippet?.text || session.detail }]
+      if (session) return [{ ...session, label: (!session.named && h.title) || session.label, detail: h.snippet?.text || session.detail }]
       if (!h.id.startsWith('chat:')) return []
       return [{ id: h.id, category: 'chat', label: h.title, detail: h.snippet?.text, icon: 'MessageSquare' }]
     })

@@ -68,6 +68,7 @@ import { projectImageBase64 } from './phone-remote-chat'
 import { mightyProjectForCwd } from '../../shared/relay-sessions'
 import { resolveOrigin, cachedWhereLabel, warmTabName, livesInApp, fitHiddenPane } from '../agent-relay/origin-resolver'
 import { watchPane } from '../agent-relay/pane-stream'
+import { sessionLoads } from '../agent-relay/session-load'
 import { cachedHostApp, warmHostApp } from '../agent-relay/host-app-icon'
 import { endAgentDriving } from '../side-browser'
 import { answerStartup, capturePaneScreen, peekStartup, sendPaneKeys, sendPickerAnswer, type PaneKey } from '../agent-relay/picker-keys'
@@ -115,6 +116,7 @@ import { planTierLabel } from '../../shared/plan-logins'
 import { NO_AFFECTS, sessionAffects, type SessionAffects } from '../../shared/surfaces'
 import { codexThreadFor, watchCodexThreads, withCodexThreads } from '../agent-relay/codex-threads'
 import { CONFIG } from '../../shared/config'
+import { hasOpenRouterKey } from '../backend/openrouter'
 import { isReasoningEffort } from '../../shared/model-sources'
 import { devLog } from '../../shared/env'
 import { relayRequestStore, onRelayStoreChanged, onRelayStalled, handoffResolver, type RelayResponse, type RelayResolvedVia } from '../agent-relay/store'
@@ -146,7 +148,7 @@ export function rowName(s: AgentSession): string | undefined {
   const late = pastNamingWait(s)
   const title = late && sessionAiTitle(late.cwd, late.sessionId)
   if (title) return title
-  const ask = sentTurnsFor(s.sessionId ?? s.label)[0]?.text ?? (late && sessionFirstAsk(late.cwd, late.sessionId))
+  const ask = sentTurnsFor(s)[0]?.text ?? (late && sessionFirstAsk(late.cwd, late.sessionId))
   return nameFromMessage(ask || undefined) ?? (isGeneratedTag(stated) ? undefined : stated)
 }
 
@@ -215,6 +217,7 @@ export function currentStatus(): AgentRelayStatus {
         // Mac -- recovering it here is what turns a row of hex back into
         // "mm-look-last-commits-repo" without waiting for the agent to restart.
         stated: rowName(s),
+        aiTitle: s.cwd && s.sessionId ? sessionAiTitle(s.cwd, s.sessionId) : undefined,
         stale: s.staleSince !== undefined,
         // Both, not one: `stale` is what every surface branches on today, while
         // the raw stamp is what lets a card age the word ("Ended 3m ago").
@@ -529,6 +532,7 @@ export async function startCodeSession(
   }
   if (!local && resume === '') env = { ...env, ...pickedLoginEnv(harness, cwd) }
   if (harness === 'opencode') {
+    if (model === '' && (await hasOpenRouterKey())) model = CONFIG.OPENCODE_MODEL
     const problem = await checkOpencodeModel(model)
     if (problem) return { ok: false as const, reason: problem }
     env = { ...env, ...OPENCODE_QUIET_ENV, ...opencodeRelayEnv(await opencodeModelConfig(model)) }
@@ -806,6 +810,8 @@ export function registerAgentRelayHandlers(): void {
     const session = resolveSessionRef(ref) ?? codexThreadFor(ref) ?? rememberedSession(ref)
     return session ? withUndoStates(session, readSessionTranscript(session)) : []
   })
+
+  ipcMain.handle(CHANNELS.agentRelaySessionLoads, () => sessionLoads())
 
   ipcMain.handle(CHANNELS.agentRelaySessionScreen, (_e, ref: string, back?: number) => {
     if (typeof ref !== 'string' || ref === '') return null

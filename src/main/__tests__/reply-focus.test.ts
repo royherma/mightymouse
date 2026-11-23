@@ -247,3 +247,66 @@ describe('startReplyFocusTracking shows the reply window over a browser only whe
     expect(h.switched).toEqual(['maker'])
   })
 })
+
+describe('the agent picked on a browser tab stays that tab’s agent', () => {
+  function madeByOther(): string {
+    const file = page('proj/out/report-page.html')
+    h.live = [session('maker', join(h.root, 'other')), session('picked', join(h.root, 'proj'))]
+    h.built = [{ sessionId: 'maker', file }]
+    return pathToFileURL(file).href
+  }
+
+  it('a pick beats the agent that made the page, even when the tab adds a query or hash', async () => {
+    const url = madeByOther()
+    const focus = await load()
+    focus.pickForPage(url, 'picked')
+    inFront(`${url}?tab=2#top`)
+    expect(await focus.aimAtFront(2000)).toBe('picked')
+  })
+
+  it('a pick saved by label finds the connected agent with that label', async () => {
+    const url = madeByOther()
+    h.live[1] = { ...h.live[1], label: 'Fix login' }
+    const focus = await load()
+    focus.pickForPage(url, 'Fix login')
+    inFront(url)
+    expect(await focus.aimAtFront(2000)).toBe('picked')
+  })
+
+  it('a pick for an agent that is no longer connected falls back to the usual guess', async () => {
+    const url = madeByOther()
+    const focus = await load()
+    focus.pickForPage(url, 'gone')
+    inFront(url)
+    expect(await focus.aimAtFront(2000)).toBe('maker')
+  })
+
+  it('picking nobody clears the saved pick', async () => {
+    const url = madeByOther()
+    const focus = await load()
+    focus.pickForPage(url, 'picked')
+    focus.pickForPage(url, null)
+    expect(h.settings.replyPagePicks).toEqual({})
+    inFront(url)
+    expect(await focus.aimAtFront(2000)).toBe('maker')
+  })
+
+  it('keeps at most 200 picks, dropping the oldest; re-picking a saved page drops nobody', async () => {
+    h.settings.replyPagePicks = Object.fromEntries(Array.from({ length: 200 }, (_, i) => [`https://site.test/p${i}`, `a${i}`]))
+    const focus = await load()
+
+    focus.pickForPage('https://site.test/p5?x=1', 'again')
+    let picks = h.settings.replyPagePicks as Record<string, string>
+    expect(Object.keys(picks)).toHaveLength(200)
+    expect(picks['https://site.test/p0']).toBe('a0')
+    expect(picks['https://site.test/p5']).toBe('again')
+    expect(Object.keys(picks).at(-1)).toBe('https://site.test/p5')
+
+    focus.pickForPage('https://site.test/new', 'fresh')
+    picks = h.settings.replyPagePicks as Record<string, string>
+    expect(Object.keys(picks)).toHaveLength(200)
+    expect(picks['https://site.test/p0']).toBeUndefined()
+    expect(picks['https://site.test/p1']).toBe('a1')
+    expect(picks['https://site.test/new']).toBe('fresh')
+  })
+})

@@ -32,6 +32,7 @@ export interface NavigatorTarget {
   // Extra words that should match the filter but are not shown (e.g. 'mic' → Listen).
   keywords?: string
   adminOnly?: boolean
+  named?: boolean
 }
 
 // Icon per shortcut. A shortcut without a row here falls back to Command.

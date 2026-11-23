@@ -39,7 +39,7 @@ vi.mock('../../settings-window', () => ({
 }))
 vi.mock('../../panel-window', () => ({ sendToPanelRenderer: vi.fn(), showPanelWindow: vi.fn() }))
 vi.mock('../../selection-watcher', () => ({ applySelectionWatcher: vi.fn() }))
-vi.mock('../../store/paths', () => ({ PATHS: { ROOT: '/tmp/mm-test' } }))
+vi.mock('../../store/paths', () => ({ PATHS: { ROOT: '/tmp/mm-test', BIN: '/tmp/mm-test/bin' } }))
 vi.mock('../../store/prefs', () => ({ PREFS: {} }))
 vi.mock('../../store/history', () => ({ HISTORY: {}, reconcileHistoryEncryption: vi.fn() }))
 vi.mock('../../analytics', () => ({ track: vi.fn() }))

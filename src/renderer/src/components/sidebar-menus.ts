@@ -32,7 +32,7 @@ export type ProjectMenuContext = {
   edit?: () => void
 }
 
-const sessionRef = (s: AgentRelaySessionInfo): string => s.sessionId ?? s.stated ?? s.label
+const sessionRef = (s: AgentRelaySessionInfo): string => s.sessionId ?? s.stated ?? (s.origin?.tmuxPane || s.label)
 
 const folderEntries = <C extends { cwd?: string }>(): MenuEntry<C>[] => [
   { label: 'Show in Finder', when: (c) => Boolean(c.cwd), run: (c) => window.api.openPath(c.cwd ?? '') },

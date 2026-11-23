@@ -5,6 +5,7 @@
  * Extracted verbatim from the old monolithic `ipc.ts`.
  */
 import { getModelCatalog } from '../model-catalog'
+import { clearAntigravityModelCache } from '../voice-routing/agent-models'
 import { ipcMain } from 'electron'
 import { existsSync } from 'fs'
 import { homedir } from 'os'
@@ -976,7 +977,10 @@ export function registerSettingsHandlers(): void {
   )
   ipcMain.handle(CHANNELS.planLoginsCancel, () => cancelPlanSignIn())
   ipcMain.handle(CHANNELS.planLoginsRemove, (_, id: string) => removePlanLogin(id))
-  ipcMain.handle(CHANNELS.planAntigravity, () => antigravityPlans())
+  ipcMain.handle(CHANNELS.planAntigravity, () => {
+    clearAntigravityModelCache()
+    return antigravityPlans()
+  })
   ipcMain.handle(CHANNELS.planAntigravityAdd, () => addAntigravityAccount())
   ipcMain.handle(CHANNELS.planAntigravityRemove, (_, id: string) => removeAntigravityAccount(String(id)))
   ipcMain.handle(CHANNELS.planAntigravityReconnect, (_, id: string) => reconnectAntigravityAccount(String(id)))

@@ -1,6 +1,6 @@
 import { JSX, ReactNode, RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { BarChart3, Check, ChevronDown, ChevronRight, Ellipsis, Orbit, Factory, Headset, Inbox, KeyRound, Laptop, Layers, LayoutGrid, Rows3, Server, type LucideIcon } from 'lucide-react'
+import { BarChart3, Check, ChevronDown, ChevronRight, Ellipsis, Orbit, Factory, Headset, Inbox, KeyRound, Laptop, Layers, LayoutGrid, Rows3, Search, Server, type LucideIcon } from 'lucide-react'
 import { Button } from '../components/Button'
 import { usePostUpdateNotice } from '../components/UpdateNudge'
 import { SidebarNotices } from '../components/SidebarNotices'
@@ -317,6 +317,14 @@ export function MightySidebar({
       onClick={() => void window.api.mighty.talkSession()}
     />
   )
+  const searchRow = (
+    <SidebarRow
+      icon={<Search size={16} />}
+      label={L.SIDEBAR_SEARCH}
+      trailing={<span className="text-xs text-muted">⌘K</span>}
+      onClick={() => void window.api.navigator.open()}
+    />
+  )
   const moreRow = (
     <div ref={moreRef}>
       <SidebarRow
@@ -403,6 +411,7 @@ export function MightySidebar({
           ref={setActionsEl}
           className="flex flex-col gap-px"
         />
+        {searchRow}
         {mode === 'code' && (
           <>
             {CODE_MAIN.map(codeRow)}

@@ -1,0 +1,343 @@
+.session-panes-wrap {
+  align-self: stretch;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  overflow: clip;
+}
+
+.session-pane-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  min-height: 28px;
+}
+
+.session-pane-groups {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.session-panes {
+  position: relative;
+  display: grid;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: clip;
+}
+
+.session-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  border: 1px solid var(--border-dark);
+  border-radius: 10px;
+  background: var(--surface1, var(--bg));
+  overflow: clip;
+  transition: border-color 120ms ease, opacity 120ms ease;
+}
+
+.session-pane:focus-within {
+  border-color: var(--accent);
+}
+
+.session-pane[data-dragging] {
+  opacity: 0.5;
+}
+
+.session-pane[data-drop] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(var(--accent-rgb, 200, 100, 50), 0.25);
+}
+
+.session-pane > .code-detail {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+.session-pane .session-detail-head {
+  cursor: grab;
+}
+
+.session-pane[data-dragging] .session-detail-head {
+  cursor: grabbing;
+}
+
+.session-pane .session-detail-chip,
+.session-pane .session-detail-tldr {
+  display: none;
+}
+
+.session-pane-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.session-pane .session-pane-hover,
+.session-pane .session-pulse-anchor {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.session-pane:hover .session-pane-hover,
+.session-pane:focus-within .session-pane-hover,
+.session-pane:hover .session-pulse-anchor,
+.session-pane:focus-within .session-pulse-anchor {
+  opacity: 1;
+}
+
+.session-pane-divider {
+  position: absolute;
+  z-index: 8;
+  touch-action: none;
+}
+
+.session-pane-divider[data-axis='col'] {
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  margin-left: -5px;
+  cursor: col-resize;
+}
+
+.session-pane-divider[data-axis='row'] {
+  left: 0;
+  right: 0;
+  height: 10px;
+  margin-top: -5px;
+  cursor: row-resize;
+}
+
+.session-pane-divider::after {
+  content: '';
+  position: absolute;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.session-pane-divider[data-axis='col']::after {
+  top: 0;
+  bottom: 0;
+  left: 4px;
+  width: 2px;
+}
+
+.session-pane-divider[data-axis='row']::after {
+  left: 0;
+  right: 0;
+  top: 4px;
+  height: 2px;
+}
+
+.session-pane-divider:hover::after,
+body[data-pane-resizing] .session-pane-divider:active::after {
+  opacity: 0.7;
+}
+
+body[data-pane-resizing='col'] {
+  cursor: col-resize;
+  user-select: none;
+}
+
+body[data-pane-resizing='row'] {
+  cursor: row-resize;
+  user-select: none;
+}
+
+.session-pane-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 540;
+  color: var(--muted);
+}
+
+.session-pane-group:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.session-pane-group[aria-selected='true'] {
+  background: var(--surface2);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border-dark);
+}
+
+.session-pane-group-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+.session-pane-view {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--surface2);
+  flex: none;
+}
+
+.session-pane-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 540;
+  color: var(--muted);
+}
+
+.session-pane-view-btn[aria-pressed='true'] {
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: 0 1px 2px rgba(var(--shadow-rgb), 0.12);
+}
+
+.agent-project-panes {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 16px;
+  overflow: clip;
+}
+
+.agent-project-table-slot {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+.session-pane-bar[data-slotted] {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 8px;
+}
+
+.session-pane .agent-screen-hint {
+  display: none;
+}
+
+.session-pane .session-detail-head .code-detail-pos {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  font-size: 0;
+  color: transparent;
+  background: var(--text-muted-medium);
+  opacity: 0.55;
+  cursor: help;
+}
+
+.session-pane .session-detail-head .code-detail-pos[data-health='working'] {
+  background: var(--green);
+  opacity: 1;
+  animation: session-pane-pulse 1.6s ease-in-out infinite;
+}
+
+.session-pane .session-detail-head .code-detail-pos[data-health='waiting'] {
+  background: var(--amber);
+  opacity: 1;
+}
+
+.session-pane .session-detail-head .code-detail-pos[data-health='your-turn'] {
+  background: var(--blue);
+  opacity: 1;
+}
+
+@keyframes session-pane-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.session-pane-new {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 7px;
+  font-size: 12.5px;
+  font-weight: 560;
+  color: var(--text);
+}
+
+.session-pane-new:hover:not(:disabled) {
+  background: var(--surface2);
+}
+
+.session-pane-new[data-failed] {
+  color: var(--amber);
+}
+
+.session-pane-group,
+.session-pane-new {
+  white-space: nowrap;
+}
+
+.session-pane-groups {
+  overflow: hidden;
+}
+
+.session-pane-view-toggle {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  color: var(--muted);
+}
+
+.session-pane-view-toggle[aria-pressed='true'] {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.session-pane-status {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  color: var(--muted);
+}
+
+.session-pane-status select {
+  appearance: none;
+  padding: 4px 26px 4px 10px;
+  border: none;
+  border-radius: 7px;
+  background: var(--surface2);
+  color: var(--text);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 560;
+  cursor: pointer;
+}
+
+.session-pane-status svg {
+  position: absolute;
+  right: 9px;
+  pointer-events: none;
+}

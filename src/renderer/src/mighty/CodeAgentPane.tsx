@@ -8,7 +8,7 @@ import { Button } from '../components/Button'
 import { Row } from '../components/Layout'
 import type { AgentRelayFeed } from '../hooks/useAgentRelay'
 import { titleUnderlineTone, type PaneOpenColorId } from './pane-colors'
-import { relayStatusLine } from '../../../shared/relay-status'
+import { relayStatusLine, sessionRef } from '../../../shared/relay-status'
 import { CONFIG } from '../../../shared/config'
 import { mightyProjectForCwd } from '../../../shared/relay-sessions'
 import { browserPageTag } from '../../../shared/attachments'
@@ -102,7 +102,7 @@ export function CodeAgentPane({
     const pick = startedSession(names, { ...starting, cwd })
     if (!pick) return
     setStarting(null)
-    onAgent(pick.sessionId ?? pick.stated ?? pick.label)
+    onAgent(sessionRef(pick))
   }, [names, starting, cwd, onAgent])
 
   const start = async (

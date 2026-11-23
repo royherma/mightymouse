@@ -1,11 +1,12 @@
-import type { JSX, KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react'
+import type { JSX, KeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { useMemo, useRef, useState } from 'react'
-import { ArrowUp, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Search } from 'lucide-react'
+import { ArrowUp, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Columns2, Rows3, Search } from 'lucide-react'
+import { SessionPanes } from './SessionPanes'
 import { TalkButton } from './TalkButton'
 import { deliverTask } from '../../../shared/task-route'
 import { Button } from './Button'
 import { CONFIG } from '../../../shared/config'
-import type { AgentRelaySessionInfo } from '../../../shared/types'
+import type { AgentRelaySessionInfo, SessionLoad } from '../../../shared/types'
 import { lastEventAt, type SessionEntry } from '../../../shared/relay-sessions'
 import type { SessionRow } from '../../../shared/relay-status'
 import {
@@ -27,6 +28,15 @@ import {
 } from '../../../shared/session-priority'
 
 const L = CONFIG.UI_LABELS
+const VIEW_KEY = 'mm.agent-project.view.v1'
+
+function readView(): 'table' | 'panes' {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'panes' ? 'panes' : 'table'
+  } catch {
+    return 'table'
+  }
+}
 
 type SortKey = 'priority' | 'name' | 'project' | 'status' | 'agent' | 'branch' | 'started' | 'active'
 type StatusFilter = 'all' | 'needs-you' | 'responding' | 'idle'
@@ -143,7 +153,7 @@ type ProjectHome = {
   onStartNew: (text: string) => Promise<void>
 }
 
-const sessionRef = (s: AgentRelaySessionInfo): string => s.sessionId ?? s.stated ?? s.label
+const sessionRef = (s: AgentRelaySessionInfo): string => s.sessionId ?? s.stated ?? (s.origin?.tmuxPane || s.label)
 
 function ProjectHomeAsk({ home, entries }: { home: ProjectHome; entries: SessionEntry[] }): JSX.Element {
   const [text, setText] = useState('')
@@ -216,7 +226,10 @@ export function AgentProjectTable({
   onSettings,
   onPick,
   onBack,
-  home
+  home,
+  loads,
+  renderPane,
+  onNewSession
 }: {
   groups: AgentGroup[]
   title: string
@@ -226,7 +239,21 @@ export function AgentProjectTable({
   onPick: (session: AgentRelaySessionInfo) => void
   onBack: () => void
   home?: ProjectHome
+  loads?: Record<string, SessionLoad>
+  renderPane?: (session: AgentRelaySessionInfo, headActions?: ReactNode) => ReactNode
+  onNewSession?: () => Promise<string | null>
 }): JSX.Element {
+  const [view, setViewState] = useState(readView)
+  const setView = (next: 'table' | 'panes'): void => {
+    setViewState(next)
+    try {
+      localStorage.setItem(VIEW_KEY, next)
+    } catch {
+      return
+    }
+  }
+  const panes = view === 'panes' && renderPane !== undefined
+  const [barSlot, setBarSlot] = useState<HTMLElement | null>(null)
   const [pickedSort, setSortKey] = useState<SortKey>('active')
   const [sortDesc, setSortDesc] = useState(true)
   const [query, setQuery] = useState('')
@@ -431,6 +458,24 @@ export function AgentProjectTable({
       </div>
       {home && <ProjectHomeAsk home={home} entries={groups[0]?.entries ?? []} />}
       <div className="agent-project-table-subbar">
+        {panes ? (
+          <label className="session-pane-status">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as StatusFilter)}
+              aria-label="Which sessions to show"
+            >
+              {STATUS_FILTERS.map((f) =>
+                f.key !== 'all' && counts[f.key] === 0 && status !== f.key ? null : (
+                  <option key={f.key} value={f.key}>
+                    {f.label} {counts[f.key]}
+                  </option>
+                )
+              )}
+            </select>
+            <ChevronDown size={12} strokeWidth={2.5} aria-hidden="true" />
+          </label>
+        ) : (
         <div className="agent-project-table-filters" role="group">
           {STATUS_FILTERS.map((f) =>
             f.key !== 'all' && counts[f.key] === 0 ? null : (
@@ -447,9 +492,29 @@ export function AgentProjectTable({
             )
           )}
         </div>
+        )}
+        {panes && <div className="agent-project-table-slot" ref={setBarSlot} />}
         <PriorityToolbar priority={priority} onRank={rank} onSettings={onSettings} />
         <div className="agent-project-table-filters">
-          {multi && (
+          {renderPane && (
+            <>
+              <Button variant="bare" className="agent-project-table-chip" aria-pressed={!panes} onClick={() => setView('table')}>
+                <Rows3 size={12} strokeWidth={2.5} />
+                Table
+              </Button>
+              <Button
+                variant="bare"
+                className="agent-project-table-chip"
+                aria-pressed={panes}
+                onClick={() => setView('panes')}
+                title="Sessions side by side, each with its chat and a reply box"
+              >
+                <Columns2 size={12} strokeWidth={2.5} />
+                Panes
+              </Button>
+            </>
+          )}
+          {multi && !panes && (
             <Button
               variant="bare"
               className="agent-project-table-chip"
@@ -463,6 +528,17 @@ export function AgentProjectTable({
       </div>
       {all.length === 0 ? (
         <div className="agent-project-table-empty">No agents in this project.</div>
+      ) : panes && renderPane ? (
+        <div className="agent-project-panes">
+          <SessionPanes
+            sessions={rows.map((r) => r.entry.session)}
+            loads={loads ?? {}}
+            onOpen={onPick}
+            renderDetail={renderPane}
+            barSlot={barSlot}
+            onNewSession={onNewSession}
+          />
+        </div>
       ) : (
         <div className="agent-project-table-scroll">
           <table className="agent-project-table">
