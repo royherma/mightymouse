@@ -1284,7 +1284,7 @@ const api = {
   agentRelaySessionLoads: () => ipcRenderer.invoke(CHANNELS.agentRelaySessionLoads),
   agentRelaySessionScreen: (ref: string, back?: number) =>
     ipcRenderer.invoke(CHANNELS.agentRelaySessionScreen, ref, back),
-  agentRelaySessionKeys: (ref: string, keys: ({ text: string } | { key: string } | { paste: string })[]) =>
+  agentRelaySessionKeys: (ref: string, keys: ({ text: string } | { key: string } | { paste: string } | { wheel: 'up' | 'down'; col: number; row: number })[]) =>
     ipcRenderer.invoke(CHANNELS.agentRelaySessionKeys, ref, keys),
   agentRelaySessionFit: (ref: string, cols: number, rows: number) =>
     ipcRenderer.invoke(CHANNELS.agentRelaySessionFit, ref, cols, rows),

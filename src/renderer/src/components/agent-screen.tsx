@@ -115,6 +115,15 @@ type Screen = {
   alt?: boolean
 }
 type PaneKey = { text: string } | { key: string } | { paste: string }
+
+const LAST_SCREENS = new Map<string, Screen>()
+const LAST_SCREENS_MAX = 60
+
+function rememberScreen(ref: string, screen: Screen): void {
+  LAST_SCREENS.delete(ref)
+  LAST_SCREENS.set(ref, screen)
+  if (LAST_SCREENS.size > LAST_SCREENS_MAX) LAST_SCREENS.delete(LAST_SCREENS.keys().next().value!)
+}
 type Link = { start: number; end: number; href: string; kind: 'url' | 'path' }
 
 const URL_PATTERN = /https?:\/\/[^\s<>"'`]*[^\s<>"'`.,;:!?)\]}]/g
@@ -232,10 +241,11 @@ export function AgentScreen(props: {
   cwd?: string
   onHide?: () => void
 }): React.JSX.Element | null {
-  const [screen, setScreen] = useState<Screen | null>(null)
+  const [screen, setScreen] = useState<Screen | null>(() => LAST_SCREENS.get(props.sessionRef) ?? null)
   const [back, setBack] = useState(0)
   const [cmdHeld, setCmdHeld] = useState(false)
   const [dropping, setDropping] = useState(false)
+  const [fitted, setFitted] = useState<boolean | null>(null)
   const backRef = useRef(0)
   const wheelRest = useRef(0)
   const screenRef = useRef<Screen | null>(null)
@@ -259,7 +269,7 @@ export function AgentScreen(props: {
   useEffect(() => {
     let alive = true
     let timer: ReturnType<typeof setTimeout> | undefined
-    setScreen(null)
+    setScreen(LAST_SCREENS.get(props.sessionRef) ?? null)
     setView({ scale: 1, x: 0, y: 0 })
     backRef.current = 0
     setBack(0)
@@ -282,6 +292,7 @@ export function AgentScreen(props: {
         if (document.visibilityState === 'visible' && !selecting()) {
           const next = await window.api.agentRelaySessionScreen(props.sessionRef, backRef.current).catch(() => null)
           if (!alive) return
+          if (next && backRef.current === 0) rememberScreen(props.sessionRef, next)
           streamed = next?.streamed ?? false
           setScreen((prev) =>
             prev?.text === next?.text &&
@@ -367,14 +378,24 @@ export function AgentScreen(props: {
         return
       }
       if (v.scale === 1) {
-        if (screenRef.current?.alt) return
         e.preventDefault()
-        const linePx = parseFloat(getComputedStyle(glass).fontSize) * 1.2 || 16
+        const fontPx = parseFloat(getComputedStyle(glass).fontSize) || 13
+        const linePx = fontPx * 1.2
         wheelRest.current += -e.deltaY / linePx
         const whole = Math.trunc(wheelRest.current)
         if (whole === 0) return
         wheelRest.current -= whole
-        scrollTo(backRef.current + whole)
+        const s = screenRef.current
+        if (!s?.alt) {
+          scrollTo(backRef.current + whole)
+          return
+        }
+        const rect = glass.getBoundingClientRect()
+        const col = Math.max(0, Math.min(s.cols - 1, Math.floor((e.clientX - rect.left) / (fontPx * 0.602))))
+        const row = Math.max(0, Math.min(s.rows - 1, Math.floor((e.clientY - rect.top) / linePx)))
+        const wheel = whole > 0 ? 'up' : 'down'
+        const steps = Array.from({ length: Math.min(10, Math.abs(whole)) }, () => ({ wheel, col, row }) as const)
+        void window.api.agentRelaySessionKeys(props.sessionRef, steps).then((ok) => ok && refresh.current())
         return
       }
       e.preventDefault()
@@ -384,7 +405,7 @@ export function AgentScreen(props: {
     }
     box.addEventListener('wheel', onWheel, { passive: false })
     return () => box.removeEventListener('wheel', onWheel)
-  }, [hasScreen])
+  }, [hasScreen, props.sessionRef])
 
   useEffect(() => () => clearTimeout(zoomTimer.current), [])
 
@@ -396,9 +417,13 @@ export function AgentScreen(props: {
     const fit = (): void => {
       clearTimeout(timer)
       timer = setTimeout(() => {
-        const cols = Math.floor((box.clientWidth - 12) / (FILL_FONT_PX * 0.602))
-        const rows = Math.floor((box.clientHeight - 12) / (FILL_FONT_PX * 1.2))
-        void window.api.agentRelaySessionFit(props.sessionRef, cols, rows).then(() => refresh.current())
+        const pad = getComputedStyle(box)
+        const cols = Math.floor((box.clientWidth - parseFloat(pad.paddingLeft) - parseFloat(pad.paddingRight)) / (FILL_FONT_PX * 0.602))
+        const rows = Math.floor((box.clientHeight - parseFloat(pad.paddingTop) - parseFloat(pad.paddingBottom)) / (FILL_FONT_PX * 1.2))
+        void window.api.agentRelaySessionFit(props.sessionRef, cols, rows).then((ok) => {
+          setFitted(ok)
+          refresh.current()
+        })
       }, 150)
     }
     const observer = new ResizeObserver(fit)
@@ -521,7 +546,7 @@ export function AgentScreen(props: {
       })
 
   return (
-    <div className="agent-screen-wrap" data-fill={props.fill || undefined}>
+    <div className="agent-screen-wrap" data-fill={props.fill || undefined} data-scaled={(props.fill && fitted === false) || undefined}>
       <div
         ref={boxRef}
         className="agent-screen"
@@ -566,7 +591,7 @@ export function AgentScreen(props: {
         onPointerMove={onPointerMove}
         onPointerUp={() => (drag.current = null)}
         onPointerCancel={() => (drag.current = null)}
-        style={{ '--cols': screen.cols, '--rows': screen.rows } as React.CSSProperties}
+        style={{ '--cols': screen.cols, '--rows': screen.rows, '--fill-font': `${FILL_FONT_PX}px` } as React.CSSProperties}
       >
         <span className="agent-screen-zoom" data-shown={zoomShown || undefined} aria-hidden>
           {Math.round(view.scale * 100)}%

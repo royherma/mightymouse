@@ -4,6 +4,42 @@
 
 export const RELEASE_NOTES = [
   {
+    version: '0.59.0',
+    date: '2026-11-24',
+    changes: [
+      {
+        icon: '💬',
+        title: 'Reply to each agent right in its pane.',
+        detail:
+          "Panes shows every agent's live chat with its OWN reply box. Drag to resize or swap them, and see how much of your computer each one uses."
+      },
+      {
+        icon: '🤖',
+        title: 'Cursor, OpenCode and Antigravity chats show up too.',
+        detail:
+          'Read and answer them in the app, just like Claude. New Cursor and Antigravity agents also start straight away, with no "trust this folder?" stop.'
+      },
+      {
+        icon: '⚡',
+        title: 'Find any chat by what was said in it.',
+        detail:
+          'Search now sits under New session in the sidebar, and it looks inside Gemini, Codex, Cursor and second Claude account chats too.'
+      },
+      {
+        icon: '🧠',
+        title: 'Local models start up on their OWN.',
+        detail:
+          'Pick a local model and Ollama opens by itself, using a model you already have. Cursor, OpenCode and Antigravity model lists also catch up after a plan change.'
+      },
+      {
+        icon: '🌐',
+        title: 'Send your screen, no words needed.',
+        detail:
+          'Tick Send my screen and press send with an empty box. The header also shows the same title as the chat it belongs to.'
+      }
+    ]
+  },
+  {
     version: '0.58.2',
     date: '2026-11-23',
     changes: [

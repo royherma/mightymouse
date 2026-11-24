@@ -1552,6 +1552,14 @@ export function CodePanel(props: {
                         }}
                         withRail={showAgentRail}
                     onToggleRail={props.onToggleAgentRail}
+                        onZoomOut={
+                          agentFromTable && agentTable
+                            ? () => {
+                                setAgentFromTable(false)
+                                setDetailLabel(sheetLabelBeforeTable.current)
+                              }
+                            : undefined
+                        }
                         project={mightyProjectForCwd(projectsPick.cwd, openProjects) ?? undefined}
                         archived={archive.isArchived(projectsPick)}
                         onArchive={() => {

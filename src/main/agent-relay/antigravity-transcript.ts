@@ -100,6 +100,7 @@ function turnsOf(dbPath: string): AgentTranscriptTurn[] {
 }
 
 const isAgyPid = new Map<string, boolean>()
+const promptByPid = new Map<string, string>()
 function runsAgy(session: TranscriptSession): boolean {
   const pid = session.facts?.agentPid
   if (!pid) return false
@@ -110,6 +111,7 @@ function runsAgy(session: TranscriptSession): boolean {
   try {
     const args = execFileSync('ps', ['-o', 'args=', '-p', String(pid)], { encoding: 'utf8', timeout: 2000 }).trim()
     agy = basename(args.split(/\s+/)[0] ?? '') === 'agy'
+    if (agy) promptByPid.set(key, / -i (.+)$/.exec(args)?.[1].slice(0, 200) ?? '')
   } catch {
     agy = false
   }
@@ -118,14 +120,34 @@ function runsAgy(session: TranscriptSession): boolean {
 }
 
 const CREATED = /Created conversation ([0-9a-f-]{36})/
+const OPEN_CONV = /\/antigravity-cli\/conversations\/([0-9a-f-]{36})\.db/
 const convByPid = new Map<string, string>()
-function conversationFromLog(pid: number, key: string): string {
+function holds(path: string, prompt: string): boolean {
+  if (!prompt) return true
+  try {
+    const db = new Database(path, { readonly: true, fileMustExist: true })
+    try {
+      return !!db.prepare('select 1 from steps where instr(step_payload, ?) > 0 limit 1').get(Buffer.from(prompt))
+    } finally {
+      db.close()
+    }
+  } catch {
+    return false
+  }
+}
+
+function conversationFromLog(pid: number, key: string, dir: string): string {
   const hit = convByPid.get(key)
   if (hit) return hit
   try {
     const open = execFileSync('lsof', ['-p', String(pid), '-Fn'], { encoding: 'utf8', timeout: 3000 })
+    const held = OPEN_CONV.exec(open)?.[1]
     const log = open.split('\n').find((l) => /^n.*\/antigravity-cli\/log\/cli-.*\.log$/.test(l))?.slice(1)
-    const id = log ? CREATED.exec(readFileSync(log, 'utf8'))?.[1] : undefined
+    const text = log ? readFileSync(log, 'utf8') : ''
+    // agy names its log by the second it started, so agents started together overwrite one log.
+    const ours = text.includes(`process with pid ${pid}\n`)
+    const found = held ?? (ours ? CREATED.exec(text)?.[1] : undefined)
+    const id = found && holds(join(dir, `${found}.db`), promptByPid.get(key) ?? '') ? found : undefined
     if (id) convByPid.set(key, id)
     return id ?? ''
   } catch {
@@ -133,7 +155,7 @@ function conversationFromLog(pid: number, key: string): string {
   }
 }
 
-function newestDbForCwd(dir: string, cwd: string, since: number): string {
+function newestDbForCwd(dir: string, cwd: string, since: number, prompt: string): string {
   let best = ''
   let bestAt = 0
   const needle = Buffer.from(`file://${cwd}`)
@@ -146,7 +168,7 @@ function newestDbForCwd(dir: string, cwd: string, since: number): string {
       const db = new Database(path, { readonly: true, fileMustExist: true })
       const row = db.prepare('select step_payload p from steps where idx = 0').get() as { p: Buffer } | undefined
       db.close()
-      if (row?.p.includes(needle)) {
+      if (row?.p.includes(needle) && holds(path, prompt)) {
         best = path
         bestAt = born
       }
@@ -165,8 +187,8 @@ export function readAntigravityTranscript(session: TranscriptSession, home: stri
   if (!existsSync(dir)) return []
   const pid = session.facts?.agentPid as number
   const key = `${pid}:${session.since ?? 0}`
-  const id = conversationFromLog(pid, key)
-  const path = id ? join(dir, `${id}.db`) : session.cwd ? newestDbForCwd(dir, session.cwd, session.since ?? 0) : ''
+  const id = conversationFromLog(pid, key, dir)
+  const path = id ? join(dir, `${id}.db`) : session.cwd ? newestDbForCwd(dir, session.cwd, session.since ?? 0, promptByPid.get(key) ?? '') : ''
   if (!path || !existsSync(path)) return []
   const stamp = Math.max(statSync(path).mtimeMs, existsSync(`${path}-wal`) ? statSync(`${path}-wal`).mtimeMs : 0)
   const hit = cache.get(path)

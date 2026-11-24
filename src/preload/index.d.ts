@@ -932,7 +932,7 @@ interface CustomAPI {
   } | null>
   agentRelaySessionKeys: (
     ref: string,
-    keys: ({ text: string } | { key: string } | { paste: string })[]
+    keys: ({ text: string } | { key: string } | { paste: string } | { wheel: 'up' | 'down'; col: number; row: number })[]
   ) => Promise<boolean>
   agentRelaySessionFit: (ref: string, cols: number, rows: number) => Promise<boolean>
   agentRelaySessionWatch: (ref: string) => Promise<boolean>

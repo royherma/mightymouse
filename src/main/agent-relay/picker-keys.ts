@@ -621,7 +621,7 @@ export async function capturePaneScreen(origin: AgentOrigin | undefined, back = 
   }
 }
 
-export type PaneKey = { text: string } | { key: string } | { paste: string }
+export type PaneKey = { text: string } | { key: string } | { paste: string } | { wheel: 'up' | 'down'; col: number; row: number }
 
 const PANE_KEY_NAMES = new Set([
   'Enter', 'BSpace', 'DC', 'Tab', 'BTab', 'Escape', 'Up', 'Down', 'Left', 'Right',
@@ -633,9 +633,15 @@ export async function sendPaneKeys(origin: AgentOrigin | undefined, keys: PaneKe
   const tmux = origin?.tmuxPane ? tmuxPath() : null
   if (!tmux || !origin?.tmuxPane || keys.length === 0) return false
   const args = origin.tmuxSocket ? ['-S', origin.tmuxSocket] : []
+  if (keys.some((k) => 'wheel' in k)) {
+    const mouse = await capture(tmux, [...args, 'display-message', '-p', '-t', origin.tmuxPane, '#{mouse_any_flag}#{mouse_sgr_flag}'])
+    if (mouse?.trim() !== '11') return false
+  }
   for (const k of keys) {
     const step =
-      'text' in k && typeof k.text === 'string' && k.text !== ''
+      'wheel' in k
+        ? ['send-keys', '-t', origin.tmuxPane, '-H', ...wheelBytes(k.wheel, k.col, k.row)]
+        : 'text' in k && typeof k.text === 'string' && k.text !== ''
         ? ['send-keys', '-t', origin.tmuxPane, '-l', k.text]
         : 'key' in k && (PANE_KEY_NAMES.has(k.key) || CTRL_KEY.test(k.key))
           ? ['send-keys', '-t', origin.tmuxPane, k.key]
@@ -647,4 +653,10 @@ export async function sendPaneKeys(origin: AgentOrigin | undefined, keys: PaneKe
     args.push(...step)
   }
   return run(tmux, args)
+}
+
+function wheelBytes(dir: 'up' | 'down', col: number, row: number): string[] {
+  const x = Math.max(1, Math.min(999, Math.round(col) + 1))
+  const y = Math.max(1, Math.min(999, Math.round(row) + 1))
+  return [...Buffer.from(`\x1b[<${dir === 'up' ? 64 : 65};${x};${y}M`)].map((b) => b.toString(16).padStart(2, '0'))
 }

@@ -355,17 +355,33 @@ enum SpeechToText {
 @MainActor
 final class LiveTranscriber {
     var onPartial: ((String) -> Void)?
+    private var recognizer: SFSpeechRecognizer?
     private var request: SFSpeechAudioBufferRecognitionRequest?
     private var task: SFSpeechRecognitionTask?
-    private var latest = ""
+    private var committed = ""
+    private var segment = ""
+    private var lastCommitted = ""
+    private var restarts = 0
+    private var finishing = false
     private var finalText: String??
     private var waiter: CheckedContinuation<String?, Never>?
     private var peak: Float = 0.05
+
+    private var latest: String {
+        [committed, segment].filter { !$0.isEmpty }.joined(separator: " ")
+    }
 
     func start() -> Bool {
         guard SpeechToText.isAllowed,
               let recognizer = SFSpeechRecognizer(locale: Locale.current) ?? SFSpeechRecognizer(locale: Locale(identifier: "en-US")),
               recognizer.isAvailable else { return false }
+        self.recognizer = recognizer
+        beginSegment()
+        return true
+    }
+
+    private func beginSegment() {
+        guard let recognizer else { return }
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
         request.addsPunctuation = true
@@ -374,17 +390,48 @@ final class LiveTranscriber {
         task = recognizer.recognitionTask(with: request) { [weak self] result, error in
             let text = result?.bestTranscription.formattedString
             let isFinal = result?.isFinal ?? false
+            let segmentEnded = result?.speechRecognitionMetadata != nil
             let failed = error != nil
             DispatchQueue.main.async {
-                guard let self else { return }
-                if let text, !text.isEmpty {
-                    self.latest = text
-                    self.onPartial?(text)
+                guard let self, self.request === request else { return }
+                if let text, !text.isEmpty { self.take(text) }
+                if segmentEnded || isFinal || failed { self.commitSegment() }
+                guard isFinal || failed else { return }
+                if self.finishing || self.restarts >= 40 || (failed && self.latest.isEmpty) {
+                    self.resolve(self.latest.isEmpty ? nil : self.latest)
+                } else {
+                    self.restarts += 1
+                    self.beginSegment()
                 }
-                if isFinal || failed { self.resolve(self.latest.isEmpty ? nil : self.latest) }
             }
         }
-        return true
+    }
+
+    // iOS restarts formattedString after a pause, so each result may hold only the newest phrase.
+    private func take(_ text: String) {
+        var text = text
+        if !lastCommitted.isEmpty, text.lowercased().hasPrefix(lastCommitted.lowercased()) {
+            text = String(text.dropFirst(lastCommitted.count)).trimmingCharacters(in: .whitespaces)
+        } else {
+            lastCommitted = ""
+            if Self.looksRestarted(from: segment, to: text) { commitSegment() }
+        }
+        guard !text.isEmpty else { return }
+        segment = text
+        onPartial?(latest)
+    }
+
+    private func commitSegment() {
+        guard !segment.isEmpty else { return }
+        committed = latest
+        lastCommitted = segment
+        segment = ""
+    }
+
+    private static func looksRestarted(from old: String, to new: String) -> Bool {
+        guard old.count >= 8, new.count < old.count / 2 else { return false }
+        let firstWord: (String) -> String = { $0.split(separator: " ").first.map { $0.lowercased() } ?? "" }
+        return firstWord(old) != firstWord(new)
     }
 
     func append(_ samples: [Int16]) {
@@ -402,6 +449,7 @@ final class LiveTranscriber {
 
     func finish() async -> String? {
         if let finalText { return finalText }
+        finishing = true
         request?.endAudio()
         return await withCheckedContinuation { continuation in
             waiter = continuation
@@ -413,6 +461,7 @@ final class LiveTranscriber {
     }
 
     func cancel() {
+        finishing = true
         task?.cancel()
         request = nil
         resolve(nil)

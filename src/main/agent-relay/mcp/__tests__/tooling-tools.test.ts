@@ -85,6 +85,7 @@ describe('agent-relay local tooling tools', () => {
       'relay_dismiss',
       'relay_pending',
       'relay_resolve',
+      'set_project_icon',
       'show',
       'task',
       // Addresses the session, like recap and busy -- the only one that ENDS it.

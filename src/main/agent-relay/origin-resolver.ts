@@ -321,6 +321,9 @@ export async function livesInApp(origin: AgentOrigin | undefined): Promise<boole
   return out !== null && out.split('\n').every((flags) => !flags.trim() || flags.includes('ignore-size'))
 }
 
+const MAX_FIT_WINDOW_COLS = 1000
+const MAX_FIT_WINDOW_ROWS = 500
+
 export async function fitHiddenPane(origin: AgentOrigin | undefined, cols: number, rows: number): Promise<boolean> {
   const tmux = tmuxPath()
   const pane = origin?.tmuxPane
@@ -329,7 +332,23 @@ export async function fitHiddenPane(origin: AgentOrigin | undefined, cols: numbe
   const w = Math.max(40, Math.min(400, Math.floor(cols)))
   const h = Math.max(10, Math.min(200, Math.floor(rows)))
   if (!(await livesInApp(origin))) return false
-  return run(tmux, [...socket, 'resize-window', '-t', pane, '-x', String(w), '-y', String(h)])
+  const count = Number((await capture(tmux, [...socket, 'display', '-p', '-t', pane, '#{window_panes}']))?.trim()) || 1
+  if (count === 1) return run(tmux, [...socket, 'resize-window', '-t', pane, '-x', String(w), '-y', String(h)])
+  const { across, down } = tiledGrid(count)
+  const x = Math.min(MAX_FIT_WINDOW_COLS, across * w + across - 1)
+  const y = Math.min(MAX_FIT_WINDOW_ROWS, down * h + down - 1)
+  if (!(await run(tmux, [...socket, 'resize-window', '-t', pane, '-x', String(x), '-y', String(y)]))) return false
+  return run(tmux, [...socket, 'select-layout', '-t', pane, 'tiled'])
+}
+
+function tiledGrid(count: number): { across: number; down: number } {
+  let across = 1
+  let down = 1
+  while (across * down < count) {
+    down++
+    if (across * down < count) across++
+  }
+  return { across, down }
 }
 
 /** Attempt the ordered table. Returns which step actually worked (or 'none'),

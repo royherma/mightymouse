@@ -109,6 +109,7 @@ async function show(e: IpcMainInvokeEvent, request: PopoverMenuRequest): Promise
   const win = menuWindow
   await loaded
   return new Promise((resolve) => {
+    finish(null, false)
     open = { request, owner, side: null, resolve }
     win.setSize(Math.round(request.width), win.getSize()[1])
     win.webContents.send(CHANNELS.popoverMenuShow, request)

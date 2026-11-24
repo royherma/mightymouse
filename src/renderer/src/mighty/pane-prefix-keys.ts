@@ -29,6 +29,8 @@ export const PREFIX_HELP: ReadonlyArray<readonly [string, string]> = [
   ['?', 'This list']
 ]
 
+export const PANE_INPUT_SELECTOR = 'textarea:not([disabled]), [contenteditable="true"], [tabindex="0"]'
+
 const ARROWS: Record<string, Direction> = {
   ArrowLeft: 'left',
   ArrowRight: 'right',
@@ -69,6 +71,28 @@ export function prefixCommand(e: KeyLike): PrefixCommand | null {
     case '?':
       return { kind: 'help' }
   }
+  return null
+}
+
+export type CmuxCommand =
+  | { kind: 'move'; dir: Direction }
+  | { kind: 'jump'; index: number }
+  | { kind: 'group'; step: 1 | -1 }
+  | { kind: 'next' }
+  | { kind: 'zoom' }
+  | { kind: 'new' }
+  | { kind: 'close' }
+
+export function cmuxCommand(e: KeyLike & Pick<KeyboardEvent, 'code'>): CmuxCommand | null {
+  const { metaKey: cmd, altKey: opt, shiftKey: shift, ctrlKey: ctrl } = e
+  if (cmd && opt && !shift && !ctrl && ARROWS[e.key]) return { kind: 'move', dir: ARROWS[e.key] }
+  if (ctrl && !cmd && !opt && !shift && /^Digit[1-9]$/.test(e.code)) return { kind: 'jump', index: Number(e.code.slice(5)) - 1 }
+  if (cmd && shift && !opt && !ctrl) {
+    if (e.code === 'BracketRight') return { kind: 'group', step: 1 }
+    if (e.code === 'BracketLeft') return { kind: 'group', step: -1 }
+    if (e.key === 'Enter') return { kind: 'zoom' }
+  }
+  if (cmd && !shift && !opt && !ctrl && e.code === 'KeyD') return { kind: 'new' }
   return null
 }
 

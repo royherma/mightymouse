@@ -5,7 +5,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-top: 8px;
   overflow: clip;
 }
 
@@ -27,27 +26,44 @@
 .session-panes {
   position: relative;
   display: grid;
-  gap: 10px;
+  gap: 1px;
   flex: 1;
   min-height: 0;
   width: 100%;
   overflow: clip;
+  background: var(--border-dark);
+  border-top: 1px solid var(--border-dark);
 }
 
 .session-pane {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
-  border: 1px solid var(--border-dark);
-  border-radius: 10px;
   background: var(--surface1, var(--bg));
   overflow: clip;
-  transition: border-color 120ms ease, opacity 120ms ease;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition: outline-color 120ms ease, opacity 120ms ease;
 }
 
-.session-pane:focus-within {
-  border-color: var(--accent);
+.session-pane::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 3px transparent;
+  transition: box-shadow 120ms ease;
+}
+
+.session-pane:focus-within::after {
+  box-shadow: inset 0 0 0 3px var(--accent);
+}
+
+.session-pane:focus-within .session-detail-head {
+  background: color-mix(in oklch, var(--accent) 16%, var(--surface1, var(--bg)));
 }
 
 .session-pane[data-dragging] {
@@ -55,8 +71,8 @@
 }
 
 .session-pane[data-drop] {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(var(--accent-rgb, 200, 100, 50), 0.25);
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .session-pane > .code-detail {
@@ -218,7 +234,6 @@ body[data-pane-resizing='row'] {
   min-height: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 16px;
   overflow: clip;
 }
 
@@ -340,4 +355,154 @@ body[data-pane-resizing='row'] {
   position: absolute;
   right: 9px;
   pointer-events: none;
+}
+
+.session-panes-wrap {
+  position: relative;
+}
+
+.session-pane-number {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.45);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+}
+
+.session-pane-number span {
+  display: grid;
+  place-items: center;
+  width: 112px;
+  height: 112px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.session-pane:focus-within .session-pane-number span {
+  background: var(--accent);
+  box-shadow: none;
+}
+
+.session-pane .code-session-load-mem {
+  display: none;
+}
+
+.session-pane .code-session-load:hover .code-session-load-mem,
+.session-pane .code-session-load[data-tone='busy'] .code-session-load-mem {
+  display: inline;
+}
+
+.session-pane-prefix {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  z-index: 30;
+  padding: 4px 8px;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  background: var(--surface2);
+  color: var(--accent);
+  font-size: 12px;
+  pointer-events: none;
+}
+
+.session-pane-prefix-help {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  padding: 14px;
+  border-color: var(--border-dark);
+  color: var(--text);
+  pointer-events: auto;
+}
+
+.session-pane-prefix-row {
+  display: contents;
+}
+
+.session-pane-prefix-row kbd {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  color: var(--accent);
+}
+
+.session-pane-prefix-row span {
+  color: var(--muted);
+}
+
+.session-pane .session-detail .session-detail-head {
+  height: 30px;
+  gap: 7px;
+  padding: 0 4px 0 10px;
+  border-bottom: none;
+}
+
+.session-pane .session-detail .session-detail-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.session-pane .session-detail .session-detail-head .code-detail-pos {
+  order: -1;
+  flex: none;
+  margin-left: 0;
+}
+
+.session-pane .session-detail .code-detail-scroll {
+  padding-bottom: 0;
+}
+
+.session-pane .session-detail-terminal {
+  margin-top: 0;
+  background: var(--terminal-bg);
+}
+
+.session-pane .session-detail-terminal:empty::before {
+  content: 'Loading';
+  margin: auto;
+  font-size: 12px;
+  color: var(--terminal-fg);
+  opacity: 0.35;
+}
+
+.session-pane .agent-screen-wrap {
+  gap: 0;
+}
+
+.session-pane .agent-screen,
+.session-pane .agent-screen:hover {
+  border-radius: 0;
+  box-shadow: none;
+  padding: 4px 10px;
+}
+
+.session-pane-actions {
+  gap: 2px;
+}
+
+.session-pane .session-pane-actions .session-pane-hover {
+  width: 24px;
+  height: 24px;
+}
+
+.session-pane .code-session-load {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.session-pane:hover .code-session-load,
+.session-pane .code-session-load[data-tone='busy'] {
+  opacity: 1;
 }

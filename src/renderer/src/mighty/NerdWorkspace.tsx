@@ -11,7 +11,7 @@ import { planOpenGlobal } from './pane-selection'
 import { paneSlotColor, type PaneOpenColorId } from './pane-colors'
 import { tabDisplayViewMode } from './tab-view-mode'
 import { paneLifecycleLog } from './pane-lifecycle-log'
-import { PREFIX_HELP, paneInDirection, usePanePrefixKeys, type PrefixCommand } from './pane-prefix-keys'
+import { PANE_INPUT_SELECTOR, PREFIX_HELP, paneInDirection, usePanePrefixKeys, type PrefixCommand } from './pane-prefix-keys'
 import { switchBinding } from './pane-binding'
 import { effectiveProjectIdForPane } from './effective-project'
 import { CLOSE_PANEL_EVENT } from '../hooks/useRailMode'
@@ -34,8 +34,6 @@ const VIEW_MODES: ReadonlyArray<SegmentItem<PaneViewMode>> = [
 type OpenTarget = { sessionId: string } | { agentLabel: string }
 
 export type GridRequest = { nonce: number } & ({ kind: 'agent'; label: string } | { kind: 'six'; cwd: string; count?: number })
-
-const PANE_INPUT_SELECTOR = 'textarea:not([disabled]), [contenteditable="true"], [tabindex="0"]'
 
 function focusPaneInput(root: HTMLElement | null, paneId: string): void {
   requestAnimationFrame(() =>

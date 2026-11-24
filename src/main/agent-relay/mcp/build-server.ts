@@ -6,6 +6,7 @@ import { CONFIG } from '../../../shared/config'
 import { VERB_HANDLERS, SESSION_HANDLERS, TOOLING_HANDLERS, PHOTO_VERBS, askWithoutDecisions, askArgsWithoutDecisions } from './verbs'
 import { BROWSER_HANDLERS } from './browser-tools'
 import { DELEGATE_HANDLERS } from './delegate-tools'
+import { PROJECT_ICON_HANDLERS } from './project-icon'
 import { PUBLISH_HANDLERS } from '../../publish'
 import { PREFS } from '../../store/prefs'
 import { setAgentSessionProgress } from './http-listener'
@@ -29,6 +30,7 @@ export function buildAgentRelayMcpServer(
     ...TOOLING_HANDLERS,
     ...BROWSER_HANDLERS,
     ...DELEGATE_HANDLERS,
+    ...PROJECT_ICON_HANDLERS,
     ...PUBLISH_HANDLERS
   })) {
     if (!handler) continue
@@ -74,7 +76,8 @@ export function buildAgentRelayMcpServer(
           ...args,
           ...(carriesSessionId ? { sessionId } : {}),
           ...(carriesFrom ? { from: args.from ?? derivedFrom, cwd, origin } : {}),
-          ...(verb in DELEGATE_HANDLERS ? { cwd, origin } : {})
+          ...(verb in DELEGATE_HANDLERS ? { cwd, origin } : {}),
+          ...(verb in PROJECT_ICON_HANDLERS ? { cwd } : {})
         })
       }
     )

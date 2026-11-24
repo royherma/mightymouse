@@ -1,25 +1,27 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode, PointerEvent as ReactPointerEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { Maximize2, MessageSquare, Plus, SquareTerminal } from 'lucide-react'
+import { Maximize2, MessageSquare, Plus, SquareTerminal, X } from 'lucide-react'
 import { Button } from './Button'
 import { LoadBadge } from './session-load'
 import { useTerminalView } from './ViewModeMenu'
 import { sessionRow } from '../../../shared/relay-status'
+import { PANE_INPUT_SELECTOR, PREFIX_HELP, cmuxCommand, paneInDirection, usePanePrefixKeys, type CmuxCommand, type PrefixCommand } from '../mighty/pane-prefix-keys'
 import type { AgentRelaySessionInfo, SessionLoad } from '../../../shared/types'
 import './SessionPanes.css'
 
 const COLS = 3
 const ROW_MIN_PX = 320
 const MAX_ROWS = 2
-const FIT_GAP = 12
+const FIT_GAP = 0
 const MIN_HEIGHT = 360
-const GAP_PX = 10
+const GAP_PX = 1
 const MIN_COL_PX = 360
 const MIN_ROW_PX = 220
 const FRESH_RECHECK_MS = 10_000
 const ORDER_KEY = 'mm.panes.order.v1'
 const SIZE_KEY = 'mm.panes.sizes.v1'
+const CLOSED_KEY = 'mm.panes.closed.v1'
 
 function paneKey(session: AgentRelaySessionInfo): string {
   return session.sessionId || `${session.label}:${session.pid ?? ''}:${session.since ?? ''}`
@@ -139,6 +141,79 @@ function ordered(sessions: AgentRelaySessionInfo[], order: string[]): AgentRelay
     .map((x) => x.s)
 }
 
+function focusPane(pane: Element | null | undefined): void {
+  if (!pane) return
+  const input = pane.querySelector<HTMLElement>(PANE_INPUT_SELECTOR)
+  input?.focus()
+  input?.scrollIntoView({ block: 'nearest' })
+}
+
+function fromPrefix(cmd: PrefixCommand): CmuxCommand | null {
+  if (cmd.kind === 'jump' || cmd.kind === 'move' || cmd.kind === 'zoom') return cmd
+  if (cmd.kind === 'next-pane') return { kind: 'next' }
+  if (cmd.kind === 'split') return { kind: 'new' }
+  if (cmd.kind === 'tab') return { kind: 'group', step: cmd.step }
+  if (cmd.kind === 'close') return cmd
+  return null
+}
+
+function usePaneKeys(
+  wrapRef: React.RefObject<HTMLDivElement | null>,
+  groupCount: number,
+  active: number,
+  pick: (group: number) => void,
+  open: (key: string) => void,
+  close: (key: string) => void,
+  startNew: (() => void) | undefined
+): ReturnType<typeof usePanePrefixKeys> {
+  const latest = useRef({ groupCount, active, pick, open, close, startNew })
+  latest.current = { groupCount, active, pick, open, close, startNew }
+  const run = (cmd: CmuxCommand): boolean => {
+    const wrap = wrapRef.current
+    if (!wrap) return false
+    const { groupCount, active, pick, open, close, startNew } = latest.current
+    const panes = [...wrap.querySelectorAll<HTMLElement>('.session-pane[data-pane-key]')]
+    const current = (document.activeElement?.closest('.session-pane[data-pane-key]') as HTMLElement | null) ?? panes[0]
+    if (cmd.kind === 'new') return startNew ? (startNew(), true) : false
+    if (cmd.kind === 'group') {
+      if (groupCount < 2) return false
+      pick((active + cmd.step + groupCount) % groupCount)
+      requestAnimationFrame(() => focusPane(wrap.querySelector('.session-pane[data-pane-key]')))
+      return true
+    }
+    if (cmd.kind === 'jump') return focusPane(panes[cmd.index]), true
+    if (cmd.kind === 'next') return focusPane(panes[(panes.indexOf(current) + 1) % panes.length]), true
+    if (cmd.kind === 'zoom') return current?.dataset.paneKey ? (open(current.dataset.paneKey), true) : false
+    if (cmd.kind === 'close') return current?.dataset.paneKey ? (close(current.dataset.paneKey), true) : false
+    if (!current) return false
+    const boxes = panes.map((p) => ({ id: p.dataset.paneKey ?? '', box: p.getBoundingClientRect() }))
+    const to = paneInDirection(boxes, current.dataset.paneKey ?? '', cmd.dir)
+    focusPane(panes.find((p) => p.dataset.paneKey === to))
+    return true
+  }
+  const runRef = useRef(run)
+  runRef.current = run
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.isComposing || !wrapRef.current?.offsetParent) return
+      const cmd = cmuxCommand(e)
+      if (!cmd || !runRef.current(cmd)) return
+      e.preventDefault()
+      e.stopPropagation()
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [wrapRef])
+  return usePanePrefixKeys(wrapRef, (cmd) => {
+    const mapped = fromPrefix(cmd)
+    if (mapped) runRef.current(mapped)
+  })
+}
+
+const PANES_PREFIX_HELP = PREFIX_HELP.filter(([keys]) => keys !== 'c').map(([keys, what]) =>
+  keys === 'x' ? ([keys, 'Hide this pane'] as const) : ([keys, what] as const)
+)
+
 function track(fr: number[]): string {
   return fr.map((f) => `minmax(0, ${f}fr)`).join(' ')
 }
@@ -223,6 +298,12 @@ export function SessionPanes(props: {
   const emptyKeys = useEmptyKeys(all)
   const [order, setOrder] = useState<string[]>(() => readJson(ORDER_KEY, []))
   const [sizes, setSizes] = useState<Record<string, number[]>>(() => readJson(SIZE_KEY, {}))
+  const [closed, setClosed] = useState<string[]>(() => readJson(CLOSED_KEY, []))
+  const saveClosed = (next: string[]): void => {
+    setClosed(next)
+    writeJson(CLOSED_KEY, next)
+  }
+  const closePane = (key: string): void => saveClosed([...closed, key].slice(-200))
   const [terminal, setTerminal] = useTerminalView()
   const [dragKey, setDragKey] = useState<string | null>(null)
   const [dropKey, setDropKey] = useState<string | null>(null)
@@ -234,7 +315,9 @@ export function SessionPanes(props: {
   const newestEmpty = emptyKeys
     ? all.filter((s) => emptyKeys.has(paneKey(s))).sort((a, b) => (b.since ?? 0) - (a.since ?? 0))[0]
     : undefined
-  const sessions = ordered(newestEmpty ? [...used, newestEmpty] : used, order)
+  const closedSet = new Set(closed)
+  const hiddenCount = all.filter((s) => closedSet.has(paneKey(s))).length
+  const sessions = ordered(newestEmpty ? [...used, newestEmpty] : used, order).filter((s) => !closedSet.has(paneKey(s)))
 
   const rows = Math.max(1, Math.min(MAX_ROWS, Math.floor(((fit ?? 0) - (props.barSlot ? 0 : 36)) / ROW_MIN_PX)))
   const perGroup = COLS * rows
@@ -267,6 +350,19 @@ export function SessionPanes(props: {
     writeJson(ORDER_KEY, keys)
   }
 
+  const prefix = usePaneKeys(
+    wrapRef,
+    groups.length,
+    active,
+    setPicked,
+    (key) => {
+      const session = shown.find((s) => paneKey(s) === key)
+      if (session) props.onOpen(session)
+    },
+    closePane,
+    props.onNewSession ? () => void startNew() : undefined
+  )
+
   const armDrag = (key: string) => (down: ReactPointerEvent<HTMLElement>) => {
     const target = down.target as HTMLElement
     if (target.closest('.session-detail-head') && !target.closest('button, a, input, textarea')) setDragKey(key)
@@ -294,13 +390,18 @@ export function SessionPanes(props: {
               )
             })}
         </div>
+        {hiddenCount > 0 && (
+          <Button variant="bare" className="session-pane-new" onClick={() => saveClosed([])} title="Show the panes you hid">
+            {hiddenCount} hidden
+          </Button>
+        )}
         {props.onNewSession && (
           <Button
             variant="bare"
             className="session-pane-new"
             onClick={() => void startNew()}
             disabled={starting === 'busy'}
-            title={starting !== 'idle' && starting !== 'busy' ? starting : 'Start a new agent in this project - it shows up here as a pane'}
+            title={starting !== 'idle' && starting !== 'busy' ? starting : 'Start a new agent in this project - it shows up here as a pane (⌘D)'}
             data-failed={starting !== 'idle' && starting !== 'busy' ? '' : undefined}
           >
             <Plus size={13} strokeWidth={2.5} />
@@ -324,12 +425,13 @@ export function SessionPanes(props: {
     <div className="session-panes-wrap" ref={wrapRef} style={fit ? { height: fit } : undefined}>
       {props.barSlot ? createPortal(<div className="session-pane-bar" data-slotted="">{barInner}</div>, props.barSlot) : <div className="session-pane-bar">{barInner}</div>}
       <div className="session-panes" role="list" style={{ gridTemplateColumns: track(colFr), gridTemplateRows: track(rowFr) }}>
-        {shown.map((session) => {
+        {shown.map((session, index) => {
           const key = paneKey(session)
           return (
             <section
               key={key}
               className="session-pane"
+              data-pane-key={key}
               role="listitem"
               draggable={dragKey === key}
               data-dragging={dragKey === key || undefined}
@@ -357,6 +459,7 @@ export function SessionPanes(props: {
                 setDropKey(null)
               }}
             >
+              {prefix.phase === 'numbers' && <div className="session-pane-number"><span>{index + 1}</span></div>}
               {props.renderDetail(
                 session,
                 <span className="session-pane-actions">
@@ -365,10 +468,19 @@ export function SessionPanes(props: {
                     variant="icon"
                     className="session-pane-hover"
                     onClick={() => props.onOpen(session)}
-                    title="Open full size"
+                    title="Open full size (⌘⇧↩)"
                     aria-label="Open full size"
                   >
-                    <Maximize2 size={14} strokeWidth={2} />
+                    <Maximize2 size={13} strokeWidth={2} />
+                  </Button>
+                  <Button
+                    variant="icon"
+                    className="session-pane-hover"
+                    onClick={() => closePane(key)}
+                    title="Hide this pane (Ctrl-B x) - the others fill the space"
+                    aria-label="Hide this pane"
+                  >
+                    <X size={14} strokeWidth={2} />
                   </Button>
                 </span>
               )}
@@ -382,6 +494,17 @@ export function SessionPanes(props: {
           <Divider key={`r${i}`} axis="row" fr={rowFr} index={i} onChange={(n) => setSize(rowKey, n)} onReset={() => setSize(rowKey, undefined)} />
         ))}
       </div>
+      {prefix.phase === 'armed' && <div className="session-pane-prefix">Ctrl-B</div>}
+      {prefix.phase === 'help' && (
+        <div className="session-pane-prefix session-pane-prefix-help" onClick={prefix.dismiss}>
+          {PANES_PREFIX_HELP.map(([keys, what]) => (
+            <div key={keys} className="session-pane-prefix-row">
+              <kbd>{keys}</kbd>
+              <span>{what}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
