@@ -610,6 +610,8 @@ interface CustomAPI {
     liveCompanion: boolean
     companionRenderer: CompanionRendererId
     companionSize: CompanionSize
+    companionQuiet: boolean
+    companionModel: string
     liveActs: boolean
     suggestions: boolean
     clickEnabled: boolean
@@ -654,6 +656,8 @@ interface CustomAPI {
   settingsSetCompanionRenderer: (renderer: string) => Promise<CompanionRendererId>
   settingsSetCompanionSize: (size: string) => Promise<CompanionSize>
   settingsSetLiveActs: (on: boolean) => Promise<boolean>
+  settingsSetCompanionQuiet: (on: boolean) => Promise<boolean>
+  settingsSetCompanionModel: (model: string) => Promise<string>
   companionSetInteractive: (interactive: boolean) => Promise<void>
   companionSendText: (text: string) => void
   openCompanionWindow: () => Promise<void>

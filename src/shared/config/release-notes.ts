@@ -4,6 +4,30 @@
 
 export const RELEASE_NOTES = [
   {
+    version: '0.59.1',
+    date: '2026-11-25',
+    changes: [
+      {
+        icon: '⚡',
+        title: 'Jump between your agents from the keyboard.',
+        detail:
+          'Press Ctrl-B then q and pick a pane by number, or X to hide one. Every pane now FITS its box, with no lines cut off.'
+      },
+      {
+        icon: '⌨️',
+        title: 'Typing from your phone stays smooth.',
+        detail:
+          'The remote no longer crashes mid-word on the iPhone keyboard, and it stops deleting letters on your computer that you never erased.'
+      },
+      {
+        icon: '🤖',
+        title: 'Your agents can give each project its OWN icon.',
+        detail:
+          "Ask an agent to set or refresh a project's icon, and the sidebar shows it right away so the right project is easy to spot."
+      }
+    ]
+  },
+  {
     version: '0.59.0',
     date: '2026-11-24',
     changes: [

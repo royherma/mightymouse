@@ -1,6 +1,6 @@
 import type { JSX, MouseEvent as ReactMouseEvent } from 'react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { X, Square } from 'lucide-react'
+import { X, Square, Pause, Mic } from 'lucide-react'
 import { MOUSE_FRAMES } from './assets/mouse'
 import { CONFIG } from '../../shared/config'
 import type { CompanionState } from '../../shared/companion-state'
@@ -27,7 +27,9 @@ const PILL_WORD: Record<CompanionState, string> = {
   reacting: 'Say "Hey Mighty"'
 }
 const PILL_WORD_PAUSED = 'Paused while recording'
+const PILL_WORD_USER_PAUSED = 'Paused - click me'
 const PILL_WORD_DONE = 'Done'
+const PILL_WORD_HEARING = 'Listening'
 const PILL_WORD_FAILED = "Couldn't do that"
 const SHOW_ELAPSED_AFTER_S = 3
 export const PILL_DONE_MS = 1_100
@@ -61,11 +63,15 @@ export interface CompanionPillProps {
   outcome: PillOutcome
   step?: string
   paused: boolean
+  hearing?: boolean
+  userPaused?: boolean
+  onTogglePause?: () => void
   micLevel: number
   barsLevel: number | null
   workingSince: number | null
   onStop: () => void
   onClose: () => void
+  closeHides?: boolean
   onContextMenu?: (e: ReactMouseEvent) => void
 }
 
@@ -79,12 +85,14 @@ export function CompanionPill(p: CompanionPillProps): JSX.Element {
     : p.outcome === 'failed'
       ? PILL_WORD_FAILED
       : p.paused
-        ? PILL_WORD_PAUSED
-        : p.state === 'thinking' && p.step
+        ? p.userPaused ? PILL_WORD_USER_PAUSED : PILL_WORD_PAUSED
+        : p.hearing
+          ? PILL_WORD_HEARING
+          : p.state === 'thinking' && p.step
           ? p.step
           : PILL_WORD[p.state]
   const secs = useElapsedSeconds(p.state === 'thinking' && !p.outcome ? p.workingSince : null)
-  const level = listening ? Math.min(1, p.micLevel) : 0
+  const level = listening || p.hearing ? Math.min(1, p.micLevel) : 0
 
   const rowRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState<number | undefined>(undefined)
@@ -97,17 +105,32 @@ export function CompanionPill(p: CompanionPillProps): JSX.Element {
     return () => ro.disconnect()
   }, [])
 
-  const showBars = !p.outcome && (listening || p.state === 'talking' || (p.state === 'idle' && !p.paused))
+  const showBars = !p.outcome && (listening || p.hearing || p.state === 'talking' || (p.state === 'idle' && !p.paused))
   return (
     <div
       className={`companion-pill ${look}${p.paused ? ' is-paused' : ''}`}
       style={{ width, ['--accent' as string]: accent, ['--level' as string]: level }}
       onContextMenu={p.onContextMenu}
+      onClick={p.userPaused && !working ? p.onTogglePause : undefined}
     >
       <div ref={rowRef} className="companion-pill-row">
         {!working && !p.outcome && (
-          <Button variant="bare" className="companion-pill-off" onClick={p.onClose} title="Turn off voice mode" aria-label="Turn off voice mode">
+          <Button variant="bare" className="companion-pill-off" onClick={p.onClose} title={p.closeHides ? 'Hide until you say Hey Mighty' : 'Turn off voice mode'} aria-label={p.closeHides ? 'Hide until you say Hey Mighty' : 'Turn off voice mode'}>
             <X size={11} strokeWidth={3} />
+          </Button>
+        )}
+        {!working && !p.outcome && p.onTogglePause && (
+          <Button
+            variant="bare"
+            className="companion-pill-off companion-pill-pause"
+            onClick={(e) => {
+              e.stopPropagation()
+              p.onTogglePause?.()
+            }}
+            title={p.userPaused ? 'Start listening' : 'Pause listening'}
+            aria-label={p.userPaused ? 'Start listening' : 'Pause listening'}
+          >
+            {p.userPaused ? <Mic size={11} strokeWidth={2.6} /> : <Pause size={10} fill="currentColor" strokeWidth={0} />}
           </Button>
         )}
         {working && !p.outcome && (
@@ -304,6 +327,9 @@ export function companionPillCss(): string {
   }
   .companion-pill:hover .companion-pill-off { opacity: 1; transform: scale(1); }
   .companion-pill-off:hover { color: ${T.redLight}; }
+  .companion-pill-pause { left: 19px; }
+  .companion-pill-pause:hover { color: ${T.onSurface}; }
+  .companion-pill.is-paused { cursor: pointer; }
 
   .companion-pill-stop {
     display: flex; align-items: center; gap: 6px;

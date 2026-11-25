@@ -83,6 +83,7 @@ const visionAttachTimestamps: number[] = []
  * bigger blast radius than the word "stop" promises.
  */
 let liveRunId: string | null = null
+let askTurn = 0
 
 /**
  * Kill the live turn that's running right now. Returns true if there was one.
@@ -93,6 +94,8 @@ let liveRunId: string | null = null
  * left the user watching the thing they just told to stop.
  */
 export function abortCompanionTurn(): boolean {
+  askTurn++
+  setCompanionRunActive(false, false, () => {})
   if (!liveRunId) return false
   const killed = abortRun(liveRunId)
   liveRunId = null
@@ -194,13 +197,15 @@ async function maybeAttachScreenshot(transcript: string): Promise<MediaAttachmen
  */
 export async function runCompanionAskTurn(
   transcript: string,
-  sessionId?: string
+  sessionId?: string,
+  recipe?: string
 ): Promise<CompanionAskResult> {
   const backend = PREFS.getBackend()
   const provider = `${RESPONSE_STAGE_PROVIDER.prefix}${backend}`
   // The label the run footer and the system prompt both use, so the panel, the
   // UI, and what the model says it is all read from one string.
-  const rawModel = resolveRunModel(backend)
+  const voiceModel = backend === 'claude' ? PREFS.getCompanionModel() : undefined
+  const rawModel = voiceModel ?? resolveRunModel(backend)
   const model = runLabel(backend, rawModel)
   const answeredBy = { backend, model: rawModel, label: model }
   const startedAt = Date.now()
@@ -224,20 +229,26 @@ export async function runCompanionAskTurn(
   const visionAttachment = screenControl ? null : await maybeAttachScreenshot(transcript)
   const attachments = visionAttachment ? [visionAttachment] : []
 
+  const turn = ++askTurn
   setCompanionRunActive(true, screenControl, () => {
     abortCompanionTurn()
     setCompanionRunActive(false, false, () => {})
     sendCompanionStageEvent({ stage: 'wake', provider: 'esc', state: 'ok', detail: WAKE_EVENT.stop, ts: Date.now() })
   })
   let stepCount = 0
+  let myRunId: string | null = null
   const result = await runMighty({
     message: transcript,
     sessionId,
     source: 'voice',
+    model: voiceModel,
+    recipe,
     attachments,
     screenControl,
     onRunId: (id) => {
-      liveRunId = id
+      myRunId = id
+      if (turn === askTurn) liveRunId = id
+      else abortRun(id)
     },
     // The frame the agent is about to read. Shown as a step of its own so the
     // user can see WHAT it looked at — a stale or wrong-display capture is the
@@ -275,8 +286,8 @@ export async function runCompanionAskTurn(
 
   // The run is over one way or another — a later "stop" must not kill whatever
   // run happens to be holding this id next.
-  liveRunId = null
-  setCompanionRunActive(false, false, () => {})
+  if (liveRunId === myRunId) liveRunId = null
+  if (turn === askTurn) setCompanionRunActive(false, false, () => {})
 
   const tookMs = Date.now() - startedAt
 

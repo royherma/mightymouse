@@ -58,7 +58,7 @@ export async function startListen(): Promise<void> {
   if (PREFS.getUseNativeMic()) {
     writeContextFile(folder, 'listen-start').catch(() => {})
     try {
-      await startNativeListen(audioTmp)
+      await startNativeListen(audioTmp, s.audioDevice)
       // Reuse `active` to carry folder/audioTmp/startedAt; audioProc is null
       // because native-mic.ts manages the process internally.
       active = { folder, audioProc: null, audioTmp, startedAt: Date.now() }
@@ -84,7 +84,7 @@ export async function startListen(): Promise<void> {
   }
 
   const devices = await listAvDevices()
-  const audioIdx = resolveDeviceIndex(s.audioDevice, devices.audio)
+  const audioIdx = resolveDeviceIndex(s.audioDevice, devices.audio, CONFIG.AUDIO_DEVICE)
 
   // Audio-only: avfoundation mic -> 16kHz mono wav (whisper-friendly).
   // Leading colon in `-i :idx` selects audio with no video input.

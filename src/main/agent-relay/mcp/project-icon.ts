@@ -118,6 +118,8 @@ const setProjectIconHandler: VerbHandler<typeof setProjectIconSchema> = {
           true
         )
       }
+    } else if (project || folder) {
+      return reply(`No MightyMouse project matched ${project ?? folder}.`, true)
     }
 
     const refreshed = MIGHTY.backfillProjectImages()

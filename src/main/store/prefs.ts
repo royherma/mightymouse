@@ -1303,6 +1303,38 @@ export const PREFS = {
     }
   },
 
+  getCompanionQuiet(): boolean {
+    try {
+      return readFileSync(PATHS.COMPANION_QUIET_PREF, 'utf-8').trim() === '1'
+    } catch {
+      return false
+    }
+  },
+
+  getCompanionModel(): string {
+    try {
+      return readFileSync(PATHS.COMPANION_MODEL_PREF, 'utf-8').trim() || CONFIG.VOICE_MODELS[0].id
+    } catch {
+      return CONFIG.VOICE_MODELS[0].id
+    }
+  },
+
+  setCompanionModel(model: string): void {
+    try {
+      writeFileSync(PATHS.COMPANION_MODEL_PREF, model, 'utf-8')
+    } catch (err) {
+      console.error('Failed to write companion model:', err)
+    }
+  },
+
+  setCompanionQuiet(on: boolean): void {
+    try {
+      writeFileSync(PATHS.COMPANION_QUIET_PREF, on ? '1' : '0', 'utf-8')
+    } catch (err) {
+      console.error('Failed to write companion-quiet toggle:', err)
+    }
+  },
+
   setLiveActs(on: boolean): void {
     try {
       writeFileSync(PATHS.LIVE_ACTS_PREF, on ? '1' : '0', 'utf-8')

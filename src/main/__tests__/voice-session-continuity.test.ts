@@ -25,7 +25,7 @@ vi.mock('../mighty/run-mighty', () => ({ runMighty }))
 // here so these tests keep asserting the plain ask path; the screen-control
 // prompt has its own coverage in run-mighty-screen-control.test.ts.
 vi.mock('../store/prefs', () => ({
-  PREFS: { getBackend: () => 'claude', getLiveActs: () => false }
+  PREFS: { getBackend: () => 'claude', getLiveActs: () => false, getCompanionModel: () => 'claude-opus-5-5' }
 }))
 vi.mock('../audio/tts', () => ({
   speak: vi.fn(async () => ({ audio: null, mimeType: 'audio/mpeg', provider: 'silent-no-key' })),

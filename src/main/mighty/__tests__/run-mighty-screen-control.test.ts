@@ -77,7 +77,9 @@ vi.mock('../../platform', () => ({
   input: {
     inputBinPath: () => '/opt/mm/mm-input',
     uiBinPath: () => '/opt/mm/mm-ui',
-    shotCommand: () => '/opt/mm/mm-shot --exclude-pid 42'
+    shotCommand: () => '/opt/mm/mm-shot --exclude-pid 42',
+    clickSpaceWidth: () => 1728,
+    captureScreenWithoutUs: async () => true
   }
 }))
 vi.mock('../../backend/context-memory', () => ({ buildMemoryBlob: () => '' }))

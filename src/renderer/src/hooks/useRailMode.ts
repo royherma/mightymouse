@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useEffectEvent, useReducer } from 'react'
-import type { LinkTarget } from '../../../shared/types'
+import { signsInOutsideApp, type LinkTarget } from '../../../shared/types'
 import { CONFIG } from '../../../shared/config'
 
 export type RailMode = 'details' | 'browser'
@@ -155,7 +155,7 @@ async function refreshLinkTarget(): Promise<LinkTarget> {
 refreshLinkTarget().catch(() => undefined)
 
 export async function openWeb(url: string, flip: boolean): Promise<void> {
-  const inApp = ((await refreshLinkTarget()) === 'app') !== flip
+  const inApp = ((await refreshLinkTarget()) === 'app') !== flip && !signsInOutsideApp(url)
   if (!inApp || !openInRail(url)) void window.api.openExternal(url)
 }
 

@@ -975,6 +975,8 @@ const api = {
   settingsSetCompanionSize: (size: string) =>
     ipcRenderer.invoke(CHANNELS.settingsSetCompanionSize, size),
   settingsSetLiveActs: (on: boolean) => ipcRenderer.invoke(CHANNELS.settingsSetLiveActs, on),
+  settingsSetCompanionQuiet: (on: boolean) => ipcRenderer.invoke(CHANNELS.settingsSetCompanionQuiet, on),
+  settingsSetCompanionModel: (model: string) => ipcRenderer.invoke(CHANNELS.settingsSetCompanionModel, model),
   companionSetInteractive: (interactive: boolean) =>
     ipcRenderer.invoke(CHANNELS.companionSetInteractive, interactive),
   companionSendText: (text: string) => ipcRenderer.send(CHANNELS.companionSendText, text),

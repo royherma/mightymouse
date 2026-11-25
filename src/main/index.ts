@@ -100,7 +100,7 @@ import {
   triggerInsightsNow,
   triggerSuggestNow
 } from './insights/insights-manager'
-import { prewarmDeviceCache } from './capture/devices'
+import { cachedAudioDevices, prewarmDeviceCache } from './capture/devices'
 import { ensureParakeetServer, disposeParakeetServer } from './capture/parakeet-server'
 import { prewarmVoiceRouteWindow, voiceRouteCardOpen } from './voice-route-window'
 import { hudCardInUse, noteAppActive } from './hud-window'
@@ -205,6 +205,7 @@ function trackTrayMenu(menu: Menu): Menu {
     trayMenuOpen = true
     trayMenuShownAt = Date.now()
     console.log(`[surface] tray menu-will-show t=${Date.now()}`)
+    prewarmDeviceCache().then(refreshTrayMenu)
   })
   menu.on('menu-will-close', () => {
     trayMenuOpen = false
@@ -711,6 +712,30 @@ function buildTrayMenu(): Menu {
 
   const incognito = PREFS.getIncognito()
 
+  const chosenMic = SETTINGS.get().audioDevice
+  const pickMic = (audioDevice: string): void => {
+    SETTINGS.set({ audioDevice })
+    refreshTrayMenu()
+  }
+  const micItem: Electron.MenuItemConstructorOptions = {
+    label: 'Microphone',
+    submenu: [
+      {
+        label: "Same as your computer's mic",
+        type: 'radio',
+        checked: chosenMic === CONFIG.AUDIO_DEVICE,
+        click: () => pickMic(CONFIG.AUDIO_DEVICE)
+      },
+      { type: 'separator' },
+      ...cachedAudioDevices().map((d) => ({
+        label: d.name,
+        type: 'radio' as const,
+        checked: chosenMic === d.name,
+        click: () => pickMic(d.name)
+      }))
+    ]
+  }
+
   // Phone Remote ▸ — its own top-level section rather than a row inside
   // Advanced. It's a primary destination (pair a phone, check whether one is
   // actually connected), so it gets a plain label; live status belongs in the
@@ -992,6 +1017,7 @@ function buildTrayMenu(): Menu {
           }
         ]
       : []),
+    micItem,
     {
       label: 'Tutorial…',
       click: () => {
@@ -1586,6 +1612,7 @@ if (!gotTheLock) {
 
 function toggleVoiceMode(): void {
   const next = !PREFS.getLiveMode()
+  console.log(`[companion] voice mode ${next ? 'on' : 'off'} via hotkey or tray`)
   PREFS.setLiveMode(next)
   // Ending the conversation drops the session — the same reset
   // ipc/settings.ts's settingsSetCompanion handler does.

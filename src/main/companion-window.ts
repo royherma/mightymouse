@@ -12,6 +12,9 @@ import type { CompanionStageEvent } from '../shared/companion-debug'
 import type { LiveTurnResult } from '../shared/companion-state'
 import { HIDEOUT_FULL, isHideoutFull, type HideoutPlace } from '../shared/hideout'
 
+// Same 'screen-saver' level as the reply panel; +1 keeps the pill above it.
+const COMPANION_ABOVE_PANELS = 1
+
 // Live Voice Companion overlay (?window=companion) — Phase 0 of the design
 // A single
 // small, always-on-top window pinned to the bottom-right corner that hosts
@@ -127,7 +130,7 @@ function buildWindow(): BrowserWindow {
   // Phase 3: the character is click-draggable, so this window is NOT
   // click-through (unlike Phase 0). `focusable: false` above already keeps it
   // from stealing keyboard focus on click.
-  win.setAlwaysOnTop(true, 'screen-saver')
+  win.setAlwaysOnTop(true, 'screen-saver', COMPANION_ABOVE_PANELS)
   chrome.showOnAllWorkspaces(win)
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
@@ -208,7 +211,7 @@ export function setCompanionHideout(open: boolean): void {
   } else if (!PREFS.getLiveMode()) {
     stopCompanionWindow()
   } else {
-    win.setAlwaysOnTop(true, 'screen-saver')
+    win.setAlwaysOnTop(true, 'screen-saver', COMPANION_ABOVE_PANELS)
     chrome.showOnAllWorkspaces(win)
   }
 }

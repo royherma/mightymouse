@@ -130,6 +130,12 @@ function pushCheckoutReturn(status: CheckoutReturnStatus): void {
  * cold-start buffering in index.ts ensures windows exist by the time we route.
  */
 export async function handleDeepLink(rawUrl: string): Promise<void> {
+  if (/^https?:\/\//i.test(rawUrl)) {
+    queueAgentUrl(rawUrl, true)
+    showMightyWindow()
+    getMightyWindow()?.webContents.send(CHANNELS.sideBrowserOpenUrl)
+    return
+  }
   const route = parseDeepLink(rawUrl)
   // Onboard handoff: stash the download email so the sign-in screen pre-fills it.
   // Pure side effect on PREFS; the auth window reads it when it mounts.

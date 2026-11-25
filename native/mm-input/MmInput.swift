@@ -57,6 +57,7 @@ import CoreGraphics
 // Carbon, only for KBGetLayoutType — the one API that reports whether the
 // physical board is ANSI or ISO. No Cocoa/CG equivalent exists.
 import Carbon
+import ApplicationServices
 
 let src = CGEventSource(stateID: .hidSystemState)
 
@@ -291,6 +292,25 @@ func postUnicode(_ s: String) {
   down.post(tap: .cghidEventTap)
   usleep(8_000)
   up.post(tap: .cghidEventTap)
+}
+
+let nonTextRoles: Set<String> = [
+  "AXWebArea", "AXButton", "AXLink", "AXImage", "AXWindow", "AXApplication", "AXMenuItem",
+  "AXList", "AXRow", "AXCell", "AXTable", "AXOutline", "AXTabGroup", "AXRadioButton", "AXCheckBox"
+]
+
+/// The focused element's role when it is certainly not a text box, else nil (unknown counts as text).
+func nonTextFocusRole() -> String? {
+  var focused: CFTypeRef?
+  guard AXUIElementCopyAttributeValue(AXUIElementCreateSystemWide(), kAXFocusedUIElementAttribute as CFString, &focused) == .success,
+        let el = focused, CFGetTypeID(el) == AXUIElementGetTypeID() else { return nil }
+  let element = el as! AXUIElement
+  var role: CFTypeRef?
+  AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &role)
+  guard let name = role as? String, nonTextRoles.contains(name) else { return nil }
+  var settable: DarwinBoolean = false
+  AXUIElementIsAttributeSettable(element, kAXValueAttribute as CFString, &settable)
+  return settable.boolValue ? nil : name
 }
 
 /// Parse "cmd+shift+a" → (flags, base keycode). Exits 2 on an unknown base key.
@@ -564,8 +584,15 @@ case "smartzoom":
   smartZoom(); print("ok smartzoom")
 case "type":
   guard args.count >= 3 else { die("type needs <text>") }
+  let force = args[2] == "--force"
+  let words = force ? args.dropFirst(3) : args.dropFirst(2)
+  guard !words.isEmpty else { die("type needs <text>") }
+  // Keystrokes into a page with nothing focused fire its one-key shortcuts (X: n = new post).
+  if !force, let role = nonTextFocusRole() {
+    die("no text box has focus (focused: \(role)), nothing typed. Click inside the text box first; `type --force <text>` types anyway.")
+  }
   // Join remaining args so unquoted multi-word text still types fully.
-  let text = args[2...].joined(separator: " ")
+  let text = words.joined(separator: " ")
   for ch in text { postUnicode(String(ch)); usleep(6_000) }
   print("ok type")
 case "key":

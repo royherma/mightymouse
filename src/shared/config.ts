@@ -88,7 +88,7 @@ export const CONFIG = {
   RELEASE_PAGE_URL: `https://github.com/${RELEASES_REPO}/releases/latest`,
   RELEASE_LATEST_API: `https://api.github.com/repos/${RELEASES_REPO}/releases/latest`,
   // Keep in sync with package.json "version". Shown in Settings footer.
-  APP_VERSION: '0.59.0',
+  APP_VERSION: '0.59.1',
 
   // mightymouse:// in prod/dev; mightymouse-staging:// in a staging packaged build
   // (registered in main/index.ts, matched in deeplink.ts — read PROTOCOL_SCHEME
@@ -153,6 +153,12 @@ export const CONFIG = {
   CLAUDE_MODEL_FALLBACKS: ['claude-opus-5-5', 'claude-sonnet-5-5'],
   CLAUDE_FAST_MODEL: 'sonnet',
   CLAUDE_FAST_MODEL_FALLBACKS: ['claude-sonnet-5-5'],
+  // First entry is the default when the user never picked one.
+  VOICE_MODELS: [
+    { id: 'claude-opus-5-5', label: 'Opus 5.5' },
+    { id: 'claude-sonnet-5-5', label: 'Sonnet 5.5' },
+    { id: 'claude-haiku-5-5', label: 'Haiku 5.5' }
+  ],
   CODEX_PATH: '',
   CODEX_MODEL: '',
   CODEX_MODEL_FALLBACK: 'codex-default',
@@ -1112,7 +1118,8 @@ export const CONFIG = {
   // AVFoundation devices. Stored by NAME (survives index reshuffling when you
   // plug/unplug an iPhone, etc); resolved to a live index at record time.
   VIDEO_DEVICE: 'Capture screen 0',
-  AUDIO_DEVICE: 'MacBook Pro Microphone',
+  AUDIO_DEVICE: 'default',
+  LEGACY_AUDIO_DEVICE: 'MacBook Pro Microphone',
 
   // Tap-vs-hold threshold for the screenshot/record capture hotkey (ms). A quick
   // tap takes a screenshot; holding past this starts a screen recording.
@@ -1440,8 +1447,8 @@ export const CONFIG = {
     TALKING_MS_PER_CHAR: 45,
     TALKING_HOLD_MAX_MS: 12_000,
     WAKE_ARM_MS: 8_000,
-    // File in public/wake/; null sends every sentence to Parakeet.
-    WAKE_MODEL: 'hey_mighty' as string | null,
+    // File in public/wake/; null sends every sentence to Parakeet. hey_mighty scores a real voice 0.001 - see gotchas.
+    WAKE_MODEL: null as string | null,
     FOLLOW_UP_MS: 8_000,
     ACK_AFTER_MS: 1_200,
     DRAFT_EVERY_MS: 600,
@@ -1968,17 +1975,25 @@ SCREEN CONTROL — you can drive the real mouse and keyboard with the \`mm-input
   {{BIN}} tripleclick <x> <y>
   {{BIN}} drag <x1> <y1> <x2> <y2>
   {{BIN}} scroll <up|down|left|right> <amount>   (amount ~= mouse-wheel notches; 3-5 is one comfortable nudge)
-  {{BIN}} type <text>                   (types literal text into the focused field)
+  {{BIN}} type <text>                   (types into the focused text box; errors and types nothing if no text box has focus)
   {{BIN}} key <combo>                   (e.g. return, tab, escape, cmd+a, cmd+c, cmd+v)
 SCREEN ANNOTATION — draw the user's attention to a spot on their REAL screen:
   {{UIBIN}} highlight <x> <y>           (rings that point on the live screen; moves no cursor, clicks nothing)
 - Use this whenever the user wants a thing on screen POINTED OUT rather than operated: ringing it, circling it, marking it, or showing them where it is. It is the visual counterpart to click — same coordinates, no interaction.
 - The user is looking at their own screen, not at a file. Never satisfy a "show me where X is" request by drawing on a screenshot with an image library and opening the result — that produces a picture of the answer instead of the answer.
+- That list is the whole tool: never run it bare to read its usage.
 - Coordinates are pixels MEASURED ON THE ATTACHED SCREENSHOT, top-left origin. Read the screenshot first, locate the target, then act on its center.
 - This is a LOOP. After each action that changes the screen (scroll, click, navigate), TAKE A FRESH SCREENSHOT with \`{{SHOTBIN}} /tmp/mm-shot.png\` and READ it before the next action. Never act twice in a row off a stale image.
 - To switch apps/tabs use \`key cmd+tab\` (apps) or click the tab; the real focus follows.
 - Be deliberate and minimal: do exactly what was asked, verify via screenshot, then stop. Do not click anything destructive (delete, send, pay) unless the instruction explicitly says to.
 - The current screenshot is at: {{SHOT}}`,
+
+  SYSTEM_PROMPT_COMPOSE: `
+THIS TURN IS A WRITING JOB. Fastest path, in this order:
+1. Read the screenshot once, then write the text in the user's voice.
+2. Put it in the box with ONE Bash call: click the text box, sleep 0.3, then type the whole text. If type says no text box has focus, click the box once more and retry once.
+3. Take one fresh screenshot and read it to confirm the text landed.
+4. Reply with one short spoken sentence, under 12 words. Never read the text back. Never press Post or Send.`,
 
   BILLING: {
     EDGE_FUNCTION_URL:

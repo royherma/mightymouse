@@ -232,7 +232,6 @@ export default function TouchpadLayout(props: {
   pressKey: (key: 'tab' | 'return' | 'escape') => void
   openKeyboard: () => void
   keyboardInputRef: RefObject<HTMLInputElement | null>
-  keyboardText: string
   onKeyboardTextChange: (next: string) => void
   submitKeyboardText: () => void
   /** Return key on the native keyboard -- sends a real Return to the Mac. */
@@ -558,7 +557,6 @@ export default function TouchpadLayout(props: {
     pressKey,
     openKeyboard,
     keyboardInputRef,
-    keyboardText,
     onKeyboardTextChange,
     submitKeyboardText,
     onKeyboardEnter,
@@ -2391,7 +2389,6 @@ export default function TouchpadLayout(props: {
         // `isPointerlessHost` false and put this stop back.
         tabIndex={-1}
         disabled={virtualKeyboardOpen}
-        value={keyboardText}
         onChange={(e) => onKeyboardTextChange(e.target.value)}
         onKeyDown={(e) => {
           // preventDefault so iOS does not also insert a newline into our

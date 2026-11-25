@@ -48,6 +48,9 @@ function linkPaths(node: MdNode, cwd?: string): void {
   if (!node.children || node.type === 'link' || node.type === 'linkReference') return
   node.children = node.children.flatMap((child): MdNode[] => {
     if (child.type === 'inlineCode' && child.value) {
+      if (/^https?:\/\/\S+$/i.test(child.value)) {
+        return [{ type: 'link', url: child.value, children: [child] }]
+      }
       const [only] = findPaths(child.value, cwd)
       return only && only.start === 0 && only.end === child.value.length
         ? [{ type: 'link', url: only.path, children: [child] }]

@@ -21,7 +21,7 @@ const h = vi.hoisted(() => {
 })
 
 vi.mock('electron', () => ({
-  app: { isPackaged: true, getPath: () => '/tmp', getName: () => 'MightyMouse' },
+  app: { isPackaged: true, isInApplicationsFolder: () => true, getPath: () => '/tmp', getName: () => 'MightyMouse' },
   BrowserWindow: { getAllWindows: () => [] },
   shell: {}
 }))

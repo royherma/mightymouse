@@ -145,7 +145,7 @@ function send(cmd: string, token: string, timeoutMs: number): Promise<void> {
  * Resolves once the engine is running (helper prints "READY").
  * Rejects if the helper is missing or fails to start — caller falls back to ffmpeg.
  */
-export async function startNativeListen(wavPath: string): Promise<void> {
+export async function startNativeListen(wavPath: string, micName: string): Promise<void> {
   if (listening) throw new Error('native-mic: already listening')
   if (!ensureNativeMicDaemon()) {
     throw new Error(
@@ -153,6 +153,9 @@ export async function startNativeListen(wavPath: string): Promise<void> {
     )
   }
   const t0 = Date.now()
+  await send(`device ${micName}`, 'DEVICE', READY_TIMEOUT_MS).catch((err) =>
+    console.error('[native-mic] device pick failed, using current mic:', err)
+  )
   await send(`start ${wavPath}`, 'READY', READY_TIMEOUT_MS)
   listening = true
   console.log(`[native-mic] READY in ${Date.now() - t0} ms`)

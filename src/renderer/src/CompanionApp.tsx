@@ -152,6 +152,13 @@ export default function CompanionApp(): JSX.Element {
   // sentence out loud as you type it can't fire a second turn from room noise.
   const [typing, setTyping] = useState(false)
   const [micPaused, setMicPaused] = useState(false)
+  const [userPaused, setUserPaused] = useState(false)
+  const [quiet, setQuiet] = useState(false)
+  const [called, setCalled] = useState(false)
+  const [dismissed, setDismissed] = useState(false)
+  useEffect(() => {
+    if (called) setDismissed(false)
+  }, [called])
   useEffect(() => window.api.onCompanionMicPaused(setMicPaused), [])
   const [caption, setCaption] = useState<Caption | null>(null)
   const { turns, steps, recent: chatRecent, addStep, clearSteps, finishTurn } = useVoiceTurns()
@@ -176,9 +183,19 @@ export default function CompanionApp(): JSX.Element {
   hideoutOpenRef.current = !!hideout?.open
   const wakeReadyRef = useRef(false)
   const wakeHeardAtRef = useRef(0)
+  const [hearing, setHearing] = useState(false)
+  const hearingTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hearYou = useCallback((on: boolean) => {
+    if (hearingTimer.current) clearTimeout(hearingTimer.current)
+    setHearing(on)
+    if (on) hearingTimer.current = setTimeout(() => setHearing(false), CONFIG.COMPANION.WAKE_ARM_MS)
+  }, [])
+  const wakeCutRef = useRef<() => void>(() => {})
   const handleWakeHeard = useCallback(() => {
     wakeHeardAtRef.current = Date.now()
+    setCalled(true)
     if (stateRef.current === 'idle') setState('listening')
+    else wakeCutRef.current()
   }, [])
   const mayTranscribe = useCallback(
     () =>
@@ -206,6 +223,7 @@ export default function CompanionApp(): JSX.Element {
   }, [])
   useEffect(() => {
     if (state === 'listening' || state === 'thinking') setOutcome(null)
+    if (state === 'idle') setCalled(false)
   }, [state])
 
   // "Live mode" is the SAME PREFS toggle Phase 0 used for window visibility
@@ -217,6 +235,7 @@ export default function CompanionApp(): JSX.Element {
       .settingsGetPrefs()
       .then((prefs) => {
         setLiveEnabled(prefs.liveCompanion)
+        setQuiet(prefs.companionQuiet)
         setRenderer(toCompanionRenderer(prefs.companionRenderer))
         const saved = toCompanionSize(prefs.companionSize)
         const opening = saved === COMPANION_SIZE_DEBUG ? COMPANION_SIZE_MINI : saved
@@ -246,8 +265,15 @@ export default function CompanionApp(): JSX.Element {
   // launch, matching the Settings toggle. setCompanionWindow(false) tears down
   // this window as a side effect, so no separate close call is needed.
   const handleClose = useCallback(() => {
+    if (quiet) {
+      setDismissed(true)
+      setCalled(false)
+      setOutcome(null)
+      setCaption(null)
+      return
+    }
     window.api.settingsSetCompanion(false).catch(() => {})
-  }, [])
+  }, [quiet])
 
   // Monotonic id for the turn currently in flight. liveTurnSubmit is
   // fire-and-forget over IPC with no correlation id on the way back, so when a
@@ -305,6 +331,7 @@ export default function CompanionApp(): JSX.Element {
         .then((draft) => {
           if (seq !== draftSeqRef.current || !draft.text) return
           if (replyPlayingRef.current) bargeInRef.current()
+          if (draft.addressed) setCalled(true)
           showCaption({ heard: draft.text, forMe: draft.addressed })
         })
         .catch(() => {})
@@ -335,7 +362,7 @@ export default function CompanionApp(): JSX.Element {
     window.api.companionSendText(text)
   }, [])
 
-  const micWanted = (liveEnabled || !!hideout?.open) && !micPaused
+  const micWanted = (liveEnabled || !!hideout?.open) && !micPaused && !userPaused
   const {
     speaking,
     error: vadError,
@@ -368,6 +395,11 @@ export default function CompanionApp(): JSX.Element {
       return
     }
     setState('idle')
+    wakeArmedRef.current = true
+    if (followUpTimer.current) clearTimeout(followUpTimer.current)
+    followUpTimer.current = setTimeout(() => {
+      wakeArmedRef.current = false
+    }, CONFIG.COMPANION.FOLLOW_UP_MS)
   })
 
   const speakingRef = useRef(false)
@@ -457,8 +489,26 @@ export default function CompanionApp(): JSX.Element {
     }
   }, [hideout?.open, ttsPosition, cutCurrentTurn, stopReply])
 
+  useEffect(() => {
+    wakeCutRef.current = () => {
+      if (stateRef.current === 'talking') {
+        cutCurrentTurn()
+        setState('listening')
+      } else if (stateRef.current === 'thinking') {
+        if (replyPlayingRef.current) stopReply()
+        hearYou(true)
+      }
+    }
+  }, [cutCurrentTurn, stopReply, hearYou])
+
   const handleWake = useCallback(
     (kind: string) => {
+      hearYou(kind === WAKE_EVENT.armed && stateRef.current === 'thinking')
+      if (kind !== WAKE_EVENT.stop) setCalled(true)
+      if (kind === WAKE_EVENT.armed && stateRef.current === 'thinking') {
+        wakeArmedRef.current = true
+        return
+      }
       cutCurrentTurn()
       if (settleTimer.current) clearTimeout(settleTimer.current)
       wakeArmedRef.current = kind === WAKE_EVENT.armed
@@ -479,7 +529,7 @@ export default function CompanionApp(): JSX.Element {
         setState('idle')
       }
     },
-    [cutCurrentTurn]
+    [cutCurrentTurn, hearYou]
   )
   const handleStop = useCallback(() => {
     window.api.companionAbortTurn()
@@ -521,6 +571,7 @@ export default function CompanionApp(): JSX.Element {
         return
       }
       if (result.ignored) {
+        hearYou(false)
         if (stateRef.current === 'listening' && !wakeArmedRef.current) setState('idle')
         const words = result.transcript.trim().split(/\s+/).filter(Boolean).length
         showCaption(words > 0 && words <= CAPTION_IGNORED_MAX_WORDS ? { heard: result.transcript, forMe: false } : null)
@@ -589,7 +640,7 @@ export default function CompanionApp(): JSX.Element {
       }, remaining)
     })
     return unsubscribe
-  }, [playClip, showCaption, finishTurn, clearSteps])
+  }, [playClip, showCaption, finishTurn, clearSteps, hearYou])
 
   useEffect(() => {
     return () => {
@@ -663,7 +714,8 @@ export default function CompanionApp(): JSX.Element {
   if (size === COMPANION_SIZE_MINI || size === COMPANION_SIZE_DEBUG) {
     const working = state === 'thinking' || state === 'talking'
     const debugOpen = size === COMPANION_SIZE_DEBUG
-    const paused = micPaused && !working
+    const paused = (micPaused || userPaused) && !working
+    const tucked = quiet && !working && (dismissed || (!called && !outcome && !caption?.forMe && !chatRecent && !userPaused))
     const liveTurn: VoiceTurn | null =
       caption || (state === 'thinking' && steps.length > 0)
         ? {
@@ -676,7 +728,7 @@ export default function CompanionApp(): JSX.Element {
             live: true
           }
         : null
-    const barsLevel = listening
+    const barsLevel = listening || (hearing && state === 'thinking')
       ? Math.sqrt(micLevel)
       : ttsPlaying
         ? Math.sqrt(mouthOpen)
@@ -690,28 +742,35 @@ export default function CompanionApp(): JSX.Element {
         <style>{companionCss()}</style>
         <div className="companion-puck-host">
         <div className="companion-puck-col">
-        {!debugOpen && (
+        {!debugOpen && !tucked && (
           <VoiceChat
             turns={liveTurn ? [...turns, liveTurn] : turns}
             hidden={!(chatHover || chatRecent || working || caption)}
             onOpenChat={chatSessionId ? () => void window.api.mighty.open(false, chatSessionId) : undefined}
           />
         )}
-        <CompanionPill
+        {!tucked && <CompanionPill
           state={state}
           outcome={outcome}
           step={state === 'thinking' ? steps[steps.length - 1] : undefined}
           paused={paused}
+          hearing={hearing && state === 'thinking'}
+          userPaused={userPaused && !micPaused}
+          onTogglePause={() => {
+            setUserPaused((was) => !was)
+            if (stateRef.current === 'listening') setState('idle')
+          }}
           micLevel={micLevel}
           barsLevel={barsLevel}
           workingSince={state === 'thinking' ? thinkingStartedAtRef.current : null}
           onStop={handleStop}
           onClose={handleClose}
+          closeHides={quiet}
           onContextMenu={(e) => {
             e.preventDefault()
             handleSizeChange(debugOpen ? COMPANION_SIZE_MINI : COMPANION_SIZE_DEBUG)
           }}
-        />
+        />}
         </div>
 
         {debugOpen && (

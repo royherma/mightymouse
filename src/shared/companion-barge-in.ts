@@ -41,6 +41,32 @@ export function isStopUtterance(transcript: string): boolean {
   return cleaned !== '' && STOP_WORDS.has(cleaned)
 }
 
+const CORRECTION_LEADS = new Set(['no', 'nope', 'wait', 'actually', 'stop', 'instead', 'cancel', 'dont', 'not'])
+
+// "No, the other tab" said while a turn runs: aimed at it even without the name.
+export function isCorrection(transcript: string): boolean {
+  const words = transcript.toLowerCase().replace(/[^a-z\s]/g, '').trim().split(/\s+/).filter(Boolean)
+  if (words.length < 2) return false
+  return CORRECTION_LEADS.has(words[0]) || (words[0] === 'hold' && words[1] === 'on')
+}
+
+const ASK_LEADS = /^(can|could|would|will) (you|u)\b|^(please|pls)\b|^(write|draft|compose|fill|reply|respond|generate|come up|help|make|create|tweet|post)\b/
+const ASK_ANYWHERE = /\bin my (vibe|voice|style|tone|words)\b|\blike i would\b|\bsomething i would\b/
+
+// "Can you fill in the post in my vibe" is a job for the agent, never words to type as-is.
+export function isAskNotDictation(said: string): boolean {
+  const s = said.toLowerCase().replace(/[^a-z'\s]/g, '').trim().replace(/\s+/g, ' ')
+  return ASK_LEADS.test(s) || ASK_ANYWHERE.test(s)
+}
+
+const COMPOSE_VERB = /\b(write|draft|compose|fill in|fill out|reply|respond|answer|come up with)\b/
+const COMPOSE_THING = /\b(post|tweet|thread|reply|comment|message|email|mail|caption|response|bio|description|note|text|dm)\b/
+
+export function isComposeAsk(said: string): boolean {
+  const s = said.toLowerCase().replace(/[^a-z'\s]/g, '').trim().replace(/\s+/g, ' ')
+  return COMPOSE_VERB.test(s) && (COMPOSE_THING.test(s) || ASK_ANYWHERE.test(s))
+}
+
 const WAKE_GREETINGS = new Set(['hey', 'hi', 'hello', 'ok', 'okay', 'yo'])
 // Filler a transcriber puts in front of the name; only counts when a command follows.
 const WAKE_FILLERS = new Set(['a', 'ah', 'uh', 'oh', 'hay', 'eh'])

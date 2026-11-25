@@ -73,8 +73,12 @@ function cacheIfHealthy(d: AvDevices): void {
 }
 
 /** Pre-warm the device cache at app startup so the first recording is instant. */
-export function prewarmDeviceCache(): void {
-  fetchAvDevices().then(cacheIfHealthy)
+export function prewarmDeviceCache(): Promise<void> {
+  return fetchAvDevices().then(cacheIfHealthy)
+}
+
+export function cachedAudioDevices(): AvDevice[] {
+  return deviceCache?.audio ?? []
 }
 
 export function parseDevices(stderr: string): AvDevices {
@@ -104,11 +108,11 @@ export function parseDevices(stderr: string): AvDevices {
  * already a bare index, return it. If a name match is found, return its current
  * index. Otherwise fall back to the stored value unchanged.
  */
-export function resolveDeviceIndex(stored: string, devices: AvDevice[]): string {
+export function resolveDeviceIndex(stored: string, devices: AvDevice[], missing?: string): string {
   if (/^\d+$/.test(stored)) {
     // Stored as index; keep it but prefer a name re-match if the index moved.
     return stored
   }
   const hit = devices.find((d) => d.name === stored)
-  return hit ? hit.index : stored
+  return hit ? hit.index : (missing ?? stored)
 }

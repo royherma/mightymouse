@@ -356,6 +356,10 @@ export function AdvancedPage({ s }: { s: SettingsCtx }): JSX.Element {
                     value={audioDevice}
                     onChange={setAudioDevice}
                     options={state.available.audio}
+                    followSystem={{
+                      value: CONFIG.AUDIO_DEVICE,
+                      label: "Same as your computer's mic"
+                    }}
                   />
                 </label>
               </div>

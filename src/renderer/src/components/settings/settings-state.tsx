@@ -167,6 +167,8 @@ export function useSettingsState({
   // answering out loud. Off is the safe half of voice mode, and until now it had
   // no control anywhere in the product.
   const [liveActs, setLiveActs] = useState(true)
+  const [companionQuiet, setCompanionQuiet] = useState(false)
+  const [companionModel, setCompanionModel] = useState('')
   // Which companion the voice loop draws. Only two are user-facing: the mouse
   // character, and Stage. (warp2d/placeholder stay dev-only picks in the debug
   // panel — see companion-renderers.ts.)
@@ -385,6 +387,8 @@ export function useSettingsState({
       setSelectionBar(p.selectionBar)
       setLiveCompanion(p.liveCompanion)
       setLiveActs(p.liveActs)
+      setCompanionQuiet(p.companionQuiet)
+      setCompanionModel(p.companionModel)
       setDockIcon(p.dockIcon)
       setSuggestions(p.suggestions)
       setClickEnabled(p.clickEnabled)
@@ -824,6 +828,18 @@ export function useSettingsState({
     setLiveCompanion(next) // optimistic
     const confirmed = await window.api.settingsSetCompanion(next)
     setLiveCompanion(confirmed)
+  }
+
+  const toggleCompanionQuiet = async (next: boolean): Promise<void> => {
+    setCompanionQuiet(next) // optimistic
+    const confirmed = await window.api.settingsSetCompanionQuiet(next)
+    setCompanionQuiet(confirmed)
+    if (confirmed && !liveCompanion) await toggleLiveCompanion(true)
+  }
+
+  const chooseCompanionModel = async (next: string): Promise<void> => {
+    setCompanionModel(next) // optimistic
+    setCompanionModel(await window.api.settingsSetCompanionModel(next))
   }
 
   const toggleLiveActs = async (next: boolean): Promise<void> => {
@@ -1485,6 +1501,8 @@ export function useSettingsState({
     setLiveCompanion,
     liveActs,
     setLiveActs,
+    companionQuiet,
+    companionModel,
     dockIcon,
     setDockIcon,
     suggestions,
@@ -1640,6 +1658,8 @@ export function useSettingsState({
     toggleSelectionBar,
     toggleLiveCompanion,
     toggleLiveActs,
+    toggleCompanionQuiet,
+    chooseCompanionModel,
     toggleDockIcon,
     toggleFnListen,
     toggleClickEnabled,

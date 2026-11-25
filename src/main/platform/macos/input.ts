@@ -14,6 +14,7 @@
 
 import { execFile, spawn, type ChildProcessWithoutNullStreams } from 'child_process'
 import { existsSync } from 'fs'
+import { screen } from 'electron'
 import { CONFIG } from '../../../shared/config'
 import { devLog } from '../../../shared/env'
 import { resolveHelper } from './helpers'
@@ -59,7 +60,12 @@ export function inputBinPath(): string {
 export function shotCommand(): string {
   const bin = resolveHelper(SHOT_BIN)
   if (!existsSync(bin)) return `${CONFIG.SCREENCAPTURE_PATH} -x`
-  return `${bin} --exclude-pid ${process.pid}`
+  return `${bin} --exclude-pid ${process.pid} --max-width ${clickSpaceWidth()}`
+}
+
+// mm-input clicks in points; a Retina capture is 2x that, so shots are taken at point width to make pixel = click spot.
+export function clickSpaceWidth(): number {
+  return screen.getPrimaryDisplay().size.width
 }
 
 export function captureScreenWithoutUs(outPath: string, maxWidth: number): Promise<boolean> {

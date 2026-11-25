@@ -169,6 +169,8 @@ export const PATHS = {
   // Absent = ON: screen control is the point of Live mode, so it is opt-OUT, unlike
   // every toggle around it. 0 = answers only.
   LIVE_ACTS_PREF: join(ROOT_DIR, 'live-acts-enabled.txt'),
+  COMPANION_QUIET_PREF: join(ROOT_DIR, 'companion-quiet.txt'),
+  COMPANION_MODEL_PREF: join(ROOT_DIR, 'companion-model.txt'),
   // "Read answers aloud" in Mighty chat — voice as a MODE on chat, independent of
   // whether the companion overlay is up (see prefs.getSpeakReplies).
   SPEAK_REPLIES_PREF: join(ROOT_DIR, 'speak-replies-enabled.txt'),

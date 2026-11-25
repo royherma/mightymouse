@@ -4,7 +4,7 @@
  *
  * Inert under `npm run dev`: every check short-circuits on app.isPackaged.
  */
-import { app, BrowserWindow, shell } from 'electron'
+import { app, BrowserWindow, dialog, shell } from 'electron'
 import { autoUpdater, type UpdateInfo, type ProgressInfo } from 'electron-updater'
 import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
@@ -190,6 +190,26 @@ function trackVersionChange(): void {
 const OFFLINE_NET_ERROR =
   /net::ERR_(INTERNET_DISCONNECTED|NETWORK_CHANGED|NETWORK_IO_SUSPENDED|NAME_NOT_RESOLVED|TIMED_OUT|ADDRESS_UNREACHABLE|HTTP2_PROTOCOL_ERROR|CONNECTION_(RESET|CLOSED|TIMED_OUT|REFUSED|ABORTED))/
 const SERVER_HICCUP = /HttpError: (5\d\d|618)|^(5\d\d|618)\b/
+const READ_ONLY_VOLUME = /read-only volume/
+
+async function offerMoveToApplications(): Promise<void> {
+  if (process.platform !== 'darwin' || !app.isPackaged || CONFIG.IS_STAGING || app.isInApplicationsFolder()) return
+  const L = CONFIG.UI_LABELS
+  const { response } = await dialog.showMessageBox({
+    type: 'question',
+    message: L.MOVE_TO_APPLICATIONS,
+    detail: L.MOVE_TO_APPLICATIONS_DETAIL,
+    buttons: [L.MOVE_TO_APPLICATIONS_CONFIRM, L.MOVE_TO_APPLICATIONS_CANCEL],
+    defaultId: 0,
+    cancelId: 1
+  })
+  if (response !== 0) return
+  try {
+    app.moveToApplicationsFolder()
+  } catch (err) {
+    devLog.error('[updater] move to Applications failed:', err)
+  }
+}
 
 export function isOfflineOrServerHiccup(message: string): boolean {
   return OFFLINE_NET_ERROR.test(message) || SERVER_HICCUP.test(message)
@@ -228,7 +248,7 @@ export function setupAutoUpdater(): void {
   autoUpdater.on('error', (err: Error) => {
     clearStallWatchdog()
     devLog.error('[updater] error:', err)
-    if (!isOfflineOrServerHiccup(err.message)) trackError({
+    if (!isOfflineOrServerHiccup(err.message) && !READ_ONLY_VOLUME.test(err.message)) trackError({
       kind: 'update_error',
       message: err.message,
       stack: err.stack,
@@ -240,7 +260,7 @@ export function setupAutoUpdater(): void {
   void clearStalePendingCache()
 
   // Initial check + every 4 hours.
-  void checkForUpdates()
+  void offerMoveToApplications().then(() => checkForUpdates())
   setInterval(() => void checkForUpdates(), 4 * 60 * 60 * 1000)
 }
 

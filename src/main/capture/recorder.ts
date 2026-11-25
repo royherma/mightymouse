@@ -62,7 +62,7 @@ export async function startSession(): Promise<void> {
 
   // Resolve device indexes — cache is hot after prewarm so this is synchronous-fast.
   const devices = await listAvDevices()
-  const audioIdx = resolveDeviceIndex(s.audioDevice, devices.audio)
+  const audioIdx = resolveDeviceIndex(s.audioDevice, devices.audio, CONFIG.AUDIO_DEVICE)
   const videoIdx = resolveDeviceIndex(s.videoDevice, devices.video)
 
   // Audio: avfoundation mic -> 16kHz mono wav (whisper-friendly)

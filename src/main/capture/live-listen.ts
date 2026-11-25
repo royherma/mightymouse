@@ -6,7 +6,7 @@ import {
   type CompanionAskResult
 } from '../companion-orchestrator'
 import { recordTalkTurn, runTalk } from '../talk/talk-turn'
-import { isStopUtterance, matchHeardWake, matchWakePhrase, splitCommands, stripEcho } from '../../shared/companion-barge-in'
+import { isAskNotDictation, isComposeAsk, isCorrection, isStopUtterance, matchHeardWake, matchWakePhrase, splitCommands, stripEcho } from '../../shared/companion-barge-in'
 import { CONFIG } from '../../shared/config'
 import { WAKE_EVENT, type WakeEventKind } from '../../shared/companion-debug'
 import { transcribeSegment, transcribeDraftSegment } from './segmented-listen'
@@ -176,12 +176,12 @@ async function handleLiveTurn(
   // Anything longer falls through deliberately: "no, the other tab" both stops
   // the old run and becomes the next instruction.
   if (isStopUtterance(heard)) {
-    abortCompanionTurn()
+    stopLiveTurn()
     sendWakeEvent(WAKE_EVENT.stop)
     return { ok: false, transcript: heard, reply: '', error: 'stopped' }
   }
 
-  const armed = Date.now() < wakeArmedUntil
+  const armed = Date.now() < wakeArmedUntil || (workingGen !== 0 && isCorrection(heard))
   const inHideout = !wake.addressed && !armed && isHideoutOpen()
   if (inHideout) {
     sendWakeEvent(WAKE_EVENT.request)
@@ -197,6 +197,11 @@ async function handleLiveTurn(
   }
   wakeArmedUntil = 0
   const request = wake.addressed ? wake.request : heard.trim()
+  if (isStopUtterance(request)) {
+    stopLiveTurn()
+    sendWakeEvent(WAKE_EVENT.stop)
+    return { ok: false, transcript: heard, reply: '', error: 'stopped' }
+  }
   if (!request) {
     wakeArmedUntil = Date.now() + CONFIG.COMPANION.WAKE_ARM_MS
     sendWakeEvent(WAKE_EVENT.armed)
@@ -205,8 +210,9 @@ async function handleLiveTurn(
 
   abortCompanionTurn()
   sendWakeEvent(WAKE_EVENT.request)
+  replyMs = 0
   const result = await runLiveTurnFromText(request)
-  if (result.ok) wakeArmedUntil = Date.now() + CONFIG.COMPANION.FOLLOW_UP_MS
+  if (result.ok) wakeArmedUntil = Date.now() + replyMs + CONFIG.COMPANION.FOLLOW_UP_MS
   return result
 }
 
@@ -229,6 +235,20 @@ export async function runLiveDraft(wavBytes: Uint8Array, echoTail = ''): Promise
 
 let lastChimeAt = 0
 
+let turnGen = 0
+let workingGen = 0
+let replyMs = 0
+
+export function stopLiveTurn(): void {
+  turnGen++
+  workingGen = 0
+  abortCompanionTurn()
+}
+
+function stoppedTurn(said: string, sessionId?: string): LiveTurnResult {
+  return { ok: false, transcript: said, reply: '', error: 'stopped', ...(sessionId ? { sessionId } : {}) }
+}
+
 let wakeArmedUntil = 0
 
 function sendWakeEvent(kind: WakeEventKind): void {
@@ -249,10 +269,20 @@ export async function runLiveTurnFromText(text: string): Promise<LiveTurnResult>
   // answer it. The abort itself is the renderer's (it fires on submit, before
   // this); without this the stopped run would be replaced by a fresh one.
   if (isStopUtterance(said)) {
-    abortCompanionTurn()
+    stopLiveTurn()
     return { ok: false, transcript: said, reply: '', error: 'stopped' }
   }
 
+  const gen = ++turnGen
+  workingGen = gen
+  try {
+    return await answerOrHideout(said, gen)
+  } finally {
+    if (workingGen === gen) workingGen = 0
+  }
+}
+
+async function answerOrHideout(said: string, gen: number): Promise<LiveTurnResult> {
   const hideout = await runHideoutTurn(said, true)
   if (hideout) {
     turnRoute = `hideout×${hideout.commands}`
@@ -262,17 +292,18 @@ export async function runLiveTurnFromText(text: string): Promise<LiveTurnResult>
 
   const ack = startAck(said)
   try {
-    return await answerTurn(said, ack)
+    return await answerTurn(said, ack, gen)
   } finally {
     ack.done()
   }
 }
 
-async function answerTurn(said: string, ack: Ack): Promise<LiveTurnResult> {
+async function answerTurn(said: string, ack: Ack, gen: number): Promise<LiveTurnResult> {
   const clauses = splitCommands(said)
   const done: FastDone[] = []
   const quickAt = Date.now()
   for (const clause of clauses) {
+    if (gen !== turnGen) return stoppedTurn(said)
     const d = await runFastAction(clause, ack)
     if (!d) break
     done.push(d)
@@ -280,7 +311,8 @@ async function answerTurn(said: string, ack: Ack): Promise<LiveTurnResult> {
   turnFast = done.length
   turnHops.push({ ...HIDEOUT_HOP.quick, ms: Date.now() - quickAt })
   const lines = done.map((d) => d.line)
-  if (done.length === clauses.length) {
+  const allShort = clauses.every((c) => c.split(/\s+/).length <= FAST_CLAUSE_MAX_WORDS)
+  if (done.length === clauses.length && allShort) {
     turnRoute = `fast×${done.length}`
     recordTalkTurn('voice', said, lines.join(' · '), { steps: turnSteps, durationMs: Date.now() - quickAt })
     if (done.some((d) => d.answer)) return voicedReply(said, lines.join(' '), undefined, SPOKEN_SENTENCES)
@@ -288,6 +320,7 @@ async function answerTurn(said: string, ack: Ack): Promise<LiveTurnResult> {
     return actionDone(said, lines.join(' · '))
   }
 
+  if (gen !== turnGen) return stoppedTurn(said)
   turnRoute = done.length ? `fast×${done.length}+agent` : 'agent'
   const ask = done.length ? `${said} (already done: ${lines.join('; ')})` : said
   ack.now('check')
@@ -297,7 +330,9 @@ async function answerTurn(said: string, ack: Ack): Promise<LiveTurnResult> {
     waitMs: 0,
     events: {
       runOnComputer: async (text, sessionId) => {
-        const result = await runCompanionAskTurn(text, liveSessionId ?? sessionId)
+        if (gen !== turnGen) return { answer: '', sessionId, error: 'stopped' }
+        const recipe = isComposeAsk(said) ? CONFIG.SYSTEM_PROMPT_COMPOSE : undefined
+        const result = await runCompanionAskTurn(text, liveSessionId ?? sessionId, recipe)
         asked.result = result
         return { answer: result.reply, sessionId: result.sessionId, error: result.error }
       }
@@ -316,6 +351,7 @@ async function answerTurn(said: string, ack: Ack): Promise<LiveTurnResult> {
       sessionId: outcome.sessionId || undefined
     }
   }
+  if (gen !== turnGen) return stoppedTurn(said, askResult.sessionId)
   turnUsage = askResult.usage
   const by = askResult.answeredBy
   turnHops.push({
@@ -358,6 +394,7 @@ async function voicedReply(said: string, reply: string, sessionId?: string, sent
   const voice = voiceHop(spoken.provider, spoken.tookMs)
   if (voice) turnHops.push(voice)
   if (spoken.words) setHideoutWords(spoken.words)
+  if (spoken.audio) replyMs = (spoken.words?.at(-1)?.e ?? 0) * 1000 || spokenText.length * CONFIG.COMPANION.TALKING_MS_PER_CHAR
   return {
     ok: true,
     transcript: said,
@@ -379,7 +416,9 @@ async function runFastAction(said: string, ack: Ack): Promise<FastDone | null> {
   const runId = randomUUID()
   const card = await proposeActions(runId, 'voice', said)
   const top = card?.proposals[0]
-  if (!top?.preselected) {
+  const typesItLiterally = top?.actionId === TYPE_ACTION_ID && isAskNotDictation(said)
+  if (typesItLiterally) console.log(`[voice-turn] not typing a request literally said=${JSON.stringify(said)}`)
+  if (!top?.preselected || typesItLiterally) {
     if (card) expireProposals(runId)
     return null
   }
@@ -389,6 +428,10 @@ async function runFastAction(said: string, ack: Ack): Promise<FastDone | null> {
   const result = await runProposal(runId, top.proposalId)
   return result.ok ? { line: result.line, answer } : null
 }
+
+const TYPE_ACTION_ID = 'input.type'
+// Past this, a quick action only covers the opening of the request ("open Drive and make a doc with...").
+const FAST_CLAUSE_MAX_WORDS = 12
 
 const ACKS = {
   look: ['Let me look.', 'Eyes on it.', 'Peeking now.'],

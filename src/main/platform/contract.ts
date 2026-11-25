@@ -125,6 +125,7 @@ export interface InputApi {
   inputBinPath: typeof import('./macos/input').inputBinPath
   shotCommand: typeof import('./macos/input').shotCommand
   captureScreenWithoutUs: typeof import('./macos/input').captureScreenWithoutUs
+  clickSpaceWidth: typeof import('./macos/input').clickSpaceWidth
   uiBinPath: typeof import('./macos/input').uiBinPath
   detectHostKeyboardType: typeof import('./macos/input').detectHostKeyboardType
   moveCursorFast: typeof import('./macos/input').moveCursorFast

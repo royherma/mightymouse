@@ -230,6 +230,8 @@ export const EXIT_STOPPED = -4
 // Entries are consumed by the close handler; the stray-entry sweep below keeps
 // this from leaking if a child somehow never closes.
 const stoppedRuns = new Set<string>()
+// A stop that lands between a run getting its id and its process spawning.
+const abortedBeforeSpawn = new Set<string>()
 
 /** True if this run was killed by the user (consumes the flag). */
 function takeStoppedFlag(runId: string): boolean {
@@ -286,7 +288,10 @@ export function abortAllRuns(): number {
  */
 export function abortRun(runId: string): boolean {
   const child = liveRuns.get(runId)
-  if (!child) return false
+  if (!child) {
+    abortedBeforeSpawn.add(runId)
+    return false
+  }
   stoppedRuns.add(runId)
   killProcessGroup(child)
   liveRuns.delete(runId)
@@ -723,6 +728,7 @@ export async function runBackend(opts: RunOptions): Promise<void> {
   // it. Deregistered in close/error below — and on timeout, where we kill it anyway.
   liveRuns.set(runId, child)
   if (child.pid) opts.onSpawn?.(child.pid)
+  if (abortedBeforeSpawn.delete(runId)) abortRun(runId)
 
   // Two independent fuses, one kill path. A hung CLI otherwise streams nothing and
   // never closes, freezing the panel/HUD forever.

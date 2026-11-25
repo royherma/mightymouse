@@ -9,6 +9,7 @@
 // only; screen-recording still uses ffmpeg.
 //
 // Contract with the Node side (native-mic.ts) — one line per command on stdin:
+//   device <name>      mic to use from the next start ("default" = the computer's mic), print "DEVICE"
 //   start <wav path>   create/overwrite the WAV, start the engine, print "READY"
 //   stop               stop the engine, finalize the WAV header, print "STOPPED"
 //   cancel             stop the engine, close the file unfinalized, print "CANCELLED"
@@ -18,6 +19,8 @@
 // expects and what the ffmpeg path produced with -ac 1 -ar 16000 pcm_s16le.
 
 import AVFoundation
+import AudioToolbox
+import CoreAudio
 import Foundation
 
 // MARK: - WAV header helpers
@@ -83,15 +86,10 @@ let targetFormat = AVAudioFormat(
     interleaved: true
 )!
 
-// Built ONCE for the life of the process — this is the whole point (see header).
-let engine = AVAudioEngine()
-let inputNode = engine.inputNode
-let hwFormat = inputNode.outputFormat(forBus: 0) // actual device format
-
-guard let converter = AVAudioConverter(from: hwFormat, to: targetFormat) else {
-    fputs("mic-recorder: failed to create AVAudioConverter\n", stderr)
-    exit(1)
-}
+// Built once per input device: a press only rebuilds when the chosen mic changed.
+var engine = AVAudioEngine()
+var currentDevice: AudioDeviceID = 0
+var preferredDeviceName = "default"
 
 // Session state: non-nil only while a `start` is in flight. The tap only
 // writes when a file is open, so the engine can sit prepared-but-stopped idle.
@@ -103,45 +101,104 @@ let writeLock = NSLock()
 // Small enough for low latency, large enough to amortize overhead.
 let tapBufferSize: AVAudioFrameCount = 1024
 
-inputNode.installTap(onBus: 0, bufferSize: tapBufferSize, format: hwFormat) { hwBuffer, _ in
-    let inputFrames = AVAudioFrameCount(hwBuffer.frameLength)
-    let outputFrames = AVAudioFrameCount(
-        ceil(Double(inputFrames) * targetSampleRate / hwFormat.sampleRate)
-    )
-    guard outputFrames > 0 else { return }
-
-    guard let outBuffer = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: outputFrames) else {
-        return
-    }
-
-    var inputConsumed = false
-    let status = converter.convert(to: outBuffer, error: nil) { _, outStatus in
-        if inputConsumed {
-            outStatus.pointee = .noDataNow
-            return nil
-        }
-        inputConsumed = true
-        outStatus.pointee = .haveData
-        return hwBuffer
-    }
-
-    guard status != .error, outBuffer.frameLength > 0 else { return }
-
-    let frameCount = Int(outBuffer.frameLength)
-    let byteCount = frameCount * 2 // 16-bit = 2 bytes per sample
-    guard let int16Ptr = outBuffer.int16ChannelData?[0] else { return }
-    let data = Data(bytes: int16Ptr, count: byteCount)
-
-    writeLock.lock()
-    if let fh = fileHandle {
-        fh.write(data)
-        totalBytesWritten += byteCount
-    }
-    writeLock.unlock()
+func defaultInputDevice() -> AudioDeviceID {
+    var address = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDefaultInputDevice, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+    var id: AudioDeviceID = 0
+    var size = UInt32(MemoryLayout<AudioDeviceID>.size)
+    return AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &id) == noErr ? id : 0
 }
 
-// Pre-allocates the render resources so start() is only the HAL device start.
-engine.prepare()
+func inputDevice(named name: String) -> AudioDeviceID? {
+    var address = AudioObjectPropertyAddress(mSelector: kAudioHardwarePropertyDevices, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+    var size: UInt32 = 0
+    guard AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size) == noErr else { return nil }
+    var ids = [AudioDeviceID](repeating: 0, count: Int(size) / MemoryLayout<AudioDeviceID>.size)
+    guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &ids) == noErr else { return nil }
+    for id in ids {
+        var nameAddress = AudioObjectPropertyAddress(mSelector: kAudioObjectPropertyName, mScope: kAudioObjectPropertyScopeGlobal, mElement: kAudioObjectPropertyElementMain)
+        var cfName: Unmanaged<CFString>? = nil
+        var nameSize = UInt32(MemoryLayout<Unmanaged<CFString>?>.size)
+        guard AudioObjectGetPropertyData(id, &nameAddress, 0, nil, &nameSize, &cfName) == noErr,
+              let deviceName = cfName?.takeRetainedValue() as String?,
+              deviceName == name else { continue }
+        var streamsAddress = AudioObjectPropertyAddress(mSelector: kAudioDevicePropertyStreams, mScope: kAudioDevicePropertyScopeInput, mElement: kAudioObjectPropertyElementMain)
+        var streamsSize: UInt32 = 0
+        if AudioObjectGetPropertyDataSize(id, &streamsAddress, 0, nil, &streamsSize) == noErr, streamsSize > 0 { return id }
+    }
+    return nil
+}
+
+func wantedDevice() -> AudioDeviceID {
+    if preferredDeviceName != "default", let id = inputDevice(named: preferredDeviceName) { return id }
+    return defaultInputDevice()
+}
+
+func buildEngine(device: AudioDeviceID) -> Bool {
+    let next = AVAudioEngine()
+    let input = next.inputNode
+    if device != 0, let unit = input.audioUnit {
+        var id = device
+        let status = AudioUnitSetProperty(unit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &id, UInt32(MemoryLayout<AudioDeviceID>.size))
+        if status != noErr { fputs("mic-recorder: set device \(device) failed: \(status)\n", stderr) }
+    }
+    let hwFormat = input.outputFormat(forBus: 0)
+    guard hwFormat.sampleRate > 0, let converter = AVAudioConverter(from: hwFormat, to: targetFormat) else {
+        fputs("mic-recorder: failed to create AVAudioConverter for device \(device)\n", stderr)
+        return false
+    }
+
+    input.installTap(onBus: 0, bufferSize: tapBufferSize, format: hwFormat) { hwBuffer, _ in
+        let inputFrames = AVAudioFrameCount(hwBuffer.frameLength)
+        let outputFrames = AVAudioFrameCount(
+            ceil(Double(inputFrames) * targetSampleRate / hwFormat.sampleRate)
+        )
+        guard outputFrames > 0 else { return }
+
+        guard let outBuffer = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: outputFrames) else {
+            return
+        }
+
+        var inputConsumed = false
+        let status = converter.convert(to: outBuffer, error: nil) { _, outStatus in
+            if inputConsumed {
+                outStatus.pointee = .noDataNow
+                return nil
+            }
+            inputConsumed = true
+            outStatus.pointee = .haveData
+            return hwBuffer
+        }
+
+        guard status != .error, outBuffer.frameLength > 0 else { return }
+
+        let frameCount = Int(outBuffer.frameLength)
+        let byteCount = frameCount * 2 // 16-bit = 2 bytes per sample
+        guard let int16Ptr = outBuffer.int16ChannelData?[0] else { return }
+        let data = Data(bytes: int16Ptr, count: byteCount)
+
+        writeLock.lock()
+        if let fh = fileHandle {
+            fh.write(data)
+            totalBytesWritten += byteCount
+        }
+        writeLock.unlock()
+    }
+
+    // Pre-allocates the render resources so start() is only the HAL device start.
+    next.prepare()
+    engine.inputNode.removeTap(onBus: 0)
+    engine = next
+    currentDevice = device
+    return true
+}
+
+func ensureEngineForWantedDevice() {
+    let device = wantedDevice()
+    if device == currentDevice { return }
+    if !buildEngine(device: device) && currentDevice == 0 { exit(1) }
+}
+
+ensureEngineForWantedDevice()
 
 func reply(_ s: String) {
     print(s)
@@ -157,6 +214,8 @@ func startSession(path: String) {
         reply("ERROR busy")
         return
     }
+
+    ensureEngineForWantedDevice()
 
     FileManager.default.createFile(atPath: path, contents: nil)
     guard let fh = FileHandle(forWritingAtPath: path) else {
@@ -221,6 +280,9 @@ sigtermSource.resume()
 while let line = readLine() {
     if line.hasPrefix("start ") {
         startSession(path: String(line.dropFirst("start ".count)))
+    } else if line.hasPrefix("device ") {
+        preferredDeviceName = String(line.dropFirst("device ".count))
+        reply("DEVICE")
     } else if line == "stop" {
         reply(endSession(finalize: true) ? "STOPPED" : "ERROR idle")
     } else if line == "cancel" {

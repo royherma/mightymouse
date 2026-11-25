@@ -73,7 +73,6 @@ export function useKeyboard({
   const [canRestoreWindows, setCanRestoreWindows] = useState(false)
   const [appSwitchOpen, setAppSwitchOpen] = useState(false)
   const [appList, setAppList] = useState<AppSwitchItem[] | null>(readCachedAppList)
-  const [keyboardText, setKeyboardText] = useState('')
   const [keyboardMode, setKeyboardMode] = useState<KeyboardMode>('none')
   const nativeKeyboardOpen = barHostVisible(keyboardMode, 'native')
   const virtualKeyboardOpen = barHostVisible(keyboardMode, 'virtual')
@@ -89,6 +88,10 @@ export function useKeyboard({
   const [clipboardHasContent, setClipboardHasContent] = useState(false)
 
   const keyboardInputRef = useRef<HTMLInputElement | null>(null)
+  const setKeyboardText = useCallback((text: string) => {
+    const input = keyboardInputRef.current
+    if (input && input.value !== text) input.value = text
+  }, [])
   const intentionalFocusRef = useRef(false)
   const browserSheetOpenRef = useRef(false)
 
@@ -192,8 +195,7 @@ export function useKeyboard({
       // Backspace ate the sentinel -> the user meant "delete on the Mac" with
       // nothing of their own left to remove. Forward one delete and re-seed.
       const atFloor = !raw.startsWith(KEYBOARD_SENTINEL)
-      const next = atFloor ? '' : raw.slice(KEYBOARD_SENTINEL.length)
-      setKeyboardText(KEYBOARD_SENTINEL + next)
+      const next = raw.split(KEYBOARD_SENTINEL).join('')
       const prev = lastSentTextRef.current
       let common = 0
       const maxCommon = Math.min(prev.length, next.length)
@@ -203,11 +205,12 @@ export function useKeyboard({
       // atFloor with nothing of ours to remove == a bare Backspace: send one
       // delete so it hits the Mac's own selection/text, not just our buffer.
       if (removed > 0) send({ type: 'deleteText', count: removed })
-      else if (atFloor) send({ type: 'deleteText', count: 1 })
+      else if (atFloor && !next) send({ type: 'deleteText', count: 1 })
       if (added) send({ type: 'typeText', text: added })
       lastSentTextRef.current = next
+      setKeyboardText(KEYBOARD_SENTINEL + next)
     },
-    [send]
+    [send, setKeyboardText]
   )
 
   const applyKeyboardMode = useCallback((next: KeyboardMode) => {
@@ -233,7 +236,7 @@ export function useKeyboard({
     keyboardInputRef.current?.blur()
     kbTrace('mode', { to: next })
     setKeyboardMode(next)
-  }, [])
+  }, [setKeyboardText])
 
   const openKeyboard = useCallback(() => {
     hapticTick()
@@ -382,13 +385,13 @@ export function useKeyboard({
     if (stolen && keyboardModeRef.current === 'native') {
       keyboardInputRef.current?.focus()
     }
-  }, [])
+  }, [setKeyboardText])
 
   const onKeyboardEnter = useCallback(() => {
     send({ type: 'pressKey', key: 'return' })
     setKeyboardText(KEYBOARD_SENTINEL)
     lastSentTextRef.current = ''
-  }, [send])
+  }, [send, setKeyboardText])
 
 
   return {
@@ -400,7 +403,6 @@ export function useKeyboard({
     appListRef,
     appSwitchOpenRef,
     pendingAppListRef,
-    keyboardText,
     keyboardMode,
     nativeKeyboardOpen,
     virtualKeyboardOpen,

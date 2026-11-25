@@ -113,15 +113,18 @@ export function StorageRow({ label, path }: { label: string; path: string }): JS
 export function DeviceSelect({
   value,
   onChange,
-  options
+  options,
+  followSystem
 }: {
   value: string
   onChange: (v: string) => void
   options: Array<{ index: string; name: string }>
+  followSystem?: { value: string; label: string }
 }): JSX.Element {
   const names = options.map((o) => o.name)
+  const isSystem = followSystem?.value === value
   // Keep the current value selectable even if the device is currently unplugged.
-  const showOrphan = value && !names.includes(value)
+  const showOrphan = value && !isSystem && !names.includes(value)
   const display = value || 'no devices found'
 
   return (
@@ -130,7 +133,9 @@ export function DeviceSelect({
         className="mt-1 w-full flex items-center justify-between bg-surface2 border border-surface3 rounded-sm text-on-surface px-2.5 py-1.5 text-md font-sans outline-none transition-colors hover:border-muted-dark focus:border-accent focus:shadow-focus data-[placeholder]:text-muted"
         aria-label="device"
       >
-        <Select.Value placeholder={display}>{value || display}</Select.Value>
+        <Select.Value placeholder={display}>
+          {isSystem && followSystem ? followSystem.label : value || display}
+        </Select.Value>
         <Select.Icon className="text-muted">▾</Select.Icon>
       </Select.Trigger>
       <Select.Portal>
@@ -140,6 +145,9 @@ export function DeviceSelect({
           className="z-50 max-h-72 overflow-hidden bg-surface2 border border-surface3 rounded-md shadow-panel"
         >
           <Select.Viewport className="p-1">
+            {followSystem && (
+              <SelectItem value={followSystem.value}>{followSystem.label}</SelectItem>
+            )}
             {showOrphan && <SelectItem value={value}>{value} (not connected)</SelectItem>}
             {options.map((o) => (
               <SelectItem key={o.index} value={o.name}>

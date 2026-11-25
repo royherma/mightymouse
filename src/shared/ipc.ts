@@ -247,6 +247,8 @@ export const CHANNELS = Object.freeze({
   settingsSetCompanionSize: 'settings-set-companion-size',
   // May a voice turn DRIVE the Mac, or only answer?
   settingsSetLiveActs: 'settings-set-live-acts',
+  settingsSetCompanionQuiet: 'settings-set-companion-quiet',
+  settingsSetCompanionModel: 'settings-set-companion-model',
   settingsSetSuggestions: 'settings-set-suggestions',
   settingsSetClick: 'settings-set-click',
   settingsSetFnListen: 'settings-set-fn-listen',

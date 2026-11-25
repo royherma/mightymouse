@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { CONFIG } from '@shared/config'
-import type { AgentRelaySessionInfo, TurnUndoState } from '@shared/types'
+import type { TurnUndoState } from '@shared/types'
 import type { ModelScope, PhoneRemoteEvent, RelayProjectWire, SessionGitOp } from '@shared/phone-remote-protocol'
 import type { ProjectIdea } from '@shared/project-ideas'
 import { foldSteps } from '@shared/session-steps'
@@ -35,7 +35,6 @@ export type StartState = {
 
 const CHAT_PROJECT_KEY = 'mm-remote-ai-chat-project'
 const TRANSCRIPT_POLL_MS = 4000
-const START_MATCH_SLACK_MS = 5000
 const GIT_ANSWER_MAX_MS = 150_000
 
 function readProject(key: string): string | null {
@@ -98,16 +97,7 @@ export function codeThreadItems(label: string, turns: TranscriptTurn[], showStep
   })
 }
 
-export function matchStartedSession(
-  start: StartState | null,
-  sessions: AgentRelaySessionInfo[]
-): AgentRelaySessionInfo | undefined {
-  if (!start?.startedAt) return undefined
-  const since = start.startedAt - START_MATCH_SLACK_MS
-  return sessions
-    .filter((s) => (start.projectId === '' ? !s.project : s.project?.name === start.projectName) && (s.since ?? 0) >= since && !s.stale)
-    .sort((a, b) => (a.since ?? 0) - (b.since ?? 0))[0]
-}
+export { matchStartedSession } from '@shared/relay-sessions'
 
 interface UseAiSessionArgs {
   bus: SocketBus

@@ -24,10 +24,11 @@ import type {
   SharedModRequest,
   SiteModAction
 } from '../shared/types'
+import { signsInOutsideApp } from '../shared/types'
 import { forgetSiteModPreview, sharedModAction, siteModAction, siteModState, watchSiteMods } from './browser-task/site-mods'
 import { browserDir, importCookies, listImportSources } from './side-browser-import'
 import { driveAgentCursor, hideAgentCursor, pauseAgentCursor } from './actions/computer-use/agent-cursor'
-import { registerSideBrowserPasskeyHandlers } from './side-browser-passkeys'
+import { passkeysEntitled, registerSideBrowserPasskeyHandlers } from './side-browser-passkeys'
 import { getSupabase } from './supabase'
 import { annotate, endAnnotate } from './side-browser-annotate'
 import {
@@ -76,6 +77,7 @@ const suspendedOwners = new Set<number>()
 let sessionReady = false
 let cookieFlush: NodeJS.Timeout | null = null
 let agentUrl: string | null = null
+let agentUrlByUser = false
 let agentUrlTaken: string | null = null
 let agentUrlAt = 0
 let newestTab: { wc: Electron.WebContents; at: number } | null = null
@@ -102,10 +104,20 @@ function browserSession(): Electron.Session {
 function sendClientHints(sess: Electron.Session): void {
   const hints = clientHints()
   sess.webRequest.onBeforeSendHeaders({ urls: ['https://*/*'] }, (details, done) => {
+    if (isGoogleSignIn(details.url)) return done({ requestHeaders: { ...details.requestHeaders, 'User-Agent': googleSignInAgent(sess) } })
     const requestHeaders = { ...hints, ...details.requestHeaders }
     if (!agentDriving(details.webContentsId)) return done({ requestHeaders })
     void agentSignature(new URL(details.url).host).then((signed) => done({ requestHeaders: { ...requestHeaders, ...signed } }))
   })
+}
+
+// Google rejects sign-in when an embedded browser claims to be plain Chrome; the honest Electron name passes.
+function googleSignInAgent(sess: Electron.Session): string {
+  return sess.getUserAgent().replace(/ Safari\//, ` Electron/${process.versions.electron} Safari/`)
+}
+
+function isGoogleSignIn(url: string): boolean {
+  return URL.parse(url)?.hostname === 'accounts.google.com'
 }
 
 function agentDriving(webContentsId: number | undefined): boolean {
@@ -261,7 +273,7 @@ function open(owner: BrowserWindow, address: string): SideBrowserTabState {
       nodeIntegration: false,
       preload: join(__dirname, '../preload/side-browser-tab.js'),
       additionalArguments: [
-        `--mm-passkey-channel=${CHANNELS.sideBrowserPasskey}`,
+        passkeysEntitled() ? `--mm-passkey-channel=${CHANNELS.sideBrowserPasskey}` : '--mm-no-passkeys',
         `--mm-location-channel=${CHANNELS.sideBrowserLocation}`,
         `--mm-mod-world=${CONFIG.BROWSER_TASK.MOD_WORLD_ID}`
       ]
@@ -302,6 +314,10 @@ function open(owner: BrowserWindow, address: string): SideBrowserTabState {
     recordVisit(wc.getURL(), wc.getTitle())
     update()
   })
+  wc.on('did-start-navigation', (details) => {
+    if (details.isMainFrame && !details.isSameDocument)
+      wc.setUserAgent(isGoogleSignIn(details.url) ? googleSignInAgent(wc.session) : wc.session.getUserAgent())
+  })
   wc.on('did-navigate-in-page', update)
   wc.on('page-title-updated', (_e, title) => {
     recordTitle(wc.getURL(), title)
@@ -319,7 +335,7 @@ function open(owner: BrowserWindow, address: string): SideBrowserTabState {
     })
   })
   wc.setWindowOpenHandler(({ url }) => {
-    if (isWebUrl(url) && !owner.isDestroyed())
+    if (isWebUrl(url) && !signsInOutsideApp(url) && !owner.isDestroyed())
       owner.webContents.send(CHANNELS.sideBrowserPopup, { openerId: id, url })
     else void shell.openExternal(url)
     return { action: 'deny' }
@@ -331,7 +347,7 @@ function open(owner: BrowserWindow, address: string): SideBrowserTabState {
       owner.webContents.send(CHANNELS.sideBrowserPageAction, { viewId: id, url, action })
       return
     }
-    if (isWebUrl(url)) return
+    if (isWebUrl(url) && !signsInOutsideApp(url)) return
     event.preventDefault()
     void shell.openExternal(url)
   })
@@ -570,9 +586,10 @@ export function siblingTabs(id: string): Array<{ id: string; wc: Electron.WebCon
     .map(([tabId, t]) => ({ id: tabId, wc: t.view.webContents }))
 }
 
-export function queueAgentUrl(url: string): void {
+export function queueAgentUrl(url: string, byUser = false): void {
   agentUrl = url
   agentUrlAt = Date.now()
+  agentUrlByUser = byUser
 }
 
 export function agentUrlQueuedAt(): number {
@@ -749,7 +766,7 @@ export function registerSideBrowserHandlers(): void {
   ipcMain.handle(CHANNELS.sideBrowserTakeUrl, () => {
     const url = agentUrl
     agentUrl = null
-    agentUrlTaken = url
+    agentUrlTaken = agentUrlByUser ? null : url
     return url
   })
 }

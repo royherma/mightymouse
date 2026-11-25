@@ -101,6 +101,7 @@ import { setIslandWindow } from '../island-window'
 import { applySelectionWatcher } from '../selection-watcher'
 import {
   setCompanionWindow,
+  isCompanionWindowRunning,
   applyCompanionRenderer,
   setCompanionInteractive
 } from '../companion-window'
@@ -629,6 +630,8 @@ export function registerSettingsHandlers(): void {
     liveCompanion: PREFS.getLiveMode(),
     companionRenderer: PREFS.getCompanionRenderer(),
     companionSize: PREFS.getCompanionSize(),
+    companionQuiet: PREFS.getCompanionQuiet(),
+    companionModel: PREFS.getCompanionModel(),
     liveActs: PREFS.getLiveActs(),
     suggestions: PREFS.getExperimentalSuggestions(),
     clickEnabled: PREFS.getClickEnabled(),
@@ -777,6 +780,7 @@ export function registerSettingsHandlers(): void {
 
   ipcMain.handle(CHANNELS.settingsSetCompanion, async (_, on: boolean) => {
     const next = on === true
+    console.log(`[companion] voice mode ${next ? 'on' : 'off'} via settings or pill`)
     PREFS.setLiveMode(next)
     // Turning live mode off ends the spoken conversation: the next time it's
     // switched on, the user is starting a new one, not resuming whatever they
@@ -819,6 +823,23 @@ export function registerSettingsHandlers(): void {
 
   // May a voice turn DRIVE the Mac, or only answer? The one control that decides
   // whether an agent can click and type on the user's real machine.
+  ipcMain.handle(CHANNELS.settingsSetCompanionQuiet, async (_, on: boolean) => {
+    PREFS.setCompanionQuiet(on)
+    track(ANALYTICS_EVENT.setting_saved, { key: 'companion_quiet' })
+    if (isCompanionWindowRunning()) {
+      setCompanionWindow(false)
+      setCompanionWindow(true)
+    }
+    return on
+  })
+
+  ipcMain.handle(CHANNELS.settingsSetCompanionModel, async (_, model: string) => {
+    if (!CONFIG.VOICE_MODELS.some((m) => m.id === model)) return PREFS.getCompanionModel()
+    PREFS.setCompanionModel(model)
+    track(ANALYTICS_EVENT.setting_saved, { key: 'companion_model' })
+    return model
+  })
+
   ipcMain.handle(CHANNELS.settingsSetLiveActs, async (_, on: boolean) => {
     PREFS.setLiveActs(on)
     track(ANALYTICS_EVENT.setting_saved, { key: 'live_acts' })

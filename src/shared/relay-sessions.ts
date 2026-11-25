@@ -456,3 +456,16 @@ export function mightyProjectForCwd(
   }
   return best
 }
+
+const START_MATCH_SLACK_MS = 5000
+
+export function matchStartedSession(
+  start: { projectId: string; projectName: string; startedAt?: number } | null,
+  sessions: AgentRelaySessionInfo[]
+): AgentRelaySessionInfo | undefined {
+  if (!start?.startedAt) return undefined
+  const since = start.startedAt - START_MATCH_SLACK_MS
+  return sessions
+    .filter((s) => (start.projectId === '' ? !s.project : s.project?.name === start.projectName) && (s.since ?? 0) >= since && !s.stale)
+    .sort((a, b) => (a.since ?? 0) - (b.since ?? 0))[0]
+}

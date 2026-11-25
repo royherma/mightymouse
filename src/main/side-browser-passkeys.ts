@@ -1,5 +1,6 @@
 import { ipcMain, app, BrowserWindow, type IpcMainInvokeEvent } from 'electron'
 import { join } from 'path'
+import { readFileSync } from 'fs'
 import { CHANNELS } from '../shared/ipc'
 import type { PasskeyRequest, PasskeyResult, PasskeyErrorCode } from '../shared/types'
 
@@ -34,6 +35,20 @@ function loadAddon(): PasskeyAddon | null {
     addon = null
   }
   return addon
+}
+
+let entitled: boolean | undefined
+
+// Apple's managed browser-passkey entitlement only exists in a build signed with its provisioning profile.
+export function passkeysEntitled(): boolean {
+  if (entitled !== undefined) return entitled
+  try {
+    const profile = readFileSync(join(process.resourcesPath, '..', 'embedded.provisionprofile'), 'latin1')
+    entitled = profile.includes('com.apple.developer.web-browser.public-key-credential')
+  } catch {
+    entitled = false
+  }
+  return entitled
 }
 
 function originHost(origin: string): string | null {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isPrefixKey, paneInDirection, prefixCommand } from '../pane-prefix-keys'
+import { cmuxCommand, isPrefixKey, paneInDirection, prefixCommand } from '../pane-prefix-keys'
 
 type Mods = { ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean }
 
@@ -139,5 +139,58 @@ describe('paneInDirection', () => {
     expect(paneInDirection([grid[0]], 'top-left', 'right')).toBeNull()
     expect(paneInDirection(grid, 'closed-pane', 'right')).toBeNull()
     expect(paneInDirection([], 'top-left', 'right')).toBeNull()
+  })
+})
+
+describe('cmuxCommand', () => {
+  const press = (k: string, code: string, mods: Mods = {}) => ({ ...key(k, mods), code })
+  const cmdOpt = { metaKey: true, altKey: true }
+  const cmdShift = { metaKey: true, shiftKey: true }
+
+  it.each([
+    ['ArrowLeft', 'left'],
+    ['ArrowRight', 'right'],
+    ['ArrowUp', 'up'],
+    ['ArrowDown', 'down']
+  ] as const)('Cmd-Opt-%s moves %s', (k, dir) => {
+    expect(cmuxCommand(press(k, k, cmdOpt))).toEqual({ kind: 'move', dir })
+  })
+
+  it('Ctrl-1 jumps to the first pane and Ctrl-9 to the ninth, read from the physical key', () => {
+    expect(cmuxCommand(press('1', 'Digit1', { ctrlKey: true }))).toEqual({ kind: 'jump', index: 0 })
+    expect(cmuxCommand(press('9', 'Digit9', { ctrlKey: true }))).toEqual({ kind: 'jump', index: 8 })
+    expect(cmuxCommand(press('&', 'Digit7', { ctrlKey: true }))).toEqual({ kind: 'jump', index: 6 })
+  })
+
+  it('Cmd-Shift-] and Cmd-Shift-[ step the page group by the physical key, not the shifted brace', () => {
+    expect(cmuxCommand(press('}', 'BracketRight', cmdShift))).toEqual({ kind: 'group', step: 1 })
+    expect(cmuxCommand(press('{', 'BracketLeft', cmdShift))).toEqual({ kind: 'group', step: -1 })
+  })
+
+  it('Cmd-Shift-Enter zooms and Cmd-D starts a new agent', () => {
+    expect(cmuxCommand(press('Enter', 'Enter', cmdShift))).toEqual({ kind: 'zoom' })
+    expect(cmuxCommand(press('d', 'KeyD', { metaKey: true }))).toEqual({ kind: 'new' })
+  })
+
+  it.each([
+    ['plain arrow', press('ArrowLeft', 'ArrowLeft')],
+    ['Cmd-arrow (line start in a text box)', press('ArrowLeft', 'ArrowLeft', { metaKey: true })],
+    ['Opt-arrow (word jump)', press('ArrowLeft', 'ArrowLeft', { altKey: true })],
+    ['Cmd-Opt-Shift-arrow', press('ArrowLeft', 'ArrowLeft', { ...cmdOpt, shiftKey: true })],
+    ['Cmd-Opt-Ctrl-arrow', press('ArrowLeft', 'ArrowLeft', { ...cmdOpt, ctrlKey: true })],
+    ['Ctrl-0', press('0', 'Digit0', { ctrlKey: true })],
+    ['Ctrl-Shift-1', press('!', 'Digit1', { ctrlKey: true, shiftKey: true })],
+    ['Cmd-1', press('1', 'Digit1', { metaKey: true })],
+    ['Ctrl-Cmd-1', press('1', 'Digit1', { ctrlKey: true, metaKey: true })],
+    ['Cmd-] without Shift', press(']', 'BracketRight', { metaKey: true })],
+    ['Cmd-Opt-Shift-]', press('}', 'BracketRight', { ...cmdShift, altKey: true })],
+    ['Cmd-Enter without Shift', press('Enter', 'Enter', { metaKey: true })],
+    ['Ctrl-Shift-Enter', press('Enter', 'Enter', { ctrlKey: true, shiftKey: true })],
+    ['Cmd-Shift-D', press('D', 'KeyD', cmdShift)],
+    ['Cmd-Opt-D', press('d', 'KeyD', { metaKey: true, altKey: true })],
+    ['Ctrl-D (EOF to the agent)', press('d', 'KeyD', { ctrlKey: true })],
+    ['plain d', press('d', 'KeyD')]
+  ])('leaves %s alone', (_name, e) => {
+    expect(cmuxCommand(e)).toBeNull()
   })
 })

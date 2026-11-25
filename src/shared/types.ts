@@ -2351,6 +2351,12 @@ export type ChatTabNameFormat = 'pretty' | 'compact' | 'slug'
 
 export type LinkTarget = 'app' | 'browser'
 
+// Google refuses sign-in inside the in-app browser, so app/CLI sign-ins (callback to this computer) open outside it.
+export function signsInOutsideApp(url: string): boolean {
+  const back = URL.parse(url)?.searchParams.get('redirect_uri')
+  return !!back && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//i.test(back)
+}
+
 export type LinkMenuChoice = 'app' | null
 
 export type NativeMenuItem =

@@ -97,7 +97,21 @@ if (channel) window.addEventListener('message', (event) => {
     })
 })
 
+// Without Apple's entitlement, Electron's own passkey call hangs forever; say "no passkeys" so sites offer another way.
+const NO_PASSKEY_SHIM = `(() => {
+  if (!window.PublicKeyCredential || !navigator.credentials) return
+  PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable = () => Promise.resolve(false)
+  PublicKeyCredential.isConditionalMediationAvailable = () => Promise.resolve(false)
+  const nav = navigator.credentials
+  const refuse = () => Promise.reject(new DOMException('The operation either timed out or was not allowed.', 'NotAllowedError'))
+  const originalCreate = nav.create.bind(nav)
+  const originalGet = nav.get.bind(nav)
+  nav.create = (options) => (options && options.publicKey ? refuse() : originalCreate(options))
+  nav.get = (options) => (options && options.publicKey ? refuse() : originalGet(options))
+})()`
+
 if (channel) webFrame.executeJavaScript(MAIN_WORLD_SHIM)
+else if (process.argv.includes('--mm-no-passkeys')) webFrame.executeJavaScript(NO_PASSKEY_SHIM)
 
 const LOCATION_ARG = '--mm-location-channel='
 const locationChannel = process.argv.find((a) => a.startsWith(LOCATION_ARG))?.slice(LOCATION_ARG.length)

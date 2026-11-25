@@ -1,5 +1,6 @@
 import { friendlyStep } from '../../shared/act-step-label'
 import { join } from 'path'
+import { execFile } from 'child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'fs'
 import { randomUUID } from 'crypto'
 import { CONFIG } from '../../shared/config'
@@ -15,7 +16,7 @@ import { buildMemoryBlob } from '../backend/context-memory'
 import { screenControlBlock } from '../backend/prompts'
 import { TALK_SYSTEM_PROMPT } from '../../shared/talk'
 import { fireScreenshot } from '../capture/screenshot'
-import { resolveClaude, captureContext } from '../platform'
+import { resolveClaude, captureContext, input } from '../platform'
 import { toBackendId, canRunUnattended, getCapabilities, BACKENDS, type PriorMessage } from '../backend/adapters'
 import {
   MightyRunSource,
@@ -290,6 +291,16 @@ function snapshotWorkspace(): Map<string, string> {
   return out
 }
 
+async function captureControlShot(): Promise<string | undefined> {
+  const shot = await fireScreenshot().catch(() => null)
+  const path = shot?.screenshotPath
+  if (!path) return undefined
+  const width = input.clickSpaceWidth()
+  const ok = await input.captureScreenWithoutUs(path, width)
+  if (!ok) await new Promise((done) => execFile('/usr/bin/sips', ['--resampleWidth', String(width), path], () => done(null)))
+  return path
+}
+
 export interface RunMightyOpts {
   /** The user's message (chat) or the job's prompt (scheduled). */
   message: string
@@ -307,6 +318,8 @@ export interface RunMightyOpts {
    * so there is nothing on disk to read yet.
    */
   backend?: BackendId
+  model?: string
+  recipe?: string
   /** User-attached media (images / files / audio). Audio is transcribed to text
    *  before the run; images + files flow to the adapter for per-backend translation. */
   attachments?: MediaAttachment[]
@@ -481,7 +494,7 @@ export function runMighty(opts: RunMightyOpts): Promise<MightyChatResult> {
     //   frontApp: one cheap AppleScript, same call the suggestion path uses. Captured
     //     up front (before the run) so it names the app the user launched FROM, not
     //     whatever they alt-tabbed to while a long act ran.
-    const runModel = project?.defaultModel || resolveRunModel(backend)
+    const runModel = opts.model || project?.defaultModel || resolveRunModel(backend)
     let ranModel: string | undefined
 
     // Built HERE, not at the top of the run: the prompt names the model that's about
@@ -493,18 +506,16 @@ export function runMighty(opts: RunMightyOpts): Promise<MightyChatResult> {
     // to cap the token cost of chatty "look at my screen" turns, and starving a
     // control turn of its frame doesn't save money, it just makes it click wrong.
     // A capture failure degrades to an answer-only turn rather than throwing.
-    const controlShot = opts.screenControl
-      ? (await fireScreenshot().catch(() => null))?.screenshotPath
-      : undefined
+    const controlShot = opts.screenControl ? await captureControlShot() : undefined
     if (controlShot) opts.onScreenshot?.(controlShot)
 
-    const systemPrompt = buildMightySystemPrompt(
+    const systemPrompt = `${buildMightySystemPrompt(
       backend,
       runModel,
       project?.systemPrompt,
       opts.source,
       controlShot
-    )
+    )}${opts.recipe ? `\n${opts.recipe}` : ''}`
 
     // Mighty IS the act-agent loop: shell, file writes, skill invocation. A model
     // that can't call tools has nothing to run it with, so it streams prose about
@@ -571,6 +582,7 @@ export function runMighty(opts: RunMightyOpts): Promise<MightyChatResult> {
     void runBackend({
       backend,
       runId,
+      model: opts.model,
       systemPrompt,
       userPrompt,
       priorMessages: priorMessagesFor(prior),

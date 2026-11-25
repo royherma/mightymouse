@@ -294,6 +294,7 @@ export function createWindowsInput(toPhysical: PointMapper): InputApi {
     inputBinPath: unsupported('inputBinPath'),
     shotCommand: unsupported('shotCommand'),
     captureScreenWithoutUs: () => Promise.resolve(false),
+    clickSpaceWidth: () => 0,
     uiBinPath: unsupported('uiBinPath'),
     detectHostKeyboardType: () => Promise.resolve('ansi'),
     moveCursorFast: quiet((x: number, y: number) => {

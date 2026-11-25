@@ -1,6 +1,7 @@
 import { JSX } from 'react'
 import { CONFIG } from '../../../../shared/config'
 import { Switch } from '../Switch'
+import { SegmentedControl } from '../SegmentedControl'
 import { Button } from '../Button'
 import { KokoroVoiceCard } from '../KokoroVoiceCard'
 import { SECTIONS, BUCKETS, SECTION_ANCHOR_ID } from './registry'
@@ -17,6 +18,8 @@ export function GeneralPage({ s }: { s: SettingsCtx }): JSX.Element {
     selectionBar,
     liveCompanion,
     liveActs,
+    companionQuiet,
+    companionModel,
     dockIcon,
     fnListenEnabled,
     listenAutoPaste,
@@ -29,6 +32,8 @@ export function GeneralPage({ s }: { s: SettingsCtx }): JSX.Element {
     toggleSelectionBar,
     toggleLiveCompanion,
     toggleLiveActs,
+    toggleCompanionQuiet,
+    chooseCompanionModel,
     toggleDockIcon,
     toggleFnListen,
     toggleTranscriptFormat,
@@ -133,6 +138,36 @@ export function GeneralPage({ s }: { s: SettingsCtx }): JSX.Element {
                 <div className="text-muted text-sm">
                   It can click and type for you to get things done. Turn this off and it only
                   answers out loud, and never touches anything.
+                </div>
+              </SettingRow>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-surface3">
+              <SettingRow
+                title="Hide until you say &quot;Hey Mighty&quot;"
+                control={<Switch on={companionQuiet} onChange={toggleCompanionQuiet} />}
+              >
+                <div className="text-muted text-sm">
+                  Always ready while {CONFIG.PRODUCT_NAME} is open. Nothing on screen until you
+                  call it.
+                </div>
+              </SettingRow>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-surface3">
+              <SettingRow
+                title="Brain"
+                control={
+                  <SegmentedControl<string>
+                    items={CONFIG.VOICE_MODELS.map((m) => ({ id: m.id, label: m.label }))}
+                    active={companionModel}
+                    onChange={chooseCompanionModel}
+                    textSize="text-xs"
+                  />
+                }
+              >
+                <div className="text-muted text-sm">
+                  Which Claude answers when you talk. Opus clicks in the right place most often.
                 </div>
               </SettingRow>
             </div>

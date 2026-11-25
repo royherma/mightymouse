@@ -25,8 +25,7 @@ import {
   moveCompanionWindow
 } from '../companion-window'
 import type { CompanionStageEvent } from '../../shared/companion-debug'
-import { runLiveDraft, runLiveTurn, runLiveTurnFromText } from '../capture/live-listen'
-import { abortCompanionTurn } from '../companion-orchestrator'
+import { runLiveDraft, runLiveTurn, runLiveTurnFromText, stopLiveTurn } from '../capture/live-listen'
 import { handleHandsFreeSegment, setHandsFreeHostState } from '../capture/hands-free'
 import type { HandsFreeHostState } from '../../shared/hands-free-state'
 import { screen } from 'electron'
@@ -156,7 +155,7 @@ export function registerWindowHandlers(): void {
   // longer enough — the run keeps operating the Mac until the process dies, so
   // the user watches the thing they just told to stop carry on regardless.
   ipcMain.on(CHANNELS.companionAbortTurn, () => {
-    abortCompanionTurn()
+    stopLiveTurn()
   })
 
   // Hands-free dictation: same VAD hook as the companion, different consumer.
