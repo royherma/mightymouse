@@ -440,7 +440,7 @@ export function ChatPrefs({
 
       <ChatField
         label="Links open in"
-        help="Where a link in Chat or Code opens when you click it. ⌘-click opens the other one, right-click lets you pick."
+        help="Where a link in Chat or Code opens when you click it. ⌘-click opens the other one. Pick one from the right-click menu and it's remembered."
       >
         <select
           value={settings.linksOpenIn}

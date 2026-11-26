@@ -18,6 +18,7 @@ import {
   AlertCircle,
   RefreshCw,
   StickyNote,
+  MessageSquare,
   Play,
   Pause,
   type LucideIcon
@@ -62,9 +63,10 @@ const CHAT_ERROR_MSG: Record<NonNullable<MediaChatResult['error']>, string> = {
 }
 
 // Type filter = all + the three kinds. 'all' isn't a MediaKind so it lives here.
-type TypeFilter = 'all' | MediaKind
+export type TypeFilter = 'all' | MediaKind | 'note'
 const TYPE_FILTERS: ReadonlyArray<{ id: TypeFilter; label: string }> = [
   { id: 'all', label: 'All' },
+  { id: 'note', label: CONFIG.UI_LABELS.SIDEBAR_VOICE_NOTES },
   { id: 'screenshot', label: 'Screenshots' },
   { id: 'recording', label: 'Recordings' },
   { id: 'listen', label: 'Dictation' }
@@ -212,6 +214,7 @@ function Detail({
   onDelete,
   onEnrich,
   onRetranscribe,
+  onStartChat,
   playRequestId,
   playSeekFrac,
   onProgress
@@ -225,6 +228,7 @@ function Detail({
   onDelete: () => void
   onEnrich: () => void
   onRetranscribe: () => void
+  onStartChat?: () => void
   playRequestId?: number
   playSeekFrac?: number
   onProgress: (state: PlayState) => void
@@ -356,6 +360,16 @@ function Detail({
                 Transcript
               </div>
               <div className="flex items-center gap-1">
+                {onStartChat && item.transcript && (
+                  <Button
+                    variant="bare"
+                    onClick={onStartChat}
+                    className="flex items-center gap-1 text-xlg px-2 py-1 rounded text-muted hover:bg-surface2 hover:text-on-surface"
+                  >
+                    <MessageSquare size={11} />
+                    {CONFIG.UI_LABELS.START_CHAT_FROM_NOTE}
+                  </Button>
+                )}
                 {item.transcript && <CopyButton showLabel text={item.transcript} />}
                 <Button
                   variant="bare"
@@ -848,6 +862,8 @@ function FilterMenu({
  */
 export function MediaLibraryBody({
   focusRequest,
+  typeRequest,
+  onStartChat,
   style = { height: 'calc(100vh - 2.75rem)' }
 }: {
   /** Root style — must carry a BOUNDED height. The inner list
@@ -860,10 +876,12 @@ export function MediaLibraryBody({
    *  or the standalone window's own query-param read). A NEW object re-selects even
    *  when it names the same folder — that's why it isn't a bare string. */
   focusRequest?: { folder: string } | null
+  typeRequest?: { type: TypeFilter } | null
+  onStartChat?: (item: MediaItem) => void
 } = {}): JSX.Element {
   const [items, setItems] = useState<MediaItem[] | null>(null)
   const [query, setQuery] = useState('')
-  const [type, setType] = useState<TypeFilter>('all')
+  const [type, setType] = useState<TypeFilter>(typeRequest?.type ?? 'all')
   const [sort, setSort] = useState<SortKey>('newest')
   const [day, setDay] = useState('') // YYYY-MM-DD or '' for any date
   const [app, setApp] = useState('') // frontApp name or '' for any app
@@ -1025,12 +1043,16 @@ export function MediaLibraryBody({
 
   // The input stays on the raw `query` so typing never feels laggy; only the scan
   // over every transcript waits for the typist to settle.
+  useEffect(() => {
+    if (typeRequest) setType(typeRequest.type)
+  }, [typeRequest])
+
   const settledQuery = useDebouncedValue(query, CONFIG.MEDIA_SEARCH_DEBOUNCE_MS)
 
   const filtered = useMemo(() => {
     const q = settledQuery.trim().toLowerCase()
     return sorted.filter((it) => {
-      if (type !== 'all' && it.kind !== type) return false
+      if (type === 'note' ? !it.voiceNote : type !== 'all' && it.kind !== type) return false
       if (app && it.frontApp !== app) return false
       if (day && localDateKey(it.ts) !== day) return false
       if (q) {
@@ -1374,6 +1396,7 @@ export function MediaLibraryBody({
               onDelete={() => setPendingDelete(current)}
               onEnrich={() => void enrich(current.folder, true)}
               onRetranscribe={() => void retranscribe(current.folder)}
+              onStartChat={onStartChat ? () => onStartChat(current) : undefined}
               playRequestId={playReq?.folder === current.folder ? playReq.n : undefined}
               playSeekFrac={playReq?.folder === current.folder ? playReq.seekFrac : undefined}
               onProgress={setPlayState}

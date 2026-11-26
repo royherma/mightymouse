@@ -1,6 +1,6 @@
 import { JSX, ReactNode, RefObject, useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { BarChart3, Check, ChevronDown, ChevronRight, Ellipsis, Orbit, Factory, Headset, Inbox, KeyRound, Laptop, Layers, LayoutGrid, Rows3, Search, Server, type LucideIcon } from 'lucide-react'
+import { BarChart3, Check, ChevronDown, ChevronRight, Ellipsis, Orbit, Factory, Headset, Inbox, KeyRound, Laptop, Layers, Mic, LayoutGrid, Rows3, Search, Server, type LucideIcon } from 'lucide-react'
 import { Button } from '../components/Button'
 import { usePostUpdateNotice } from '../components/UpdateNudge'
 import { SidebarNotices } from '../components/SidebarNotices'
@@ -8,7 +8,7 @@ import { CONFIG } from '../../../shared/config'
 import { TALK } from '../../../shared/talk'
 import type { CodeTab } from '../../../shared/types'
 import { useIsAdmin } from '../hooks/useIsAdmin'
-import { BUBBA_ON, TABS, type Tab } from './mighty-shared'
+import { BUBBA_ON, TABS, VOICE_NOTES_REQUEST, type Tab } from './mighty-shared'
 import appIcon from '../assets/app-icon.png'
 
 export type SidebarMode = 'all' | 'chat' | 'code'
@@ -317,6 +317,13 @@ export function MightySidebar({
       onClick={() => void window.api.mighty.talkSession()}
     />
   )
+  const notesRow = (
+    <SidebarRow
+      icon={<Mic size={16} />}
+      label={L.SIDEBAR_VOICE_NOTES}
+      onClick={() => VOICE_NOTES_REQUEST.request(true)}
+    />
+  )
   const searchRow = (
     <SidebarRow
       icon={<Search size={16} />}
@@ -434,6 +441,7 @@ export function MightySidebar({
             >
               {moreNav.map(tabRow)}
               {talkRow}
+              {notesRow}
               {mode === 'all' && (
                 <>
                   <SidebarSection nested label={CODE_LABEL} />

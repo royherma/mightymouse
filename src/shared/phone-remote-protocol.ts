@@ -502,6 +502,7 @@ export type PhoneRemoteMessage =
   | { type: 'relayProjects' }
   | { type: 'relayProjectIdeas'; projectId: string; mode?: 'cached' | 'generate' | 'refresh' }
   | { type: 'relaySessionTranscript'; label: string }
+  | { type: 'relayMediaGet'; label: string; at: number; item: number }
   | { type: 'relaySessionInfo'; label: string }
   | { type: 'pulseGet'; label: string }
   | { type: 'pulseScore'; label: string; force?: boolean }
@@ -927,6 +928,7 @@ export type PhoneRemoteEvent =
       turns: { role: AgentTranscriptTurn['role']; at: number; text: string; recap?: string; media?: number; videos?: number[]; undo?: TurnUndoState }[]
       reason?: 'no-session' | 'no-transcript'
     }
+  | { type: 'relayMedia'; label: string; at: number; item: number; dataUrl?: string }
   | { type: 'pulseState'; label: string; state: PulseState }
   | {
       type: 'relayInfo'

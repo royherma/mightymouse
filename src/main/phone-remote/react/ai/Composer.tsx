@@ -136,6 +136,12 @@ export function Composer(props: {
           placeholder={recording ? 'Listening…' : dictating ? 'Writing it down…' : props.placeholder}
           onChange={(e) => setText(e.target.value)}
           maxLength={CONFIG.PHONE_REMOTE.CHAT_MESSAGE_MAX_CHARS}
+          onPaste={props.allowPhoto ? (e) => {
+            const pasted = [...e.clipboardData.files].find((f) => f.type.startsWith('image/'))
+            if (!pasted) return
+            e.preventDefault()
+            pick(pasted)
+          } : undefined}
           enterKeyHint="send"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {

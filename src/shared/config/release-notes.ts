@@ -4,6 +4,42 @@
 
 export const RELEASE_NOTES = [
   {
+    version: '0.59.2',
+    date: '2026-11-26',
+    changes: [
+      {
+        icon: '🎙️',
+        title: 'Hey Mighty hears you every time.',
+        detail:
+          'Say the name and it answers. Talk while it works to change course, say stop to END it, or keep the pill hidden until you call it.'
+      },
+      {
+        icon: '🖱️',
+        title: 'Hey Mighty clicks right where it aims.',
+        detail:
+          'Clicks land on the right spot on sharp screens, and asks like write a post get typed in one go. Pick which Claude answers in Settings.'
+      },
+      {
+        icon: '🎧',
+        title: 'Dictation uses the mic you picked.',
+        detail:
+          'MightyMouse follows the mic your computer is set to instead of sticking to the built-in one. Switch mics from the menu bar too.'
+      },
+      {
+        icon: '🌐',
+        title: 'Google sign-in works in the Browser tab.',
+        detail:
+          'Sign in to Google sites without a Something went wrong page. Sign-in links for your apps open in your usual browser and finish there.'
+      },
+      {
+        icon: '⬇️',
+        title: 'Updates reach you wherever you opened it.',
+        detail:
+          'Started MightyMouse straight from the download? It offers to move itself to Applications, so it keeps itself up to date.'
+      }
+    ]
+  },
+  {
     version: '0.59.1',
     date: '2026-11-25',
     changes: [

@@ -538,7 +538,7 @@ export function transcriptMedia(turn: Pick<AgentTranscriptTurn, 'files'>): strin
   return (turn.files ?? []).filter((f) => CHAT_MEDIA_CONTENT_TYPES[extname(f).toLowerCase()])
 }
 
-function transcriptMediaPath(label: string, at: number, item: number): string | undefined {
+export function transcriptMediaPath(label: string, at: number, item: number): string | undefined {
   const session = transcriptSession(label)
   const turn = session ? readSessionTranscript(session).find((t) => t.at === at) : undefined
   return turn ? transcriptMedia(turn)[item] : undefined

@@ -621,6 +621,7 @@ export interface MediaItem {
   /** Capture time, ISO-8601, parsed from the folder name. */
   ts: string
   run_id?: string
+  voiceNote?: boolean
   /** The note the user left on this capture (FeedbackEntry.note, joined by run_id). */
   note?: string
   /** file:// or media:// URL to the primary visual (png/mp4), if any. */
@@ -1083,6 +1084,7 @@ export interface StoredSettings {
   whisperModelPath: string
   videoDevice: string
   audioDevice: string
+  audioDeviceChosen?: boolean
   /** Whisper language code ('en', 'es', 'he', …). Picks the model too — see whisperModelFor. */
   whisperLang: string
   /** Which engine transcribes. Exists as the one-line rollback, not as an
@@ -2096,7 +2098,7 @@ export interface MediaChatPayload {
   question: string
 }
 
-export type MightyRunSource = 'chat' | 'job' | 'phone' | 'listen' | 'capture' | 'voice' | 'talk'
+export type MightyRunSource = 'chat' | 'job' | 'phone' | 'listen' | 'capture' | 'voice' | 'talk' | 'note'
 
 /** One exchange in a Mighty session: the user's (or job's) message and Mighty's reply. */
 export interface MightyTurn {
@@ -2354,10 +2356,10 @@ export type LinkTarget = 'app' | 'browser'
 // Google refuses sign-in inside the in-app browser, so app/CLI sign-ins (callback to this computer) open outside it.
 export function signsInOutsideApp(url: string): boolean {
   const back = URL.parse(url)?.searchParams.get('redirect_uri')
-  return !!back && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//i.test(back)
+  return !!back && /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:\d+)?([/?#]|$)/i.test(back)
 }
 
-export type LinkMenuChoice = 'app' | null
+export type LinkMenuChoice = LinkTarget | null
 
 export type NativeMenuItem =
   | { id: string; label: string; enabled?: boolean; checked?: boolean; sublabel?: string }

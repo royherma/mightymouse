@@ -7,11 +7,11 @@ import { ViewModeMenu } from './components/ViewModeMenu'
 import { CodePanel, codeViewTitle } from './components/CodePanel'
 import { useAgentRelay } from './hooks/useAgentRelay'
 import { RAIL_BROWSER_EVENT, requestRailTab, useCloseKey, useRailHost } from './hooks/useRailMode'
-import type { HistoryHandoff } from './mighty/mighty-shared'
+import { VOICE_NOTES_REQUEST, NOTE_CHAT_REQUEST, type HistoryHandoff } from './mighty/mighty-shared'
 import { useIsAdmin } from './hooks/useIsAdmin'
 import type { GridRequest } from './mighty/NerdWorkspace'
 import { CONFIG } from '../../shared/config'
-import { MediaLibraryBody } from './MediaLibraryApp'
+import { MediaLibraryBody, type TypeFilter } from './MediaLibraryApp'
 import CanvasApp from './CanvasApp'
 import { SideBrowser } from './components/side-browser'
 import { useRailResize } from './hooks/useRailResize'
@@ -88,6 +88,7 @@ export default function MightyApp(): JSX.Element {
   // request so re-opening the SAME capture still re-selects it (a bare string would
   // compare equal and the prop-effect wouldn't fire).
   const [libraryFocusReq, setLibraryFocusReq] = useState<{ folder: string } | null>(null)
+  const [libraryTypeReq, setLibraryTypeReq] = useState<{ type: TypeFilter } | null>(null)
   const bodyHeight = 'calc(100vh - 2.75rem)'
   const [showMade, setShowMade] = useState(false)
   // Resolved persona name (user override or CONFIG default). Loaded once; the
@@ -146,6 +147,16 @@ export default function MightyApp(): JSX.Element {
     setTab('library')
     if (focus !== '') setLibraryFocusReq({ folder: focus })
   }, [])
+
+  useEffect(
+    () =>
+      VOICE_NOTES_REQUEST.listen(() => {
+        setTab('library')
+        setShowMade(false)
+        setLibraryTypeReq({ type: 'note' })
+      }),
+    []
+  )
 
   useEffect(() => {
     return window.api.onMediaFocusFolder((folder) => {
@@ -476,7 +487,15 @@ export default function MightyApp(): JSX.Element {
                     <MadeTab name={name} />
                   </div>
                 ) : (
-                  <MediaLibraryBody focusRequest={libraryFocusReq} style={{ flex: 1, minHeight: 0 }} />
+                  <MediaLibraryBody
+                    focusRequest={libraryFocusReq}
+                    typeRequest={libraryTypeReq}
+                    onStartChat={(item) => {
+                      setTab('chat')
+                      NOTE_CHAT_REQUEST.request(item.transcript ?? '')
+                    }}
+                    style={{ flex: 1, minHeight: 0 }}
+                  />
                 )}
               </div>
             )}

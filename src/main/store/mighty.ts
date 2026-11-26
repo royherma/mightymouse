@@ -149,9 +149,10 @@ export function onSessionsWritten(listener: () => void): void {
   sessionsWritten = listener
 }
 
-let projectsWritten: (() => void) | null = null
+const projectsListeners = new Set<() => void>()
+const projectsWritten = (): void => projectsListeners.forEach((listener) => listener())
 export function onProjectsWritten(listener: () => void): void {
-  projectsWritten = listener
+  projectsListeners.add(listener)
 }
 
 export const MIGHTY = {
@@ -555,7 +556,7 @@ export const MIGHTY = {
       appendLine(PATHS.MIGHTY_PROJECTS, { ...project, order, updated })
       changed = true
     })
-    if (changed) projectsWritten?.()
+    if (changed) projectsWritten()
     return changed
   },
 
@@ -574,7 +575,7 @@ export const MIGHTY = {
     if (name === '') return null
     const record: MightyProject = { ...project, name }
     appendLine(PATHS.MIGHTY_PROJECTS, record)
-    projectsWritten?.()
+    projectsWritten()
     return record
   },
 
@@ -636,7 +637,7 @@ export const MIGHTY = {
     removeProjectImageFiles(id)
     map.delete(id)
     if (!rewriteFile(PATHS.MIGHTY_PROJECTS, [...map.values()])) return false
-    projectsWritten?.()
+    projectsWritten()
 
     const sessions = sessionsById()
     for (const session of sessions.values()) {

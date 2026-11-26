@@ -19,6 +19,7 @@ const WEB_LABEL = 'web/browser'
 const WEB_ALLOWED_MESSAGES = new Set<PhoneRemoteMessage['type']>([
   'relaySessionPeek',
   'relaySessionTranscript',
+  'relayMediaGet',
   'relaySessionUndo',
   'relaySessionReply',
   'relaySessionStop',

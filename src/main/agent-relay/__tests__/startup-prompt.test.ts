@@ -146,3 +146,29 @@ it('keeps a terminal Codex session when desktop threads are listed', () => {
     rescanCodexThreads(home)
   }
 })
+
+it('reads the Antigravity tool-permission menu with its hard-wrapped rows', () => {
+  const p = parseStartupPrompt([
+    'MCP',
+    '─'.repeat(80),
+    '',
+    'mightymouse-code/browser_open',
+    '',
+    'Allow calling this tool?',
+    '> 1. Yes, allow tool call',
+    "  2. Yes, and always allow tool 'mightymouse-code/browser_open' in this",
+    'conversation',
+    '  3. No, deny tool call',
+    '',
+    '  ↑/↓ Navigate · tab Amend',
+    'esc to cancel                 auto · Gemini 4 Neon · medium · 1 task(s) · /tasks'
+  ])
+  expect(p?.question).toBe('Allow calling this tool?')
+  expect(p?.detail).toBe('mightymouse-code/browser_open')
+  expect(p?.options).toEqual([
+    'Yes, allow tool call',
+    "Yes, and always allow tool 'mightymouse-code/browser_open' in this conversation",
+    'No, deny tool call'
+  ])
+  expect(p?.selected).toBe(0)
+})

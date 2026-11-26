@@ -62,6 +62,7 @@ import {
   SOURCE_MENU_W,
   TITLE_RANK_BOOST,
   SIDEBAR_SOURCE_GROUPS,
+  NOTE_CHAT_REQUEST,
   type HistoryHandoff,
   type SearchHit
 } from './mighty-shared'
@@ -532,6 +533,18 @@ export function ChatTab({
     [activeTab, activePaneId, switchPaneSession, sessions]
   )
 
+  useEffect(() => {
+    if (sessions.length === 0) return
+    return NOTE_CHAT_REQUEST.listen((text) => {
+      const want = text.replace(/\s+/g, ' ').trim()
+      const note = sessions.find(
+        (s) => s.turns[0]?.source === 'note' && s.turns[0].q.replace(/\s+/g, ' ').trim() === want
+      )
+      if (note) openSessionInActivePane(note.id)
+      else void newChatInActivePane()
+    })
+  }, [sessions, openSessionInActivePane, newChatInActivePane])
+
   // A History Continue whose run still resolves to a real session: open that session
   // in the active pane and consume the handoff here, so it never reaches the pane's
   // seed-a-transient-copy path. Handoffs without an openSessionId (older rows) fall
@@ -802,7 +815,7 @@ export function ChatTab({
     (s: MightySession): boolean => {
       if ((s.archived === true) !== showArchived) return false
       const open = s.id === activePane?.sessionId || openElsewhere.has(s.id) || s.runId !== undefined
-      if (!showEmpty && !open && !hasRealExchange(s)) return false
+      if (!showEmpty && !open && !hasRealExchange(s) && sourceGroupOf(s) !== 'note') return false
       if (query !== '') return searchHits.has(s.id)
       return !hiddenSources.includes(sourceGroupOf(s))
     },

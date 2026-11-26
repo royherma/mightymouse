@@ -161,7 +161,15 @@ export async function openWeb(url: string, flip: boolean): Promise<void> {
 
 export async function linkMenu(e: { preventDefault: () => void }, url: string): Promise<void> {
   e.preventDefault()
-  if ((await window.api.linkMenu(url, hasRail())) === 'app') openInRail(url)
+  const choice = await window.api.linkMenu(url, hasRail())
+  if (choice === 'app') openInRail(url)
+  if (choice) await rememberLinkTarget(choice)
+}
+
+async function rememberLinkTarget(target: LinkTarget): Promise<void> {
+  const settings = await window.api.mighty.getSettings()
+  linkTarget = target
+  if (settings.linksOpenIn !== target) await window.api.mighty.setSettings({ ...settings, linksOpenIn: target })
 }
 
 export function currentLinkTarget(): LinkTarget {

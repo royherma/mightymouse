@@ -13,7 +13,8 @@ import {
   BrowserWindow,
   screen,
   session,
-  systemPreferences
+  systemPreferences,
+  webContents
 } from 'electron'
 import { initializePaths, cleanupTmp } from './store/paths'
 import { HISTORY, reconcileHistoryEncryption } from './store/history'
@@ -1461,6 +1462,7 @@ if (!gotTheLock) {
   })
 
   app.on('will-quit', () => {
+    console.log('[quit] will-quit')
     logComputerUseQuit()
     stopCapture()
     stopContextLogging()
@@ -1493,14 +1495,22 @@ if (!gotTheLock) {
     // its pending history row on the way out.
     const killed = abortAllRuns()
     if (killed > 0) console.log(`Aborted ${killed} in-flight run(s) on quit.`)
+    // Skips Node teardown: uiohook's exit-time stop joins a hook thread that dispatch_syncs to main on any keypress, hanging quit forever.
+    ;(process as unknown as { reallyExit: (code: number) => never }).reallyExit(0)
   })
 
   // Drain buffered analytics before the process exits. Without this, events that
   // fired late in the session (e.g. right before quit) die in the in-memory
   // buffer. We delay the quit once to let the final insert land, then quit.
   let analyticsFlushed = false
+  const flushSessionsForHardExit = (): Promise<unknown> => {
+    const all = new Set([session.defaultSession, session.fromPartition('persist:mm-side-browser')])
+    for (const wc of webContents.getAllWebContents()) all.add(wc.session)
+    return Promise.all([...all].map((s) => (s.flushStorageData(), s.cookies.flushStore())))
+  }
   app.on('before-quit', (e) => {
     if (analyticsFlushed) return
+    console.log('[quit] before-quit')
     e.preventDefault()
     analyticsFlushed = true
     // Cap the wait so a hung network call can't block quit forever.
@@ -1517,7 +1527,8 @@ if (!gotTheLock) {
         flushAnalyticsNow(),
         disableClamshell(),
         handback('disconnect', { relock: false }),
-        releaseDefaultInput()
+        releaseDefaultInput(),
+        flushSessionsForHardExit()
       ]),
       new Promise((r) => setTimeout(r, 2000))
     ]).finally(done)

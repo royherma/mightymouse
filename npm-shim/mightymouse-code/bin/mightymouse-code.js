@@ -379,7 +379,34 @@ function sessionTag() {
  * booted), so the Mac cannot use the name to recognise a reconnecting session.
  */
 function sessionId() {
-  return claudeSessionId() || process.env.CODEX_THREAD_ID || process.env.CODEX_SESSION_ID || codexPaneSessionId()
+  return claudeSessionId() || process.env.CODEX_THREAD_ID || process.env.CODEX_SESSION_ID || codexPaneSessionId() || agySessionId()
+}
+
+let agyId = ''
+let agyCheckedAt = 0
+let underAgy = null
+const AGY_LOG = /^n(.*\/antigravity-cli\/log\/cli-[^/]*\.log)$/
+
+// agy shares one log name per start second, so only a log naming our agent's pid is trusted.
+function agySessionId() {
+  underAgy ??= (process.env.AI_AGENT || detectAgent()) === 'antigravity'
+  if (!underAgy) return ''
+  if (agyId && (!agyId.startsWith('agy-') || process.uptime() > 60)) return agyId
+  if (Date.now() - agyCheckedAt < 5000) return agyId
+  agyCheckedAt = Date.now()
+  const pid = agentPid()
+  try {
+    const open = execFileSync('lsof', ['-nP', '-a', '-p', String(pid), '-Fn'], {
+      encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 2000
+    })
+    for (const line of open.split('\n')) {
+      const log = AGY_LOG.exec(line)?.[1]
+      const text = log ? readFileSync(log, 'utf8') : ''
+      const id = text.includes(`process with pid ${pid}\n`) && /Created conversation ([0-9a-f-]{36})/.exec(text)?.[1]
+      if (id) return (agyId = id)
+    }
+  } catch {}
+  return (agyId = `agy-${pid}`)
 }
 
 let codexPaneId = ''
@@ -540,6 +567,8 @@ function agentCwd() {
  */
 function isUtilitySession(cwd) {
   if (process.env.MM_INTERNAL_RUN) return true
+  // A script's `claude -p` inherits its caller's TMUX_PANE; registering it put a second row on that pane.
+  if (process.env.TMUX_PANE && /^sdk-/.test(process.env.CLAUDE_CODE_ENTRYPOINT || '')) return true
   const home = process.env.HOME || homedir()
   if (cwd === home + '/.claude/.namer-scratch' || cwd === home + '/.claude') return true
   return /\/T\/tmp\./.test(cwd)

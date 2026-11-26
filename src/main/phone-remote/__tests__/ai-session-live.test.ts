@@ -43,6 +43,7 @@ vi.mock('../../../shared/env', async (importOriginal) => {
 })
 
 vi.mock('../../store/mighty', () => ({
+  onProjectsWritten: () => {},
   MIGHTY: {
     listProjects: () => [
       { id: 'p1', name: 'MightyMouse', repoFolder: '/tmp/mightymouse', icon: 'mouse', pinned: true },

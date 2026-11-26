@@ -9,18 +9,19 @@
 // The actual prompts -> backend -> History -> HUD pipeline lives in the shared
 // hud-run service; this module only stashes the capture context and hands off.
 import { join } from 'path'
+import { writeFileSync } from 'fs'
 import { PREFS } from '../store/prefs'
 import { EVENTS } from '../store/events'
 import { runningHud, failHud } from '../hud-window'
 import { runHudRun, clearHudThread, type ResolvedActionExtra } from '../backend/hud-run'
 import { estimateDuration } from '../estimator/duration-estimator'
 import { buildMemoryBlob } from '../backend/context-memory'
-import { createRunFolder } from '../store/run-folder'
+import { createRunFolder, VOICE_NOTE_MARKER } from '../store/run-folder'
 import { readCaptureContext } from './capture-utils'
 import { HISTORY, historyTimestamp } from '../store/history'
 import { MIGHTY } from '../store/mighty'
 import { CONFIG } from '../../shared/config'
-import type { HudActionKind, CaptureKind, HistoryEntry } from '../../shared/types'
+import type { HudActionKind, CaptureKind, HistoryEntry, MightyRunSource } from '../../shared/types'
 
 /** What a capture HUD card can act on. The folder is always present (every
  *  capture writes one); transcript/screenshotPath are set per capture kind. */
@@ -61,6 +62,7 @@ export interface CaptureLogInput {
   /** Recording video path, rewritten to its new home after the folder move. */
   videoPath?: string
   durationS?: number
+  source?: MightyRunSource
 }
 
 /** What logCapture returns: the capture's new folder, plus the primary media
@@ -122,6 +124,7 @@ export function logCapture(input: CaptureLogInput): CaptureLogResult {
     }
   })
   const folder = runDir ?? input.folder
+  if (input.source === 'note') writeFileSync(join(folder, VOICE_NOTE_MARKER), '')
   // Media assets moved with their folder — re-home each path to the new folder so
   // a preview/reveal points at the moved file, not the emptied pre-move location.
   const rehome = (p?: string): string | null =>
@@ -140,7 +143,7 @@ export function logCapture(input: CaptureLogInput): CaptureLogResult {
   const sessionId = PREFS.getIncognito()
     ? undefined
     : MIGHTY.appendTurn(undefined, {
-        source: input.kind === 'screenshot' ? 'capture' : 'listen',
+        source: input.source ?? (input.kind === 'screenshot' ? 'capture' : 'listen'),
         q: instruction,
         a: '',
         ts,

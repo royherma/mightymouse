@@ -48,20 +48,27 @@ import type { StartingInfo } from './starting-agent'
 
 const NO_ROOT: React.RefObject<HTMLElement | null> = { current: null }
 
-function useZoomOutKeys(root: React.RefObject<HTMLDivElement | null>, onZoomOut: (() => void) | undefined): void {
-  const latest = useRef(onZoomOut)
-  latest.current = onZoomOut
+function useZoomOutKeys(
+  root: React.RefObject<HTMLDivElement | null>,
+  onZoomOut: (() => void) | undefined,
+  onZoomTo: ((index: number) => boolean) | undefined
+): void {
+  const latest = useRef({ onZoomOut, onZoomTo })
+  latest.current = { onZoomOut, onZoomTo }
   const on = Boolean(onZoomOut)
   usePanePrefixKeys(on ? root : NO_ROOT, (cmd) => {
-    if (cmd.kind === 'zoom') latest.current?.()
+    if (cmd.kind === 'zoom') latest.current.onZoomOut?.()
+    if (cmd.kind === 'jump') latest.current.onZoomTo?.(cmd.index)
   })
   useEffect(() => {
     if (!on) return
     const onKey = (e: KeyboardEvent): void => {
-      if (cmuxCommand(e)?.kind !== 'zoom' || !root.current?.offsetParent) return
+      const cmd = cmuxCommand(e)
+      if (!cmd || !root.current?.offsetParent) return
+      if (cmd.kind === 'zoom') latest.current.onZoomOut?.()
+      else if (cmd.kind !== 'jump' || !latest.current.onZoomTo?.(cmd.index)) return
       e.preventDefault()
       e.stopPropagation()
-      latest.current?.()
     }
     window.addEventListener('keydown', onKey, true)
     return () => window.removeEventListener('keydown', onKey, true)
@@ -98,6 +105,7 @@ export function SessionDetail(props: {
   headActions?: React.ReactNode
   hideViewToggle?: boolean
   onZoomOut?: () => void
+  onZoomTo?: (index: number) => boolean
 }): React.JSX.Element {
   const { session, history, onRespond, onBack, shared, backLabel, withRail, opening, starting } = props
   const sessionRef = session.sessionId ?? (session.origin?.tmuxPane || session.label)
@@ -107,7 +115,7 @@ export function SessionDetail(props: {
   useRailBrowserShortcut(Boolean(withRail), () => setRailMode('browser'))
   const browsing = railMode === 'browser'
   const railResize = useRailResize(sheetRef, 'agent-projects-grip')
-  useZoomOutKeys(sheetRef, props.onZoomOut)
+  useZoomOutKeys(sheetRef, props.onZoomOut, props.onZoomTo)
 
   // 1s, not the card's 60s: an exact uptime on a minute clock reads as frozen.
   const [now, setNow] = useState(() => Date.now())

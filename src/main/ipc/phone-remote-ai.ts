@@ -1,9 +1,10 @@
 import { basename } from '../../shared/attachments'
 import type { PhoneRemoteMessage, RelayProjectWire } from '../../shared/phone-remote-protocol'
 import type { MightyProject, RepoPull } from '../../shared/types'
-import { MIGHTY } from '../store/mighty'
+import { MIGHTY, onProjectsWritten } from '../store/mighty'
 import { sendToPhone } from '../phone-remote/server'
-import { transcriptMedia, transcriptSession } from '../phone-remote/relay-http'
+import { nativeImage } from 'electron'
+import { transcriptMedia, transcriptMediaPath, transcriptSession } from '../phone-remote/relay-http'
 import { readSessionChecklist } from '../agent-relay/session-checklist'
 import { readRunningHelpers, readSessionTools, readSessionTouched, readSessionTranscript } from '../agent-relay/session-transcript'
 import { projectIdeas } from '../agent-relay/project-ideas'
@@ -88,6 +89,13 @@ export async function handleCodeSetModel(id: string): Promise<void> {
   await handleCodeGetModels()
 }
 
+const PROJECTS_RESEND_MS = 300
+let projectsResend: ReturnType<typeof setTimeout> | null = null
+onProjectsWritten(() => {
+  if (projectsResend) clearTimeout(projectsResend)
+  projectsResend = setTimeout(() => { projectsResend = null; handleRelayProjects() }, PROJECTS_RESEND_MS)
+})
+
 export function handleRelayProjects(): void {
   const projects: RelayProjectWire[] = codeProjects().map((p) => ({
     id: p.id,
@@ -129,6 +137,18 @@ export async function handleRelaySessionTranscript(msg: Msg<'relaySessionTranscr
     return { role: t.role, at: t.at, text: t.text, recap: t.recap, media: media.length || undefined, videos: videos.length ? videos : undefined, undo: t.undo }
   })
   sendToPhone({ type: 'relayTranscript', label: msg.label, turns, reason: turns.length ? undefined : 'no-transcript' })
+}
+
+const MEDIA_PREVIEW_WIDTH = 720
+const STILL_IMAGE = /\.(png|jpe?g|webp|gif)$/i
+
+export function handleRelayMediaGet(msg: Msg<'relayMediaGet'>): void {
+  if (typeof msg.label !== 'string' || !Number.isFinite(msg.at) || !Number.isInteger(msg.item)) return
+  const path = transcriptMediaPath(msg.label, msg.at, msg.item)
+  const image = path && STILL_IMAGE.test(path) ? nativeImage.createFromPath(path) : null
+  const fit = image && !image.isEmpty() && image.getSize().width > MEDIA_PREVIEW_WIDTH ? image.resize({ width: MEDIA_PREVIEW_WIDTH }) : image
+  const dataUrl = fit && !fit.isEmpty() ? `data:image/jpeg;base64,${fit.toJPEG(80).toString('base64')}` : undefined
+  sendToPhone({ type: 'relayMedia', label: msg.label, at: msg.at, item: msg.item, dataUrl })
 }
 
 export async function handleRelaySessionUndo(msg: Msg<'relaySessionUndo'>): Promise<void> {

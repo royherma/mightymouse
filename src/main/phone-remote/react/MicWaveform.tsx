@@ -97,7 +97,7 @@ function MicWaveformBars({
         // iOS Safari hands back a SUSPENDED context, and a suspended analyser
         // reads all zeros forever -- flat bars that look like a dead mic. The
         // mic tap is a real gesture, so this resume is allowed.
-        if (audioCtx.state === 'suspended') void audioCtx.resume()
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {})
         analyser = audioCtx.createAnalyser()
         analyser.fftSize = 512
         source = audioCtx.createMediaStreamSource(stream)
@@ -244,7 +244,7 @@ function MicWaveformSine({
         // iOS Safari hands back a SUSPENDED context, and a suspended analyser
         // reads all zeros forever -- flat bars that look like a dead mic. The
         // mic tap is a real gesture, so this resume is allowed.
-        if (audioCtx.state === 'suspended') void audioCtx.resume()
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {})
         analyser = audioCtx.createAnalyser()
         analyser.fftSize = 512
         source = audioCtx.createMediaStreamSource(stream)

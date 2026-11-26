@@ -393,7 +393,8 @@ export async function handlePhoneAudio(
     kind: 'listen',
     folder,
     transcript: text,
-    durationS
+    durationS,
+    source: to === PHONE_AUDIO_TO.note ? 'note' : undefined
   })
   // logCapture() above wrote this run into HISTORY, so the phone's sheet is now
   // one row stale -- push the refreshed first page.

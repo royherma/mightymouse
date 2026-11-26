@@ -10,7 +10,7 @@ import './SessionTable.css'
 import { PulseCell } from './session-pulse'
 import { usePulseFresh } from './session-pulse-mac'
 import { LoadBadge, LoadCell, useSessionLoads } from './session-load'
-import { SessionPanes } from './SessionPanes'
+import { SessionPanes, paneAt } from './SessionPanes'
 import type { SessionLoad } from '../../../shared/types'
 import type { PulseRow } from '../../../shared/session-pulse'
 import { Tooltip, useTooltip } from './Tooltip'
@@ -1557,6 +1557,15 @@ export function CodePanel(props: {
                             ? () => {
                                 setAgentFromTable(false)
                                 setDetailLabel(sheetLabelBeforeTable.current)
+                              }
+                            : undefined
+                        }
+                        onZoomTo={
+                          agentFromTable && agentTable
+                            ? (index) => {
+                                const next = paneAt(index)
+                                if (next) setDetailLabel(sessionRef(next))
+                                return Boolean(next)
                               }
                             : undefined
                         }

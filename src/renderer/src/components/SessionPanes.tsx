@@ -23,6 +23,12 @@ const ORDER_KEY = 'mm.panes.order.v1'
 const SIZE_KEY = 'mm.panes.sizes.v1'
 const CLOSED_KEY = 'mm.panes.closed.v1'
 
+let zoomedFrom: AgentRelaySessionInfo[] = []
+
+export function paneAt(index: number): AgentRelaySessionInfo | undefined {
+  return zoomedFrom[index]
+}
+
 function paneKey(session: AgentRelaySessionInfo): string {
   return session.sessionId || `${session.label}:${session.pid ?? ''}:${session.since ?? ''}`
 }
@@ -350,6 +356,11 @@ export function SessionPanes(props: {
     writeJson(ORDER_KEY, keys)
   }
 
+  const zoomInto = (session: AgentRelaySessionInfo): void => {
+    zoomedFrom = shown
+    props.onOpen(session)
+  }
+
   const prefix = usePaneKeys(
     wrapRef,
     groups.length,
@@ -357,7 +368,7 @@ export function SessionPanes(props: {
     setPicked,
     (key) => {
       const session = shown.find((s) => paneKey(s) === key)
-      if (session) props.onOpen(session)
+      if (session) zoomInto(session)
     },
     closePane,
     props.onNewSession ? () => void startNew() : undefined
@@ -467,7 +478,7 @@ export function SessionPanes(props: {
                   <Button
                     variant="icon"
                     className="session-pane-hover"
-                    onClick={() => props.onOpen(session)}
+                    onClick={() => zoomInto(session)}
                     title="Open full size (⌘⇧↩)"
                     aria-label="Open full size"
                   >

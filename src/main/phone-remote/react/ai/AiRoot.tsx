@@ -280,7 +280,7 @@ export default function AiRoot(props: {
   const [showSteps, setShowSteps] = useState(readSteps)
   const [sendError, setSendError] = useState<string | undefined>()
   const [watching, setWatching] = useState(false)
-  const [outbox, setOutbox] = useState<{ label: string; text: string; at: number }[]>([])
+  const [outbox, setOutbox] = useState<{ label: string; text: string; at: number; photo?: string }[]>([])
   const mirrorStartedHere = useRef(false)
   const shownRefusal = useRefusal(code.refusal)
 
@@ -598,9 +598,10 @@ export default function AiRoot(props: {
     const row = sessionRow(current, Date.now())
     const busy = row.health === 'working'
     const said = codeThreadItems(current.label, ai.transcripts[current.label] ?? [], showSteps)
-    const heard = said.filter((i) => i.kind === 'you').map((i) => (i.kind === 'you' ? i.text : ''))
+    const heard = said.flatMap((i) => (i.kind === 'you' ? [i] : []))
     const waiting = outbox.filter(
-      (o) => o.label === current.label && Date.now() - o.at < OUTBOX_MS && !heard.some((t) => t.includes(o.text))
+      (o) => o.label === current.label && Date.now() - o.at < OUTBOX_MS &&
+        !heard.some((i) => (o.text ? i.text.includes(o.text) : i.media.length > 0 && i.at >= o.at - OUTBOX_MS))
     )
     const label = current.label
     const pulse: PulseState = ai.pulse[label] ?? NO_PULSE
@@ -610,7 +611,7 @@ export default function AiRoot(props: {
     }
     const items: ThreadItem[] = [
       ...said,
-      ...waiting.map((o): ThreadItem => ({ kind: 'you', key: `out${o.at}`, at: o.at, text: o.text, media: [] }))
+      ...waiting.map((o): ThreadItem => ({ kind: 'you', key: `out${o.at}`, at: o.at, text: o.text, media: o.photo ? [{ key: `out${o.at}`, src: o.photo, name: 'Photo you sent' }] : [] }))
     ]
     screen = (
       <Conversation
@@ -641,15 +642,15 @@ export default function AiRoot(props: {
         undoError={ai.undoError?.label === current.label ? ai.undoError : null}
         onSend={(text, file) => {
           setSendError(undefined)
-          const reply = (): void => {
-            if (!text.trim()) return
+          const reply = (photo?: string): void => {
+            if (!text.trim() && !photo) return
             code.onSessionReply?.(current.label, text.trim())
-            setOutbox((prev) => [...prev.filter((o) => Date.now() - o.at < OUTBOX_MS), { label: current.label, text: text.trim(), at: Date.now() }])
+            setOutbox((prev) => [...prev.filter((o) => Date.now() - o.at < OUTBOX_MS), { label: current.label, text: text.trim(), at: Date.now(), photo }])
           }
           if (!file || !code.onSessionAttach) return reply()
           void code.onSessionAttach(current.label, file).then((ok) => {
             if (!ok) setSendError('The photo did not send. Try again.')
-            reply()
+            reply(ok ? URL.createObjectURL(file) : undefined)
           })
         }}
       />

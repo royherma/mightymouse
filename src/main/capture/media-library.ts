@@ -26,6 +26,7 @@ import { readdirSync, statSync, existsSync, readFileSync, rmSync } from 'fs'
 import { join, basename } from 'path'
 import { shell } from 'electron'
 import { PATHS } from '../store/paths'
+import { VOICE_NOTE_MARKER } from '../store/run-folder'
 import { PREFS } from '../store/prefs'
 import { FEEDBACK } from '../store/feedback'
 import { readCachedInsights, enrichCapture } from './insights'
@@ -204,6 +205,7 @@ function scanFolder(folder: string): MediaItem | null {
     kind,
     ts,
     run_id: folderRunId(folder),
+    voiceNote: existsSync(join(folder, VOICE_NOTE_MARKER)) || undefined,
     imagePath,
     videoPath,
     audioPath,

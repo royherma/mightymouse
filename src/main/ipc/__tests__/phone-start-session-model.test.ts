@@ -10,6 +10,7 @@ const h = vi.hoisted(() => ({
 
 vi.mock('electron', () => ({ app: { getPath: () => '/tmp' }, ipcMain: { handle: () => {} } }))
 vi.mock('../../store/mighty', () => ({
+  onProjectsWritten: () => {},
   MIGHTY: { listProjects: () => [{ id: 'p1', name: 'MightyMouse', repoFolder: '/tmp/mm' }] }
 }))
 vi.mock('../../phone-remote/server', () => ({

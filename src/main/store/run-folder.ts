@@ -35,6 +35,8 @@ import { RunKind, RunContext } from '../../shared/types'
 // "fully adaptable" property. Incognito is the caller's call: an incognito action
 // skips createRunFolder entirely so nothing persists.
 
+export const VOICE_NOTE_MARKER = 'voice-note'
+
 export interface RunFolderMeta {
   runId: string
   ts: string

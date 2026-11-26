@@ -297,7 +297,13 @@ export function registerSystemHandlers(): void {
       let choice: LinkMenuChoice = null
       Menu.buildFromTemplate([
         ...(canOpenHere ? [{ label: 'Open in the Browser tab', click: () => (choice = 'app') }] : []),
-        { label: 'Open in your browser', click: () => void shell.openExternal(url) },
+        {
+          label: 'Open in your browser',
+          click: () => {
+            choice = 'browser'
+            void shell.openExternal(url)
+          }
+        },
         { type: 'separator' as const },
         { label: 'Copy link', click: () => clipboard.writeText(url) }
       ]).popup({

@@ -406,7 +406,7 @@ function resumeArgs(harness: AgentHarness, sessionId: string): string[] {
   if (harness === 'claude') return ['--resume', sessionId]
   if (harness === 'codex') return ['resume', sessionId]
   if (harness === 'cursor') return ['--resume', sessionId]
-  if (harness === 'antigravity') return ['--conversation', sessionId]
+  if (harness === 'antigravity') return sessionId.startsWith('agy-') ? [] : ['--conversation', sessionId]
   return []
 }
 

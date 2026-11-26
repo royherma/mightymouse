@@ -49,7 +49,9 @@ export const SETTINGS = {
       try {
         const raw = JSON.parse(readFileSync(PATHS.SETTINGS_FILE, 'utf-8'))
         const merged: StoredSettings = withResolvedBinaries({ ...base, ...raw })
-        if (merged.audioDevice === CONFIG.LEGACY_AUDIO_DEVICE) merged.audioDevice = CONFIG.AUDIO_DEVICE
+        if (merged.audioDevice === CONFIG.LEGACY_AUDIO_DEVICE && !merged.audioDeviceChosen) {
+          merged.audioDevice = CONFIG.AUDIO_DEVICE
+        }
         cache = merged
         return merged
       } catch (err) {
@@ -70,7 +72,8 @@ export const SETTINGS = {
   },
 
   set(patch: Partial<StoredSettings>): StoredSettings {
-    const next = withResolvedBinaries({ ...this.get(), ...patch })
+    const chosen = patch.audioDevice === undefined ? {} : { audioDeviceChosen: true }
+    const next = withResolvedBinaries({ ...this.get(), ...patch, ...chosen })
     cache = next
     try {
       writeFileSync(PATHS.SETTINGS_FILE, JSON.stringify(next, null, 2), 'utf-8')

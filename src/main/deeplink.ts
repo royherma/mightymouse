@@ -42,6 +42,7 @@ export type DeepLinkRoute =
   // <scheme>://code/<tab> — straight to the Code tab, so a card, a script or a
   // link can land on one agent's conversation instead of on Settings.
   | { kind: 'code'; tab?: CodeTab; session?: string }
+  | { kind: 'chat'; session?: string }
   | { kind: 'canvas' }
   | { kind: 'mod'; id: string }
   | { kind: 'unknown' }
@@ -78,6 +79,7 @@ export function parseDeepLink(rawUrl: string): DeepLinkRoute {
   // <scheme>://phone-remote — the "Open the screen" affordance.
   if (url.hostname === 'phone-remote') return { kind: 'phone-remote' }
   if (url.hostname === 'canvas') return { kind: 'canvas' }
+  if (url.hostname === 'chat') return { kind: 'chat', session: url.searchParams.get('session')?.trim() || undefined }
   if (url.hostname === 'mod' && /^[0-9a-z]{10}$/.test(action)) return { kind: 'mod', id: action.toUpperCase() }
   // <scheme>://code, or <scheme>://code/agents to name the sub-tab. An
   // unrecognised tab falls back to the Code tab's own default rather than
@@ -159,6 +161,12 @@ export async function handleDeepLink(rawUrl: string): Promise<void> {
     queueAgentUrl(modLinkUrl(route.id))
     showMightyWindow()
     getMightyWindow()?.webContents.send(CHANNELS.sideBrowserOpenUrl)
+    return
+  }
+  if (route.kind === 'chat') {
+    if (isMac && app.dock) void app.dock.show()
+    showMightyWindow(false, route.session)
+    setImmediate(() => applyDockIcon())
     return
   }
   if (route.kind === 'code') {

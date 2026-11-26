@@ -416,7 +416,24 @@ function noteAsked(touched: SessionTouched, at: number, said: string): void {
   for (const env of askedEnvs(said)) touched.asked[env] = at
 }
 
+const PASTED_IMAGE_MARK = /\[Image #\d+\]/
+const PASTED_IMAGE_SOURCE = /^\[Image: source: (\/[^\]\n]+)\]$/
+type Pasted = { promptId?: string; at: number; turn?: AgentTranscriptTurn }
+
+// Claude swaps a pasted or typed image path for "[Image #N]" and keeps the path only in a later meta record.
+function attachPastedImage(turns: AgentTranscriptTurn[], pasted: Pasted | undefined, body: string, promptId: string | undefined): void {
+  const path = PASTED_IMAGE_SOURCE.exec(body.trim())?.[1]
+  if (!path || !pasted || pasted.promptId !== promptId) return
+  if (!pasted.turn) {
+    pasted.turn = { role: 'you', at: pasted.at, text: '' }
+    const after = turns.findIndex((t) => t.at > pasted.at)
+    turns.splice(after < 0 ? turns.length : after, 0, pasted.turn)
+  }
+  pasted.turn.files = [...new Set([...(pasted.turn.files ?? []), path])]
+}
+
 function parseClaude(blob: string, turns: AgentTranscriptTurn[], seen: Seen): void {
+  let pasted: Pasted | undefined
   for (const record of lines(blob)) {
     const r = record as {
       type?: string
@@ -425,11 +442,16 @@ function parseClaude(blob: string, turns: AgentTranscriptTurn[], seen: Seen): vo
       isMeta?: boolean
       isCompactSummary?: boolean
       timestamp?: string
+      promptId?: string
       message?: { role?: string; content?: unknown; id?: string; usage?: ClaudeUsage }
     }
     if (r.type === 'system' && r.subtype === 'away_summary') attachRecap(turns, r.content)
     if (r.type === 'assistant') noteClaudeUsage(seen, r.message?.id, r.message?.usage)
     if (r.type !== 'user' && r.type !== 'assistant') continue
+    if (r.type === 'user' && r.isMeta) {
+      attachPastedImage(turns, pasted, textOf(r.message?.content), r.promptId)
+      continue
+    }
     if (r.isMeta || r.isCompactSummary) continue
     const at = stamp(r.timestamp)
     if (r.type === 'assistant' && Array.isArray(r.message?.content)) {
@@ -440,7 +462,9 @@ function parseClaude(blob: string, turns: AgentTranscriptTurn[], seen: Seen): vo
     const body = textOf(r.message?.content)
     if (body && !isInjected(body)) {
       if (r.type === 'user') noteAsked(seen.touched, at, body)
+      const before = turns.length
       pushSaid(turns, r.type === 'user' ? 'you' : 'agent', at, body)
+      if (r.type === 'user' && PASTED_IMAGE_MARK.test(body)) pasted = { promptId: r.promptId, at, turn: turns.length > before ? turns[turns.length - 1] : undefined }
       continue
     }
     const tool = r.type === 'assistant' ? toolOf(r.message?.content) : ''

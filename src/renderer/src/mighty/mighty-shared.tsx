@@ -50,7 +50,8 @@ export const SIDEBAR_SOURCE_GROUPS: ReadonlyArray<{
   sources: readonly MightyRunSource[]
 }> = [
   { key: 'chat', label: 'Chats', sources: ['chat', 'phone'] },
-  { key: 'capture', label: 'Voice notes & captures', sources: ['listen', 'voice', 'capture', 'talk'] },
+  { key: 'note', label: 'Voice notes', sources: ['note'] },
+  { key: 'capture', label: 'Dictation & captures', sources: ['listen', 'voice', 'capture', 'talk'] },
   { key: 'job', label: 'Scheduled jobs', sources: ['job'] }
 ]
 
@@ -61,6 +62,31 @@ export function sourceGroupOf(s: MightySession): string {
   const source = s.turns[0]?.source
   return SIDEBAR_SOURCE_GROUPS.find((g) => g.sources.includes(source as MightyRunSource))?.key ?? 'chat'
 }
+
+// Held until a listener takes it, so a request made before the target view mounts still lands.
+function heldRequest<T>(event: string): { request: (value: T) => void; listen: (apply: (value: T) => void) => () => void } {
+  let pending: { value: T } | null = null
+  return {
+    request(value) {
+      pending = { value }
+      window.dispatchEvent(new Event(event))
+    },
+    listen(apply) {
+      const take = (): void => {
+        if (!pending) return
+        const { value } = pending
+        pending = null
+        apply(value)
+      }
+      take()
+      window.addEventListener(event, take)
+      return () => window.removeEventListener(event, take)
+    }
+  }
+}
+
+export const VOICE_NOTES_REQUEST = heldRequest<true>('mm:show-voice-notes')
+export const NOTE_CHAT_REQUEST = heldRequest<string>('mm:note-chat')
 
 
 export const TABS: Array<{ id: Tab; label: string; icon: typeof MessageSquare }> = [

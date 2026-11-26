@@ -872,7 +872,7 @@ export function useDictation({
           (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
         voiceCtx = new Ctor()
         // iOS hands back a SUSPENDED context that reads all zeros forever.
-        if (voiceCtx.state === 'suspended') void voiceCtx.resume()
+        if (voiceCtx.state === 'suspended') voiceCtx.resume().catch(() => {})
         voiceAnalyser = voiceCtx.createAnalyser()
         voiceAnalyser.fftSize = 512
         voiceSource = voiceCtx.createMediaStreamSource(stream)

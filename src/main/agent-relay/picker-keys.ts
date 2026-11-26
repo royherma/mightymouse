@@ -460,7 +460,7 @@ async function submitIfReviewing(
 }
 
 const PANE_ID = /^%\d+$/
-const PROMPT_FOOTER = /(?:press )?enter to (confirm|select|continue)|esc to cancel . tab to amend/i
+const PROMPT_FOOTER = /(?:press )?enter to (confirm|select|continue)|esc to cancel . tab to amend|↑\/↓ navigate . tab amend/i
 const HOOKS_MENU_FOOTER = /Press t to trust all; enter to review hooks; esc to close/i
 const HOOKS_MENU_TITLE = 'Hooks'
 const OPTION_MARK = /^[❯›>▶]\s*/
@@ -503,7 +503,11 @@ export function parseStartupPrompt(screen: string[]): StartupPrompt | null {
   const marked = block.findIndex((l) => OPTION_MARK.test(l.trim()))
   let rows: string[]
   if (block.filter(isNumbered).length >= 2) {
-    rows = block.filter(isNumbered).map((l) => l.trim())
+    rows = []
+    for (const l of block.slice(firstNumbered)) {
+      if (isNumbered(l)) rows.push(l.trim())
+      else if (rows.length && indentOf(l) < indentOf(block[firstNumbered])) rows[rows.length - 1] += ` ${l.trim()}`
+    }
     i += firstNumbered
   } else if (marked !== -1) {
     const indent = indentOf(block[marked])

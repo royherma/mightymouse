@@ -8,6 +8,7 @@ vi.mock('electron', () => {
 })
 vi.mock('../../phone-remote/server', () => ({ sendToPhone: (m: Record<string, unknown>) => sent.push(m) }))
 vi.mock('../../store/mighty', () => ({
+  onProjectsWritten: () => {},
   MIGHTY: { getSession: () => ({ id: 's1', title: 't', turns: [] }), getProject: () => null, newSession: () => ({ id: 's1', title: 't' }) }
 }))
 vi.mock('../../mighty/run-mighty', () => ({

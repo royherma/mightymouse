@@ -82,6 +82,8 @@ export const buildUiLabels = (appName: string) => ({
   SIDEBAR_NO_MATCHES: 'Nothing to show. Change what shows above.',
   SIDEBAR_SHOW_MORE: 'Show more',
   SIDEBAR_MORE: 'More',
+  SIDEBAR_VOICE_NOTES: 'Voice notes',
+  START_CHAT_FROM_NOTE: 'Start a chat',
   SIDEBAR_SEARCH: 'Search',
   BUBBA: 'Bubba',
   SIDEBAR_SETUP: 'Setup',

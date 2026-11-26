@@ -8,7 +8,7 @@ const h = vi.hoisted(() => ({
 }))
 
 vi.mock('electron', () => ({ app: { getPath: () => '/tmp' }, ipcMain: { handle: () => {} } }))
-vi.mock('../../store/mighty', () => ({ MIGHTY: { listProjects: () => [] } }))
+vi.mock('../../store/mighty', () => ({ onProjectsWritten: () => {}, MIGHTY: { listProjects: () => [] } }))
 vi.mock('../../phone-remote/server', () => ({ sendToPhone: (msg: Record<string, unknown>) => h.sent.push(msg) }))
 vi.mock('../../phone-remote/relay-http', () => ({ transcriptMedia: () => [], transcriptSession: () => undefined }))
 vi.mock('../../agent-relay/session-checklist', () => ({ readSessionChecklist: () => null }))
